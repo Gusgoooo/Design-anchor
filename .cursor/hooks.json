@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "hooks": {
+    "afterFileEdit": [
+      {
+        "command": "node .cursor/hooks/harness-audit-after-edit.mjs"
+      }
+    ]
+  }
+}

@@ -121,6 +121,7 @@ function doInit(targetArg) {
     scripts: {
       "sync:tokens": parentPkg.scripts?.["sync:tokens"] || "node scripts/emit-design-tokens-css.mjs",
       "sync:harness": parentPkg.scripts?.["sync:harness"] || "npm run sync:tokens && node scripts/sync-from-schema.mjs",
+      "harness:audit": parentPkg.scripts?.["harness:audit"] || "node scripts/harness-audit.mjs",
       storybook: "storybook dev -p 6006",
       "build-storybook": "storybook build",
       typecheck: "tsc --noEmit",
@@ -138,6 +139,8 @@ function doInit(targetArg) {
   const projectRoot = resolve(target, "..");
   generateCursorRule(projectRoot, target);
   generateCursorMcp(projectRoot, target);
+  installCursorHooks(projectRoot);
+  installSelfcheckRule(projectRoot);
 
   console.log("\n📦 scaffold 完成！\n");
   console.log("后续步骤：");
@@ -146,9 +149,11 @@ function doInit(targetArg) {
   console.log("  npx harness dev .");
   console.log("");
   console.log("🤖 Cursor 集成已自动配置：");
-  console.log("  • .cursor/rules/harness.mdc  — AI 规则（Agent 自动遵守组件规范）");
-  console.log("  • .cursor/mcp.json           — MCP Server（Agent 可操作组件库）");
-  console.log("  重新打开 Cursor 即生效。\n");
+  console.log("  • .cursor/rules/harness.mdc       — 组件库约束（alwaysApply）");
+  console.log("  • .cursor/rules/harness-selfcheck.mdc — 改完代码后的自检清单");
+  console.log("  • .cursor/mcp.json                — MCP Server");
+  console.log("  • .cursor/hooks.json              — 保存 .tsx 后自动跑 harness audit");
+  console.log("  重新打开 Cursor 后 Hooks 与规则生效。\n");
 }
 
 function readPkgJson(dir) {
@@ -283,26 +288,72 @@ function generateCursorMcp(projectRoot, libTarget) {
   console.log("  ✅ .cursor/mcp.json");
 }
 
+function mergeHooksJson(existing, incoming) {
+  const version = existing.version ?? incoming.version ?? 1;
+  const hooks = { ...(existing.hooks || {}) };
+  for (const [event, arr] of Object.entries(incoming.hooks || {})) {
+    const prev = [...(hooks[event] || [])];
+    const seen = new Set(prev.map((h) => JSON.stringify(h)));
+    for (const h of arr) {
+      const key = JSON.stringify(h);
+      if (!seen.has(key)) {
+        prev.push(h);
+        seen.add(key);
+      }
+    }
+    hooks[event] = prev;
+  }
+  return { version, hooks };
+}
+
+function installCursorHooks(projectRoot) {
+  const hooksSrcDir = join(PKG_ROOT, ".cursor/hooks");
+  const hooksDstDir = join(projectRoot, ".cursor/hooks");
+  const srcJson = join(PKG_ROOT, ".cursor/hooks.json");
+  if (!existsSync(hooksSrcDir) || !existsSync(srcJson)) return;
+
+  mkdirSync(hooksDstDir, { recursive: true });
+  for (const f of readdirSync(hooksSrcDir)) {
+    cpSync(join(hooksSrcDir, f), join(hooksDstDir, f), { recursive: true });
+  }
+
+  const incoming = JSON.parse(readFileSync(srcJson, "utf8"));
+  const dstJson = join(projectRoot, ".cursor/hooks.json");
+  if (existsSync(dstJson)) {
+    const existing = JSON.parse(readFileSync(dstJson, "utf8"));
+    writeFileSync(dstJson, JSON.stringify(mergeHooksJson(existing, incoming), null, 2) + "\n");
+  } else {
+    writeFileSync(dstJson, JSON.stringify(incoming, null, 2) + "\n");
+  }
+  console.log("  ✅ .cursor/hooks（afterFileEdit → harness audit）");
+}
+
+function installSelfcheckRule(projectRoot) {
+  const src = join(PKG_ROOT, ".cursor/rules/harness-selfcheck.mdc");
+  const dstDir = join(projectRoot, ".cursor/rules");
+  if (!existsSync(src)) return;
+  mkdirSync(dstDir, { recursive: true });
+  cpSync(src, join(dstDir, "harness-selfcheck.mdc"));
+  console.log("  ✅ .cursor/rules/harness-selfcheck.mdc");
+}
+
 /* ─── start（设计师一键启动） ─── */
 
 function doStart(targetArg) {
   const target = resolve(process.cwd(), targetArg || "harness-ui");
 
-  // 1) init（幂等，已存在则跳过）
   doInit(targetArg);
 
-  // 2) npm install（如果 node_modules 不存在）
   if (!existsSync(join(target, "node_modules"))) {
-    console.log("\n📥 安装依赖…\n");
+    console.log("\n  📥 安装依赖（首次启动，约 1-2 分钟）…\n");
     try {
-      execSync("npm install", { cwd: target, stdio: "inherit" });
+      execSync("npm install --loglevel=error", { cwd: target, stdio: "inherit" });
     } catch {
-      console.error("❌ npm install 失败");
+      console.error("❌ 依赖安装失败");
       process.exit(1);
     }
   }
 
-  // 3) dev（自动打开 Portal）
   doDev(targetArg);
 }
 
@@ -340,29 +391,58 @@ function doDev(targetArg) {
   const target = resolve(process.cwd(), targetArg || "harness-ui");
 
   if (!existsSync(join(target, ".storybook"))) {
-    console.error(`❌ 未找到 .storybook 配置，请先运行: harness init ${targetArg || ""}`);
+    console.error(`❌ 未找到配置，请先运行: harness init ${targetArg || ""}`);
     process.exit(1);
   }
 
   const port = DEFAULT_PORT;
   const portalUrl = `http://localhost:${port}${PORTAL_PATH}`;
 
-  console.log(`\n🚀 启动 Storybook → ${target}`);
-  console.log(`🎨 Portal 页面将自动打开: ${portalUrl}\n`);
+  console.log(`
+╔══════════════════════════════════════════╗
+║         HarnessUI Design Portal          ║
+║     AI 组件治理平台 · 设计师工作台        ║
+╚══════════════════════════════════════════╝
+`);
+  console.log(`  📂 组件库: ${target}`);
+  console.log(`  🌐 地址:   http://localhost:${port}`);
+  console.log(`  🎨 Portal: ${portalUrl}`);
+  console.log(`\n  启动中…\n`);
 
-  const child = spawn("npx", ["storybook", "dev", "-p", String(port), "--no-open"], {
+  const child = spawn("npx", [
+    "storybook", "dev",
+    "-p", String(port),
+    "--no-open",
+    "--disable-telemetry",
+    "--quiet",
+  ], {
     cwd: target,
-    stdio: "inherit",
+    stdio: ["inherit", "pipe", "pipe"],
     shell: true,
+    env: { ...process.env, STORYBOOK_DISABLE_TELEMETRY: "1" },
   });
 
-  waitForPort(port, "127.0.0.1", 60_000)
+  child.stdout.on("data", (buf) => {
+    const line = buf.toString();
+    if (/error|ERR!|failed/i.test(line)) {
+      process.stderr.write(line);
+    }
+  });
+  child.stderr.on("data", (buf) => {
+    const line = buf.toString();
+    if (/error|ERR!|failed|WARN/i.test(line) && !/storybook/i.test(line)) {
+      process.stderr.write(line);
+    }
+  });
+
+  waitForPort(port, "127.0.0.1", 90_000)
     .then(() => {
-      console.log(`\n🎨 正在打开 Portal…\n`);
+      console.log(`  ✅ 就绪！正在打开浏览器…\n`);
       openUrl(portalUrl);
     })
     .catch((err) => {
-      console.warn(`⚠️  ${err.message}，请手动打开: ${portalUrl}`);
+      console.warn(`  ⚠️  ${err.message}`);
+      console.warn(`  请手动打开: ${portalUrl}\n`);
     });
 
   child.on("exit", (code) => process.exit(code ?? 0));

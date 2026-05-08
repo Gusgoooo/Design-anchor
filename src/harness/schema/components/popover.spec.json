@@ -1,0 +1,48 @@
+{
+  "id": "popover",
+  "componentName": "Popover",
+  "version": "1.0.0",
+  "intent": "弹出气泡框，用于在触发元素附近展示额外内容或轻量交互；点击外部自动关闭。",
+  "wraps": {
+    "module": "@/components/starter/popover",
+    "primitives": ["Popover", "PopoverTrigger", "PopoverContent"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "气泡框结构（Trigger + Content）",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "absolute",
+      "z-50",
+      "min-w-[12rem]",
+      "rounded-md",
+      "border",
+      "border-border",
+      "bg-popover",
+      "text-popover-foreground",
+      "shadow-md"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖气泡框定位与层级",
+        "pattern": "^(absolute|fixed|z-)"
+      },
+      {
+        "description": "禁止覆盖背景与边框色",
+        "pattern": "^(bg|border)-(popover|border)"
+      }
+    ]
+  },
+  "aiPrompt": "需要轻量弹出内容时使用 Popover；结构为 Popover > PopoverTrigger + PopoverContent；通过 align 属性控制对齐方式（start/center/end）。",
+  "meta": {
+    "tags": ["popover", "popup", "overlay", "tooltip"],
+    "category": "overlay",
+    "status": "stable"
+  }
+}

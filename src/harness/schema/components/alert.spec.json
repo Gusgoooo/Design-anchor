@@ -1,0 +1,57 @@
+{
+  "id": "alert",
+  "componentName": "Alert",
+  "version": "1.0.0",
+  "intent": "用于向用户展示重要提示信息，如成功、警告、错误等状态反馈；支持标题与描述组合。",
+  "wraps": {
+    "module": "@/components/starter/alert",
+    "primitives": ["Alert", "AlertTitle", "AlertDescription"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "提示内容（通常包含 AlertTitle 和 AlertDescription）",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "视觉变体",
+      "type": "\"default\" | \"destructive\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": ["border-border", "bg-background", "text-foreground"],
+        "destructive": ["border-destructive/50", "text-destructive"]
+      }
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "relative",
+      "w-full",
+      "rounded-lg",
+      "border",
+      "px-4",
+      "text-sm"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖内边距与圆角",
+        "pattern": "^(p-|px-|py-|rounded)"
+      },
+      {
+        "description": "禁止覆盖语义颜色（由 variant 控制）",
+        "pattern": "^(bg|text|border)-(primary|secondary|destructive|accent)"
+      }
+    ]
+  },
+  "aiPrompt": "需要提示信息时使用 Alert 组件；通过 variant 控制类型（默认/错误）；内部使用 AlertTitle 和 AlertDescription 组合内容结构。",
+  "meta": {
+    "tags": ["alert", "notification", "feedback"],
+    "category": "feedback",
+    "status": "stable"
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "id": "skeleton",
+  "componentName": "Skeleton",
+  "version": "1.0.0",
+  "intent": "骨架屏占位符，用于内容加载时展示预期布局形态；减少页面跳动感。",
+  "wraps": {
+    "module": "@/components/starter/skeleton",
+    "primitives": ["Skeleton"]
+  },
+  "requiredProps": [],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "animate-pulse",
+      "rounded-md",
+      "bg-muted"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖动画效果",
+        "pattern": "^animate-"
+      },
+      {
+        "description": "禁止覆盖骨架屏背景色",
+        "pattern": "^bg-(muted|gray|slate)"
+      }
+    ]
+  },
+  "aiPrompt": "加载态使用 Skeleton 占位；通过 className 设置宽高模拟真实内容形状（如 h-4 w-[200px]）；禁止修改 animate-pulse 和 bg-muted。",
+  "meta": {
+    "tags": ["skeleton", "loading", "placeholder"],
+    "category": "feedback",
+    "status": "stable"
+  }
+}

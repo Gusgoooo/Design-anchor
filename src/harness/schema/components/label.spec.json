@@ -1,0 +1,46 @@
+{
+  "id": "label",
+  "componentName": "Label",
+  "version": "1.0.0",
+  "intent": "表单标签，与 Input/Select 等表单控件配合使用；提供一致的字体样式与禁用态关联。",
+  "wraps": {
+    "module": "@/components/starter/label",
+    "primitives": ["Label"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "标签文案",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "htmlFor",
+      "description": "关联表单控件的 id",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "text-sm",
+      "leading-none",
+      "peer-disabled:cursor-not-allowed",
+      "peer-disabled:opacity-70"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖字体大小与粗细",
+        "pattern": "^(text-|font-)"
+      }
+    ]
+  },
+  "aiPrompt": "表单控件前必须使用 Label 组件提供标签；通过 htmlFor 关联对应控件 id；禁止用 <span> 或 <p> 代替 Label。",
+  "meta": {
+    "tags": ["label", "form", "accessibility"],
+    "category": "form",
+    "status": "stable"
+  }
+}

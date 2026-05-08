@@ -1,0 +1,66 @@
+{
+  "id": "switch",
+  "componentName": "Switch",
+  "version": "1.0.0",
+  "intent": "开关组件，用于布尔值切换场景（如启用/禁用功能）；基于无障碍 checkbox + 视觉化轨道实现。",
+  "wraps": {
+    "module": "@/components/starter/switch",
+    "primitives": ["Switch"]
+  },
+  "requiredProps": [],
+  "optionalProps": [
+    {
+      "name": "checked",
+      "description": "受控选中状态",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "description": "禁用状态",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    },
+    {
+      "name": "onChange",
+      "description": "状态变更回调",
+      "type": "React.ChangeEventHandler<HTMLInputElement>",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "inline-flex",
+      "h-5",
+      "w-9",
+      "shrink-0",
+      "cursor-pointer",
+      "rounded-full",
+      "border",
+      "shadow-inner",
+      "transition-colors",
+      "peer-checked:bg-primary"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖开关尺寸",
+        "pattern": "^(h-|w-)[0-9]"
+      },
+      {
+        "description": "禁止覆盖圆角（必须保持药丸形）",
+        "pattern": "^rounded"
+      },
+      {
+        "description": "禁止覆盖选中颜色",
+        "pattern": "^(bg|peer-checked:bg)-(primary|secondary)"
+      }
+    ]
+  },
+  "aiPrompt": "布尔切换场景使用 Switch 组件；搭配 Label 使用提供文字说明；禁止用 checkbox 或自定义 div 实现开关效果。",
+  "meta": {
+    "tags": ["switch", "toggle", "form", "boolean"],
+    "category": "form",
+    "status": "stable"
+  }
+}

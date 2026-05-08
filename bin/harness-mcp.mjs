@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = resolve(__dirname, "..");
 
-const LIB_ROOT = resolve(process.argv[2] || "harness-ui");
+const LIB_ROOT = resolve(process.argv[2] || ".harness");
 
 if (!existsSync(LIB_ROOT)) {
   process.stderr.write(`错误: 目录 ${LIB_ROOT} 不存在\n`);

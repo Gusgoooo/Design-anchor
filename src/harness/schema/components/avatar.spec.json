@@ -1,0 +1,49 @@
+{
+  "id": "avatar",
+  "componentName": "Avatar",
+  "version": "1.0.0",
+  "intent": "展示用户头像，支持图片加载与文字回退；用于用户列表、评论、导航栏等场景。",
+  "wraps": {
+    "module": "@/components/starter/avatar",
+    "primitives": ["Avatar", "AvatarImage", "AvatarFallback"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "包含 AvatarImage 和/或 AvatarFallback",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "relative",
+      "flex",
+      "h-10",
+      "w-10",
+      "shrink-0",
+      "overflow-hidden",
+      "rounded-full",
+      "border",
+      "border-border",
+      "bg-muted"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖头像尺寸（使用 className 控制）",
+        "pattern": "^(h-|w-)[0-9]"
+      },
+      {
+        "description": "禁止覆盖圆角",
+        "pattern": "^rounded"
+      }
+    ]
+  },
+  "aiPrompt": "展示用户头像时使用 Avatar + AvatarImage + AvatarFallback 组合；AvatarFallback 在图片加载失败时显示替代文字或图标。",
+  "meta": {
+    "tags": ["avatar", "user", "profile", "image"],
+    "category": "data-display",
+    "status": "stable"
+  }
+}

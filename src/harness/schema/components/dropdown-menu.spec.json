@@ -1,0 +1,52 @@
+{
+  "id": "dropdown-menu",
+  "componentName": "DropdownMenu",
+  "version": "1.0.0",
+  "intent": "下拉菜单，用于在触发按钮下方展示操作列表；适用于更多操作、批量操作等场景。",
+  "wraps": {
+    "module": "@/components/starter/dropdown-menu",
+    "primitives": ["DropdownMenu", "DropdownMenuTrigger", "DropdownMenuContent", "DropdownMenuItem", "DropdownMenuSeparator"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "菜单结构（Trigger + Content）",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "absolute",
+      "z-50",
+      "min-w-[10rem]",
+      "rounded-md",
+      "border",
+      "border-border",
+      "bg-popover",
+      "text-popover-foreground",
+      "shadow-md"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖菜单定位与层级",
+        "pattern": "^(absolute|fixed|z-)"
+      },
+      {
+        "description": "禁止覆盖菜单背景与边框",
+        "pattern": "^(bg|border)-(popover|border)"
+      },
+      {
+        "description": "禁止覆盖圆角与阴影",
+        "pattern": "^(rounded|shadow)"
+      }
+    ]
+  },
+  "aiPrompt": "需要下拉操作列表时使用 DropdownMenu；结构为 DropdownMenu > DropdownMenuTrigger + DropdownMenuContent > DropdownMenuItem；使用 DropdownMenuSeparator 分隔逻辑组。",
+  "meta": {
+    "tags": ["dropdown", "menu", "action", "context-menu"],
+    "category": "overlay",
+    "status": "stable"
+  }
+}

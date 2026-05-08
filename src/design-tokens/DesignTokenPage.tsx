@@ -1,15 +1,22 @@
 import * as React from "react";
 import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
 import { converter, formatCss, parse } from "culori";
-import { X, RotateCcw, Copy, Check, Ruler, Save, Code } from "lucide-react";
+import { X, RotateCcw, Copy, Check, Ruler, Save, Code, Sun, Moon } from "lucide-react";
 import { Button } from "@/components/starter/button";
 import { Input } from "@/components/starter/input";
 import { Label } from "@/components/starter/label";
 import { cn } from "@/lib/utils";
 import tokensFallback from "./tokens.json";
+import { deriveSeedToMap } from "./seed-to-map.mjs";
 import { DesignTokenShowcase } from "./DesignTokenShowcase";
 import type { DesignTokenEntry } from "./token-registry";
 import { detectTokenValueKind, parseCssLength, formatCssLength, type TokenValueKind } from "./token-value-type";
+
+/** 与 Vite 开发服同源；显式 origin，避免相对路径未命中保存 API */
+function devApi(path: string): string {
+  if (typeof window === "undefined" || !path.startsWith("/")) return path;
+  return `${window.location.origin}${path}`;
+}
 
 const toOklch = converter("oklch");
 const toRgb = converter("rgb");
@@ -60,11 +67,104 @@ type TokenRow = {
   emitCss?: boolean;
 };
 
-type TokensDoc = {
+type TokensDocV1 = {
   version?: number;
   tokens: TokenRow[];
   storyBindings?: unknown;
 };
+
+type TokensDocV2 = {
+  version: 2;
+  seed: Record<string, string | number>;
+  seedDark?: Record<string, string | number>;
+  /** 覆盖派生 CSS 变量：light / dark 各自独立，写回 tokens.json 并参与 sync:tokens */
+  mapOverrides?: { light?: Record<string, string>; dark?: Record<string, string> };
+  customSeeds?: Record<string, string>;
+  fixedAliases?: Record<string, string | number>;
+  storyBindings?: unknown;
+};
+
+type TokensDoc = TokensDocV1;
+
+function categorizeCssVar(id: string): string {
+  if (id.startsWith("color-primary")) return "color-primary";
+  if (id.startsWith("color-success")) return "color-success";
+  if (id.startsWith("color-warning")) return "color-warning";
+  if (id.startsWith("color-error")) return "color-error";
+  if (id.startsWith("color-info")) return "color-info";
+  if (id.startsWith("color-link")) return "color-link";
+  if (id.startsWith("color-text") || id.startsWith("color-fill") || id.startsWith("color-bg") || id.startsWith("color-border") || id === "color-white" || id === "color-shadow") return "neutral-color";
+  if (["background", "foreground", "card", "card-foreground", "popover", "popover-foreground", "primary", "primary-foreground", "secondary", "secondary-foreground", "muted", "muted-foreground", "accent", "accent-foreground", "destructive", "border", "input", "ring"].includes(id)) return "semantic";
+  if (id.startsWith("sidebar")) return "sidebar";
+  if (id.startsWith("chart-")) return "chart";
+  if (id.startsWith("font-size") || id.startsWith("line-height")) return "typography";
+  if (id.startsWith("font-weight") || id.startsWith("font-family")) return "typography";
+  if (id.startsWith("size") || id.startsWith("control-height")) return "size";
+  if (id.startsWith("border-radius")) return "radius";
+  if (id.startsWith("padding") || id.startsWith("margin")) return "spacing";
+  if (id.startsWith("space-")) return "spacing-scale";
+  if (id.startsWith("elevation")) return "shadow";
+  if (id.startsWith("motion")) return "motion";
+  if (id.startsWith("opacity")) return "opacity";
+  if (id.startsWith("ring") || id.startsWith("border-width") || id.startsWith("line-width")) return "border";
+  if (id.startsWith("z-")) return "z-index";
+  if (id.startsWith("layout-")) return "layout";
+  return "other";
+}
+
+function v2ToTokenRows(v2: TokensDocV2): TokenRow[] {
+  const rows: TokenRow[] = [];
+  const { seed, seedDark = {}, mapOverrides = {}, customSeeds = {}, fixedAliases = {} } = v2;
+  const moL = mapOverrides.light ?? {};
+  const moD = mapOverrides.dark ?? {};
+
+  for (const [key, val] of Object.entries(seed)) {
+    const darkVal = seedDark[key] ?? val;
+    rows.push({ id: key, category: "seed", light: String(val), dark: String(darkVal) });
+  }
+
+  try {
+    const lightVars = deriveSeedToMap(seed, { dark: false, customSeeds, fixedAliases });
+    const darkSeed = { ...seed, ...seedDark };
+    const darkVars = deriveSeedToMap(darkSeed, { dark: true, customSeeds, fixedAliases });
+    const lightMerged = { ...lightVars, ...moL };
+    const darkMerged = { ...darkVars, ...moD };
+
+    for (const [name, value] of Object.entries(lightMerged)) {
+      if (value === "" || value == null) continue;
+      const darkValue = darkMerged[name];
+      rows.push({
+        id: name,
+        category: categorizeCssVar(name),
+        light: String(value),
+        dark: darkValue != null ? String(darkValue) : String(value),
+      });
+    }
+  } catch {
+    for (const [key, val] of Object.entries(fixedAliases)) {
+      rows.push({ id: `alias-${key}`, category: "fixedAlias", light: String(val), dark: String(val) });
+    }
+    for (let i = 1; i <= 5; i++) {
+      const l = customSeeds[`chart${i}`] ?? "";
+      const d = customSeeds[`chart${i}Dark`] ?? l;
+      rows.push({ id: `chart-${i}`, category: "chart", light: l, dark: d });
+    }
+  }
+
+  return rows;
+}
+
+function normalizeDoc(raw: string): TokensDoc | null {
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed.version === 2 && parsed.seed) {
+      return { version: 2, tokens: v2ToTokenRows(parsed as TokensDocV2), storyBindings: parsed.storyBindings };
+    }
+    return parsed as TokensDoc;
+  } catch {
+    return null;
+  }
+}
 
 /* ── Length slider 范围自适应 ── */
 const UNIT_RANGES: Record<string, { min: number; max: number; step: number }> = {
@@ -350,12 +450,39 @@ export function DesignTokenPage() {
   const [copied, setCopied] = React.useState(false);
   const [codeOpen, setCodeOpen] = React.useState(false);
   const codeDialogRef = React.useRef<HTMLDialogElement>(null);
+  const DARK_KEY = "harness-dark-mode";
+  const [darkMode, setDarkMode] = React.useState(() => {
+    if (typeof localStorage !== "undefined") return localStorage.getItem(DARK_KEY) === "true";
+    if (typeof document !== "undefined") return document.documentElement.classList.contains("dark");
+    return false;
+  });
+
+  React.useEffect(() => {
+    const root = document.documentElement;
+    root.classList.toggle("dark", darkMode);
+    // 与 Storybook Manager appContentBg 一致，画布与 Controls 面板同色
+    document.body.style.background = darkMode ? "#1c1c1e" : "#ffffff";
+    localStorage.setItem(DARK_KEY, String(darkMode));
+    try {
+      const ch = new BroadcastChannel(DARK_KEY);
+      ch.postMessage(darkMode);
+      ch.close();
+    } catch { /* BroadcastChannel not available */ }
+  }, [darkMode]);
+
+  React.useEffect(() => {
+    function onStorage(e: StorageEvent) {
+      if (e.key === DARK_KEY) setDarkMode(e.newValue === "true");
+    }
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const load = React.useCallback(async () => {
     setLoading(true);
     setStatus(null);
     try {
-      const res = await fetch("/api/design-tokens", { cache: "no-store" });
+      const res = await fetch(devApi("/api/design-tokens"), { cache: "no-store" });
       if (!res.ok) throw new Error(await res.text());
       setRaw(await res.text());
       setSaveApiAvailable(true);
@@ -374,18 +501,51 @@ export function DesignTokenPage() {
     void load();
   }, [load]);
 
-  const doc = React.useMemo((): TokensDoc | null => {
-    try {
-      return JSON.parse(raw) as TokensDoc;
-    } catch {
-      return null;
-    }
-  }, [raw]);
+  const doc = React.useMemo((): TokensDoc | null => normalizeDoc(raw), [raw]);
 
   function patchTokenField(tokenId: string, field: "light" | "dark", value: string) {
-    if (!doc?.tokens) return;
-    const tokens = doc.tokens.map((t) => (t.id === tokenId ? { ...t, [field]: value } : t));
-    setRaw(JSON.stringify({ ...doc, tokens }, null, 2));
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed.version === 2 && parsed.seed) {
+        if (parsed.seed[tokenId] !== undefined) {
+          if (field === "dark") {
+            parsed.seedDark = { ...parsed.seedDark, [tokenId]: value };
+          } else {
+            parsed.seed[tokenId] = value;
+          }
+          setRaw(JSON.stringify(parsed, null, 2));
+          return;
+        }
+        if (parsed.seedDark?.[tokenId] !== undefined && field === "dark") {
+          parsed.seedDark[tokenId] = value;
+          setRaw(JSON.stringify(parsed, null, 2));
+          return;
+        }
+        if (parsed.fixedAliases?.[tokenId] !== undefined) {
+          parsed.fixedAliases[tokenId] = value;
+          setRaw(JSON.stringify(parsed, null, 2));
+          return;
+        }
+        const customKey = tokenId.replace(/^chart-(\d)$/, "chart$1");
+        const customDarkKey = `${customKey}Dark`;
+        if (parsed.customSeeds?.[customKey] !== undefined || parsed.customSeeds?.[customDarkKey] !== undefined) {
+          if (!parsed.customSeeds) parsed.customSeeds = {};
+          parsed.customSeeds[field === "dark" ? customDarkKey : customKey] = value;
+          setRaw(JSON.stringify(parsed, null, 2));
+          return;
+        }
+        parsed.mapOverrides = parsed.mapOverrides ?? { light: {}, dark: {} };
+        if (!parsed.mapOverrides.light) parsed.mapOverrides.light = {};
+        if (!parsed.mapOverrides.dark) parsed.mapOverrides.dark = {};
+        const branch = field === "dark" ? "dark" : "light";
+        parsed.mapOverrides[branch] = { ...parsed.mapOverrides[branch], [tokenId]: value };
+        setRaw(JSON.stringify(parsed, null, 2));
+        return;
+      }
+      if (!parsed.tokens) return;
+      parsed.tokens = parsed.tokens.map((t: TokenRow) => (t.id === tokenId ? { ...t, [field]: value } : t));
+      setRaw(JSON.stringify(parsed, null, 2));
+    } catch { /* ignore parse errors */ }
   }
 
   async function save() {
@@ -401,14 +561,30 @@ export function DesignTokenPage() {
       return;
     }
     try {
-      const res = await fetch("/api/save-design-tokens", {
+      const res = await fetch(devApi("/api/save-design-tokens"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ jsonText: raw }),
       });
-      const body = await res.json().catch(() => ({}));
-      if (!res.ok || !body.ok) throw new Error(body.error ?? res.statusText);
-      setStatus("已保存并执行 sync:tokens（design-tokens.generated.css 已更新）。");
+      const body = (await res.json().catch(() => ({}))) as {
+        ok?: boolean;
+        fileWritten?: boolean;
+        syncOk?: boolean;
+        syncError?: string | null;
+        error?: string;
+      };
+      if (!res.ok) throw new Error(body.error ?? res.statusText);
+      if (!body.ok || !body.fileWritten) throw new Error(body.error ?? "未写入磁盘");
+      const parts: string[] = ["已写入磁盘：src/design-tokens/tokens.json"];
+      if (body.syncOk === false && body.syncError) {
+        parts.push(
+          `⚠️ sync:tokens 失败（JSON 已落盘，请在本机终端手动执行 npm run sync:tokens）：\n${body.syncError}`,
+        );
+      } else if (body.syncOk !== false) {
+        parts.push("已执行 sync:tokens（design-tokens.generated.css 已更新）。");
+      }
+      setStatus(parts.join("\n"));
+      await load();
     } catch (e) {
       setStatus(`保存失败：${e instanceof Error ? e.message : String(e)}`);
     }
@@ -449,7 +625,28 @@ export function DesignTokenPage() {
 
   function resetPickedToBundledDefault() {
     if (!picker) return;
-    const row = (tokensFallback as { tokens: TokenRow[] }).tokens.find((t) => t.id === picker.tokenId);
+    const fb = tokensFallback as unknown as Record<string, unknown>;
+    if (fb.version === 2 && fb.seed) {
+      const seed = fb.seed as Record<string, string | number>;
+      const seedDark = (fb.seedDark ?? {}) as Record<string, string | number>;
+      const v = picker.field === "dark" ? seedDark[picker.tokenId] ?? seed[picker.tokenId] : seed[picker.tokenId];
+      if (v !== undefined) {
+        patchTokenField(picker.tokenId, picker.field, String(v));
+        return;
+      }
+      try {
+        const parsed = JSON.parse(raw) as TokensDocV2;
+        parsed.mapOverrides = parsed.mapOverrides ?? { light: {}, dark: {} };
+        const branch = picker.field === "light" ? "light" : "dark";
+        const next = { ...(parsed.mapOverrides[branch] ?? {}) };
+        delete next[picker.tokenId];
+        parsed.mapOverrides[branch] = next;
+        setRaw(JSON.stringify(parsed, null, 2));
+      } catch { /* ignore */ }
+      return;
+    }
+    const arr = (fb as { tokens?: TokenRow[] }).tokens ?? [];
+    const row = arr.find((t) => t.id === picker.tokenId);
     const v = row?.[picker.field];
     if (typeof v === "string") patchTokenField(picker.tokenId, picker.field, v);
   }
@@ -464,6 +661,38 @@ export function DesignTokenPage() {
 
   const liveTokens = (doc?.tokens as DesignTokenEntry[] | undefined) ?? undefined;
 
+  const currentSeeds = React.useMemo((): Record<string, string | number> => {
+    try {
+      const parsed = JSON.parse(raw) as TokensDocV2;
+      if (parsed.version === 2 && parsed.seed) {
+        if (!darkMode) return parsed.seed;
+        const sd = parsed.seedDark ?? {};
+        const out: Record<string, string | number> = { ...parsed.seed };
+        for (const k of Object.keys(parsed.seed)) {
+          if (sd[k] !== undefined) out[k] = sd[k]!;
+        }
+        return out;
+      }
+    } catch { /* ignore */ }
+    return {};
+  }, [raw, darkMode]);
+
+  function handleSeedChange(seedKey: string, value: string) {
+    const numVal = Number(value);
+    const coerced = Number.isFinite(numVal) && !/^#/.test(value) && !/[a-zA-Z]/.test(value) ? numVal : value;
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed.version === 2 && parsed.seed) {
+        if (darkMode) {
+          parsed.seedDark = { ...(parsed.seedDark ?? {}), [seedKey]: coerced };
+        } else {
+          parsed.seed[seedKey] = coerced;
+        }
+        setRaw(JSON.stringify(parsed, null, 2));
+      }
+    } catch { /* ignore */ }
+  }
+
   return (
     <div className="not-prose flex min-h-[70vh] w-full min-w-0 flex-col text-foreground">
       <header className="w-full min-w-0 border-b border-border px-4 py-8 sm:px-6 lg:px-8">
@@ -471,14 +700,25 @@ export function DesignTokenPage() {
           <div className="min-w-0 space-y-2">
             <h1 className="text-3xl font-semibold tracking-tight">DesignToken</h1>
             <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-              全局唯一来源为 <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">src/design-tokens/tokens.json</code>
-              。下方 JSON 与表格均反映<strong>当前</strong>文档内容；点击任意 token 值可弹窗编辑。
+              Seed 与「暗色预览」下的 Seed 分别写入 <code className="rounded bg-muted px-1 font-mono text-xs">seed</code> /{" "}
+              <code className="rounded bg-muted px-1 font-mono text-xs">seedDark</code>；梯度变量可按当前预览模式单独覆盖并保存到{" "}
+              <code className="rounded bg-muted px-1 font-mono text-xs">mapOverrides.light</code> /{" "}
+              <code className="rounded bg-muted px-1 font-mono text-xs">dark</code>。保存后执行 sync:tokens 生成 CSS。
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDarkMode(!darkMode)}
+              title={darkMode ? "切换到浅色模式" : "切换到暗色模式"}
+            >
+              {darkMode ? <Sun size={14} className="mr-1.5" /> : <Moon size={14} className="mr-1.5" />}
+              {darkMode ? "Light" : "Dark"}
+            </Button>
             <Button type="button" variant="outline" onClick={() => setCodeOpen(true)}>
               <Code size={14} className="mr-1.5" />
-              查看代码
+              JSON
             </Button>
             <Button type="button" variant="outline" onClick={() => void load()} disabled={loading}>
               重新加载
@@ -491,12 +731,13 @@ export function DesignTokenPage() {
       </header>
 
       <div className="flex w-full min-w-0 flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
-
         <DesignTokenShowcase
           embedded
           liveTokens={liveTokens}
-          onColorPick={(_token, field) => setPicker({ tokenId: _token.id, field })}
-          colorSelection={picker}
+          seeds={currentSeeds}
+          onSeedChange={handleSeedChange}
+          darkMode={darkMode}
+          onTokenEdit={(token) => setPicker({ tokenId: token.id, field: darkMode ? "dark" : "light" })}
         />
       </div>
 

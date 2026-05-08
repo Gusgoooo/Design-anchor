@@ -1,4 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import {
+  pickPreviewShellArgs,
+  previewShellDefaults,
+  PreviewShell,
+  storyHarnessCompliance,
+} from "@/design-tokens/story-preview-shell";
 import { Input } from "./input";
 import { Label } from "./label";
 
@@ -6,7 +12,20 @@ const meta = {
   title: "Input",
   component: Input,
   tags: ["autodocs"],
+  parameters: {
+    harnessTokenCompliance: storyHarnessCompliance({
+      ignoreArgNames: ["placeholder", "defaultValue", "type", "disabled", "readOnly", "required"],
+    }),
+  },
+  decorators: [
+    (Story, ctx) => (
+      <PreviewShell args={pickPreviewShellArgs(ctx.args as Record<string, unknown>)}>
+        <Story />
+      </PreviewShell>
+    ),
+  ],
   args: {
+    ...previewShellDefaults,
     placeholder: "请输入…",
     type: "text",
     disabled: false,
@@ -14,6 +33,10 @@ const meta = {
     required: false,
   },
   argTypes: {
+    shellPadding: { table: { disable: true } },
+    shellMaxWidth: { table: { disable: true } },
+    shellGap: { table: { disable: true } },
+    shellRadius: { table: { disable: true } },
     type: {
       control: "select",
       options: ["text", "password", "email", "search", "number", "tel", "url"],
@@ -23,12 +46,12 @@ const meta = {
     readOnly: { control: "boolean" },
     required: { control: "boolean" },
     defaultValue: { control: "text" },
-    className: { control: "text" },
+    className: { table: { disable: true } },
   },
-} satisfies Meta<typeof Input>;
+} satisfies Meta;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
 export const Default: Story = {};
 
@@ -42,9 +65,9 @@ export const Disabled: Story = {
 
 export const WithLabel: Story = {
   render: (args) => (
-    <div className="grid w-full max-w-sm gap-2">
+    <>
       <Label htmlFor="demo-input">标签</Label>
       <Input id="demo-input" {...args} />
-    </div>
+    </>
   ),
 };

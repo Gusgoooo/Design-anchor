@@ -1,4 +1,34 @@
 <style>
+  /* ─── Manager Theme CSS Custom Properties ─── */
+  :root {
+    --mgr-bg: #ffffff;
+    --mgr-text: #18181b;
+    --mgr-text-muted: #71717a;
+    --mgr-text-secondary: #52525b;
+    --mgr-text-tertiary: #a1a1aa;
+    --mgr-border: #e4e4e7;
+    --mgr-bg-subtle: #f4f4f5;
+    --mgr-bg-muted: #fafafa;
+    --mgr-border-light: #f0f0f0;
+    --mgr-blue: #2563eb;
+    --mgr-btn-hover: #333;
+    --mgr-input-bg: #ffffff;
+  }
+  :root.dark {
+    --mgr-bg: #1c1c1e;
+    --mgr-text: #fafafa;
+    --mgr-text-muted: #a1a1aa;
+    --mgr-text-secondary: #a1a1aa;
+    --mgr-text-tertiary: #52525b;
+    --mgr-border: #3f3f46;
+    --mgr-bg-subtle: #27272a;
+    --mgr-bg-muted: #27272a;
+    --mgr-border-light: #3f3f46;
+    --mgr-blue: #3b82f6;
+    --mgr-btn-hover: #d4d4d8;
+    --mgr-input-bg: #27272a;
+  }
+
   /* ─── ① sidebar-header 纵向布局 ─── */
   .sidebar-header {
     flex-direction: column !important;
@@ -32,25 +62,38 @@
     display: none !important;
   }
 
-  /* ─── ⑤ 隐藏 DesignToken 树条目 ─── */
+  /* ─── ⑤ 隐藏 DesignToken / Patterns 树条目（由侧栏按钮进入） ─── */
   [data-item-id="designtoken"],
-  [data-item-id="designtoken--docs"] {
+  [data-item-id="designtoken--docs"],
+  [data-item-id="patterns"],
+  [data-item-id="patterns--docs"] {
     display: none !important;
   }
 
-  /* ─── ⑥ 选中态：浅灰背景 + 深色文字（覆盖 colorSecondary） ─── */
-  [data-selected="true"],
-  [data-selected="true"] *,
-  button[data-selected="true"],
-  a[data-selected="true"] {
+  /* ─── ⑥ 选中态 + hover 态（亮色） ─── */
+  :root:not(.dark) [data-selected="true"],
+  :root:not(.dark) [data-selected="true"] *,
+  :root:not(.dark) button[data-selected="true"],
+  :root:not(.dark) a[data-selected="true"] {
     background-color: #f4f4f5 !important;
     color: #18181b !important;
   }
-
-  /* ─── ⑦ hover 态：极浅灰 ─── */
-  #storybook-explorer-tree button:hover,
-  #storybook-explorer-tree a:hover {
+  :root:not(.dark) #storybook-explorer-tree button:hover,
+  :root:not(.dark) #storybook-explorer-tree a:hover {
     background-color: #fafafa !important;
+  }
+
+  /* ─── ⑥b 选中态 + hover 态（暗色） ─── */
+  :root.dark [data-selected="true"],
+  :root.dark [data-selected="true"] *,
+  :root.dark button[data-selected="true"],
+  :root.dark a[data-selected="true"] {
+    background-color: #27272a !important;
+    color: #fafafa !important;
+  }
+  :root.dark #storybook-explorer-tree button:hover,
+  :root.dark #storybook-explorer-tree a:hover {
+    background-color: #27272a !important;
   }
 
   /* ─── ⑧ 隐藏 Storybook 通知弹窗 ─── */

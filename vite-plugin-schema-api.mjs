@@ -2,6 +2,35 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 
+/** 同步落盘并 fsync，避免进程崩溃时缓冲区未刷盘 */
+function writeFileWithFsync(absPath, data) {
+  fs.writeFileSync(absPath, data, "utf8");
+  let fd;
+  try {
+    fd = fs.openSync(absPath, "r+");
+    fs.fsyncSync(fd);
+  } finally {
+    if (fd !== undefined) fs.closeSync(fd);
+  }
+}
+
+function execSyncCaptured(cmd, opts) {
+  try {
+    const out = execSync(cmd, {
+      cwd: opts.cwd,
+      stdio: ["ignore", "pipe", "pipe"],
+      encoding: "utf8",
+      maxBuffer: 10 * 1024 * 1024,
+      ...opts,
+    });
+    return { ok: true, stdout: out ?? "", stderr: "" };
+  } catch (e) {
+    const stderr = e.stderr != null ? String(e.stderr) : "";
+    const stdout = e.stdout != null ? String(e.stdout) : "";
+    return { ok: false, stdout, stderr: stderr || stdout || e.message || String(e) };
+  }
+}
+
 /**
  * 开发服务器中间件：读写 src/harness/schema/components/*.spec.json，保存后执行 sync:harness。
  * 供独立 Portal 与 Storybook 共用。
@@ -41,10 +70,17 @@ export function schemaApiPlugin(repoRoot) {
               const jsonText = payload.jsonText ?? "";
               JSON.parse(jsonText);
               const pretty = `${JSON.stringify(JSON.parse(jsonText), null, 2)}\n`;
-              fs.writeFileSync(tokensPath, pretty, "utf8");
-              execSync("npm run sync:tokens", { cwd: repoRoot, stdio: "inherit" });
+              writeFileWithFsync(tokensPath, pretty);
+              const sync = execSyncCaptured("npm run sync:tokens", { cwd: repoRoot });
               res.setHeader("Content-Type", "application/json");
-              res.end(JSON.stringify({ ok: true }));
+              res.end(
+                JSON.stringify({
+                  ok: true,
+                  fileWritten: true,
+                  syncOk: sync.ok,
+                  syncError: sync.ok ? null : sync.stderr || sync.stdout,
+                }),
+              );
             } catch (e) {
               res.statusCode = 500;
               res.setHeader("Content-Type", "application/json");
@@ -196,8 +232,8 @@ export function schemaApiPlugin(repoRoot) {
               const jsonText = payload.jsonText ?? "";
               if (!/^[\w.-]+\.spec\.json$/.test(filename)) {
                 res.statusCode = 400;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ ok: false, error: "bad filename" }));
+                res.setHeader("Content-Type", "application/json; charset=utf-8");
+                res.end(JSON.stringify({ ok: false, fileWritten: false, error: "bad filename" }));
                 return;
               }
               JSON.parse(jsonText);
@@ -205,27 +241,41 @@ export function schemaApiPlugin(repoRoot) {
               const file = path.join(specDir, filename);
               if (!file.startsWith(specDir + path.sep)) {
                 res.statusCode = 403;
-                res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ ok: false, error: "forbidden path" }));
+                res.setHeader("Content-Type", "application/json; charset=utf-8");
+                res.end(JSON.stringify({ ok: false, fileWritten: false, error: "forbidden path" }));
                 return;
               }
-              fs.writeFileSync(file, pretty, "utf8");
-              execSync("npm run sync:harness", { cwd: repoRoot, stdio: "inherit" });
 
-              let auditResult = { passed: true, output: "" };
-              try {
-                const auditOutput = execSync("npm run harness:audit", { cwd: repoRoot, encoding: "utf8", timeout: 30000 });
-                auditResult = { passed: true, output: auditOutput };
-              } catch (auditErr) {
-                auditResult = { passed: false, output: auditErr.stdout || auditErr.stderr || auditErr.message };
+              writeFileWithFsync(file, pretty);
+              const relPath = path.relative(repoRoot, file).split(path.sep).join("/");
+
+              const harnessSync = execSyncCaptured("npm run sync:harness", { cwd: repoRoot });
+              let auditResult = null;
+              if (harnessSync.ok) {
+                const audit = execSyncCaptured("npm run harness:audit", {
+                  cwd: repoRoot,
+                  timeout: 120000,
+                });
+                auditResult = audit.ok
+                  ? { passed: true, output: audit.stdout || "" }
+                  : { passed: false, output: audit.stderr || audit.stdout || "" };
               }
 
-              res.setHeader("Content-Type", "application/json");
-              res.end(JSON.stringify({ ok: true, audit: auditResult }));
+              res.setHeader("Content-Type", "application/json; charset=utf-8");
+              res.end(
+                JSON.stringify({
+                  ok: true,
+                  fileWritten: true,
+                  path: relPath,
+                  syncOk: harnessSync.ok,
+                  syncError: harnessSync.ok ? null : harnessSync.stderr || harnessSync.stdout || null,
+                  audit: auditResult,
+                }),
+              );
             } catch (e) {
               res.statusCode = 500;
-              res.setHeader("Content-Type", "application/json");
-              res.end(JSON.stringify({ ok: false, error: String(e) }));
+              res.setHeader("Content-Type", "application/json; charset=utf-8");
+              res.end(JSON.stringify({ ok: false, fileWritten: false, error: String(e) }));
             }
           });
           return;

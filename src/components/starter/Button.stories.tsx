@@ -1,29 +1,41 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import {
+  pickPreviewShellArgs,
+  previewShellDefaults,
+  PreviewShell,
+  storyHarnessCompliance,
+} from "@/design-tokens/story-preview-shell";
 import { Button } from "./button";
 
 const meta = {
   title: "Button",
   component: Button,
   tags: ["autodocs"],
+  parameters: {
+    harnessTokenCompliance: storyHarnessCompliance({
+      ignoreArgNames: ["children", "variant", "size", "type", "disabled"],
+    }),
+  },
   decorators: [
-    (Story, ctx) => {
-      const r = ctx.args.borderRadius as number | undefined;
-      return (
-        <div style={r != null ? { "--radius": `${r}rem` } as React.CSSProperties : undefined}>
-          <Story />
-        </div>
-      );
-    },
+    (Story, ctx) => (
+      <PreviewShell args={pickPreviewShellArgs(ctx.args as Record<string, unknown>)}>
+        <Story />
+      </PreviewShell>
+    ),
   ],
   args: {
+    ...previewShellDefaults,
     children: "Button",
     variant: "default",
     size: "default",
     disabled: false,
     type: "button",
-    borderRadius: 0.625,
   },
   argTypes: {
+    shellPadding: { table: { disable: true } },
+    shellMaxWidth: { table: { disable: true } },
+    shellGap: { table: { disable: true } },
+    shellRadius: { table: { disable: true } },
     variant: {
       control: "select",
       options: ["default", "destructive", "outline", "secondary", "ghost", "link"],
@@ -38,18 +50,13 @@ const meta = {
       options: ["button", "submit", "reset"],
     },
     children: { control: "text" },
-    borderRadius: {
-      control: { type: "range", min: 0, max: 1.5, step: 0.0625 },
-      description: "圆角大小 (rem)，映射 CSS 变量 --radius",
-      table: { category: "样式" },
-    },
     asChild: { table: { disable: true } },
-    className: { control: "text" },
+    className: { table: { disable: true } },
   },
-} satisfies Meta<typeof Button>;
+} satisfies Meta;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
 export const Default: Story = {};
 

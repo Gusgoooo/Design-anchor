@@ -1,0 +1,38 @@
+{
+  "id": "scroll-area",
+  "componentName": "ScrollArea",
+  "version": "1.0.0",
+  "intent": "自定义滚动区域容器，用于限制内容高度并提供滚动能力；保持滚动行为一致性。",
+  "wraps": {
+    "module": "@/components/starter/scroll-area",
+    "primitives": ["ScrollArea"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "可滚动内容",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "relative",
+      "overflow-auto",
+      "overscroll-contain"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖 overflow 行为",
+        "pattern": "^overflow"
+      }
+    ]
+  },
+  "aiPrompt": "需要滚动容器时使用 ScrollArea；通过 className 设置 max-h 控制可视高度；禁止直接在容器上覆盖 overflow 类。",
+  "meta": {
+    "tags": ["scroll", "container", "overflow"],
+    "category": "layout",
+    "status": "stable"
+  }
+}

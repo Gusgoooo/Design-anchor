@@ -1,9 +1,14 @@
 import * as React from "react";
-import { twMerge } from "tailwind-merge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { mergeWithBusinessSpec } from "@/components/business/business-style";
-import dataTableSpec from "@/harness/schema/components/data-table.spec.json";
+import {
+  CompositeDataTable,
+  type CompositeDataColumnDef,
+  type CompositeDataTableProps,
+} from "@/components/business/composite-data-table";
 import type { ComponentSpec } from "@/harness/schema/types";
+import dataTableSpec from "@/harness/schema/components/data-table.spec.json";
+
+export type { CompositeDataColumnDef, CompositeDataTableProps };
+export { CompositeDataTable };
 
 const spec = dataTableSpec as ComponentSpec;
 
@@ -19,25 +24,18 @@ export interface DataTableProps<T> {
   density?: "compact" | "comfortable" | "default";
   variant?: "plain" | "striped";
   className?: string;
-}
-
-function densityClasses(density: NonNullable<DataTableProps<unknown>["density"]>): string[] {
-  const map = spec.optionalProps?.find((p) => p.name === "density")?.enumMap;
-  if (!map) return ["text-sm", "py-3", "px-3"];
-  const key = density === undefined ? "default" : density;
-  return [...(map[key] ?? map.default ?? [])];
-}
-
-function variantClasses(variant: NonNullable<DataTableProps<unknown>["variant"]>): string[] {
-  const map = spec.optionalProps?.find((p) => p.name === "variant")?.enumMap;
-  if (!map) return [];
-  return [...(map[variant] ?? [])];
+  /**
+   * 纵向浅底条带：第 N 列（0 起算）。与复合表格语义一致。
+   * null / undefined 关闭；越界视为关闭。
+   */
+  columnBandIndex?: number | null;
+  /** 稳定行键（分页、局部更新时建议提供） */
+  getRowKey?: (row: T) => string;
 }
 
 /**
- * BusinessTable：由 ComponentSpec 驱动密度/变体映射；consumer className 经黑名单剥离后再 merge。
+ * BusinessTable：复合表格的简化版（无复选框、无表头排序），密度/斑马纹/列条带与 KitchenSink 同源。
  * Schema 即单一事实来源（aiPrompt、styleLock 同步参与 generate-cursorrules）。
- * 语义色/边框等来自全局令牌：`src/design-tokens/tokens.json`（`border-border`、`bg-card` 等），勿在业务中硬编码色值。
  */
 export function DataTable<T>({
   columns,
@@ -45,36 +43,32 @@ export function DataTable<T>({
   density = "default",
   variant = "plain",
   className,
+  columnBandIndex,
+  getRowKey,
 }: DataTableProps<T>) {
-  const rowTokens = twMerge(...densityClasses(density), ...variantClasses(variant));
-  const root = mergeWithBusinessSpec(className, spec);
+  const compositeColumns = React.useMemo<CompositeDataColumnDef<T>[]>(
+    () =>
+      columns.map((c) => ({
+        id: c.id,
+        header: c.header,
+        accessor: c.accessor ?? (() => null),
+      })),
+    [columns],
+  );
 
   return (
-    <div className={root}>
-      <Table>
-        <TableHeader>
-          <TableRow>
-            {columns.map((col) => (
-              <TableHead key={col.id} className={rowTokens}>
-                {col.header}
-              </TableHead>
-            ))}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {data.map((row, idx) => (
-            <TableRow key={idx}>
-              {columns.map((col) => (
-                <TableCell key={col.id} className={rowTokens}>
-                  {col.accessor ? col.accessor(row) : null}
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+    <CompositeDataTable<T>
+      columns={compositeColumns}
+      data={data}
+      density={density}
+      variant={variant}
+      className={className}
+      columnBandIndex={columnBandIndex}
+      enableRowSelection={false}
+      enableSort={false}
+      getRowKey={getRowKey}
+    />
   );
 }
 
-DataTable.displayName = "DataTable";
+DataTable.displayName = spec.componentName;

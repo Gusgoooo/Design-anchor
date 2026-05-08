@@ -1,0 +1,49 @@
+{
+  "id": "card",
+  "componentName": "Card",
+  "version": "1.0.0",
+  "intent": "通用内容容器，用于分组展示相关信息；支持标题、描述、正文、底部操作等结构化布局。",
+  "wraps": {
+    "module": "@/components/starter/card",
+    "primitives": ["Card", "CardHeader", "CardTitle", "CardDescription", "CardContent", "CardFooter"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "卡片内容（通常由 CardHeader/CardContent/CardFooter 组合）",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "rounded-xl",
+      "border",
+      "border-border",
+      "bg-card",
+      "text-card-foreground",
+      "shadow"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖卡片圆角与阴影",
+        "pattern": "^(rounded|shadow)"
+      },
+      {
+        "description": "禁止覆盖卡片背景色（由 design token 驱动）",
+        "pattern": "^bg-(card|background|primary|secondary)"
+      },
+      {
+        "description": "禁止覆盖内边距（由子组件统一控制）",
+        "pattern": "^(p-|px-|py-|pt-|pb-)"
+      }
+    ]
+  },
+  "aiPrompt": "展示分组内容时使用 Card 组件；内部按 CardHeader > CardTitle/CardDescription > CardContent > CardFooter 的层次结构组织；禁止直接在 Card 上添加 padding 类。",
+  "meta": {
+    "tags": ["card", "container", "layout", "panel"],
+    "category": "layout",
+    "status": "stable"
+  }
+}

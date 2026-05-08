@@ -129,39 +129,78 @@ const layoutArgTypes = {
 const layoutDefaults = {
   outerPadding: "space-6",
   cardPadding: "space-6",
-  borderRadius: "radius-token-xl",
+  borderRadius: "border-radius-xl",
   maxWidth: "layout-max-w-5xl",
   minWidth: "layout-min-w-lg",
   shadow: "elevation-sm",
   showBorder: true,
 };
 
-/* ─── 基础 DataTable ─── */
+/* ─── 基础 DataTable（与复合表格共用 PreviewFrame + 布局 token）─── */
+
+type DataTableStoryArgs = DataTableProps<Row> & typeof layoutDefaults;
 
 const meta = {
-  title: "DataTable",
+  title: "Table",
   component: DataTable,
   tags: ["autodocs"],
+  parameters: {
+    harnessTokenCompliance: {
+      sidebarStatus: "full",
+      tokenIdArgs: ["outerPadding", "cardPadding", "borderRadius", "maxWidth", "minWidth", "shadow"],
+    },
+  },
   args: {
     columns,
     data: sampleData,
     density: "default",
     variant: "plain",
+    columnBandIndex: null as null | 0 | 1,
+    ...layoutDefaults,
   },
   argTypes: {
     density: {
       control: "select",
       options: ["compact", "comfortable", "default"],
+      table: { category: "表格" },
     },
     variant: {
       control: "select",
       options: ["plain", "striped"],
+      table: { category: "表格" },
     },
-    className: { control: "text" },
+    columnBandIndex: {
+      control: "select",
+      options: [null, 0, 1],
+      description: "纵向浅底条带：第 N 列（0 起算，与复合表格一致）。",
+      table: { category: "表格" },
+    },
+    className: { table: { disable: true } },
     columns: { table: { disable: true } },
     data: { table: { disable: true } },
+    ...layoutArgTypes,
   },
-} satisfies Meta<DataTableProps<Row>>;
+  render: (args: DataTableStoryArgs) => (
+    <PreviewFrame
+      outerPadding={args.outerPadding}
+      cardPadding={args.cardPadding}
+      borderRadius={args.borderRadius}
+      maxWidth={args.maxWidth}
+      minWidth={args.minWidth}
+      shadow={args.shadow}
+      showBorder={args.showBorder}
+    >
+      <DataTable<Row>
+        columns={args.columns}
+        data={args.data}
+        density={args.density}
+        variant={args.variant}
+        columnBandIndex={args.columnBandIndex}
+        className={args.className}
+      />
+    </PreviewFrame>
+  ),
+} satisfies Meta<DataTableStoryArgs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -182,18 +221,19 @@ export const Comfortable: Story = {
 
 /* ─── 复合表格（KitchenSink + 画布装饰）─── */
 
-type SinkArgs = Pick<KitchenSinkDataTableProps, "density" | "variant" | "roleColumnTint"> & typeof layoutDefaults;
+type SinkArgs = Pick<KitchenSinkDataTableProps, "density" | "variant" | "columnBandIndex"> & typeof layoutDefaults;
 
 export const SuperComposite: StoryObj<SinkArgs> = {
   name: "复合表格（排序 + 多选 + 可调边距）",
   args: {
     density: "default",
     variant: "striped",
-    roleColumnTint: true,
+    /** 演示：第 2 列文本列纵向浅底（与列标题文案无关，AI 换列序后仍按索引生效） */
+    columnBandIndex: 1,
     ...layoutDefaults,
     outerPadding: "space-0",
-    cardPadding: "space-2",
-    shadow: "elevation-none"
+    cardPadding: "space-1",
+    shadow: "elevation-md"
   },
   argTypes: {
     density: {
@@ -206,9 +246,11 @@ export const SuperComposite: StoryObj<SinkArgs> = {
       options: ["plain", "striped"],
       table: { category: "表格" },
     },
-    roleColumnTint: {
-      control: "boolean",
-      description: "角色列浅底色",
+    columnBandIndex: {
+      control: "select",
+      options: [null, 0, 1, 2],
+      description:
+        "纵向浅底条带：复选框列后的第 N 列（0=首列文本，1=第二列…）；与列业务含义无关。选「无」关闭。",
       table: { category: "表格" },
     },
     ...layoutArgTypes,
@@ -227,7 +269,7 @@ export const SuperComposite: StoryObj<SinkArgs> = {
         data={sinkData}
         density={args.density}
         variant={args.variant}
-        roleColumnTint={args.roleColumnTint}
+        columnBandIndex={args.columnBandIndex}
       />
     </PreviewFrame>
   ),

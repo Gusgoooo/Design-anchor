@@ -130,6 +130,12 @@ if (cfg.reportForbiddenHtmlFromSpecs) {
     for (const f of s.forbidden ?? []) {
       forbiddenTags.add(String(f.htmlTag).toLowerCase());
     }
+    for (const frag of Object.values(s.storyHarness ?? {})) {
+      if (!frag || typeof frag !== "object") continue;
+      for (const f of frag.forbidden ?? []) {
+        forbiddenTags.add(String(f.htmlTag).toLowerCase());
+      }
+    }
   }
 }
 

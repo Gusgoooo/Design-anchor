@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { resolve, join, relative, sep } from "node:path";
-import { existsSync, mkdirSync, cpSync, readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { existsSync, mkdirSync, cpSync, readFileSync, writeFileSync, readdirSync, rmSync } from "node:fs";
 import { execSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createConnection } from "node:net";
@@ -10,15 +10,23 @@ const PKG_ROOT = resolve(__dirname, "..");
 
 const [, , cmd, ...rest] = process.argv;
 
+/** 消费者项目中的组件库根目录：隐藏目录，与业务 `src/` 分离；治理文件在 `.cursor/` */
+const DEFAULT_HARNESS_DIR = ".harness";
+
 const PORTAL_PATH = "/?path=/docs/designtoken--docs";
 const DEFAULT_PORT = 6006;
 
 const HELP = `
 harness — 组件库管理工具
 
+说明:
+  默认在**当前项目根**下创建隐藏目录 ${DEFAULT_HARNESS_DIR}/（组件库 + Storybook），
+  并在 .cursor/ 写入规则与 MCP；不在业务树里创建 harness-ui 等显式文件夹。
+  业务应用代码仍放在项目自有的 src/；组件库仅在 ${DEFAULT_HARNESS_DIR}/ 内维护。
+
 用法:
   harness start [目标目录]    一键启动（init + install + 打开 Portal）— 设计师推荐
-  harness init  [目标目录]    在项目中初始化组件库（默认 ./harness-ui）
+  harness init  [目标目录]    初始化组件库（默认 ./${DEFAULT_HARNESS_DIR}）
   harness dev   [目标目录]    启动 Storybook 并自动打开 Portal 页面
   harness mcp   [目标目录]    启动 MCP Server（供 Cursor Agent 使用）
   harness sync  [目标目录]    同步 schema → Tailwind + .cursorrules + 规则镜像
@@ -60,11 +68,14 @@ switch (cmd) {
 /* ─── init ─── */
 
 function doInit(targetArg) {
-  const target = resolve(process.cwd(), targetArg || "harness-ui");
+  const target = resolve(process.cwd(), targetArg || DEFAULT_HARNESS_DIR);
   console.log(`\n📦 初始化组件库到 ${target}\n`);
 
   if (existsSync(join(target, "package.json"))) {
     console.log("⚠️  目标目录已存在 package.json，跳过 scaffold（使用 harness dev 启动）");
+    const projectRoot = resolve(target, "..");
+    writeHarnessConsumerDocs(projectRoot, target);
+    generateCursorRule(projectRoot, target);
     return;
   }
 
@@ -79,6 +90,7 @@ function doInit(targetArg) {
     "vite-plugin-schema-api.mjs",
     "tsconfig.json",
     "tailwind.config.ts",
+    "tailwind.harness.generated.ts",
   ];
 
   for (const rel of toCopy) {
@@ -96,12 +108,7 @@ function doInit(targetArg) {
     console.log("  ✅ src/harness");
   }
 
-  // 如果有 design-portal 也拷贝
-  const portalDir = join(PKG_ROOT, "src/design-portal");
-  if (existsSync(portalDir)) {
-    cpSync(portalDir, join(target, "src/design-portal"), { recursive: true });
-    console.log("  ✅ src/design-portal");
-  }
+  // 设计门户（Schema 可视化）仅保留在 Harness 产品仓库；init 出的消费者项目不包含，避免在项目 A 里「强行塞」一套独立编辑产品。
 
   // 拷贝 scripts
   const scriptsDir = join(PKG_ROOT, "scripts");
@@ -110,14 +117,15 @@ function doInit(targetArg) {
     console.log("  ✅ scripts");
   }
 
-  // 生成 package.json
+  // 生成 package.json（react / react-dom 用 peer + dev，减轻与业务项目双 React 冲突）
   const parentPkg = readPkgJson(PKG_ROOT);
+  const { dependencies, peerDependencies, devDependencies } = buildScaffoldPackageJson(parentPkg);
   const pkg = {
-    name: "harness-ui",
+    name: "harness-local",
     version: "0.1.0",
     private: true,
     type: "module",
-    main: "src/components/index.ts",
+    main: "index.ts",
     scripts: {
       "sync:tokens": parentPkg.scripts?.["sync:tokens"] || "node scripts/emit-design-tokens-css.mjs",
       "sync:harness": parentPkg.scripts?.["sync:harness"] || "npm run sync:tokens && node scripts/sync-from-schema.mjs",
@@ -126,9 +134,11 @@ function doInit(targetArg) {
       "build-storybook": "storybook build",
       typecheck: "tsc --noEmit",
     },
-    dependencies: parentPkg.dependencies || {},
-    devDependencies: parentPkg.devDependencies || {},
+    dependencies,
+    peerDependencies,
+    devDependencies,
   };
+  if (!Object.keys(pkg.peerDependencies).length) delete pkg.peerDependencies;
   writeFileSync(join(target, "package.json"), JSON.stringify(pkg, null, 2) + "\n");
   console.log("  ✅ package.json");
 
@@ -141,19 +151,115 @@ function doInit(targetArg) {
   generateCursorMcp(projectRoot, target);
   installCursorHooks(projectRoot);
   installSelfcheckRule(projectRoot);
+  writeHarnessConsumerDocs(projectRoot, target);
 
   console.log("\n📦 scaffold 完成！\n");
   console.log("后续步骤：");
-  console.log(`  cd ${targetArg || "harness-ui"}`);
+  console.log(`  cd ${targetArg || DEFAULT_HARNESS_DIR}`);
   console.log("  npm install");
-  console.log("  npx harness dev .");
+  console.log("  harness dev .");
   console.log("");
   console.log("🤖 Cursor 集成已自动配置：");
   console.log("  • .cursor/rules/harness.mdc       — 组件库约束（alwaysApply）");
   console.log("  • .cursor/rules/harness-selfcheck.mdc — 改完代码后的自检清单");
   console.log("  • .cursor/mcp.json                — MCP Server");
   console.log("  • .cursor/hooks.json              — 保存 .tsx 后自动跑 harness audit");
+  console.log("  • HARNESS_BOUNDARIES.md            — 目录边界说明（业务 src vs .harness）");
+  console.log("  • HARNESS_INTEGRATION.md           — @design 别名与 Vite 示例");
   console.log("  重新打开 Cursor 后 Hooks 与规则生效。\n");
+}
+
+/**
+ * 脚手架 package.json：将 react / react-dom 从 dependencies 挪到 peerDependencies，
+ * 并在 devDependencies 中保留同版本供 Storybook 本地开发解析。
+ */
+function buildScaffoldPackageJson(parentPkg) {
+  const deps = { ...(parentPkg.dependencies || {}) };
+  const peer = {};
+  for (const key of ["react", "react-dom"]) {
+    if (deps[key] != null) {
+      peer[key] = deps[key];
+      delete deps[key];
+    }
+  }
+  const devDeps = { ...(parentPkg.devDependencies || {}) };
+  for (const key of ["react", "react-dom"]) {
+    if (peer[key] != null && devDeps[key] == null) {
+      devDeps[key] = peer[key];
+    }
+  }
+  return {
+    dependencies: deps,
+    peerDependencies: peer,
+    devDependencies: devDeps,
+  };
+}
+
+/** 项目根：边界说明 + import 别名集成（立刻可做的「一页纸」） */
+function writeHarnessConsumerDocs(projectRoot, libTarget) {
+  const relLib = "./" + relative(projectRoot, libTarget).split(sep).join("/");
+  const boundariesSrc = join(PKG_ROOT, "docs", "BOUNDARIES.md");
+  const boundariesDst = join(projectRoot, "HARNESS_BOUNDARIES.md");
+  if (existsSync(boundariesSrc)) {
+    cpSync(boundariesSrc, boundariesDst);
+    console.log("  ✅ HARNESS_BOUNDARIES.md（项目根）");
+  }
+
+  const integration = `# Harness 与业务项目集成（import 别名）
+
+组件库物理路径：\`${relLib}/\`（一般为 \`./.harness/\`）。业务代码请放在项目自有的 \`src/\`，详见同目录 **HARNESS_BOUNDARIES.md**。
+
+## 推荐：TypeScript \`paths\` — \`@design\`
+
+在**业务项目**的 \`tsconfig.json\` 的 \`compilerOptions.paths\` 中合并（路径按你仓库结构调整）：
+
+\`\`\`json
+{
+  "compilerOptions": {
+    "paths": {
+      "@design": ["${relLib}/index.ts"]
+    }
+  }
+}
+\`\`\`
+
+业务中写法示例：
+
+\`\`\`tsx
+import { DataTable, BusinessButton } from "@design";
+\`\`\`
+
+> 若项目已将 \`@\` 映射到业务 \`src/\`，请勿与 \`@design\` 混用同一前缀；保持 \`@design\` 仅指向 Harness barrel。
+
+## Vite / Rspack 等：\`resolve.alias\`
+
+\`\`\`ts
+import path from "node:path";
+// vite.config.ts
+export default {
+  resolve: {
+    alias: {
+      "@design": path.resolve(__dirname, "${relLib}/index.ts"),
+    },
+  },
+};
+\`\`\`
+
+## 无别名时
+
+使用相对路径，例如从 \`src/pages/Foo.tsx\` 导入：
+
+\`\`\`tsx
+import { BusinessButton } from "${relLib}/index.ts";
+\`\`\`
+
+（具体相对路径以文件位置为准。）
+
+---
+*由 \`harness init\` 生成；修改别名后无需改本文件，以业务侧 tsconfig / Vite 为准。*
+`;
+  writeFileSync(join(projectRoot, "HARNESS_INTEGRATION.md"), integration);
+  console.log("  ✅ HARNESS_INTEGRATION.md（项目根）");
 }
 
 function readPkgJson(dir) {
@@ -169,9 +275,9 @@ function generateIndex(target) {
   if (!existsSync(compsDir)) return;
 
   const lines = [
-    '// Auto-generated — 组件库统一入口',
-    '// 使用: import { Button, Badge, ... } from "./harness-ui"',
-    '',
+    "// Auto-generated — 组件库统一入口（位于项目根隐藏目录 .harness/）",
+    '// 业务项目: import { ... } from "./.harness" 或为 .harness 配置 TS path 别名',
+    "",
   ];
 
   // starter 组件
@@ -229,12 +335,17 @@ alwaysApply: true
 
 # Harness 组件库规范
 
-本项目使用 Harness 组件库（位于 \`${relLib}\`），所有 UI 开发必须遵守以下规范。
+本项目使用 Harness 组件库（位于 \`${relLib}\`，一般为隐藏目录 \`./.harness\`），所有 UI 开发必须遵守以下规范。
+
+## 目录约定
+
+- **应用 / 业务页面**：写在项目自有的 \`src/\`（或你项目原有的应用目录），**不要**把业务页面、路由、feature 代码写进 \`${relLib}\`。
+- **组件库与 Design Token**：仅在 \`${relLib}\` 内维护；Harness 通过 \`${relLib}\` 与 \`.cursor/\` 注入能力，不替代你项目本身的文件夹结构。
 
 ## 组件引用规则
 
 1. **禁止使用原生 HTML 标签**：\`<button>\`、\`<input>\`、\`<table>\` 等，必须使用业务组件
-2. **导入路径**：从 \`${relLib}\` 或 \`${relLib}/src/components/business/\` 导入
+2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`HARNESS_INTEGRATION.md\`）；否则从 \`${relLib}\` 或 \`${relLib}/src/components/business/\` 导入
 3. **禁止手写间距**：不允许 \`m-[13px]\`、\`p-[7px]\` 等任意值 Tailwind 类
 4. **颜色仅用语义类**：\`bg-primary\`、\`text-muted-foreground\` 等，禁止硬编码色值
 
@@ -242,26 +353,13 @@ alwaysApply: true
 
 ${specSummary || "（运行 harness sync 后自动生成）"}
 
-## MCP 工具
+## 组件规范（JSON，非独立「Schema 编辑器」产品）
 
-本项目配置了 Harness MCP Server，你可以通过以下工具操作组件库：
+规范文件在 \`${relLib}/src/harness/schema/components/*.spec.json\`。在 IDE 里直接改 JSON 即可；改完后在 \`${relLib}\` 下执行 \`npm run sync:harness\`（或 \`harness sync .\`）生成 \`.cursorrules\` 与 Tailwind 生成物。
 
-- \`list_components\` — 列出所有组件
-- \`read_component\` — 读取组件源码
-- \`create_component\` — 创建新组件
-- \`list_schemas\` — 列出组件规范
-- \`read_schema\` — 读取组件规范详情
-- \`update_schema\` — 更新规范并同步 .cursorrules
-- \`list_tokens\` — 列出 design tokens
-- \`update_token\` — 修改 token 值
-- \`run_audit\` — 运行合规审计
-- \`sync_rules\` — 同步治理规则
+## MCP 工具（若已配置 .cursor/mcp.json）
 
-## 常用指令示例
-
-用户说「创建一个 Select 组件」→ 调用 \`create_component\` 工具
-用户说「修改主题色」→ 调用 \`update_token\` 工具
-用户说「检查代码合规性」→ 调用 \`run_audit\` 工具
+按需使用，例如：\`list_components\`、\`read_component\`、\`create_component\`、\`list_tokens\`、\`update_token\`、\`run_audit\`、\`sync_rules\`；规范相关也可用 \`read_schema\` / \`update_schema\`（与手写 JSON 等价）。
 `;
 
   writeFileSync(join(rulesDir, "harness.mdc"), rule);
@@ -340,7 +438,7 @@ function installSelfcheckRule(projectRoot) {
 /* ─── start（设计师一键启动） ─── */
 
 function doStart(targetArg) {
-  const target = resolve(process.cwd(), targetArg || "harness-ui");
+  const target = resolve(process.cwd(), targetArg || DEFAULT_HARNESS_DIR);
 
   doInit(targetArg);
 
@@ -358,6 +456,24 @@ function doStart(targetArg) {
 }
 
 /* ─── dev ─── */
+
+/** 损坏的 Storybook manager 缓存会导致 manager-bundle.js 等 404、页面一片空白 */
+function clearStorybookManagerCache(target) {
+  const dirs = [
+    join("node_modules", ".cache", "storybook"),
+    join("node_modules", ".vite"),
+    join("node_modules", ".vite-storybook-harness"),
+  ];
+  for (const rel of dirs) {
+    const p = join(target, rel);
+    if (!existsSync(p)) continue;
+    try {
+      rmSync(p, { recursive: true, force: true });
+    } catch {
+      /* ignore */
+    }
+  }
+}
 
 function waitForPort(port, host, timeoutMs) {
   return new Promise((resolve, reject) => {
@@ -388,10 +504,10 @@ function openUrl(url) {
 }
 
 function doDev(targetArg) {
-  const target = resolve(process.cwd(), targetArg || "harness-ui");
+  const target = resolve(process.cwd(), targetArg || DEFAULT_HARNESS_DIR);
 
   if (!existsSync(join(target, ".storybook"))) {
-    console.error(`❌ 未找到配置，请先运行: harness init ${targetArg || ""}`);
+    console.error(`❌ 未找到配置，请先运行: harness init ${targetArg || DEFAULT_HARNESS_DIR}`);
     process.exit(1);
   }
 
@@ -407,33 +523,25 @@ function doDev(targetArg) {
   console.log(`  📂 组件库: ${target}`);
   console.log(`  🌐 地址:   http://localhost:${port}`);
   console.log(`  🎨 Portal: ${portalUrl}`);
-  console.log(`\n  启动中…\n`);
+  console.log(`\n  启动中…（首次会编译 Storybook 管理端，约 10–30 秒）\n`);
 
-  const child = spawn("npx", [
-    "storybook", "dev",
-    "-p", String(port),
-    "--no-open",
-    "--disable-telemetry",
-    "--quiet",
-  ], {
-    cwd: target,
-    stdio: ["inherit", "pipe", "pipe"],
-    shell: true,
-    env: { ...process.env, STORYBOOK_DISABLE_TELEMETRY: "1" },
-  });
+  clearStorybookManagerCache(target);
 
-  child.stdout.on("data", (buf) => {
-    const line = buf.toString();
-    if (/error|ERR!|failed/i.test(line)) {
-      process.stderr.write(line);
-    }
-  });
-  child.stderr.on("data", (buf) => {
-    const line = buf.toString();
-    if (/error|ERR!|failed|WARN/i.test(line) && !/storybook/i.test(line)) {
-      process.stderr.write(line);
-    }
-  });
+  const storybookCli = join(target, "node_modules", ".bin", "storybook");
+  if (!existsSync(storybookCli)) {
+    console.error(`❌ 未找到 Storybook，请在目录下执行: cd "${target}" && npm install`);
+    process.exit(1);
+  }
+
+  const child = spawn(
+    process.execPath,
+    [storybookCli, "dev", "-p", String(port), "--no-open", "--disable-telemetry", "--quiet"],
+    {
+      cwd: target,
+      stdio: "inherit",
+      env: { ...process.env, STORYBOOK_DISABLE_TELEMETRY: "1" },
+    },
+  );
 
   waitForPort(port, "127.0.0.1", 90_000)
     .then(() => {
@@ -451,10 +559,10 @@ function doDev(targetArg) {
 /* ─── mcp ─── */
 
 function doMcp(targetArg) {
-  const target = resolve(process.cwd(), targetArg || "harness-ui");
+  const target = resolve(process.cwd(), targetArg || DEFAULT_HARNESS_DIR);
 
   if (!existsSync(join(target, "src/design-tokens/tokens.json"))) {
-    console.error(`❌ 未找到 tokens.json，请先运行: harness init ${targetArg || ""}`);
+    console.error(`❌ 未找到 tokens.json，请先运行: harness init ${targetArg || DEFAULT_HARNESS_DIR}`);
     process.exit(1);
   }
 
@@ -476,10 +584,10 @@ function doMcp(targetArg) {
 /* ─── sync ─── */
 
 function doSync(targetArg) {
-  const target = resolve(process.cwd(), targetArg || "harness-ui");
+  const target = resolve(process.cwd(), targetArg || DEFAULT_HARNESS_DIR);
 
   if (!existsSync(join(target, "src/harness/schema/components"))) {
-    console.error(`❌ 未找到 schema 目录，请先运行: harness init ${targetArg || ""}`);
+    console.error(`❌ 未找到 schema 目录，请先运行: harness init ${targetArg || DEFAULT_HARNESS_DIR}`);
     process.exit(1);
   }
 
@@ -507,10 +615,10 @@ function doSync(targetArg) {
 /* ─── audit ─── */
 
 function doAudit(targetArg) {
-  const target = resolve(process.cwd(), targetArg || "harness-ui");
+  const target = resolve(process.cwd(), targetArg || DEFAULT_HARNESS_DIR);
 
   if (!existsSync(join(target, "src/harness"))) {
-    console.error(`❌ 未找到 harness 目录，请先运行: harness init ${targetArg || ""}`);
+    console.error(`❌ 未找到 harness 目录，请先运行: harness init ${targetArg || DEFAULT_HARNESS_DIR}`);
     process.exit(1);
   }
 

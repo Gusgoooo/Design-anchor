@@ -4,9 +4,28 @@ export function patternToString(p) {
 
 /** @param {any[]} specs */
 export function renderCursorrules(specs) {
-  const forbidden = specs.flatMap((s) => s.forbidden ?? []);
-  const refs = [...new Set(specs.flatMap((s) => s.referencePriority ?? []))];
-  const corrections = specs.flatMap((s) => s.corrections ?? []);
+  const forbidden = specs.flatMap((s) => [
+    ...(s.forbidden ?? []),
+    ...Object.values(s.storyHarness ?? {}).flatMap((frag) =>
+      frag && typeof frag === "object" ? frag.forbidden ?? [] : [],
+    ),
+  ]);
+  const refs = [
+    ...new Set(
+      specs.flatMap((s) => [
+        ...(s.referencePriority ?? []),
+        ...Object.values(s.storyHarness ?? {}).flatMap((frag) =>
+          frag && typeof frag === "object" ? frag.referencePriority ?? [] : [],
+        ),
+      ]),
+    ),
+  ];
+  const corrections = specs.flatMap((s) => [
+    ...(s.corrections ?? []),
+    ...Object.values(s.storyHarness ?? {}).flatMap((frag) =>
+      frag && typeof frag === "object" ? frag.corrections ?? [] : [],
+    ),
+  ]);
 
   const lines = [];
   lines.push(
@@ -14,8 +33,13 @@ export function renderCursorrules(specs) {
   );
   lines.push("");
   lines.push("## 引用优先");
-  lines.push("- 实现 UI 时优先从以下路径导入业务组件：");
-  refs.forEach((r) => lines.push(`  - ${r}`));
+  lines.push("- **主路径**：每个组件只以该组件 `referencePriority[0]` 为默认 import；禁止在多条路径间随意切换。");
+  lines.push("- 下列为全部已注册组件中出现过的路径（首条对每个 spec 为主路径，其余为备选）：");
+  if (refs.length === 0) {
+    lines.push("  - （未配置）");
+  } else {
+    refs.forEach((r) => lines.push(`  - ${r}`));
+  }
   lines.push("");
   lines.push("## 禁止项（原生 HTML）");
   if (forbidden.length === 0) {
@@ -34,6 +58,17 @@ export function renderCursorrules(specs) {
     (s.styleLock?.blacklist ?? []).forEach((b) => {
       lines.push(`- ${b.description} — pattern: \`${patternToString(b)}\``);
     });
+    const sh = s.storyHarness && typeof s.storyHarness === "object" ? s.storyHarness : null;
+    if (sh) {
+      for (const [sid, frag] of Object.entries(sh)) {
+        const bl = frag?.styleLock?.blacklist ?? [];
+        if (bl.length === 0) continue;
+        lines.push(`  - **变体 \`${sid}\` 附加黑名单**：`);
+        for (const b of bl) {
+          lines.push(`    - ${b.description} — pattern: \`${patternToString(b)}\``);
+        }
+      }
+    }
   });
   lines.push("");
   lines.push("## 组件意图与 AI 指令");
@@ -41,6 +76,41 @@ export function renderCursorrules(specs) {
     lines.push(`### ${s.componentName}`);
     lines.push(`- **Intent**: ${s.intent}`);
     lines.push(`- **AI**: ${s.aiPrompt}`);
+    const ex = s.examples ?? [];
+    if (ex.length > 0) {
+      lines.push("- **Few-shot 示例**（优先模仿结构与 import）：");
+      for (const item of ex) {
+        lines.push(`  - **${item.title}**${item.description ? ` — ${item.description}` : ""}`);
+        const sn = String(item.snippet ?? "").trim();
+        if (sn) {
+          lines.push("  ```tsx");
+          lines.push(sn.split("\n").map((ln) => `  ${ln}`).join("\n"));
+          lines.push("  ```");
+        }
+      }
+    }
+    const sh = s.storyHarness && typeof s.storyHarness === "object" ? s.storyHarness : null;
+    if (sh && Object.keys(sh).length > 0) {
+      lines.push("- **Storybook 变体覆盖**（与侧栏具体 Story 对应）：");
+      for (const [sid, frag] of Object.entries(sh)) {
+        if (!frag || typeof frag !== "object") continue;
+        lines.push(`  - **\`${sid}\`**`);
+        if (frag.intent) lines.push(`    - Intent: ${frag.intent}`);
+        if (frag.aiPrompt) lines.push(`    - AI: ${frag.aiPrompt}`);
+        const vex = frag.examples ?? [];
+        if (vex.length > 0) {
+          for (const item of vex) {
+            lines.push(`    - 示例 **${item.title}**${item.description ? ` — ${item.description}` : ""}`);
+            const sn = String(item.snippet ?? "").trim();
+            if (sn) {
+              lines.push("      ```tsx");
+              lines.push(sn.split("\n").map((ln) => `      ${ln}`).join("\n"));
+              lines.push("      ```");
+            }
+          }
+        }
+      }
+    }
   });
   lines.push("");
   lines.push("## 纠错指令");

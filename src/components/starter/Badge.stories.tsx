@@ -1,26 +1,49 @@
 import type { Meta, StoryObj } from "@storybook/react";
+import {
+  pickPreviewShellArgs,
+  previewShellDefaults,
+  PreviewShell,
+  storyHarnessCompliance,
+} from "@/design-tokens/story-preview-shell";
 import { Badge } from "./badge";
 
 const meta = {
   title: "Badge",
   component: Badge,
   tags: ["autodocs"],
+  parameters: {
+    harnessTokenCompliance: storyHarnessCompliance({
+      ignoreArgNames: ["children", "variant"],
+    }),
+  },
+  decorators: [
+    (Story, ctx) => (
+      <PreviewShell args={pickPreviewShellArgs(ctx.args as Record<string, unknown>)}>
+        <Story />
+      </PreviewShell>
+    ),
+  ],
   args: {
+    ...previewShellDefaults,
     children: "Badge",
     variant: "default",
   },
   argTypes: {
+    shellPadding: { table: { disable: true } },
+    shellMaxWidth: { table: { disable: true } },
+    shellGap: { table: { disable: true } },
+    shellRadius: { table: { disable: true } },
     variant: {
       control: "select",
       options: ["default", "secondary", "destructive", "outline"],
     },
     children: { control: "text" },
-    className: { control: "text" },
+    className: { table: { disable: true } },
   },
-} satisfies Meta<typeof Badge>;
+} satisfies Meta;
 
 export default meta;
-type Story = StoryObj<typeof meta>;
+type Story = StoryObj;
 
 export const Default: Story = {};
 

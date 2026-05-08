@@ -1,0 +1,111 @@
+{
+  "title": "IBM Carbon Design System — Universal Patterns (link index only)",
+  "description": "Official deep links + Carbon overview summaries (English). Full docs © IBM; visit URLs for diagrams and specs.",
+  "source": {
+    "name": "IBM Carbon Design System",
+    "overviewUrl": "https://www.carbondesignsystem.com/patterns/overview/",
+    "communityPatternsUrl": "https://www.carbondesignsystem.com/community/patterns",
+    "overviewSourceFile": "https://github.com/carbon-design-system/carbon-website/blob/main/src/pages/patterns/overview.mdx"
+  },
+  "baseUrl": "https://www.carbondesignsystem.com",
+  "patterns": [
+    {
+      "id": "common-actions",
+      "title": "Common actions",
+      "path": "/patterns/common-actions",
+      "officialSummaryEn": "Frequently used actions that appear multiple times across different components and workflows.",
+      "harnessHintZh": "组合 BusinessButton / 菜单等业务组件完成重复操作；遵循对应 *.spec.json 与 .cursorrules。"
+    },
+    {
+      "id": "dialog-pattern",
+      "title": "Dialogs",
+      "path": "/patterns/dialog-pattern",
+      "officialSummaryEn": "Prompted when the system needs input from the user or to give the user urgent information concerning their current workflow.",
+      "harnessHintZh": "模态与确认流：优先使用封装后的 Dialog/Sheet 与预设文案策略；勿散落原生 dialog。"
+    },
+    {
+      "id": "disabled-states",
+      "title": "Disabled states",
+      "path": "/patterns/disabled-states",
+      "officialSummaryEn": "Used to completely remove the interactive function of a component.",
+      "harnessHintZh": "通过组件 disabled/readOnly 等语义表达禁用；勿仅用样式假装禁用。"
+    },
+    {
+      "id": "disclosures-pattern",
+      "title": "Disclosures",
+      "path": "/patterns/disclosures-pattern",
+      "officialSummaryEn": "Used to disclose additional content or information about part of a UI.",
+      "harnessHintZh": "折叠/展开附加信息时用封装 Disclosure/Collapsible；保持焦点与可访问性。"
+    },
+    {
+      "id": "empty-states-pattern",
+      "title": "Empty states",
+      "path": "/patterns/empty-states-pattern",
+      "officialSummaryEn": "How to address moments in an app where there is no data to display to the user.",
+      "harnessHintZh": "空列表/无数据时用统一空状态模板（文案 + 主操作）；与 DataTable/Business 组件一致。"
+    },
+    {
+      "id": "filtering",
+      "title": "Filtering",
+      "path": "/patterns/filtering",
+      "officialSummaryEn": "The mechanism by which a user adds or removes data items from a displayed data set.",
+      "harnessHintZh": "筛选与表格联动：状态上升、受控筛选控件；大数据仍走 DataTable 语义。"
+    },
+    {
+      "id": "forms-pattern",
+      "title": "Forms",
+      "path": "/patterns/forms-pattern",
+      "officialSummaryEn": "A group of related input controls that allows users to provide data or configure options.",
+      "harnessHintZh": "表单组合 BusinessInput、Checkbox 等；校验与标签策略对齐业务 spec。"
+    },
+    {
+      "id": "global-header",
+      "title": "Global header",
+      "path": "/patterns/global-header",
+      "officialSummaryEn": "Covers using UI Shell components for within and between product navigation; introduces techniques for achieving consistency in products.",
+      "harnessHintZh": "顶栏/侧栏导航一致性：用布局壳与路由约定；不在业务页重复造多套 header。"
+    },
+    {
+      "id": "loading-pattern",
+      "title": "Loading",
+      "path": "/patterns/loading-pattern",
+      "officialSummaryEn": "Used when information takes an extended amount of time to process and appear on screen.",
+      "harnessHintZh": "长耗时操作用 Skeleton/Spinner 与禁用二次提交；避免空白闪烁。"
+    },
+    {
+      "id": "login-pattern",
+      "title": "Login",
+      "path": "/patterns/login-pattern",
+      "officialSummaryEn": "Allows a user to gain access to an application by entering their user ID and password.",
+      "harnessHintZh": "登录与凭证流程遵循安全与错误提示规范；输入控件用封装组件。"
+    },
+    {
+      "id": "notification-pattern",
+      "title": "Notifications",
+      "path": "/patterns/notification-pattern",
+      "officialSummaryEn": "An important method of communicating with users and providing feedback.",
+      "harnessHintZh": "全局反馈：toast/banner 与严重级别策略；与 notification 类 Business 组件一致。"
+    },
+    {
+      "id": "read-only-inputs-pattern",
+      "title": "Read-only inputs",
+      "path": "/patterns/read-only-inputs-pattern",
+      "officialSummaryEn": "Inputs for form components that users can review but not modify.",
+      "harnessHintZh": "只读展示用 readOnly/纯文本策略；勿把可编辑控件伪装成只读。"
+    },
+    {
+      "id": "search-pattern",
+      "title": "Search",
+      "path": "/patterns/search-pattern",
+      "officialSummaryEn": "An intuitive method of discovery, offering users a way to explore a website or application using keywords.",
+      "harnessHintZh": "搜索与查询：Input + 防抖/空状态；结果区与筛选、表格的分工清晰。"
+    },
+    {
+      "id": "text-toolbar-pattern",
+      "title": "Text toolbar",
+      "path": "/patterns/text-toolbar-pattern",
+      "officialSummaryEn": "A set of buttons and menus that allows users to edit text.",
+      "harnessHintZh": "富文本工具条：成组操作与快捷键；按钮仍走 BusinessButton 等封装。"
+    }
+  ]
+}

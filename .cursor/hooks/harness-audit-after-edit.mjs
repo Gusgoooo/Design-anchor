@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Cursor afterFileEdit hook：在 Agent 写入 .tsx 后，在关联的 harness-ui 根目录运行 harness-audit。
+ * Cursor afterFileEdit hook：在 Agent 写入 .tsx 后，在关联的组件库根目录（.harness/ 或旧版 harness-ui/）运行 harness-audit。
  * 若失败，通过 additional_context 把报告塞回对话，促使模型修复。
  */
 import fs from "node:fs";
@@ -43,8 +43,10 @@ function findHarnessRoot(filePath) {
   let dir = path.dirname(path.resolve(filePath));
   for (;;) {
     if (isHarnessRoot(dir)) return dir;
-    const nested = path.join(dir, "harness-ui");
-    if (isHarnessRoot(nested)) return nested;
+    for (const sub of [".harness", "harness-ui"]) {
+      const nested = path.join(dir, sub);
+      if (isHarnessRoot(nested)) return nested;
+    }
     const parent = path.dirname(dir);
     if (parent === dir) break;
     dir = parent;

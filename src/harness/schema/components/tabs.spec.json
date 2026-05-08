@@ -1,0 +1,71 @@
+{
+  "id": "tabs",
+  "componentName": "Tabs",
+  "version": "1.0.0",
+  "intent": "选项卡组件，用于在同一区域内切换不同视图/面板；支持受控与非受控模式。",
+  "wraps": {
+    "module": "@/components/starter/tabs",
+    "primitives": ["Tabs", "TabsList", "TabsTrigger", "TabsContent"]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "选项卡结构（TabsList + TabsContent）",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "defaultValue",
+      "description": "非受控模式默认激活项",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "value",
+      "description": "受控模式当前激活项",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onValueChange",
+      "description": "激活项变更回调",
+      "type": "(value: string) => void",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "inline-flex",
+      "items-center",
+      "rounded-md",
+      "bg-muted",
+      "text-muted-foreground",
+      "whitespace-nowrap",
+      "text-sm",
+      "ring-offset-background",
+      "transition-all"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖 TabsList 背景色",
+        "pattern": "^bg-(muted|background|primary|secondary)"
+      },
+      {
+        "description": "禁止覆盖圆角",
+        "pattern": "^rounded"
+      },
+      {
+        "description": "禁止覆盖内边距与高度",
+        "pattern": "^(h-|p-|px-|py-)"
+      }
+    ]
+  },
+  "aiPrompt": "内容面板切换使用 Tabs 组件；结构为 Tabs > TabsList > TabsTrigger + TabsContent；每个 TabsTrigger 和 TabsContent 的 value 必须对应。",
+  "meta": {
+    "tags": ["tabs", "navigation", "panel", "view"],
+    "category": "navigation",
+    "status": "stable"
+  }
+}

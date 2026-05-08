@@ -97,7 +97,7 @@ export interface ComponentSpecMeta {
   extendsSpecId?: string;
 }
 
-/** 给 AI / 设计师的简短用法示例（不进 linter，进文档与后续 prompt 模板） */
+/** 给 AI / 设计师的简短用法示例（不进 linter；`npm run sync:harness` 写入 .cursorrules Few-shot） */
 export interface ComponentExample {
   title: string;
   description?: string;
@@ -138,6 +138,12 @@ export interface ComponentSpec {
   /** 引用优先：强制查找的路径前缀（与规划「强制优先 @/components/business」一致） */
   referencePriority: string[];
   meta?: ComponentSpecMeta;
+  /**
+   * Storybook 侧栏中 **每个 Story 变体** 的可选覆盖层（key = `getCurrentStoryData().id`，如 `datatable--playground`）。
+   * 与顶层字段做深度合并后供 Harness 面板编辑；未声明的变体沿用顶层「组件基准」。
+   * 代码侧 import 的 JSON 仍可只读顶层；变体层主要进入 .cursorrules / 协作提示。
+   */
+  storyHarness?: Record<string, Partial<Omit<ComponentSpec, "storyHarness">>>;
   /** 用法示例（可选；用于文档生成与后续自动化 prompt） */
   examples?: ComponentExample[];
   /**

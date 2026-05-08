@@ -5,7 +5,8 @@ alwaysApply: true
 
 # Harness 自检（每轮修改结束前执行）
 
-1. **引用**：业务页面与 feature 中的交互控件是否仅从 `@/components/business/`（或项目约定的 harness 导出路径）导入 `BusinessButton`、`BusinessInput`、`BusinessCheckbox`、`BusinessBadge`、`DataTable` 等，而不是裸用 starter 或手写原生控件。
+0. **目录**：业务页面与路由应写在**项目自有**的 `src/`（或应用目录）；组件库与 token 仅在项目根的 **`.harness/`**（隐藏目录）内修改。不要把业务 feature 写进 `.harness/`。
+1. **引用**：业务里优先 `import { … } from "@design"`（若已按 `HARNESS_INTEGRATION.md` 配置 paths）；否则从 `@/components/business/` 或 `.harness` 的 barrel 导入 `BusinessButton`、`BusinessInput`、`BusinessCheckbox`、`BusinessBadge`、`DataTable` 等，不要裸用 starter 或手写原生控件。
 2. **禁止标签**：是否在业务场景使用了 `<button>`、`<input>`、`<table>` 等已被 spec `forbidden` 声明的标签；若有，改为对应 Business 组件。
 3. **样式**：避免在业务 JSX 上堆叠 `m-[…]`、`p-[…]` 等任意值 Tailwind；密度与外观优先用组件语义 props（如 `density`、`variant`、`size`）。
 4. **收尾**：若用户已配置 Harness Cursor Hook，保存后会自动跑审计；否则主动建议执行 `harness audit` 或 MCP `run_audit` 并据输出修复。

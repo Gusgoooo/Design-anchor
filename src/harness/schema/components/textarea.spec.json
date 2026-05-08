@@ -1,0 +1,72 @@
+{
+  "id": "textarea",
+  "componentName": "Textarea",
+  "version": "1.0.0",
+  "intent": "多行文本输入框，用于需要较长文本输入的场景；统一边框、圆角与聚焦样式。",
+  "wraps": {
+    "module": "@/components/starter/textarea",
+    "primitives": ["Textarea"]
+  },
+  "requiredProps": [],
+  "optionalProps": [
+    {
+      "name": "placeholder",
+      "description": "占位提示文本",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "description": "禁用状态",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    },
+    {
+      "name": "rows",
+      "description": "可见行数",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "min-h-[80px]",
+      "w-full",
+      "rounded-md",
+      "border",
+      "border-input",
+      "bg-transparent",
+      "text-sm",
+      "shadow-sm",
+      "transition-colors",
+      "placeholder:text-muted-foreground",
+      "focus-visible:outline-none",
+      "focus-visible:ring-1",
+      "focus-visible:ring-ring",
+      "disabled:cursor-not-allowed",
+      "disabled:opacity-50"
+    ],
+    "blacklist": [
+      {
+        "description": "禁止覆盖最小高度与圆角",
+        "pattern": "^(min-h-|rounded)"
+      },
+      {
+        "description": "禁止覆盖边框与背景",
+        "pattern": "^(bg|border)-(input|transparent|background)"
+      },
+      {
+        "description": "禁止覆盖内边距",
+        "pattern": "^(px-|py-|p-)"
+      }
+    ]
+  },
+  "aiPrompt": "多行输入场景使用 Textarea 组件；禁止在业务页使用裸 <textarea>；搭配 Label 使用；通过 className 仅允许添加布局类（如 w-full）。",
+  "meta": {
+    "tags": ["textarea", "form", "input", "text"],
+    "category": "form",
+    "status": "stable"
+  }
+}

@@ -1,0 +1,111 @@
+{
+  "title": "Material Design 3 — Reference index (link only)",
+  "description": "Official deep links + short English summaries. Full documentation © Google; visit URLs for specs, motion, and component behavior.",
+  "source": {
+    "name": "Material Design 3",
+    "overviewUrl": "https://m3.material.io/get-started",
+    "overviewSourceFile": "https://github.com/material-components/material-web",
+    "figmaKitUrl": "https://www.figma.com/community/file/1035203688168086460"
+  },
+  "baseUrl": "https://m3.material.io",
+  "patterns": [
+    {
+      "id": "m3-buttons",
+      "title": "Buttons",
+      "path": "/components/buttons/overview",
+      "officialSummaryEn": "Action triggers with variants (elevated, filled, tonal, outlined, text), sizes, icons, and optional toggle/selection behavior; labels should stay concise.",
+      "harnessHintZh": "操作按钮统一走 BusinessButton / 封装 Button；变体与危险操作与 *.spec.json 对齐，勿混用原生 button 堆样式。"
+    },
+    {
+      "id": "m3-dialogs",
+      "title": "Dialogs",
+      "path": "/components/dialogs/overview",
+      "officialSummaryEn": "Modal surfaces for critical choices or required input; should be focused, dismissible per platform guidance, and not hide essential navigation.",
+      "harnessHintZh": "确认/表单模态用封装 Dialog；焦点与 Esc 行为一致；不要在业务页散落多个未托管的模态层。"
+    },
+    {
+      "id": "m3-menus",
+      "title": "Menus",
+      "path": "/components/menus/overview",
+      "officialSummaryEn": "Temporary lists of choices anchored to a control; support selection, icons, and grouping for overflow actions.",
+      "harnessHintZh": "溢出操作用 DropdownMenu / 封装菜单；与工具栏、表格行操作的分工清晰，遵循键盘与焦点规范。"
+    },
+    {
+      "id": "m3-toolbars",
+      "title": "Toolbars",
+      "path": "/components/toolbars/overview",
+      "officialSummaryEn": "Surface for frequent actions and controls; can pair with FAB and adapt across window sizes.",
+      "harnessHintZh": "顶栏/工具条内控件仍用 Business 组件拼装；不要在页面层重复多套互不一致的 toolbar 样式。"
+    },
+    {
+      "id": "m3-split-button",
+      "title": "Split button",
+      "path": "/components/split-button/overview",
+      "officialSummaryEn": "Primary action paired with a connected menu for related secondary actions.",
+      "harnessHintZh": "主操作 + 次要操作菜单：主按钮与菜单项语义拆分；危险操作需二次确认策略。"
+    },
+    {
+      "id": "m3-button-groups",
+      "title": "Button groups",
+      "path": "/components/button-groups/overview",
+      "officialSummaryEn": "Related buttons organized together with expressive shape and motion feedback.",
+      "harnessHintZh": "互斥或关联操作成组时保持间距与选中态一致；仍走封装按钮，不用裸 div 模拟。"
+    },
+    {
+      "id": "m3-progress",
+      "title": "Progress indicators",
+      "path": "/components/progress-indicators/overview",
+      "officialSummaryEn": "Show ongoing processes (determinate or indeterminate) with clear visual status.",
+      "harnessHintZh": "长耗时用 Progress / Skeleton；与禁用重复提交、空状态文案联动。"
+    },
+    {
+      "id": "m3-navigation-drawer",
+      "title": "Navigation drawer",
+      "path": "/components/navigation-drawer/overview",
+      "officialSummaryEn": "Side sheet for app destinations; M3 Expressive recommends expanded navigation rail on many layouts; modal vs standard by window size class.",
+      "harnessHintZh": "侧栏导航与路由壳统一；大屏/折叠设备注意布局分级；新 Expressive 路线可对照 navigation rail 文档。"
+    },
+    {
+      "id": "m3-navigation-rail",
+      "title": "Navigation rail",
+      "path": "/m3/pages/navigation-rail/overview",
+      "officialSummaryEn": "Compact side navigation with icons and optional labels/FAB; preferred evolution over some drawer patterns in M3 Expressive.",
+      "harnessHintZh": "图标导航 + 选中态与主题令牌一致；与全局 header / 内容区留白策略统一。"
+    },
+    {
+      "id": "m3-color-system",
+      "title": "Color system",
+      "path": "/styles/color/system/overview",
+      "officialSummaryEn": "Semantic color roles, dynamic color, and accessible contrast relationships across surfaces and components.",
+      "harnessHintZh": "颜色只用语义 token（Design Token → Tailwind 语义类）；禁止页面硬编码 hex/oklch 与 Carbon/Material 像素级抄色。"
+    },
+    {
+      "id": "m3-typography",
+      "title": "Typography",
+      "path": "/styles/typography/overview",
+      "officialSummaryEn": "Type scale, readability, and hierarchy for M3 surfaces and components.",
+      "harnessHintZh": "标题/正文层级与令牌对齐；表格与表单标签字号遵循业务 spec，勿随意局部放大缩小。"
+    },
+    {
+      "id": "m3-motion",
+      "title": "Motion",
+      "path": "/styles/motion/overview",
+      "officialSummaryEn": "Transitions and feedback motion; M3 Expressive introduces physics-based motion schemes for more expressive UI.",
+      "harnessHintZh": "动效保持克制、可关闭（尊重系统减少动效）；复杂过渡与业务组件封装策略一致。"
+    },
+    {
+      "id": "m3-shape",
+      "title": "Shape",
+      "path": "/styles/shape/overview-principles",
+      "officialSummaryEn": "Corner radii and shape language across components; expressive updates add morphing shapes for buttons and decorative elements.",
+      "harnessHintZh": "圆角与卡片形状走设计令牌；不要在业务 JSX 上随意覆盖 rounded-* 破坏系统一致性。"
+    },
+    {
+      "id": "m3-expressive-overview",
+      "title": "M3 Expressive (what's new)",
+      "path": "/blog/building-with-m3-expressive",
+      "officialSummaryEn": "Overview of the expressive update: new/updated components, motion, shape, and how teams adopt the refresh.",
+      "harnessHintZh": "业界演进参考：落地仍以本仓库 Business + spec 为准；可摘取「组合思路」而非照搬 Material Web API。"
+    }
+  ]
+}

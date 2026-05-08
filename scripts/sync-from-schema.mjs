@@ -11,22 +11,30 @@ import { renderCursorrules, renderHarnessMarkdown } from "./lib/render-harness-r
 const root = getRepoRoot();
 
 /** 从 specs 收集需在 JIT 中保留的 class token（JSON enumMap / baseline） */
+function consumeSpecLikeForSafelist(specLike, set) {
+  if (!specLike || typeof specLike !== "object") return;
+  for (const t of specLike.styleLock?.baselineTokens ?? []) {
+    for (const part of String(t).split(/\s+/)) if (part) set.add(part);
+  }
+  const props = [...(specLike.requiredProps ?? []), ...(specLike.optionalProps ?? [])];
+  for (const p of props) {
+    const em = p.enumMap;
+    if (!em) continue;
+    for (const classes of Object.values(em)) {
+      if (!Array.isArray(classes)) continue;
+      for (const chunk of classes) {
+        for (const part of String(chunk).split(/\s+/)) if (part) set.add(part);
+      }
+    }
+  }
+}
+
 function collectSafelistTokens(specs) {
   const set = new Set();
   for (const s of specs) {
-    for (const t of s.styleLock?.baselineTokens ?? []) {
-      for (const part of String(t).split(/\s+/)) if (part) set.add(part);
-    }
-    const props = [...(s.requiredProps ?? []), ...(s.optionalProps ?? [])];
-    for (const p of props) {
-      const em = p.enumMap;
-      if (!em) continue;
-      for (const classes of Object.values(em)) {
-        if (!Array.isArray(classes)) continue;
-        for (const chunk of classes) {
-          for (const part of String(chunk).split(/\s+/)) if (part) set.add(part);
-        }
-      }
+    consumeSpecLikeForSafelist(s, set);
+    for (const frag of Object.values(s.storyHarness ?? {})) {
+      consumeSpecLikeForSafelist(frag, set);
     }
   }
   return [...set].sort();
@@ -36,12 +44,17 @@ function buildTailwindExtend(specs) {
   const spacing = {};
   const colors = {};
   const borderRadius = {};
-  for (const s of specs) {
-    const te = s.tailwindExtend;
-    if (!te) continue;
+  function mergeTe(te) {
+    if (!te) return;
     Object.assign(spacing, te.spacing ?? {});
     Object.assign(colors, te.colors ?? {});
     Object.assign(borderRadius, te.borderRadius ?? {});
+  }
+  for (const s of specs) {
+    mergeTe(s.tailwindExtend);
+    for (const frag of Object.values(s.storyHarness ?? {})) {
+      mergeTe(frag?.tailwindExtend);
+    }
   }
   return { spacing, colors, borderRadius };
 }

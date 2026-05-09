@@ -1100,8 +1100,6 @@ function HarnessPanel() {
             whiteSpace: "nowrap", flexShrink: 0,
           }}>{filename}</span>
           <div style={{ flex: 1 }} />
-          <button type="button" style={HS.btn()} onClick={() => void load()}>刷新</button>
-          <button type="button" style={HS.btn(true)} onClick={() => void save()}>保存</button>
         </div>
         {harnessCtx.storyId ? (
           <div style={{ fontSize: 11, color: "var(--mgr-text-muted)", lineHeight: 1.4, display: "flex", alignItems: "center", gap: 4 }}>
@@ -1115,13 +1113,7 @@ function HarnessPanel() {
         ) : null}
       </div>
 
-      {status && (
-        <div style={{ ...HS.status, background: status.ok ? "#f0fdf4" : "#fef2f2", border: `1px solid ${status.ok ? "#bbf7d0" : "#fecaca"}`, color: status.ok ? "#166534" : "#991b1b" }}>
-          {status.text}
-        </div>
-      )}
-
-      <div style={HS.body}>
+      <div style={{ ...HS.body, flex: 1, minHeight: 0, overflow: "auto" }}>
         <CollapsibleSection
           title="Harness 规则（设计师）"
           hint="编辑结果写入当前 Story 变体（storyHarness[storyId]），与组件顶层基准深度合并后进 .cursorrules；与侧栏其他变体互不覆盖。Intent / AI Prompt / 主路径为常用项。"
@@ -1330,6 +1322,27 @@ function HarnessPanel() {
             />
           </div>
         </CollapsibleSection>
+      </div>
+
+      {/* 底部操作条 */}
+      <div style={{
+        flexShrink: 0, display: "flex", alignItems: "center", gap: 8,
+        padding: "8px 16px", borderTop: "1px solid var(--mgr-border)",
+        background: "var(--mgr-bg)",
+      }}>
+        {status && (
+          <div style={{
+            flex: 1, fontSize: 12, padding: "4px 8px", borderRadius: 4, whiteSpace: "pre-wrap" as const,
+            background: status.ok ? "#f0fdf4" : "#fef2f2",
+            border: `1px solid ${status.ok ? "#bbf7d0" : "#fecaca"}`,
+            color: status.ok ? "#166534" : "#991b1b",
+          }}>
+            {status.text}
+          </div>
+        )}
+        {!status && <div style={{ flex: 1 }} />}
+        <button type="button" style={HS.btn()} onClick={() => void load()}>刷新</button>
+        <button type="button" style={HS.btn(true)} onClick={() => void save()}>保存</button>
       </div>
     </div>
   );

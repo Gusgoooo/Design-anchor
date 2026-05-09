@@ -1,41 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
-import { TRIGGER_VARIANTS, TRIGGER_SIZES } from "@/design-tokens/story-controls";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import popoverSrc from "./popover.tsx?raw";
-import { buttonVariants } from "./button";
-import { Popover, PopoverContent, PopoverTrigger } from "./popover";
+import componentSrc from "./popover.tsx?raw";
+import { Popover, PopoverTrigger, PopoverContent } from "./popover";
+import { Button } from "./button";
 
-const audit = autoClassControls(popoverSrc);
-
-type PopoverStoryArgs = {
-  triggerVariant: string;
-  triggerSize: string;
-};
+const audit = autoClassControls(componentSrc);
 
 const meta = {
   title: "Popover",
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }),
   },
-  args: {
-    triggerVariant: "outline",
-    triggerSize: "default",
-    ...audit.args,
-  },
+  args: { ...audit.args },
   argTypes: {
     className: { table: { disable: true } },
-    triggerVariant: {
-      control: "select",
-      options: [...TRIGGER_VARIANTS],
-      description: "触发按钮变体",
-    },
-    triggerSize: {
-      control: "select",
-      options: [...TRIGGER_SIZES],
-      description: "触发按钮尺寸",
-    },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
 } satisfies Meta;
@@ -44,24 +25,17 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: (_args) => {
-    const args = _args as unknown as PopoverStoryArgs & Record<string, string>;
-    return (
+  render: (args) => (
       <Popover>
-        <PopoverTrigger
-          className={buttonVariants({
-            variant: args.triggerVariant as any,
-            size: args.triggerSize as any,
-          })}
-        >
-          打开 Popover
+        <PopoverTrigger asChild>
+          <Button variant="outline">打开弹出框</Button>
         </PopoverTrigger>
-        <PopoverContent className={audit.buildClassName(args)}>
-          <p className="text-sm text-muted-foreground">
-            可放置过滤器、附加表单等。
-          </p>
+        <PopoverContent className={audit.buildClassName(args as unknown as Record<string, string>)}>
+          <div className="grid gap-base">
+            <div className="text-sm font-medium">弹出框标题</div>
+            <div className="text-sm text-muted-foreground">这是弹出框的内容。</div>
+          </div>
         </PopoverContent>
       </Popover>
-    );
-  },
+    ),
 };

@@ -1,20 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import tabsSrc from "./tabs.tsx?raw";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./tabs";
+import componentSrc from "./tabs.tsx?raw";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
 
-const audit = autoClassControls(tabsSrc);
+const audit = autoClassControls(componentSrc);
 
 const meta = {
   title: "Tabs",
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children", "defaultValue", "value", "onValueChange"] }),
   },
   args: { ...audit.args },
   argTypes: {
     className: { table: { disable: true } },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
 } satisfies Meta;
@@ -24,19 +25,19 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <div className="w-full">
-      <Tabs defaultValue="a">
-        <TabsList className={audit.buildClassName(args as unknown as Record<string, string>)}>
-          <TabsTrigger value="a">概况</TabsTrigger>
-          <TabsTrigger value="b">详情</TabsTrigger>
-        </TabsList>
-        <TabsContent value="a" className="text-sm text-muted-foreground">
-          概况面板内容。
-        </TabsContent>
-        <TabsContent value="b" className="text-sm text-muted-foreground">
-          详情面板内容。
-        </TabsContent>
-      </Tabs>
-    </div>
-  ),
+      <div className="w-[400px]">
+        <Tabs defaultValue="account" className={audit.buildClassName(args as unknown as Record<string, string>)}>
+          <TabsList>
+            <TabsTrigger value="account">账户</TabsTrigger>
+            <TabsTrigger value="password">密码</TabsTrigger>
+          </TabsList>
+          <TabsContent value="account">
+            <p className="text-sm text-muted-foreground">在这里管理您的账户设置。</p>
+          </TabsContent>
+          <TabsContent value="password">
+            <p className="text-sm text-muted-foreground">在这里修改您的密码。</p>
+          </TabsContent>
+        </Tabs>
+      </div>
+    ),
 };

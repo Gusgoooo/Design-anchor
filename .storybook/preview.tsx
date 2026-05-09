@@ -34,7 +34,7 @@ function useDarkSync() {
 function DarkModeDecorator(Story: React.FC) {
   useDarkSync();
   return (
-    <div style={{ minHeight: "100%" }}>
+    <div style={{ minHeight: "100%", minWidth: 320 }}>
       <Story />
     </div>
   );

@@ -38,6 +38,7 @@ function execSyncCaptured(cmd, opts) {
 const WRITE_WHITELIST_PREFIXES = [
   "src/harness/schema/",
   "src/design-tokens/",
+  "src/components/starter/",
 ];
 
 function isWriteAllowed(repoRoot, absPath) {
@@ -309,6 +310,102 @@ export function schemaApiPlugin(repoRoot) {
               res.statusCode = 500;
               res.setHeader("Content-Type", "application/json; charset=utf-8");
               res.end(JSON.stringify({ ok: false, fileWritten: false, error: String(e) }));
+            }
+          });
+          return;
+        }
+
+        if (req.method === "POST" && url === "/api/upload-component") {
+          const chunks = [];
+          req.on("data", (c) => chunks.push(c));
+          req.on("end", () => {
+            try {
+              const body = Buffer.concat(chunks);
+              const boundary = (req.headers["content-type"] || "").split("boundary=")[1];
+              if (!boundary) { res.statusCode = 400; res.end("no boundary"); return; }
+
+              const parts = body.toString("binary").split("--" + boundary);
+              let filename = "";
+              let content = "";
+
+              for (const part of parts) {
+                const headerEnd = part.indexOf("\r\n\r\n");
+                if (headerEnd < 0) continue;
+                const headers = part.slice(0, headerEnd);
+                const fileMatch = headers.match(/filename="([^"]+)"/);
+                if (fileMatch) {
+                  filename = fileMatch[1].replace(/.*[/\\]/, "");
+                  content = part.slice(headerEnd + 4).replace(/\r\n$/, "");
+                }
+              }
+
+              if (!filename || !filename.endsWith(".tsx")) {
+                res.statusCode = 400;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ ok: false, error: "需要 .tsx 文件" }));
+                return;
+              }
+
+              const compName = filename.replace(/\.tsx$/, "");
+              const starterDir = path.join(repoRoot, "src/components/starter");
+              if (!fs.existsSync(starterDir)) fs.mkdirSync(starterDir, { recursive: true });
+
+              const compPath = path.join(starterDir, filename);
+              if (!isWriteAllowed(repoRoot, compPath)) {
+                res.statusCode = 403;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ ok: false, error: "forbidden" }));
+                return;
+              }
+
+              writeFileWithFsync(compPath, Buffer.from(content, "binary"));
+
+              const pascal = compName.replace(/(^|-)(\w)/g, (_, _2, c) => c.toUpperCase());
+              const storyPath = path.join(starterDir, pascal + ".stories.tsx");
+              if (!fs.existsSync(storyPath)) {
+                const story = [
+                  `import type { Meta, StoryObj } from "@storybook/react";`,
+                  `import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";`,
+                  `import { autoClassControls } from "@/design-tokens/tw-class-audit";`,
+                  `import componentSrc from "./${compName}.tsx?raw";`,
+                  `import { ${pascal} } from "./${compName}";`,
+                  ``,
+                  `const audit = autoClassControls(componentSrc);`,
+                  ``,
+                  `const meta = {`,
+                  `  title: "${pascal}",`,
+                  `  component: ${pascal},`,
+                  `  tags: ["autodocs"],`,
+                  `  parameters: { harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }) },`,
+                  `  args: { ...audit.args },`,
+                  `  argTypes: { ...audit.argTypes },`,
+                  `} satisfies Meta<typeof ${pascal}>;`,
+                  ``,
+                  `export default meta;`,
+                  `type Story = StoryObj<typeof meta>;`,
+                  ``,
+                  `export const Default: Story = {`,
+                  `  render: (args) => (`,
+                  `    <${pascal} className={audit.buildClassName(args as unknown as Record<string, string>)}>`,
+                  `      示例内容`,
+                  `    </${pascal}>`,
+                  `  ),`,
+                  `};`,
+                  ``,
+                ].join("\n");
+                writeFileWithFsync(storyPath, story);
+              }
+
+              res.setHeader("Content-Type", "application/json; charset=utf-8");
+              res.end(JSON.stringify({
+                ok: true,
+                component: compPath.replace(repoRoot + "/", ""),
+                story: storyPath.replace(repoRoot + "/", ""),
+              }));
+            } catch (e) {
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({ ok: false, error: String(e) }));
             }
           });
           return;

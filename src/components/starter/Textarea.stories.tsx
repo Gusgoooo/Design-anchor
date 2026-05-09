@@ -1,54 +1,35 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import textareaSrc from "./textarea.tsx?raw";
-import { Label } from "./label";
+import componentSrc from "./textarea.tsx?raw";
 import { Textarea } from "./textarea";
+import { Label } from "./label";
 
-const audit = autoClassControls(textareaSrc);
+const audit = autoClassControls(componentSrc);
 
 const meta = {
   title: "Textarea",
-  component: Textarea,
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({
-      ignoreArgNames: ["placeholder", "rows", "disabled"],
-    }),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children", "id", "placeholder", "disabled"] }),
   },
-  args: { placeholder: "多行内容…", rows: 4, disabled: false, ...audit.args },
+  args: { disabled: false, ...audit.args },
   argTypes: {
-    rows: { control: "number" },
     disabled: { control: "boolean" },
     className: { table: { disable: true } },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
-  render: (args) => (
-    <Textarea
-      placeholder={args.placeholder}
-      rows={args.rows}
-      disabled={args.disabled}
-      className={audit.buildClassName(args as unknown as Record<string, string>)}
-    />
-  ),
 } satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-export const WithLabel: Story = {
+export const Default: Story = {
   render: (args) => (
-    <div className="grid w-full gap-sm">
-      <Label htmlFor="t">备注</Label>
-      <Textarea
-        id="t"
-        placeholder={args.placeholder}
-        rows={args.rows}
-        disabled={args.disabled}
-        className={audit.buildClassName(args as unknown as Record<string, string>)}
-      />
-    </div>
-  ),
+      <div className="grid w-[360px] gap-xs">
+        <Label htmlFor="msg">消息</Label>
+        <Textarea id="msg" placeholder="请输入消息" className={audit.buildClassName(args as unknown as Record<string, string>)} />
+      </div>
+    ),
 };

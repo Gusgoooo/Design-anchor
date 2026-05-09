@@ -103,18 +103,27 @@ const SEMANTIC_COLORS = new Set([
 export function extractClasses(source: string): string[] {
   const raw: string[] = [];
 
-  // className="..."
   for (const m of source.matchAll(/className="([^"]+)"/g)) raw.push(m[1]);
-  // className={`...`}
   for (const m of source.matchAll(/className=\{`([^`]+)`\}/g)) raw.push(m[1]);
-  // cn("...", "...", ...)  and  cva("...", ...)
-  for (const m of source.matchAll(/(?:cn|cva)\(\s*"([^"]+)"/g)) raw.push(m[1]);
-  // 所有双引号字符串（cva variants 等，粗粒度兜底）
+
+  for (const m of source.matchAll(/(?:cn|cva)\(([\s\S]*?)\n\s*\)/gm)) {
+    const body = m[1];
+    for (const s of body.matchAll(/"([^"]+)"/g)) raw.push(s[1]);
+    for (const s of body.matchAll(/`([^`]+)`/g)) raw.push(s[1]);
+  }
+  for (const m of source.matchAll(/(?:cn|cva)\(([^\n)]*)\)/g)) {
+    const body = m[1];
+    for (const s of body.matchAll(/"([^"]+)"/g)) raw.push(s[1]);
+    for (const s of body.matchAll(/`([^`]+)`/g)) raw.push(s[1]);
+  }
+
   for (const m of source.matchAll(/:\s*"([^"]{4,})"/g)) {
     if (m[1].includes(" ") || /^[a-z]+-/.test(m[1])) raw.push(m[1]);
   }
 
-  const all = raw.flatMap((s) => s.split(/\s+/).filter(Boolean));
+  const all = raw.flatMap((s) =>
+    s.split(/\s+/).filter((c) => c && !c.startsWith("${")),
+  );
   return [...new Set(all)];
 }
 

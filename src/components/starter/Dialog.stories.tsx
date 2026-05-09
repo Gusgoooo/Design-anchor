@@ -1,81 +1,49 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
-import { TRIGGER_VARIANTS, TRIGGER_SIZES } from "@/design-tokens/story-controls";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import dialogSrc from "./dialog.tsx?raw";
-import { cn } from "@/lib/utils";
-import { Button, buttonVariants } from "./button";
-import {
-  Dialog, DialogClose, DialogContent, DialogDescription,
-  DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
-} from "./dialog";
+import componentSrc from "./dialog.tsx?raw";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogDescription, DialogClose } from "./dialog";
+import { Button } from "./button";
 
-const audit = autoClassControls(dialogSrc);
-
-type DialogStoryArgs = {
-  defaultOpen: boolean;
-  triggerVariant: string;
-  triggerSize: string;
-  [k: string]: unknown;
-};
+const audit = autoClassControls(componentSrc);
 
 const meta = {
   title: "Dialog",
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({
-      ignoreArgNames: ["defaultOpen"],
-    }),
+    layout: "fullscreen",
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children", "open", "onOpenChange"] }),
   },
-  args: {
-    defaultOpen: false,
-    triggerVariant: "outline",
-    triggerSize: "default",
-    ...audit.args,
-  },
+  args: { ...audit.args },
   argTypes: {
-    defaultOpen: { control: "boolean", description: "初始打开状态" },
-    triggerVariant: {
-      control: "select",
-      options: [...TRIGGER_VARIANTS],
-      description: "触发/关闭按钮变体",
-    },
-    triggerSize: {
-      control: "select",
-      options: [...TRIGGER_SIZES],
-      description: "触发/关闭按钮尺寸",
-    },
+    className: { table: { disable: true } },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
-} satisfies Meta<DialogStoryArgs>;
+} satisfies Meta;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Basic: Story = {
-  render: (_a) => {
-    const args = _a as unknown as DialogStoryArgs & Record<string, string>;
-    const triggerCls = cn(
-      buttonVariants({ variant: args.triggerVariant as any, size: args.triggerSize as any }),
-    );
-    return (
-      <Dialog defaultOpen={args.defaultOpen}>
-        <DialogTrigger className={triggerCls}>
-          打开对话框
+export const Default: Story = {
+  render: (args) => (
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button variant="outline">打开对话框</Button>
         </DialogTrigger>
-        <DialogContent className={audit.buildClassName(args)}>
+        <DialogContent className={audit.buildClassName(args as unknown as Record<string, string>)}>
           <DialogHeader>
-            <DialogTitle>确认操作</DialogTitle>
-            <DialogDescription>此处可放置说明文案；点击遮罩或按 Esc 关闭。</DialogDescription>
+            <DialogTitle>对话框标题</DialogTitle>
+            <DialogDescription>这是一段描述文本。</DialogDescription>
           </DialogHeader>
+          <div className="py-base">对话框内容区域</div>
           <DialogFooter>
-            <DialogClose className={triggerCls}>
-              取消
+            <DialogClose asChild>
+              <Button variant="outline">取消</Button>
             </DialogClose>
-            <Button type="button">确定</Button>
+            <Button>确认</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    );
-  },
+    ),
 };

@@ -1,24 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import separatorSrc from "./separator.tsx?raw";
+import componentSrc from "./separator.tsx?raw";
 import { Separator } from "./separator";
 
-const audit = autoClassControls(separatorSrc);
+const audit = autoClassControls(componentSrc);
 
 const meta = {
   title: "Separator",
-  component: Separator,
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({
-      ignoreArgNames: ["orientation"],
-    }),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }),
   },
-  args: { orientation: "horizontal" as const, ...audit.args },
+  args: { ...audit.args },
   argTypes: {
-    orientation: { control: "select", options: ["horizontal", "vertical"] },
     className: { table: { disable: true } },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
 } satisfies Meta;
@@ -26,23 +23,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Horizontal: Story = {
+export const Default: Story = {
   render: (args) => (
-    <div className="flex w-full flex-col gap-sm">
-      <p className="text-sm">区块 A</p>
-      <Separator orientation={args.orientation} className={audit.buildClassName(args as unknown as Record<string, string>)} />
-      <p className="text-sm">区块 B</p>
-    </div>
-  ),
-};
-
-export const Vertical: Story = {
-  args: { orientation: "vertical" },
-  render: (args) => (
-    <div className="flex h-16 items-center gap-sm">
-      <span className="text-sm">左</span>
-      <Separator orientation={args.orientation} decorative className={audit.buildClassName(args as unknown as Record<string, string>)} />
-      <span className="text-sm">右</span>
-    </div>
-  ),
+      <div className="w-[300px] space-y-base">
+        <div className="text-sm font-medium">上方内容</div>
+        <Separator className={audit.buildClassName(args as unknown as Record<string, string>)} />
+        <div className="text-sm text-muted-foreground">下方内容</div>
+      </div>
+    ),
 };

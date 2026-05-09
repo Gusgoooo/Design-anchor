@@ -1,11 +1,13 @@
-export { Alert, AlertTitle, AlertDescription, alertVariants } from "./alert";
+export { Alert, AlertTitle, AlertDescription } from "./alert";
 export { Avatar, AvatarImage, AvatarFallback } from "./avatar";
 export { Badge, badgeVariants, type BadgeProps } from "./badge";
 export { Button, buttonVariants, type ButtonProps } from "./button";
 export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "./card";
-export { Checkbox, type CheckboxProps } from "./checkbox";
+export { Checkbox } from "./checkbox";
 export {
   Dialog,
+  DialogPortal,
+  DialogOverlay,
   DialogTrigger,
   DialogContent,
   DialogHeader,
@@ -19,19 +21,40 @@ export {
   DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuRadioItem,
+  DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuGroup,
+  DropdownMenuPortal,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuRadioGroup,
 } from "./dropdown-menu";
-export { Input, type InputProps } from "./input";
-export { Label, type LabelProps } from "./label";
+export { Input } from "./input";
+export { Label } from "./label";
 export { Popover, PopoverTrigger, PopoverContent } from "./popover";
-export { Progress, type ProgressProps } from "./progress";
+export { Progress } from "./progress";
 export { RadioGroup, RadioGroupItem } from "./radio-group";
-export { ScrollArea, type ScrollAreaProps } from "./scroll-area";
-export { Select, type SelectProps } from "./select";
-export { Separator, type SeparatorProps } from "./separator";
+export { ScrollArea, ScrollBar } from "./scroll-area";
+export {
+  Select,
+  SelectGroup,
+  SelectValue,
+  SelectTrigger,
+  SelectContent,
+  SelectLabel,
+  SelectItem,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+} from "./select";
+export { Separator } from "./separator";
 export { Skeleton } from "./skeleton";
-export { Slider, type SliderProps } from "./slider";
-export { Switch, type SwitchProps } from "./switch";
+export { Slider } from "./slider";
+export { Switch } from "./switch";
 export {
   Table,
   TableHeader,
@@ -43,5 +66,5 @@ export {
   TableCaption,
 } from "./table";
 export { Tabs, TabsList, TabsTrigger, TabsContent } from "./tabs";
-export { Textarea, type TextareaProps } from "./textarea";
+export { Textarea } from "./textarea";
 export { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from "./tooltip";

@@ -1,22 +1,28 @@
-import * as React from "react";
+"use client"
 
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import * as SliderPrimitive from "@radix-ui/react-slider"
 
-export interface SliderProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {}
+import { cn } from "@/lib/utils"
 
-const Slider = React.forwardRef<HTMLInputElement, SliderProps>(({ className, ...props }, ref) => (
-  <input
+const Slider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
+>(({ className, ...props }, ref) => (
+  <SliderPrimitive.Root
     ref={ref}
-    type="range"
     className={cn(
-      "h-2 w-full cursor-pointer appearance-none rounded-full bg-secondary accent-primary",
-      "[&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-primary [&::-webkit-slider-thumb]:bg-background [&::-webkit-slider-thumb]:shadow",
-      "[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-primary [&::-moz-range-thumb]:bg-background",
-      className,
+      "relative flex w-full touch-none select-none items-center",
+      className
     )}
     {...props}
-  />
-));
-Slider.displayName = "Slider";
+  >
+    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
+      <SliderPrimitive.Range className="absolute h-full bg-primary" />
+    </SliderPrimitive.Track>
+    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+  </SliderPrimitive.Root>
+))
+Slider.displayName = SliderPrimitive.Root.displayName
 
-export { Slider };
+export { Slider }

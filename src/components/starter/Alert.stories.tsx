@@ -1,55 +1,36 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { AlertCircle } from "lucide-react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import alertSrc from "./alert.tsx?raw";
-import { cn } from "@/lib/utils";
-import { Alert, AlertDescription, AlertTitle } from "./alert";
+import componentSrc from "./alert.tsx?raw";
+import { Alert, AlertTitle, AlertDescription } from "./alert";
 
-const audit = autoClassControls(alertSrc);
+const audit = autoClassControls(componentSrc);
 
-const meta = {
+type Args = { variant: string; [k: string]: unknown };
+
+const meta: Meta<Args> = {
   title: "Alert",
-  component: Alert,
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({
-      ignoreArgNames: ["variant"],
-    }),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["variant", "children"] }),
   },
   args: { variant: "default", ...audit.args },
   argTypes: {
     variant: { control: "select", options: ["default", "destructive"] },
     className: { table: { disable: true } },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
-} satisfies Meta;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <Alert
-      variant={args.variant}
-      className={cn("w-full", audit.buildClassName(args as unknown as Record<string, string>))}
-    >
-      <AlertCircle className="h-4 w-4" />
-      <AlertTitle>提示</AlertTitle>
-      <AlertDescription>这是一条说明文案，可用于表单校验或页面级提示。</AlertDescription>
-    </Alert>
-  ),
-};
-
-export const Destructive: Story = {
-  args: { variant: "destructive" },
-  render: (args) => (
-    <Alert
-      variant={args.variant}
-      className={cn("w-full", audit.buildClassName(args as unknown as Record<string, string>))}
-    >
-      <AlertTitle>操作失败</AlertTitle>
-      <AlertDescription>请检查网络或稍后重试。</AlertDescription>
+    <Alert variant={args.variant as "default" | "destructive"} className={audit.buildClassName(args as Record<string, string>)}>
+      <AlertTitle>提示标题</AlertTitle>
+      <AlertDescription>这是一条默认的提示消息，用于展示组件的基本样式。</AlertDescription>
     </Alert>
   ),
 };

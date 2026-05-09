@@ -1,44 +1,22 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
-import { TRIGGER_VARIANTS, TRIGGER_SIZES } from "@/design-tokens/story-controls";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import dropdownSrc from "./dropdown-menu.tsx?raw";
-import { buttonVariants } from "./button";
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from "./dropdown-menu";
+import componentSrc from "./dropdown-menu.tsx?raw";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "./dropdown-menu";
+import { Button } from "./button";
 
-const audit = autoClassControls(dropdownSrc);
-
-type DropdownStoryArgs = {
-  triggerVariant: string;
-  triggerSize: string;
-};
+const audit = autoClassControls(componentSrc);
 
 const meta = {
   title: "DropdownMenu",
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }),
   },
-  args: {
-    triggerVariant: "outline",
-    triggerSize: "default",
-    ...audit.args,
-  },
+  args: { ...audit.args },
   argTypes: {
     className: { table: { disable: true } },
-    triggerVariant: {
-      control: "select",
-      options: [...TRIGGER_VARIANTS],
-      description: "触发按钮变体",
-    },
-    triggerSize: {
-      control: "select",
-      options: [...TRIGGER_SIZES],
-      description: "触发按钮尺寸",
-    },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
 } satisfies Meta;
@@ -47,25 +25,19 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
-  render: (_args) => {
-    const args = _args as unknown as DropdownStoryArgs & Record<string, string>;
-    return (
+  render: (args) => (
       <DropdownMenu>
-        <DropdownMenuTrigger
-          className={buttonVariants({
-            variant: args.triggerVariant as any,
-            size: args.triggerSize as any,
-          })}
-        >
-          菜单 ▾
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">打开菜单</Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className={audit.buildClassName(args)}>
-          <DropdownMenuItem>复制</DropdownMenuItem>
-          <DropdownMenuItem>重命名</DropdownMenuItem>
+        <DropdownMenuContent className={audit.buildClassName(args as unknown as Record<string, string>)}>
+          <DropdownMenuLabel>我的账户</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>删除</DropdownMenuItem>
+          <DropdownMenuItem>个人设置</DropdownMenuItem>
+          <DropdownMenuItem>账单管理</DropdownMenuItem>
+          <DropdownMenuItem>团队管理</DropdownMenuItem>
+          <DropdownMenuItem>退出登录</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-    );
-  },
+    ),
 };

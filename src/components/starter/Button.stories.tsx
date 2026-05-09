@@ -1,67 +1,40 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import buttonSrc from "./button.tsx?raw";
+import componentSrc from "./button.tsx?raw";
 import { Button } from "./button";
 
-const audit = autoClassControls(buttonSrc);
+const audit = autoClassControls(componentSrc);
 
-const meta = {
+type Args = { variant: string; size: string; [k: string]: unknown };
+
+const meta: Meta<Args> = {
   title: "Button",
-  component: Button,
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({
-      ignoreArgNames: ["children", "variant", "size", "type", "disabled"],
-    }),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["variant", "size", "children", "asChild"] }),
   },
-  args: {
-    children: "Button",
-    variant: "default",
-    size: "default",
-    disabled: false,
-    type: "button",
-    ...audit.args,
-  },
+  args: { variant: "default", size: "default", ...audit.args },
   argTypes: {
-    variant: {
-      control: "select",
-      options: ["default", "destructive", "outline", "secondary", "ghost", "link"],
-      description: "视觉变体；颜色来自全局语义 token。",
-    },
-    size: {
-      control: "select",
-      options: ["default", "sm", "lg", "icon"],
-      description: "高度与内边距由 control-height、padding 等 token 驱动。",
-    },
-    disabled: { control: "boolean" },
-    type: { control: "select", options: ["button", "submit", "reset"] },
-    children: { control: "text" },
-    asChild: { table: { disable: true } },
+    variant: { control: "select", options: ["default", "destructive", "outline", "secondary", "ghost", "link"] },
+    size: { control: "select", options: ["default", "sm", "lg", "icon"] },
     className: { table: { disable: true } },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
-  render: (args) => (
-    <Button
-      variant={args.variant}
-      size={args.size}
-      disabled={args.disabled}
-      type={args.type}
-      className={audit.buildClassName(args as unknown as Record<string, string>)}
-    >
-      {args.children}
-    </Button>
-  ),
-} satisfies Meta;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-export const Secondary: Story = { args: { variant: "secondary" } };
-export const Outline: Story = { args: { variant: "outline" } };
-export const Destructive: Story = { args: { variant: "destructive" } };
-export const Ghost: Story = { args: { variant: "ghost" } };
-export const Link: Story = { args: { variant: "link" } };
-export const Small: Story = { args: { size: "sm", children: "Small" } };
-export const Large: Story = { args: { size: "lg", children: "Large" } };
+export const Default: Story = {
+  render: (args) => (
+    <Button
+      variant={args.variant as "default" | "destructive" | "outline" | "secondary" | "ghost" | "link"}
+      size={args.size as "default" | "sm" | "lg" | "icon"}
+      className={audit.buildClassName(args as Record<string, string>)}
+    >
+      按钮
+    </Button>
+  ),
+};

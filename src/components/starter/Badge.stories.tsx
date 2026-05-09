@@ -1,41 +1,35 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import badgeSrc from "./badge.tsx?raw";
+import componentSrc from "./badge.tsx?raw";
 import { Badge } from "./badge";
 
-const audit = autoClassControls(badgeSrc);
+const audit = autoClassControls(componentSrc);
 
-const meta = {
+type Args = { variant: string; [k: string]: unknown };
+
+const meta: Meta<Args> = {
   title: "Badge",
-  component: Badge,
   tags: ["autodocs"],
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({
-      ignoreArgNames: ["children", "variant"],
-    }),
+    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["variant", "children"] }),
   },
-  args: { children: "Badge", variant: "default", ...audit.args },
+  args: { variant: "default", ...audit.args },
   argTypes: {
     variant: { control: "select", options: ["default", "secondary", "destructive", "outline"] },
-    children: { control: "text" },
     className: { table: { disable: true } },
+    children: { table: { disable: true } },
     ...audit.argTypes,
   },
-  render: (args) => (
-    <Badge
-      variant={args.variant}
-      className={audit.buildClassName(args as unknown as Record<string, string>)}
-    >
-      {args.children}
-    </Badge>
-  ),
-} satisfies Meta;
+};
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-export const Secondary: Story = { args: { variant: "secondary", children: "次要" } };
-export const Destructive: Story = { args: { variant: "destructive", children: "危险" } };
-export const Outline: Story = { args: { variant: "outline", children: "线框" } };
+export const Default: Story = {
+  render: (args) => (
+    <Badge variant={args.variant as "default" | "secondary" | "destructive" | "outline"} className={audit.buildClassName(args as Record<string, string>)}>
+      标签
+    </Badge>
+  ),
+};

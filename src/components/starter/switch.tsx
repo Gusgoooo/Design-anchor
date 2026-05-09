@@ -1,34 +1,29 @@
-import * as React from "react";
+"use client"
 
-import { cn } from "@/lib/utils";
+import * as React from "react"
+import * as SwitchPrimitives from "@radix-ui/react-switch"
 
-export interface SwitchProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {}
+import { cn } from "@/lib/utils"
 
-/**
- * 无障碍开关：隐藏的 checkbox + 可视化轨道；表单提交与原生 checkbox 一致。
- */
-const Switch = React.forwardRef<HTMLInputElement, SwitchProps>(({ className, id, disabled, ...props }, ref) => {
-  const innerId = React.useId();
-  const cid = id ?? innerId;
-  return (
-    <div className={cn("inline-flex items-center gap-[var(--size-xs)]", className)}>
-      <input ref={ref} id={cid} type="checkbox" role="switch" disabled={disabled} className="peer sr-only" {...props} />
-      <label
-        htmlFor={cid}
-        className={cn(
-          "relative inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border border-transparent shadow-inner transition-colors",
-          "bg-input peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-background",
-          "peer-disabled:cursor-not-allowed peer-disabled:opacity-disabled",
-          "peer-checked:bg-primary peer-checked:border-primary",
-          "before:pointer-events-none before:absolute before:left-0.5 before:h-4 before:w-4 before:rounded-full before:bg-background before:shadow before:transition-transform before:content-['']",
-          "peer-checked:before:translate-x-4",
-        )}
-      >
-        <span className="sr-only">切换</span>
-      </label>
-    </div>
-  );
-});
-Switch.displayName = "Switch";
+const Switch = React.forwardRef<
+  React.ElementRef<typeof SwitchPrimitives.Root>,
+  React.ComponentPropsWithoutRef<typeof SwitchPrimitives.Root>
+>(({ className, ...props }, ref) => (
+  <SwitchPrimitives.Root
+    className={cn(
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      className
+    )}
+    {...props}
+    ref={ref}
+  >
+    <SwitchPrimitives.Thumb
+      className={cn(
+        "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+      )}
+    />
+  </SwitchPrimitives.Root>
+))
+Switch.displayName = SwitchPrimitives.Root.displayName
 
-export { Switch };
+export { Switch }

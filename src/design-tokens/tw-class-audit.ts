@@ -24,7 +24,7 @@ const TOKEN_RADIUS: Record<string, string> = {
 };
 
 const TOKEN_SHADOW: Record<string, string> = {
-  none: "none", sm: "sm", DEFAULT: "DEFAULT", md: "md", lg: "lg",
+  none: "none", xs: "xs", sm: "sm", DEFAULT: "DEFAULT", md: "md", lg: "lg",
 };
 
 const TOKEN_FONT_SIZE: Record<string, string> = {
@@ -162,7 +162,7 @@ function findEquivalent(
   return null;
 }
 
-const SPACING_PREFIXES = /^(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|space-x|space-y|inset|top|right|bottom|left)-(.+)$/;
+const SPACING_PREFIXES = /^(p|px|py|pt|pb|pl|pr|m|mx|my|mt|mb|ml|mr|gap|gap-x|gap-y|space-x|space-y|inset-x|inset-y|inset|top|right|bottom|left)-(.+)$/;
 const RADIUS_RE = /^rounded(?:-(tl|tr|bl|br|t|r|b|l|s|e|ss|se|es|ee))?(?:-(.+))?$/;
 
 export function auditClass(cls: string): AuditEntry | null {
@@ -178,6 +178,7 @@ export function auditClass(cls: string): AuditEntry | null {
   if (spM) {
     const [, prefix, val] = spM;
     if (val === "auto" || val === "full" || val === "screen" || val === "fit" || val === "min" || val === "max") return null;
+    if (val.includes("/")) return null;
     if (val.startsWith("[")) return arb(cls, "spacing", prefix, val);
     const isSemanticToken = val in TOKEN_SPACING;
     const isNativeNum = val in TW_NUM_SPACING_PX;
@@ -234,8 +235,10 @@ export function auditClass(cls: string): AuditEntry | null {
   if (opM) {
     const val = opM[1];
     if (val.startsWith("[")) return arb(cls, "opacity", "opacity", val);
-    const isToken = val in TOKEN_OPACITY;
-    const cssVal = isToken ? TOKEN_OPACITY[val] : TW_NUM_OPACITY[val] ?? "?";
+    const isSemanticToken = val in TOKEN_OPACITY;
+    const isNativeNum = val in TW_NUM_OPACITY;
+    const isToken = isSemanticToken || isNativeNum;
+    const cssVal = isSemanticToken ? TOKEN_OPACITY[val] : TW_NUM_OPACITY[val] ?? "?";
     const eq = isToken ? null : findEquivalent(cssVal, TOKEN_OPACITY);
     return { raw: cls, category: "opacity", prefix: "opacity", value: val, isToken, cssValue: cssVal, equivalentToken: eq, adjustable: true };
   }
@@ -245,8 +248,10 @@ export function auditClass(cls: string): AuditEntry | null {
   if (duM) {
     const val = duM[1];
     if (val.startsWith("[")) return arb(cls, "duration", "duration", val);
-    const isToken = val in TOKEN_DURATION;
-    const cssVal = isToken ? TOKEN_DURATION[val] : TW_NUM_DURATION_MS[val] ?? "?";
+    const isSemanticToken = val in TOKEN_DURATION;
+    const isNativeNum = val in TW_NUM_DURATION_MS;
+    const isToken = isSemanticToken || isNativeNum;
+    const cssVal = isSemanticToken ? TOKEN_DURATION[val] : TW_NUM_DURATION_MS[val] ?? "?";
     const eq = isToken ? null : findEquivalent(cssVal, TOKEN_DURATION);
     return { raw: cls, category: "duration", prefix: "duration", value: val, isToken, cssValue: cssVal, equivalentToken: eq, adjustable: true };
   }
@@ -327,12 +332,12 @@ const CATEGORY_META: Record<string, CategoryMeta> = {
     makeClass: (_p, k) => `font-${k}`,
   },
   opacity: {
-    tokens: TOKEN_OPACITY,
+    tokens: { ...TOKEN_OPACITY, ...TW_NUM_OPACITY },
     label: "透明度",
     makeClass: (_p, k) => `opacity-${k}`,
   },
   duration: {
-    tokens: TOKEN_DURATION,
+    tokens: { ...TOKEN_DURATION, ...TW_NUM_DURATION_MS },
     label: "动画时长",
     makeClass: (_p, k) => `duration-${k}`,
   },

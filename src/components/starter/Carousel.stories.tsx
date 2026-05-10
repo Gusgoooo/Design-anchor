@@ -22,8 +22,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
+  args: {
+    top: "xxxs"
+  },
+
   render: (args) => {
     return (
+      <div className="w-[400px]">
       <Comp.Carousel className={"w-full max-w-xs " + audit.buildClassName(args)}>
         <Comp.CarouselContent>
           {[1,2,3,4,5].map(i => (
@@ -35,6 +40,7 @@ export const Default: Story = {
         <Comp.CarouselPrevious />
         <Comp.CarouselNext />
       </Comp.Carousel>
+      </div>
     );
-  },
+  }
 };

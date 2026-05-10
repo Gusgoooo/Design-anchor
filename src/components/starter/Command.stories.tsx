@@ -24,7 +24,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => {
     return (
-      <Comp.Command className={"rounded-lg border shadow-md " + audit.buildClassName(args)}>
+      <Comp.Command className={"w-[350px] rounded-lg border shadow-md " + audit.buildClassName(args)}>
         <Comp.CommandInput placeholder="输入搜索…" />
         <Comp.CommandList>
           <Comp.CommandEmpty>未找到结果</Comp.CommandEmpty>

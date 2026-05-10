@@ -221,6 +221,16 @@ function buildThemeBlock(vars) {
     if (val != null && val !== "") lines.push(`  --${destKey}: ${val};`);
   }
 
+  lines.push("");
+  lines.push("  /* Max-width scale — enables Tailwind max-w-xs/sm/md/lg/xl/... utilities */");
+  const MAX_WIDTH_SCALE = {
+    xs: "20rem", sm: "24rem", md: "28rem", lg: "32rem", xl: "36rem",
+    "2xl": "42rem", "3xl": "48rem", "4xl": "56rem", "5xl": "64rem", "6xl": "72rem", "7xl": "80rem",
+  };
+  for (const [key, val] of Object.entries(MAX_WIDTH_SCALE)) {
+    lines.push(`  --max-width-${key}: ${val};`);
+  }
+
   lines.push("}");
   return lines.join("\n");
 }

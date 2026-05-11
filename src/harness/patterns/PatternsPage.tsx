@@ -1,6 +1,7 @@
 import * as React from "react";
 import { Code, X, Copy, Check } from "lucide-react";
 import { Button } from "@/components/starter/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/starter/table";
 import { Tabs, TabsList, TabsTrigger } from "@/components/starter/tabs";
 import carbonCatalog from "./carbon-universal-patterns.json";
 import materialCatalog from "./material-universal-patterns.json";
@@ -91,7 +92,7 @@ export function PatternsPage() {
       : "Google Material Design 及其贡献者";
 
   return (
-    <div className="not-prose flex min-h-[70vh] w-full min-w-0 flex-col text-foreground">
+    <div className="not-prose flex min-h-screen w-full min-w-0 flex-col text-foreground">
       <header className="w-full min-w-0 border-b border-border px-4 py-8 sm:px-6 lg:px-8">
         <div className="flex w-full min-w-0 flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-4">
@@ -168,24 +169,26 @@ export function PatternsPage() {
 
       <div className="flex w-full min-w-0 flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
         <section className="overflow-hidden rounded-lg border border-border">
-          <table className="w-full border-collapse text-left text-sm">
-            <thead>
-              <tr className="border-b border-border bg-muted/50">
-                <th className="px-4 py-3 font-semibold text-foreground">模式</th>
-                <th className="px-4 py-3 font-semibold text-foreground">官方概述（英）</th>
-                <th className="px-4 py-3 font-semibold text-foreground">Harness 落地提示</th>
-                <th className="px-4 py-3 font-semibold text-foreground">文档</th>
-              </tr>
-            </thead>
-            <tbody>
+          <Table className="border-collapse text-left text-sm">
+            <TableHeader>
+              <TableRow className="border-b border-border bg-muted/50 hover:bg-muted/50">
+                <TableHead className="px-4 py-3 font-semibold text-foreground">模式</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-foreground">官方概述（英）</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-foreground">Harness 落地提示</TableHead>
+                <TableHead className="px-4 py-3 font-semibold text-foreground">文档</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {catalog.patterns.map((p) => (
-                <tr key={p.id} className="border-b border-border/60 last:border-0">
-                  <td className="align-top px-4 py-3 font-medium text-foreground">{p.title}</td>
-                  <td className="align-top px-4 py-3 text-xs leading-relaxed text-muted-foreground">
+                <TableRow key={p.id} className="border-b border-border/60 last:border-0">
+                  <TableCell className="align-top px-4 py-3 font-medium text-foreground">{p.title}</TableCell>
+                  <TableCell className="align-top px-4 py-3 text-xs leading-relaxed text-muted-foreground">
                     {p.officialSummaryEn}
-                  </td>
-                  <td className="align-top px-4 py-3 text-xs leading-relaxed text-foreground/90">{p.harnessHintZh}</td>
-                  <td className="align-top whitespace-nowrap px-4 py-3">
+                  </TableCell>
+                  <TableCell className="align-top px-4 py-3 text-xs leading-relaxed text-foreground/90">
+                    {p.harnessHintZh}
+                  </TableCell>
+                  <TableCell className="align-top whitespace-nowrap px-4 py-3">
                     <a
                       className="text-xs font-medium text-primary underline decoration-primary/30 underline-offset-2 hover:decoration-primary"
                       href={`${base}${p.path}`}
@@ -194,23 +197,23 @@ export function PatternsPage() {
                     >
                       打开官网
                     </a>
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </section>
 
         <p className="text-xs text-muted-foreground">
           文档著作权归 {attribution}。人读索引另见{" "}
-          <code className="rounded bg-muted px-2 py-0.5 font-mono text-[11px] text-foreground">docs/patterns/</code>
+          <code className="rounded bg-muted px-2 py-0.5 font-mono text-xs text-foreground">docs/patterns/</code>
           ；AI 用 JSON 见右上角「查看代码」（随 Tab 切换当前来源）。
         </p>
       </div>
 
       <dialog
         ref={codeDialogRef}
-        className="fixed top-1/2 left-1/2 z-50 m-0 w-[calc(100vw-4rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-black/50"
+        className="fixed top-1/2 left-1/2 z-50 m-0 w-full max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-0 px-4 text-card-foreground shadow-2xl backdrop:bg-black/50 sm:px-0"
         onClose={() => setCodeOpen(false)}
         onClick={(e) => {
           if (e.target === codeDialogRef.current) setCodeOpen(false);
@@ -224,25 +227,27 @@ export function PatternsPage() {
                 当前：{catalog.source.name} · {DIGEST_FILENAMES[source]}
               </span>
             </div>
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               aria-label="关闭"
-              className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="shrink-0 text-muted-foreground hover:text-foreground"
               onClick={() => setCodeOpen(false)}
             >
               <X size={16} />
-            </button>
+            </Button>
           </div>
 
           <div className="px-5 pb-4">
             <p className="mb-3 text-xs leading-relaxed text-muted-foreground">
               由{" "}
-              <code className="rounded bg-muted px-1 py-0.5 font-mono text-[11px]">{DIGEST_FILENAMES[source]}</code>{" "}
+              <code className="rounded bg-muted px-1 py-0.5 font-mono text-xs">{DIGEST_FILENAMES[source]}</code>{" "}
               生成的只读摘要；完整说明请点表格「打开官网」。切换上方 Tab 可生成另一来源的摘要。
             </p>
             <textarea
               readOnly
-              className="h-[min(60vh,480px)] w-full cursor-text select-all rounded-lg border border-input bg-muted/30 p-4 font-mono text-xs leading-relaxed text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+              className="min-h-60 max-h-96 w-full cursor-text select-all rounded-lg border border-input bg-muted/30 p-4 font-mono text-xs leading-relaxed text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
               spellCheck={false}
               value={digest}
             />

@@ -67,6 +67,7 @@ const preview: Preview = {
     },
     controls: {
       expanded: true,
+      sort: "alpha",
     },
     backgrounds: { disable: true },
     layout: "centered",

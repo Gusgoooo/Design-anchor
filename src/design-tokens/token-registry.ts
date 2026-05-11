@@ -16,8 +16,6 @@ export type DesignTokenCategory =
   | "opacity"
   | "border"
   | "color"
-  | "size"
-  | "control-height"
   | "padding"
   | "font-weight"
   | "ring"
@@ -48,7 +46,6 @@ type TokensV1 = { tokens: DesignTokenEntry[] };
 const doc = tokensDoc as unknown as TokensV2 | TokensV1;
 
 function categorize(id: string): DesignTokenCategory {
-  if (id.startsWith("layout-")) return "layout";
   if (id.startsWith("color-primary") || id.startsWith("color-success") || id.startsWith("color-warning") || id.startsWith("color-error") || id.startsWith("color-info") || id.startsWith("color-link")) return "color";
   if (id.startsWith("color-text") || id.startsWith("color-fill") || id.startsWith("color-bg") || id.startsWith("color-border") || id === "color-white" || id === "color-shadow") return "color";
   if (id.startsWith("sidebar")) return "sidebar";
@@ -61,10 +58,8 @@ function categorize(id: string): DesignTokenCategory {
   if (id.startsWith("font-weight")) return "font-weight";
   if (id.startsWith("opacity")) return "opacity";
   if (id.startsWith("ring")) return "ring";
-  if (id.startsWith("space-")) return "spacing";
+  if (id.startsWith("spacing-")) return "spacing";
   if (id.startsWith("padding") || id.startsWith("margin")) return "padding";
-  if (id.startsWith("size")) return "size";
-  if (id.startsWith("control-height")) return "control-height";
   if (id.startsWith("line-width") || id.startsWith("border-width")) return "border";
   if (["background", "foreground", "card", "card-foreground", "popover", "popover-foreground", "primary", "primary-foreground", "secondary", "secondary-foreground", "muted", "muted-foreground", "accent", "accent-foreground", "destructive", "border", "input", "ring"].includes(id)) return "semantic";
   return "other";
@@ -88,6 +83,7 @@ function buildFromV2(v2: TokensV2): DesignTokenEntry[] {
     const darkMerged = { ...darkVars, ...moD };
 
     for (const [name, value] of Object.entries(lightMerged)) {
+      if (name.startsWith("__")) continue;
       if (value === "" || value == null) continue;
       const dv = darkMerged[name];
       add(name, String(value), dv != null ? String(dv) : String(value));

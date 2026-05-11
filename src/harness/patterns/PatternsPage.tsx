@@ -159,7 +159,7 @@ export function PatternsPage() {
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Button type="button" variant="outline" onClick={() => setCodeOpen(true)}>
-              <Code size={14} className="mr-1.5" />
+              <Code size={14} className="mr-2" />
               查看代码
             </Button>
           </div>
@@ -203,7 +203,7 @@ export function PatternsPage() {
 
         <p className="text-xs text-muted-foreground">
           文档著作权归 {attribution}。人读索引另见{" "}
-          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground">docs/patterns/</code>
+          <code className="rounded bg-muted px-2 py-0.5 font-mono text-[11px] text-foreground">docs/patterns/</code>
           ；AI 用 JSON 见右上角「查看代码」（随 Tab 切换当前来源）。
         </p>
       </div>
@@ -227,7 +227,7 @@ export function PatternsPage() {
             <button
               type="button"
               aria-label="关闭"
-              className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               onClick={() => setCodeOpen(false)}
             >
               <X size={16} />
@@ -252,12 +252,12 @@ export function PatternsPage() {
             <Button type="button" variant="outline" size="sm" onClick={() => void copyDigest()}>
               {copied ? (
                 <>
-                  <Check size={14} className="mr-1.5" />
+                  <Check size={14} className="mr-2" />
                   已复制
                 </>
               ) : (
                 <>
-                  <Copy size={14} className="mr-1.5" />
+                  <Copy size={14} className="mr-2" />
                   复制
                 </>
               )}

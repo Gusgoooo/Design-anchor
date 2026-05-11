@@ -26,7 +26,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-      <div className="flex items-center gap-xs">
+      <div className="flex items-center gap-2">
         <Switch id="airplane" className={audit.buildClassName(args as unknown as Record<string, string>)} />
         <Label htmlFor="airplane">飞行模式</Label>
       </div>

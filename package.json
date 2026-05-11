@@ -1,7 +1,7 @@
 {
   "name": "harness-design",
-  "version": "0.2.2",
-  "description": "AI-first component design kit — design tokens, Storybook portal, and harness CLI for building token-driven UI component libraries",
+  "version": "0.3.0",
+  "description": "Design-system kit for teams: token-driven UI, Storybook portal for designer review, spec + audit guardrails for engineers and AI",
   "private": false,
   "type": "module",
   "license": "MIT",
@@ -32,7 +32,8 @@
     "vite-plugin-schema-api.mjs",
     "components.json",
     "harness-vite.d.ts",
-    "tailwind.harness.generated.ts"
+    "tailwind.harness.generated.ts",
+    "src/design-tokens/spacing-scale.generated.json"
   ],
   "scripts": {
     "generate:rules": "node scripts/generate-cursorrules.mjs",

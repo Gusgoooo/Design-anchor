@@ -2,11 +2,12 @@ import type { Meta, StoryObj } from "@storybook/react";
 import {
   cssVar,
   cssVarOrTransparent,
-  layoutMaxWidthTokenIds,
-  layoutMinWidthTokenIds,
+  STORY_TAILWIND_MAX_WIDTH_CLASSES,
+  STORY_TAILWIND_MIN_WIDTH_CLASSES,
   storyColorControlOptionsWithTransparent,
   tokenIdsByCategory,
 } from "@/design-tokens/story-controls";
+import { cn } from "@/lib/utils";
 import { DataTable, type ColumnDef, type DataTableProps } from "./DataTable";
 import {
   KitchenSinkDataTable,
@@ -41,8 +42,10 @@ interface PreviewFrameProps {
   outerPadding: string;
   cardPadding: string;
   borderRadius: string;
-  maxWidth: string;
-  minWidth: string;
+  /** Tailwind max-width 工具类，如 max-w-5xl */
+  maxWidthClass: string;
+  /** Tailwind min-width 工具类，如 min-w-0 */
+  minWidthClass: string;
   shadow: string;
   showBorder: boolean;
   cardBackgroundToken: string;
@@ -54,8 +57,8 @@ function PreviewFrame({
   outerPadding,
   cardPadding,
   borderRadius,
-  maxWidth,
-  minWidth,
+  maxWidthClass,
+  minWidthClass,
   shadow,
   showBorder,
   cardBackgroundToken,
@@ -69,22 +72,22 @@ function PreviewFrame({
       style={{ padding: cssVar(outerPadding) }}
     >
       <div
-        className="box-border w-full border-0"
+        className={cn(
+          "box-border w-full border-0",
+          maxWidthClass,
+          "mx-auto overflow-hidden",
+        )}
         style={{
           padding: cssVar(cardPadding),
           borderRadius: cssVar(borderRadius),
-          maxWidth: cssVar(maxWidth),
           boxShadow: cssVar(shadow),
-          marginLeft: "auto",
-          marginRight: "auto",
-          overflow: "hidden",
           backgroundColor: cssVarOrTransparent(cardBackgroundToken),
           ...(showBorder && borderColor !== "transparent"
             ? { borderWidth: 1, borderStyle: "solid" as const, borderColor }
             : {}),
         }}
       >
-        <div style={{ minWidth: cssVar(minWidth) }} className="w-full overflow-x-auto">
+        <div className={cn("w-full overflow-x-auto", minWidthClass)}>
           {children}
         </div>
       </div>
@@ -111,16 +114,16 @@ const layoutArgTypes = {
     description: "卡片圆角",
     table: { category: "布局" },
   },
-  maxWidth: {
+  maxWidthClass: {
     control: "select",
-    options: layoutMaxWidthTokenIds(),
-    description: "最大宽度",
+    options: STORY_TAILWIND_MAX_WIDTH_CLASSES,
+    description: "最大宽度（Tailwind 工具类，非设计 token）",
     table: { category: "布局" },
   },
-  minWidth: {
+  minWidthClass: {
     control: "select",
-    options: layoutMinWidthTokenIds(),
-    description: "表格最小宽度",
+    options: STORY_TAILWIND_MIN_WIDTH_CLASSES,
+    description: "表格区域最小宽度（Tailwind 工具类）",
     table: { category: "布局" },
   },
   shadow: {
@@ -149,11 +152,11 @@ const layoutArgTypes = {
 } as const;
 
 const layoutDefaults = {
-  outerPadding: "space-6",
-  cardPadding: "space-6",
+  outerPadding: "spacing-6",
+  cardPadding: "spacing-6",
   borderRadius: "border-radius-xl",
-  maxWidth: "layout-max-w-5xl",
-  minWidth: "layout-min-w-lg",
+  maxWidthClass: "max-w-5xl",
+  minWidthClass: "min-w-lg",
   shadow: "elevation-sm",
   showBorder: true,
   cardBackgroundToken: "background",
@@ -175,8 +178,6 @@ const meta = {
         "outerPadding",
         "cardPadding",
         "borderRadius",
-        "maxWidth",
-        "minWidth",
         "shadow",
         "cardBackgroundToken",
         "cardBorderToken",
@@ -218,8 +219,8 @@ const meta = {
       outerPadding={args.outerPadding}
       cardPadding={args.cardPadding}
       borderRadius={args.borderRadius}
-      maxWidth={args.maxWidth}
-      minWidth={args.minWidth}
+      maxWidthClass={args.maxWidthClass}
+      minWidthClass={args.minWidthClass}
       shadow={args.shadow}
       showBorder={args.showBorder}
       cardBackgroundToken={args.cardBackgroundToken}
@@ -242,8 +243,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
   args: {
-    outerPadding: "space-0",
-    cardPadding: "space-0",
+    outerPadding: "spacing-0",
+    cardPadding: "spacing-0",
     cardBackgroundToken: "color-bg-container"
   },
 
@@ -255,9 +256,9 @@ export const CompactStriped: Story = {
   args: {
     density: "compact",
     variant: "striped",
-    outerPadding: "space-0",
-    cardPadding: "space-0",
-    minWidth: "layout-min-w-xs",
+    outerPadding: "spacing-0",
+    cardPadding: "spacing-0",
+    minWidthClass: "min-w-xs",
     shadow: "elevation-none"
   },
 };
@@ -267,8 +268,8 @@ export const Comfortable: Story = {
   args: {
     density: "comfortable",
     variant: "plain",
-    outerPadding: "space-0",
-    cardPadding: "space-0"
+    outerPadding: "spacing-0",
+    cardPadding: "spacing-0"
   },
 };
 
@@ -286,8 +287,8 @@ export const SuperComposite: StoryObj<SinkArgs> = {
     columnBandIndex: null,
 
     ...layoutDefaults,
-    outerPadding: "space-0",
-    cardPadding: "space-0",
+    outerPadding: "spacing-0",
+    cardPadding: "spacing-0",
     shadow: "elevation-none",
     cardBackgroundToken: "color-bg-container"
   },
@@ -316,8 +317,8 @@ export const SuperComposite: StoryObj<SinkArgs> = {
       outerPadding={args.outerPadding}
       cardPadding={args.cardPadding}
       borderRadius={args.borderRadius}
-      maxWidth={args.maxWidth}
-      minWidth={args.minWidth}
+      maxWidthClass={args.maxWidthClass}
+      minWidthClass={args.minWidthClass}
       shadow={args.shadow}
       showBorder={args.showBorder}
       cardBackgroundToken={args.cardBackgroundToken}
@@ -334,7 +335,8 @@ export const SuperComposite: StoryObj<SinkArgs> = {
   parameters: {
     docs: {
       description: {
-        story: "演示用复合表：点击表头排序、行/全选 checkbox。布局参数均从 DesignToken 中选取。",
+        story:
+          "演示用复合表：点击表头排序、行/全选 checkbox。颜色/圆角/阴影等从设计 token 选取；最大/最小宽度为 Tailwind 工具类。",
       },
     },
   },

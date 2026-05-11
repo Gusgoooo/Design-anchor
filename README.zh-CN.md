@@ -10,12 +10,35 @@
 <h1 align="center">HarnessUI &nbsp;<a href="./README.md"><img src="https://img.shields.io/badge/lang-English-blue?style=flat-square" alt="English" /></a></h1>
 
 <p align="center">
-  <strong>AI 优先的组件设计套件 —— 将设计令牌转化为生产就绪、AI 可治理的 UI 组件库。</strong>
+  <strong>一套把「你在门户里签过字的视觉」一路送到代码里的组件与令牌体系 —— 令牌、组件与 AI 护栏共用一条管线。</strong>
 </p>
 
 <p align="center">
-  设计令牌 &rarr; Tailwind v4 <code>@theme</code> &rarr; 23 个无障碍组件 &rarr; Storybook 可视化门户 &rarr; AI 编码规则 —— <em>一条管线，零漂移。</em>
+  <strong>给设计师：</strong><em>在 Storybook 里审真组件、调种子色，而不用在 PR 里捞十六进制。</em>
+  &nbsp;·&nbsp;
+  <strong>给团队：</strong><em>令牌 &rarr; Tailwind v4 <code>@theme</code> &rarr; 无障碍组件 &rarr; 规范驱动审计。</em>
 </p>
+
+---
+
+## 设计师视角：这是什么？
+
+HarnessUI 可以理解为你产品 UI 的 **控制塔**：你在变量、品牌规范或 Figma 库里做的决策，会沉淀成工程、Storybook 和编码助手共同读取的 **单一真源**。
+
+**你不必在生产里追像素，也能守住体验**
+
+- **一套色板，两种模式** —— 种子色驱动主色、语义色与表面色；明暗模式一起推导，对比关系是「算出来的」，而不是两套各画各的。
+- **站得住脚的韵律** —— 间距、字号、圆角、阴影与动效落在结构化刻度上，界面容易「对齐到同一套规矩」，减少临时 `p-[13px]` 式需求。
+- **可验收的预览间** —— Storybook 门户里是每个组件在真实令牌下的状态，更接近走查与签收，而不是静态标注图。
+- **能过交接的意图** —— 每个组件有 `.spec.json`：用途、允许的变体、样式锁与禁止项。设计定护栏；`harness sync` 写入 Cursor 规则，`harness audit` 检查是否跑偏。
+
+**和工程怎么配合**
+
+1. 在 `tokens.json`（或 Design Token 界面）里对齐种子层，当作品牌与密度的「签字版」。
+2. 工程执行 `npm run sync:tokens` 后，在门户或生成 CSS 里快速扫一眼色面与密度是否仍符合你的意图。
+3. 发版前若担心走样，要一份 `harness audit` 摘要 —— 违规会落到文件与模式上，而不是泛泛的「间距再调调」。
+
+你不一定要亲自敲 CLI。把 HarnessUI 当成产品默认上架的 **组件货架** 即可；下文写给工程与 AI 工作流，说明这架货怎么生成、怎么守住。
 
 ---
 
@@ -172,7 +195,8 @@ HarnessUI 采用受 Ant Design 令牌体系启发的**双层令牌架构**：
     "colorSuccess": "#52c41a",    // → success-bg, success-border, success-text, ...
     "fontSize": 14,               // → 7 级字号梯度令牌
     "borderRadius": 6,            // → xs/sm/md/lg/xl 圆角梯度
-    "controlHeight": 36,          // → sm/lg 控件高度变体
+    "sizeUnit": 4,                // → spacing-* 间距刻度
+    "sizeStep": 4,                // → 与 sizeUnit 配对推导 spacing
     "motionUnit": 0.1             // → fast/mid/slow 动效时长令牌
   },
   "seedDark": {
@@ -218,7 +242,7 @@ HarnessUI 采用受 Ant Design 令牌体系启发的**双层令牌架构**：
 | 阴影 | `shadow-sm`、`shadow-md` | `<Card className="shadow-sm">` |
 | 动效 | `duration-fast`、`duration-slow` | `<Progress className="duration-slow">` |
 | 透明度 | `opacity-disabled`、`opacity-muted` | `<Input className="disabled:opacity-disabled">` |
-| 布局变量 | `var(--control-height)` | `h-[var(--control-height)]` |
+| 布局 / 控件高度 | `h-9`、`h-7`、`h-11`、`size-9` | `<Button className="h-9">`（对齐 Tailwind 默认刻度，不再生成 `--control-height*`） |
 
 ## 组件规范系统
 

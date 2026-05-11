@@ -25,9 +25,9 @@ export const Default: Story = {
   render: (args) => {
     return (
       <Comp.ButtonGroup className={audit.buildClassName(args)}>
-        <button className="inline-flex items-center justify-center rounded-md border px-sm py-xs text-sm">左</button>
-        <button className="inline-flex items-center justify-center rounded-md border px-sm py-xs text-sm">中</button>
-        <button className="inline-flex items-center justify-center rounded-md border px-sm py-xs text-sm">右</button>
+        <button className="inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm">左</button>
+        <button className="inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm">中</button>
+        <button className="inline-flex items-center justify-center rounded-md border px-3 py-2 text-sm">右</button>
       </Comp.ButtonGroup>
     );
   },

@@ -36,7 +36,7 @@ export const Default: Story = {
 
 export const AllVariants: Story = {
   render: (args) => (
-    <div className="flex gap-xs">
+    <div className="flex gap-2">
       {(["default", "secondary", "destructive", "outline"] as const).map((v) => (
         <Badge key={v} variant={v} className={audit.buildClassName(args as Record<string, string>)}>
           {v}

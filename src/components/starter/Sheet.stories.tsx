@@ -27,13 +27,13 @@ export const Default: Story = {
     return (
       <div className="flex min-h-screen items-center justify-center">
       <Comp.Sheet>
-        <Comp.SheetTrigger asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-base py-xs text-sm font-medium shadow-sm">打开面板</button></Comp.SheetTrigger>
+        <Comp.SheetTrigger asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm">打开面板</button></Comp.SheetTrigger>
         <Comp.SheetContent className={audit.buildClassName(args)}>
           <Comp.SheetHeader>
             <Comp.SheetTitle>面板标题</Comp.SheetTitle>
             <Comp.SheetDescription>面板描述文字。</Comp.SheetDescription>
           </Comp.SheetHeader>
-          <div className="py-base text-sm">面板内容区域</div>
+          <div className="py-4 text-sm">面板内容区域</div>
         </Comp.SheetContent>
       </Comp.Sheet>
       </div>

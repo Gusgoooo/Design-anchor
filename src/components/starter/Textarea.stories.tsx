@@ -27,7 +27,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-      <div className="grid w-[360px] gap-xs">
+      <div className="grid w-[360px] gap-2">
         <Label htmlFor="msg">消息</Label>
         <Textarea id="msg" placeholder="请输入消息" className={audit.buildClassName(args as unknown as Record<string, string>)} />
       </div>

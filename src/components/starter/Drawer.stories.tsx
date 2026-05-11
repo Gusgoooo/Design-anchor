@@ -27,15 +27,15 @@ export const Default: Story = {
     return (
       <div className="flex min-h-screen items-center justify-center">
       <Comp.Drawer>
-        <Comp.DrawerTrigger asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-base py-xs text-sm font-medium shadow-sm">打开抽屉</button></Comp.DrawerTrigger>
+        <Comp.DrawerTrigger asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm">打开抽屉</button></Comp.DrawerTrigger>
         <Comp.DrawerContent className={audit.buildClassName(args)}>
           <Comp.DrawerHeader>
             <Comp.DrawerTitle>编辑内容</Comp.DrawerTitle>
             <Comp.DrawerDescription>修改后点击保存。</Comp.DrawerDescription>
           </Comp.DrawerHeader>
-          <div className="p-base text-sm">抽屉内容区域</div>
+          <div className="p-4 text-sm">抽屉内容区域</div>
           <Comp.DrawerFooter>
-            <Comp.DrawerClose asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-base py-xs text-sm font-medium shadow-sm">关闭</button></Comp.DrawerClose>
+            <Comp.DrawerClose asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm">关闭</button></Comp.DrawerClose>
           </Comp.DrawerFooter>
         </Comp.DrawerContent>
       </Comp.Drawer>

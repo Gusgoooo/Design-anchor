@@ -52,7 +52,7 @@ export const Default: Story = {
             <DialogTitle>对话框标题</DialogTitle>
             <DialogDescription>这是一段描述文本。点击遮罩或按 Esc 关闭。</DialogDescription>
           </DialogHeader>
-          <div className="py-base text-sm">对话框内容区域</div>
+          <div className="py-4 text-sm">对话框内容区域</div>
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">取消</Button>

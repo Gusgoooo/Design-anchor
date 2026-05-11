@@ -24,7 +24,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => {
     return (
-      <div className="flex items-center gap-xs">
+      <div className="flex items-center gap-2">
         <Comp.Kbd className={audit.buildClassName(args)}>⌘</Comp.Kbd>
         <span className="text-sm text-muted-foreground">+</span>
         <Comp.Kbd>K</Comp.Kbd>

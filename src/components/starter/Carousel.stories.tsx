@@ -23,7 +23,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    top: "xxxs"
+    top: "0.5"
   },
 
   render: (args) => {
@@ -33,7 +33,7 @@ export const Default: Story = {
         <Comp.CarouselContent>
           {[1,2,3,4,5].map(i => (
             <Comp.CarouselItem key={i}>
-              <div className="flex aspect-square items-center justify-center rounded-md border bg-muted p-lg"><span className="text-3xl font-semibold">{i}</span></div>
+              <div className="flex aspect-square items-center justify-center rounded-md border bg-muted p-6"><span className="text-3xl font-semibold">{i}</span></div>
             </Comp.CarouselItem>
           ))}
         </Comp.CarouselContent>

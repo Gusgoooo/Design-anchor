@@ -47,7 +47,8 @@ export {
 export { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyContent, EmptyMedia } from "./empty";
 export { Field, FieldLabel, FieldDescription, FieldError } from "./field";
 export { HoverCard, HoverCardTrigger, HoverCardContent } from "./hover-card";
-export { Input } from "./input";
+export { controlFieldSizeCore, type FormControlSize } from "./control-field-size";
+export { Input, inputVariants, type InputProps } from "./input";
 export { InputGroup, InputGroupText } from "./input-group";
 export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator } from "./input-otp";
 export { Item, ItemContent, ItemTitle, ItemDescription } from "./item";
@@ -66,6 +67,7 @@ export {
   SelectGroup,
   SelectValue,
   SelectTrigger,
+  type SelectTriggerProps,
   SelectContent,
   SelectLabel,
   SelectItem,

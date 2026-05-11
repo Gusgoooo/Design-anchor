@@ -1,0 +1,76 @@
+{
+  "version": 2,
+  "mode": "linear-sizeMap",
+  "sizeUnit": 4,
+  "sizeStep": 4,
+  "suffixToPx": {
+    "0": "0",
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "8": "32px",
+    "12": "48px",
+    "px": "1px",
+    "0.5": "2px"
+  },
+  "stepLabels": [
+    {
+      "suffix": "0",
+      "zh": "零间距",
+      "en": "None (0)"
+    },
+    {
+      "suffix": "px",
+      "zh": "1px 发丝线",
+      "en": "1px hairline"
+    },
+    {
+      "suffix": "0.5",
+      "zh": "半步进 · 2px",
+      "en": "Half-step · 2px"
+    },
+    {
+      "suffix": "1",
+      "zh": "特紧 · 4px",
+      "en": "XS · 4px"
+    },
+    {
+      "suffix": "2",
+      "zh": "紧凑 · 8px",
+      "en": "SM · 8px"
+    },
+    {
+      "suffix": "3",
+      "zh": "密 · 12px",
+      "en": "MD · 12px"
+    },
+    {
+      "suffix": "4",
+      "zh": "偏小 · 16px",
+      "en": "LG · 16px"
+    },
+    {
+      "suffix": "5",
+      "zh": "均衡 · 20px",
+      "en": "XL · 20px"
+    },
+    {
+      "suffix": "6",
+      "zh": "舒适 · 24px",
+      "en": "2XL · 24px"
+    },
+    {
+      "suffix": "8",
+      "zh": "大留白 · 32px",
+      "en": "4XL · 32px"
+    },
+    {
+      "suffix": "12",
+      "zh": "极大 · 48px",
+      "en": "8XL · 48px"
+    }
+  ]
+}

@@ -1,23 +1,21 @@
 /**
- * Tailwind ClassName → Token 自动审计工具
+ * Tailwind ClassName → Token 自动审计（Storybook「Token 修改」控件）
  *
  * 用法：
  *   import src from './button.tsx?raw';
  *   const audit = autoClassControls(src);
- *   // audit.args      → Storybook 默认值
- *   // audit.argTypes   → 自动 Controls（非 token 项带 ⚠️）
- *   // audit.buildClassName(args) → className 覆盖串
- *   // audit.entries    → 完整审计列表
+ *   // audit.args / argTypes：已映射刻度 → `Token 修改 · 已绑定`（select）；
+ *   //   未映射 → `Token 修改 · 未映射（可输入）`（text + 可选 token 下拉，可不绑定）；
+ *   //   数字类但不在设计 spacing 刻度 → `Token 修改 · 未使用令牌（px 微调）`（number，提示未引用 token）
+ *   // audit.buildClassName(args) → 根据控件值拼出覆盖 class 串
+ *   // audit.entries → 完整审计（含非 token），nonTokenCount 供合规统计
  */
+
+import spacingScale from "./spacing-scale.generated.json";
 
 /* ================================================================== */
 /*  1. Token 定义（与 @theme 保持一致）                                 */
 /* ================================================================== */
-
-const TOKEN_SPACING: Record<string, string> = {
-  "0": "0px", xxxs: "2px", xxs: "4px", xs: "8px",
-  sm: "12px", base: "16px", md: "20px", lg: "24px", xl: "32px",
-};
 
 const TOKEN_RADIUS: Record<string, string> = {
   none: "0px", sm: "4px", md: "6px", lg: "8px", xl: "12px", full: "9999px",
@@ -53,14 +51,8 @@ const TOKEN_DURATION: Record<string, string> = {
   whole: "1s",
 };
 
-/** Tailwind 数字间距 → px（用于找等价 token） */
-const TW_NUM_SPACING_PX: Record<string, string> = {
-  "0": "0px", px: "1px", "0.5": "2px", "1": "4px", "1.5": "6px",
-  "2": "8px", "2.5": "10px", "3": "12px", "3.5": "14px", "4": "16px",
-  "5": "20px", "6": "24px", "7": "28px", "8": "32px", "9": "36px",
-  "10": "40px", "11": "44px", "12": "48px", "14": "56px", "16": "64px",
-  "20": "80px", "24": "96px",
-};
+/** Tailwind 数字间距 → px（与 `spacing-scale.generated.json` / Modular seed 同源） */
+const TW_NUM_SPACING_PX: Record<string, string> = spacingScale.suffixToPx as Record<string, string>;
 
 /** Tailwind 默认圆角 → px */
 const TW_NUM_RADIUS_PX: Record<string, string> = {
@@ -275,6 +267,8 @@ function findEquivalent(
   return null;
 }
 
+const NUMERIC_SPACING_SUFFIX = /^\d+(\.\d+)?$/;
+
 function auditSpacingOrSizing(
   cls: string,
   prefix: string,
@@ -287,48 +281,57 @@ function auditSpacingOrSizing(
   if (val.includes("/")) return null;
   if (val.startsWith("[")) return arb(cls, "spacing", prefix, val);
 
-  const isSizing = /^(size|min-w|max-w|min-h|max-h|w|h)$/.test(prefix);
-  if (isSizing && !(val in TW_NUM_SPACING_PX) && !(val in TOKEN_SPACING)) {
-    return null;
-  }
-  if (
-    !isSizing
-    && !(val in TW_NUM_SPACING_PX)
-    && !(val in TOKEN_SPACING)
-  ) {
-    return null;
-  }
-
-  if (val in TOKEN_SPACING) {
-    return {
-      raw: cls,
-      category: "spacing",
-      prefix,
-      value: val,
-      isToken: true,
-      cssValue: TOKEN_SPACING[val],
-      equivalentToken: null,
-      adjustable: true,
-    };
-  }
-
-  const tw = TW_NUM_SPACING_PX[val];
-  if (!tw) return null;
-
-  const px = parsePx(tw);
-  const exactName = findEquivalent(tw, TOKEN_SPACING);
-  const nearest =
-    px != null ? nearestTokenKeyPreferLarger(px, TOKEN_SPACING) : null;
-  const equiv = exactName ?? nearest;
+  if (!(val in TW_NUM_SPACING_PX)) return null;
 
   return {
     raw: cls,
     category: "spacing",
     prefix,
     value: val,
+    isToken: true,
+    cssValue: TW_NUM_SPACING_PX[val],
+    equivalentToken: null,
+    adjustable: true,
+  };
+}
+
+/**
+ * Tailwind 默认 spacing(n)=n×0.25rem；在 16px root 下即 n×4px。
+ * 用于「刻度后缀不在 design spacing-scale 内」时的 px 估算与 Storybook 微调。
+ */
+function tailwindDefaultSpacingToPx(n: number): number {
+  return n * 4;
+}
+
+/** 数字刻度类（如 h-9、gap-7）但后缀不在 `spacing-scale.generated` 中时，视为未引用 spacing 设计令牌。 */
+function auditNumericOutsideDesignSpacingToken(
+  cls: string,
+  prefix: string,
+  val: string,
+): AuditEntry | null {
+  const skip = new Set([
+    "auto", "full", "screen", "fit", "min", "max", "prose",
+  ]);
+  if (skip.has(val)) return null;
+  if (val.includes("/")) return null;
+  if (val.startsWith("[")) return null;
+  if (!NUMERIC_SPACING_SUFFIX.test(val)) return null;
+
+  const n = Number(val);
+  if (!Number.isFinite(n)) return null;
+
+  const pxNum = tailwindDefaultSpacingToPx(n);
+  const cssValue = `${pxNum}px`;
+  const nearest = nearestTokenKeyPreferLarger(pxNum, TW_NUM_SPACING_PX);
+
+  return {
+    raw: cls,
+    category: "layout",
+    prefix,
+    value: val,
     isToken: false,
-    cssValue: tw,
-    equivalentToken: equiv,
+    cssValue,
+    equivalentToken: nearest,
     adjustable: true,
   };
 }
@@ -345,12 +348,15 @@ export function auditClass(cls: string): AuditEntry | null {
     return null;
   }
 
-  // --- Spacing / sizing utilities（仅语义 Scale 写入源码；原生数字 scale 只做就近语义映射）
+  // --- Spacing / sizing utilities（与 `@theme --spacing-{n}` 数字刻度一致）
   const spM = cls.match(SPACING_PREFIXES);
   if (spM) {
     const [, prefix, val] = spM;
+    if (prefix === "min-w" || prefix === "max-w") return null;
     const row = auditSpacingOrSizing(cls, prefix, val);
     if (row) return row;
+    const layoutRow = auditNumericOutsideDesignSpacingToken(cls, prefix, val);
+    if (layoutRow) return layoutRow;
   }
 
   // --- Border Radius ---
@@ -396,7 +402,7 @@ export function auditClass(cls: string): AuditEntry | null {
       isToken,
       cssValue: val,
       equivalentToken: null,
-      adjustable: isToken,
+      adjustable: true,
     };
   }
 
@@ -562,11 +568,36 @@ type CategoryMeta = {
   makeClass: (prefix: string, key: string) => string;
 };
 
+const CATEGORY_BOUND = "Token 修改 · 已绑定";
+const CATEGORY_UNMAPPED = "Token 修改 · 未映射（可输入）";
+const CATEGORY_LAYOUT_NON_TOKEN = "Token 修改 · 未使用令牌（px 微调）";
+const TOKEN_SELECT_NONE = "";
+
+function readPxArg(raw: unknown): number | null {
+  if (typeof raw === "number" && Number.isFinite(raw)) return raw;
+  if (typeof raw === "string" && raw.trim() !== "") {
+    const n = Number(raw);
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
+}
+
+function makeLayoutPxClass(prefix: string, px: number): string {
+  if (!/^[\w-]+$/.test(prefix)) return "";
+  return `${prefix}-[${px}px]`;
+}
+
+/** 允许在「未映射」文本框中填写的 Tailwind 刻度后缀 / arbitrary 片段（防注入） */
+function isSafeTailwindSuffix(s: string): boolean {
+  return /^[\w.[\]\/-]+$/.test(s);
+}
+
 const CATEGORY_META: Record<string, CategoryMeta> = {
   spacing: {
-    tokens: TOKEN_SPACING,
+    tokens: TW_NUM_SPACING_PX,
     label: "间距",
-    makeClass: (p, k) => (k === "0" ? `${p}-0` : `${p}-${k}`),
+    makeClass: (p, k) =>
+      k === "0" ? `${p}-0` : k === "px" ? `${p}-px` : `${p}-${k}`,
   },
   radius: {
     tokens: TOKEN_RADIUS,
@@ -613,15 +644,36 @@ function makeLabels(
   return labels;
 }
 
+/** Storybook `args` 传入 `buildClassName` 时的形状（含 number 控件的运行时值） */
+export type ClassOverrideArgs = Record<string, string | number | undefined>;
+
 export type AutoControlsResult = {
   entries: AuditEntry[];
+  /** 与 Meta.args 兼容：全部为 string，避免与 `[k: string]: string` 冲突 */
   args: Record<string, string>;
   argTypes: Record<string, unknown>;
-  buildClassName: (runtimeArgs: Record<string, string>) => string;
-  resolveArgTypes: (runtimeArgs: Record<string, string>) => Record<string, unknown>;
+  buildClassName: (runtimeArgs: ClassOverrideArgs) => string;
+  resolveArgTypes: (runtimeArgs: ClassOverrideArgs) => Record<string, unknown>;
   /** 非 token 条目总数 */
   nonTokenCount: number;
 };
+
+type SlotMeta =
+  | { mode: "mapped"; controlId: string; entry: AuditEntry; catMeta: CategoryMeta }
+  | {
+      mode: "unmapped";
+      controlId: string;
+      rawControlId: string;
+      tokenControlId: string;
+      entry: AuditEntry;
+      catMeta: CategoryMeta;
+    }
+  | {
+      mode: "layoutPx";
+      controlId: string;
+      entry: AuditEntry;
+      defaultPx: number;
+    };
 
 export function autoClassControls(source: string): AutoControlsResult {
   const rawClasses = extractClasses(source);
@@ -631,12 +683,14 @@ export function autoClassControls(source: string): AutoControlsResult {
     if (entry) allEntries.push(entry);
   }
 
-  // 按 prefix 去重，保留第一个（通常是 base / 默认变体中的）
   const seen = new Set<string>();
   const adjustable: AuditEntry[] = [];
   for (const e of allEntries) {
     if (!e.adjustable) continue;
-    const slotKey = `${e.category}::${e.prefix}`;
+    const slotKey =
+      e.category === "layout"
+        ? `layout::${e.prefix}::${e.value}`
+        : `${e.category}::${e.prefix}`;
     if (seen.has(slotKey)) continue;
     seen.add(slotKey);
     adjustable.push(e);
@@ -644,60 +698,127 @@ export function autoClassControls(source: string): AutoControlsResult {
 
   const args: Record<string, string> = {};
   const argTypes: Record<string, unknown> = {};
-  const slotMeta: Array<{ controlId: string; entry: AuditEntry; catMeta: CategoryMeta }> = [];
+  const slotMeta: SlotMeta[] = [];
 
   for (const entry of adjustable) {
+    if (entry.category === "layout") {
+      const px = parsePx(entry.cssValue);
+      if (px == null) continue;
+      const controlId = `layout_${entry.prefix.replace(/-/g, "_")}_${String(entry.value).replace(/\./g, "_")}`;
+      const suggest =
+        entry.equivalentToken != null
+          ? `\n设计 spacing 刻度中与当前最接近的后缀：${entry.equivalentToken}（${TW_NUM_SPACING_PX[entry.equivalentToken] ?? "?"}）`
+          : "";
+      const desc =
+        `【未引用 spacing 设计令牌】源码类 ${entry.raw}（按 Tailwind 默认换算约 ${entry.cssValue}）。` +
+        `下方用像素数微调预览，会追加 arbitrary 类覆盖；与 tokens.json 无直接绑定。${suggest}`;
+      args[controlId] = String(px);
+      argTypes[controlId] = {
+        name: controlId,
+        control: { type: "number" as const, min: 0, max: 512, step: 1 },
+        description: desc,
+        table: { category: CATEGORY_LAYOUT_NON_TOKEN },
+      };
+      slotMeta.push({ mode: "layoutPx", controlId, entry, defaultPx: px });
+      continue;
+    }
+
     const catMeta = CATEGORY_META[entry.category];
     if (!catMeta) continue;
 
     const controlId = entry.prefix.replace(/-/g, "_");
-    const defaultKey = entry.isToken
-      ? entry.value
-      : entry.equivalentToken ?? entry.value;
+    const defaultKey = entry.value;
+    const tokenKeys = Object.keys(catMeta.tokens);
+    const labels = makeLabels(catMeta.tokens, null);
 
-    const options = [...Object.keys(catMeta.tokens)];
+    if (entry.isToken) {
+      const desc = `${catMeta.label} · 已对齐设计刻度 · ${entry.raw}`;
+      args[controlId] = defaultKey;
+      argTypes[controlId] = {
+        control: { type: "select" as const, labels },
+        options: [...tokenKeys],
+        description: desc,
+        table: { category: CATEGORY_BOUND },
+      };
+      slotMeta.push({ mode: "mapped", controlId, entry, catMeta });
+      continue;
+    }
 
-    const labels = makeLabels(catMeta.tokens, entry.equivalentToken);
+    const rawControlId = `${controlId}_raw`;
+    const tokenControlId = `${controlId}_token`;
+    const equivLine = entry.equivalentToken
+      ? `\n建议近似 token：${entry.equivalentToken}`
+      : "";
+    const desc =
+      `${entry.raw}${entry.cssValue && entry.cssValue !== "?" ? ` · ${entry.cssValue}` : ""}${equivLine}\n` +
+      "可不绑定 token；文本框填写 Tailwind 刻度后缀或 arbitrary 片段；下拉可选令牌覆盖。";
 
-    const desc = entry.isToken
-      ? `${catMeta.label} · ${entry.raw}`
-      : `⚠️ ${catMeta.label} · ${entry.raw}`;
+    args[rawControlId] = defaultKey;
+    args[tokenControlId] = TOKEN_SELECT_NONE;
 
-    args[controlId] = defaultKey;
-    argTypes[controlId] = {
-      control: { type: "select" as const, labels },
-      options,
-      description: desc,
-      table: { category: "ClassName 审计" },
+    const tokenOptions = [TOKEN_SELECT_NONE, ...tokenKeys];
+    const tokenLabels: Record<string, string> = {
+      [TOKEN_SELECT_NONE]: "（不绑定）",
+      ...labels,
     };
-    slotMeta.push({ controlId, entry, catMeta });
+
+    argTypes[rawControlId] = {
+      control: "text",
+      description: desc,
+      table: { category: CATEGORY_UNMAPPED },
+    };
+    argTypes[tokenControlId] = {
+      control: { type: "select" as const, labels: tokenLabels },
+      options: tokenOptions,
+      description: `${catMeta.label} · 令牌覆盖（可选）· ${entry.raw}`,
+      table: { category: CATEGORY_UNMAPPED },
+    };
+
+    slotMeta.push({
+      mode: "unmapped",
+      controlId,
+      rawControlId,
+      tokenControlId,
+      entry,
+      catMeta,
+    });
   }
 
-  function buildClassName(runtimeArgs: Record<string, string>): string {
-    return slotMeta
-      .map(({ controlId, entry, catMeta }) => {
-        const selected = runtimeArgs[controlId];
-        if (!selected || selected === entry.value) return "";
-        return catMeta.makeClass(entry.prefix, selected);
-      })
-      .filter(Boolean)
-      .join(" ");
-  }
-
-  function resolveArgTypes(runtimeArgs: Record<string, string>): Record<string, unknown> {
-    const resolved: Record<string, unknown> = { ...argTypes };
-    for (const { controlId, entry, catMeta } of slotMeta) {
-      if (entry.isToken) continue;
-      const selected = runtimeArgs[controlId];
-      const isNowToken = selected != null && selected in catMeta.tokens;
-      if (isNowToken) {
-        resolved[controlId] = {
-          ...(argTypes[controlId] as Record<string, unknown>),
-          description: `${catMeta.label} · ${catMeta.makeClass(entry.prefix, selected)}`,
-        };
+  function buildClassName(runtimeArgs: ClassOverrideArgs): string {
+    const parts: string[] = [];
+    for (const slot of slotMeta) {
+      if (slot.mode === "layoutPx") {
+        const n = readPxArg(runtimeArgs[slot.controlId]);
+        if (n == null || n === slot.defaultPx) continue;
+        const cls = makeLayoutPxClass(slot.entry.prefix, n);
+        if (cls) parts.push(cls);
+        continue;
+      }
+      if (slot.mode === "mapped") {
+        const selected = runtimeArgs[slot.controlId];
+        if (selected == null || selected === "" || selected === slot.entry.value) continue;
+        parts.push(slot.catMeta.makeClass(slot.entry.prefix, String(selected)));
+        continue;
+      }
+      const tokenPick = runtimeArgs[slot.tokenControlId];
+      if (tokenPick && String(tokenPick) !== TOKEN_SELECT_NONE) {
+        parts.push(slot.catMeta.makeClass(slot.entry.prefix, String(tokenPick)));
+        continue;
+      }
+      const raw = runtimeArgs[slot.rawControlId];
+      if (
+        raw != null &&
+        String(raw) !== slot.entry.value &&
+        isSafeTailwindSuffix(String(raw))
+      ) {
+        parts.push(slot.catMeta.makeClass(slot.entry.prefix, String(raw)));
       }
     }
-    return resolved;
+    return parts.join(" ");
+  }
+
+  function resolveArgTypes(_runtimeArgs: ClassOverrideArgs): Record<string, unknown> {
+    return { ...argTypes };
   }
 
   const nonTokenCount = allEntries.filter((e) => !e.isToken).length;

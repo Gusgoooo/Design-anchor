@@ -1,4 +1,5 @@
 import tokensDoc from "./tokens.json";
+import spacingScale from "./spacing-scale.generated.json";
 import { DESIGN_TOKENS } from "./token-registry";
 
 /** Story Controls 选项：tokenId 为 Controls 中的值，value 为映射到组件 prop 的字符串 */
@@ -63,13 +64,46 @@ export function tokenIdsByCategory(category: string): string[] {
   return DESIGN_TOKENS.filter((t) => t.category === category).map((t) => t.id);
 }
 
-export function layoutMaxWidthTokenIds(): string[] {
-  return tokenIdsByCategory("layout").filter((id) => id.startsWith("layout-max-w"));
-}
+/** Story 用 Tailwind max-width 工具类（非设计 token；与 emit 中 MAX_WIDTH 语义一致） */
+export const STORY_TAILWIND_MAX_WIDTH_CLASSES: string[] = [
+  "max-w-none",
+  "max-w-xs",
+  "max-w-sm",
+  "max-w-md",
+  "max-w-lg",
+  "max-w-xl",
+  "max-w-2xl",
+  "max-w-3xl",
+  "max-w-4xl",
+  "max-w-5xl",
+  "max-w-6xl",
+  "max-w-7xl",
+  "max-w-full",
+  "max-w-min",
+  "max-w-max",
+  "max-w-fit",
+  "max-w-prose",
+];
 
-export function layoutMinWidthTokenIds(): string[] {
-  return tokenIdsByCategory("layout").filter((id) => id.startsWith("layout-min-w"));
-}
+/** Story 用 Tailwind min-width 工具类（非设计 token） */
+export const STORY_TAILWIND_MIN_WIDTH_CLASSES: string[] = [
+  "min-w-0",
+  "min-w-full",
+  "min-w-min",
+  "min-w-max",
+  "min-w-fit",
+  "min-w-xs",
+  "min-w-sm",
+  "min-w-md",
+  "min-w-lg",
+  "min-w-xl",
+  "min-w-2xl",
+  "min-w-3xl",
+  "min-w-4xl",
+  "min-w-5xl",
+  "min-w-6xl",
+  "min-w-7xl",
+];
 
 /* ------------------------------------------------------------------ */
 /*  Story 语义化枚举控件：共享映射表                                    */
@@ -119,28 +153,15 @@ export const TRIGGER_VARIANTS = [
 
 export const TRIGGER_SIZES = ["default", "sm", "lg", "icon"] as const;
 
-export const SPACING_MAP: Record<string, string> = {
-  none: "0",
-  xxxs: "xxxs",
-  xxs: "xxs",
-  xs: "xs",
-  sm: "sm",
-  base: "base",
-  md: "md",
-  lg: "lg",
-  xl: "xl",
-};
-export const SPACING_LABEL: Record<string, string> = {
-  none: "none · 0",
-  xxxs: "xxxs · 2px",
-  xxs: "xxs · 4px",
-  xs: "xs · 8px",
-  sm: "sm · 12px",
-  base: "base · 16px",
-  md: "md · 20px",
-  lg: "lg · 24px",
-  xl: "xl · 32px",
-};
+type SpacingStepLabel = { suffix: string; zh: string; en: string };
+
+/** 与 `@theme --spacing-*` / Modular seed 一致 */
+export const SPACING_MAP: Record<string, string> = Object.fromEntries(
+  Object.keys(spacingScale.suffixToPx as Record<string, string>).map((k) => [k, k]),
+);
+export const SPACING_LABEL: Record<string, string> = Object.fromEntries(
+  (spacingScale.stepLabels as SpacingStepLabel[]).map((l) => [l.suffix, `${l.zh} / ${l.en}`]),
+);
 
 export const BG_MAP: Record<string, string> = {
   transparent: "bg-transparent",

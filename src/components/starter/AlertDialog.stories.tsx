@@ -27,7 +27,7 @@ export const Default: Story = {
     return (
       <div className="flex min-h-screen items-center justify-center">
       <Comp.AlertDialog>
-        <Comp.AlertDialogTrigger asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-base py-xs text-sm font-medium shadow-sm">打开</button></Comp.AlertDialogTrigger>
+        <Comp.AlertDialogTrigger asChild><button className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium shadow-sm">打开</button></Comp.AlertDialogTrigger>
         <Comp.AlertDialogContent className={audit.buildClassName(args)}>
           <Comp.AlertDialogHeader>
             <Comp.AlertDialogTitle>确认操作？</Comp.AlertDialogTitle>

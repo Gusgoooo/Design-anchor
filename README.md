@@ -10,12 +10,35 @@
 <h1 align="center">HarnessUI &nbsp;<a href="./README.zh-CN.md"><img src="https://img.shields.io/badge/lang-简体中文-red?style=flat-square" alt="中文文档" /></a></h1>
 
 <p align="center">
-  <strong>The AI-first component design kit that turns design tokens into production-ready, AI-governed UI libraries.</strong>
+  <strong>A design-system kit where your tokens, components, and AI guardrails stay in one pipeline — so what you approve in the portal is what ships in code.</strong>
 </p>
 
 <p align="center">
-  Design tokens &rarr; Tailwind v4 <code>@theme</code> &rarr; 23 accessible components &rarr; Storybook portal &rarr; AI coding rules — <em>one pipeline, zero drift.</em>
+  For designers: <em>review the real library in Storybook, tune seeds without hunting hex in PRs.</em>
+  &nbsp;·&nbsp;
+  For teams: <em>tokens &rarr; Tailwind v4 <code>@theme</code> &rarr; accessible components &rarr; spec-driven audits.</em>
 </p>
+
+---
+
+## For designers
+
+HarnessUI is the **control room for your product UI**: the same decisions you would capture in variables, brand decks, or a Figma library become the source that engineers, Storybook, and coding agents all read from.
+
+**What you get without chasing pixels in production**
+
+- **One palette, two modes** — Seed colors drive the full primary / semantic / surface story; light and dark are derived together so contrast relationships stay intentional.
+- **Rhythm you can defend** — Spacing, type, radius, elevation, and motion share structured scales, so layouts feel coherent without one-off `p-[13px]` requests.
+- **A live review room** — The Storybook portal shows each component with real tokens and states, closer to acceptance testing than static redlines.
+- **Intent that survives handoff** — Every component carries a `.spec.json` contract: purpose, allowed props, style locks, and forbidden patterns. Designers set the guardrails; `harness sync` turns them into Cursor rules and `harness audit` checks drift.
+
+**How to collaborate with engineering**
+
+1. Agree on the seed layer in `tokens.json` (or iterate in the Design Token UI) as the signed-off brand baseline.
+2. After `npm run sync:tokens`, skim the generated CSS or the portal preview to confirm the palette and density still match your intent.
+3. For risky releases, ask for a `harness audit` summary — violations point to files and patterns, not abstract “please fix spacing.”
+
+You do not need to run the CLI yourself. Treat HarnessUI as the **curated component shelf** the product builds on; the sections below document how that shelf is built and kept honest for engineers and AI workflows.
 
 ---
 
@@ -172,7 +195,8 @@ HarnessUI uses a **two-layer token architecture** inspired by Ant Design's token
     "colorSuccess": "#52c41a",    // → success-bg, success-border, success-text, ...
     "fontSize": 14,               // → 7 font-size scale tokens
     "borderRadius": 6,            // → xs/sm/md/lg/xl radius scale
-    "controlHeight": 36,          // → sm/lg height variants
+    "sizeUnit": 4,                // → spacing-* scale
+    "sizeStep": 4,                // → paired with sizeUnit for spacing derivation
     "motionUnit": 0.1             // → fast/mid/slow duration tokens
   },
   "seedDark": {
@@ -218,7 +242,7 @@ Tokens are mapped to Tailwind's `@theme inline` directive, enabling native utili
 | Shadows | `shadow-sm`, `shadow-md` | `<Card className="shadow-sm">` |
 | Motion | `duration-fast`, `duration-slow` | `<Progress className="duration-slow">` |
 | Opacity | `opacity-disabled`, `opacity-muted` | `<Input className="disabled:opacity-disabled">` |
-| Layout vars | `var(--control-height)` | `h-[var(--control-height)]` |
+| Layout / control height | `h-9`, `h-7`, `h-11`, `size-9` | `<Button className="h-9">` (Tailwind default scale; `--control-height*` tokens are not emitted) |
 
 ## Component Spec System
 

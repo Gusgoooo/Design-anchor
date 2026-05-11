@@ -104,16 +104,14 @@ function categorizeCssVar(id: string): string {
   if (id.startsWith("chart-")) return "chart";
   if (id.startsWith("font-size") || id.startsWith("line-height")) return "typography";
   if (id.startsWith("font-weight") || id.startsWith("font-family")) return "typography";
-  if (id.startsWith("size") || id.startsWith("control-height")) return "size";
   if (id.startsWith("border-radius")) return "radius";
   if (id.startsWith("padding") || id.startsWith("margin")) return "spacing";
-  if (id.startsWith("space-")) return "spacing-scale";
+  if (id.startsWith("spacing-")) return "spacing-scale";
   if (id.startsWith("elevation")) return "shadow";
   if (id.startsWith("motion")) return "motion";
   if (id.startsWith("opacity")) return "opacity";
   if (id.startsWith("ring") || id.startsWith("border-width") || id.startsWith("line-width")) return "border";
   if (id.startsWith("z-")) return "z-index";
-  if (id.startsWith("layout-")) return "layout";
   return "other";
 }
 
@@ -223,7 +221,7 @@ function ColorEditor({
           color={hex8.slice(0, 7)}
           onChange={(h) => handlePickerChange(h + hex8.slice(7))}
           prefixed
-          className="w-[220px] rounded-md border border-input bg-background px-3 py-1.5 text-center font-mono text-sm text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
+          className="w-[220px] rounded-md border border-input bg-background px-3 py-2 text-center font-mono text-sm text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
         />
       </div>
 
@@ -239,7 +237,7 @@ function ColorEditor({
           </div>
         </div>
 
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">CSS 颜色值</Label>
           <Input
             defaultValue={value}
@@ -331,7 +329,7 @@ function LengthEditor({
 
       {/* 数值 + 单位 */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">数值</Label>
           <Input
             type="number"
@@ -343,7 +341,7 @@ function LengthEditor({
             autoComplete="off"
           />
         </div>
-        <div className="space-y-1.5">
+        <div className="space-y-2">
           <Label className="text-xs text-muted-foreground">单位</Label>
           <select
             value={unit}
@@ -358,7 +356,7 @@ function LengthEditor({
       </div>
 
       {/* 原始文本输入 */}
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">CSS 值（自由输入）</Label>
         <Input
           value={textVal}
@@ -391,11 +389,11 @@ function GenericEditor({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">当前值</Label>
         <p className="font-mono text-sm break-all text-foreground">{value}</p>
       </div>
-      <div className="space-y-1.5">
+      <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">新值</Label>
         <Input
           value={text}
@@ -712,11 +710,11 @@ export function DesignTokenPage() {
               onClick={() => setDarkMode(!darkMode)}
               title={darkMode ? "切换到浅色模式" : "切换到暗色模式"}
             >
-              {darkMode ? <Sun size={14} className="mr-1.5" /> : <Moon size={14} className="mr-1.5" />}
+              {darkMode ? <Sun size={14} className="mr-2" /> : <Moon size={14} className="mr-2" />}
               {darkMode ? "Light" : "Dark"}
             </Button>
             <Button type="button" variant="outline" onClick={() => setCodeOpen(true)}>
-              <Code size={14} className="mr-1.5" />
+              <Code size={14} className="mr-2" />
               JSON
             </Button>
             <Button type="button" variant="outline" onClick={() => void load()} disabled={loading}>
@@ -729,7 +727,7 @@ export function DesignTokenPage() {
         </div>
       </header>
 
-      <div className="flex w-full min-w-0 flex-col gap-10 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="flex w-full min-w-0 flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
         <DesignTokenShowcase
           embedded
           liveTokens={liveTokens}
@@ -766,14 +764,14 @@ export function DesignTokenPage() {
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {picker.field === "light" ? "Light" : "Dark"} 模式
                 </span>
-                <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+                <span className="shrink-0 rounded bg-muted px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
                   {KIND_LABEL[valueKind]}
                 </span>
               </div>
               <button
                 type="button"
                 aria-label="关闭"
-                className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={closeDialog}
               >
                 <X size={16} />
@@ -792,15 +790,15 @@ export function DesignTokenPage() {
             {/* 底部操作栏 */}
             <div className="flex items-center gap-2 px-5 pb-5">
               <Button type="button" variant="outline" size="sm" onClick={resetPickedToBundledDefault}>
-                <RotateCcw size={14} className="mr-1.5" />
+                <RotateCcw size={14} className="mr-2" />
                 恢复默认
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => void copyCurrentValue()}>
-                {copied ? <Check size={14} className="mr-1.5" /> : <Copy size={14} className="mr-1.5" />}
+                {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
                 {copied ? "已复制" : "复制值"}
               </Button>
               <Button type="button" size="sm" className="ml-auto" onClick={() => void save()}>
-                <Save size={14} className="mr-1.5" />
+                <Save size={14} className="mr-2" />
                 保存
               </Button>
             </div>
@@ -835,7 +833,7 @@ export function DesignTokenPage() {
             <button
               type="button"
               aria-label="关闭"
-              className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               onClick={() => setCodeOpen(false)}
             >
               <X size={16} />
@@ -864,7 +862,7 @@ export function DesignTokenPage() {
               关闭
             </Button>
             <Button type="button" size="sm" onClick={() => { void save(); }}>
-              <Save size={14} className="mr-1.5" />
+              <Save size={14} className="mr-2" />
               保存并同步
             </Button>
           </div>

@@ -38,10 +38,10 @@
       "required": false,
       "defaultValue": "default",
       "enumMap": {
-        "default": ["h-9", "px-4", "py-2"],
-        "sm": ["h-8", "px-3", "text-xs"],
-        "lg": ["h-10", "px-8"],
-        "icon": ["h-9", "w-9"]
+        "default": ["h-9", "px-4", "py-2", "text-sm"],
+        "sm": ["h-7", "px-3", "text-xs"],
+        "lg": ["h-11", "px-8", "text-sm"],
+        "icon": ["size-9", "shrink-0", "p-0"]
       }
     },
     {

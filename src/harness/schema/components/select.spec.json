@@ -22,16 +22,27 @@
       "type": "boolean",
       "required": false,
       "defaultValue": false
+    },
+    {
+      "name": "size",
+      "description": "SelectTrigger 与 Button / Input 对齐：sm / default / lg",
+      "type": "\"sm\" | \"default\" | \"lg\"",
+      "required": false,
+      "defaultValue": "default"
     }
   ],
   "styleLock": {
     "baselineTokens": [
       "flex",
+      "h-7",
+      "h-9",
+      "h-11",
       "w-full",
       "rounded-md",
       "border",
       "border-input",
       "bg-background",
+      "text-xs",
       "text-sm",
       "shadow-sm",
       "transition-colors",

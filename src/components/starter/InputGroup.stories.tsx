@@ -24,15 +24,15 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     shadow: "sm",
-    py: "xxxs",
-    p: "xxxs"
+    py: "0.5",
+    p: "0.5"
   },
 
   render: (args) => {
     return (
       <Comp.InputGroup className={audit.buildClassName(args)}>
         <Comp.InputGroupText>https://</Comp.InputGroupText>
-        <input className="flex h-xl w-full rounded-md border border-input bg-transparent px-sm py-xxs text-sm" placeholder="example.com" />
+        <input className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm" placeholder="example.com" />
       </Comp.InputGroup>
     );
   }

@@ -13,7 +13,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { deriveSeedToMap } from "../src/design-tokens/seed-to-map.mjs";
+import {
+  computeSpacingScaleSnapshot,
+  deriveSeedToMap,
+  getSpacingSuffixSortOrderFromSeed,
+} from "../src/design-tokens/seed-to-map.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
@@ -53,6 +57,48 @@ const darkSeed = { ...seed, ...seedDark };
 const darkVars = deriveSeedToMap(darkSeed, { dark: true, customSeeds, fixedAliases });
 const lightVarsMerged = { ...lightVars, ...moLight };
 const darkVarsMerged = { ...darkVars, ...moDark };
+
+const spacingSuffixSortOrder = getSpacingSuffixSortOrderFromSeed(seed);
+
+const spacingScaleJsonPath = path.join(root, "src/design-tokens/spacing-scale.generated.json");
+const spacingSnap = computeSpacingScaleSnapshot(seed);
+fs.writeFileSync(
+  spacingScaleJsonPath,
+  `${JSON.stringify(
+    {
+      version: 2,
+      mode: "linear-sizeMap",
+      sizeUnit: spacingSnap.sizeUnit,
+      sizeStep: spacingSnap.sizeStep,
+      suffixToPx: spacingSnap.suffixToPx,
+      stepLabels: spacingSnap.stepLabels,
+    },
+    null,
+    2,
+  )}\n`,
+  "utf8",
+);
+
+/** CSS 自定义属性名中的 `.` 需转义（如 `spacing-1.5` → `--spacing-1\.5`） */
+function cssEscapedCustomProp(kebabTokenName) {
+  return kebabTokenName.replace(/\./g, "\\.");
+}
+
+function spacingSuffixSortIndex(suffix) {
+  const i = spacingSuffixSortOrder.indexOf(suffix);
+  return i === -1 ? 1000 : i;
+}
+
+function sortSpacingThemeKeys(keys) {
+  return [...keys].sort((a, b) => {
+    const sa = a.replace(/^spacing-/, "");
+    const sb = b.replace(/^spacing-/, "");
+    const da = spacingSuffixSortIndex(sa);
+    const db = spacingSuffixSortIndex(sb);
+    if (da !== db) return da - db;
+    return sa.localeCompare(sb);
+  });
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // @theme mapping configuration
@@ -95,18 +141,6 @@ const SHADOW_MAP = {
 
 // Font weights → @theme --font-weight-* with direct values
 const FONT_WEIGHT_KEYS = ["font-weight-medium", "font-weight-semibold"];
-
-// Padding scale → @theme --spacing-* with direct values (theme-invariant)
-const SPACING_MAP = {
-  "padding-xxxs": "spacing-xxxs",
-  "padding-xxs": "spacing-xxs",
-  "padding-xs": "spacing-xs",
-  "padding-sm": "spacing-sm",
-  "padding": "spacing-base",
-  "padding-md": "spacing-md",
-  "padding-lg": "spacing-lg",
-  "padding-xl": "spacing-xl",
-};
 
 // Font sizes → @theme --font-size-* with direct values
 // Token naming differs from Tailwind naming (e.g. token "font-size-sm"=12px → Tailwind "text-xs")
@@ -152,7 +186,9 @@ for (const name of SHADCN_COLORS) themeVarNames.add(`color-${name}`);
 for (const dest of Object.values(RADIUS_MAP)) themeVarNames.add(dest);
 for (const dest of Object.values(SHADOW_MAP)) themeVarNames.add(dest);
 for (const key of FONT_WEIGHT_KEYS) themeVarNames.add(key);
-for (const dest of Object.values(SPACING_MAP)) themeVarNames.add(dest);
+for (const k of Object.keys(lightVarsMerged)) {
+  if (k.startsWith("spacing-")) themeVarNames.add(k);
+}
 for (const dest of Object.values(FONT_SIZE_MAP)) {
   themeVarNames.add(dest);
   const lhKey = `${dest}--line-height`;
@@ -160,7 +196,6 @@ for (const dest of Object.values(FONT_SIZE_MAP)) {
 }
 for (const key of OPACITY_KEYS) themeVarNames.add(key);
 for (const dest of Object.values(MOTION_MAP)) themeVarNames.add(dest);
-themeVarNames.add("spacing");
 
 // ─── Output builders ────────────────────────────────────────────────────────
 
@@ -197,15 +232,15 @@ function buildThemeBlock(vars) {
   }
 
   lines.push("");
-  lines.push("  /* Spacing base — enables all Tailwind numeric spacing (p-1.5, gap-2.5, etc.) */");
-  const sizeUnit = vars["__sizeUnit"];
-  lines.push(`  --spacing: ${sizeUnit || "4px"};`);
-
-  lines.push("");
-  lines.push("  /* Spacing scale — semantic aliases from padding tokens */");
-  for (const [srcKey, destKey] of Object.entries(SPACING_MAP)) {
-    const val = vars[srcKey];
-    if (val != null && val !== "") lines.push(`  --${destKey}: ${val};`);
+  lines.push("  /* Spacing — 由 size 梯度 ÷ sizeUnit 推导的有限数字档（与 p-4、gap-2 等一致） */");
+  const spacingKeys = sortSpacingThemeKeys(
+    Object.keys(vars).filter((k) => k.startsWith("spacing-")),
+  );
+  for (const key of spacingKeys) {
+    const val = vars[key];
+    if (val != null && val !== "") {
+      lines.push(`  --${cssEscapedCustomProp(key)}: ${val};`);
+    }
   }
 
   lines.push("");
@@ -255,8 +290,7 @@ function toCSS(vars, selector) {
     if (value === "" || value == null) continue;
     if (name.startsWith("__")) continue;
     if (themeVarNames.has(name)) continue;
-    if (/\./.test(name)) continue;
-    lines.push(`  --${name}: ${value};`);
+    lines.push(`  --${cssEscapedCustomProp(name)}: ${value};`);
   }
   lines.push("}");
   return lines.join("\n");
@@ -275,4 +309,6 @@ fs.writeFileSync(out, content, "utf8");
 const themeCount = themeVarNames.size;
 const rootCount = Object.keys(lightVarsMerged).filter((k) => lightVarsMerged[k] !== "" && lightVarsMerged[k] != null && !themeVarNames.has(k)).length;
 const darkCount = Object.keys(darkVarsMerged).filter((k) => darkVarsMerged[k] !== "" && darkVarsMerged[k] != null && !themeVarNames.has(k)).length;
-console.log(`[v2] Wrote ${path.relative(root, out)} — @theme: ${themeCount}, :root: ${rootCount}, .dark: ${darkCount}`);
+console.log(
+  `[v2] Wrote ${path.relative(root, out)} + ${path.relative(root, spacingScaleJsonPath)} — @theme: ${themeCount}, :root: ${rootCount}, .dark: ${darkCount}`,
+);

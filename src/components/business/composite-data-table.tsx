@@ -45,7 +45,7 @@ export interface CompositeDataTableProps<T> {
 
 function densityCellClasses(density: NonNullable<CompositeDataTableProps<unknown>["density"]>): string {
   const map = spec.optionalProps?.find((p) => p.name === "density")?.enumMap;
-  if (!map) return twMerge("text-sm", "py-[var(--padding-sm)]", "px-[var(--padding-sm)]");
+  if (!map) return twMerge("text-sm", "py-3", "px-3");
   const key = density ?? "default";
   return twMerge(...(map[key] ?? map.default ?? []));
 }
@@ -86,11 +86,16 @@ function HeaderSelectAllCheckbox({
   indeterminate: boolean;
   onChange: () => void;
 }) {
-  const ref = React.useRef<HTMLInputElement>(null);
-  React.useEffect(() => {
-    if (ref.current) ref.current.indeterminate = indeterminate;
-  }, [indeterminate]);
-  return <Checkbox ref={ref} checked={checked} onChange={onChange} aria-label="全选" />;
+  const radixChecked: boolean | "indeterminate" = indeterminate
+    ? "indeterminate"
+    : checked;
+  return (
+    <Checkbox
+      checked={radixChecked}
+      onCheckedChange={() => onChange()}
+      aria-label="全选"
+    />
+  );
 }
 
 /**
@@ -181,7 +186,7 @@ export function CompositeDataTable<T>({
         <TableHeader>
           <TableRow>
             {enableRowSelection ? (
-              <TableHead className={cn(checkCol, "h-auto min-h-0 font-[var(--font-weight-medium)] text-muted-foreground")}>
+              <TableHead className={cn(checkCol, "h-auto min-h-0 font-medium text-muted-foreground")}>
                 <div className="flex items-center justify-center leading-none">
                   <HeaderSelectAllCheckbox
                     checked={allSelected}
@@ -227,7 +232,7 @@ export function CompositeDataTable<T>({
                   <div className="flex items-center justify-center leading-none">
                     <Checkbox
                       checked={selected.has(keyOf(row, i))}
-                      onChange={() => toggleRow(row, i)}
+                      onCheckedChange={() => toggleRow(row, i)}
                       aria-label="选择行"
                     />
                   </div>

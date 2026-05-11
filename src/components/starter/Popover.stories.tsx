@@ -31,7 +31,7 @@ export const Default: Story = {
           <Button variant="outline">打开弹出框</Button>
         </PopoverTrigger>
         <PopoverContent className={audit.buildClassName(args as unknown as Record<string, string>)}>
-          <div className="grid gap-base">
+          <div className="grid gap-4">
             <div className="text-sm font-medium">弹出框标题</div>
             <div className="text-sm text-muted-foreground">这是弹出框的内容。</div>
           </div>

@@ -25,7 +25,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-      <div className="w-[300px] space-y-base">
+      <div className="w-[300px] space-y-4">
         <div className="text-sm font-medium">上方内容</div>
         <Separator className={audit.buildClassName(args as unknown as Record<string, string>)} />
         <div className="text-sm text-muted-foreground">下方内容</div>

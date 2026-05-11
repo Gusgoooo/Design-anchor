@@ -23,7 +23,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   args: {
-    py: "base"
+    py: "4",
+    font: "normal"
   },
 
   render: (args) => {

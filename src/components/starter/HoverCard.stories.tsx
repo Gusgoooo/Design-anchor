@@ -27,7 +27,7 @@ export const Default: Story = {
       <Comp.HoverCard>
         <Comp.HoverCardTrigger asChild><button className="text-sm underline">悬停查看</button></Comp.HoverCardTrigger>
         <Comp.HoverCardContent className={audit.buildClassName(args)}>
-          <div className="space-y-xxs">
+          <div className="space-y-1">
             <h4 className="text-sm font-semibold">Hover Card</h4>
             <p className="text-sm text-muted-foreground">这是悬浮卡片的内容。</p>
           </div>

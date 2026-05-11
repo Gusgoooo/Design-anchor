@@ -43,7 +43,7 @@ export const Default: Story = {
 
 export const AllVariants: Story = {
   render: (args) => (
-    <div className="flex flex-wrap gap-xs">
+    <div className="flex flex-wrap gap-2">
       {(["default", "destructive", "outline", "secondary", "ghost", "link"] as const).map((v) => (
         <Button key={v} variant={v} className={audit.buildClassName(args as Record<string, string>)}>
           {v}
@@ -55,7 +55,7 @@ export const AllVariants: Story = {
 
 export const AllSizes: Story = {
   render: (args) => (
-    <div className="flex items-center gap-xs">
+    <div className="flex items-center gap-2">
       <Button size="sm" className={audit.buildClassName(args as Record<string, string>)}>小按钮</Button>
       <Button size="default" className={audit.buildClassName(args as Record<string, string>)}>默认按钮</Button>
       <Button size="lg" className={audit.buildClassName(args as Record<string, string>)}>大按钮</Button>
@@ -67,7 +67,7 @@ export const AllSizes: Story = {
 export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => (
-    <div className="flex gap-xs">
+    <div className="flex gap-2">
       <Button disabled={args.disabled} className={audit.buildClassName(args as Record<string, string>)}>禁用状态</Button>
       <Button variant="outline" disabled={args.disabled} className={audit.buildClassName(args as Record<string, string>)}>禁用描边</Button>
       <Button variant="destructive" disabled={args.disabled} className={audit.buildClassName(args as Record<string, string>)}>禁用危险</Button>

@@ -27,15 +27,15 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => (
       <RadioGroup defaultValue="option-b" className={audit.buildClassName(args as unknown as Record<string, string>)}>
-        <div className="flex items-center gap-xs">
+        <div className="flex items-center gap-2">
           <RadioGroupItem value="option-a" id="r1" />
           <Label htmlFor="r1">选项 A</Label>
         </div>
-        <div className="flex items-center gap-xs">
+        <div className="flex items-center gap-2">
           <RadioGroupItem value="option-b" id="r2" />
           <Label htmlFor="r2">选项 B</Label>
         </div>
-        <div className="flex items-center gap-xs">
+        <div className="flex items-center gap-2">
           <RadioGroupItem value="option-c" id="r3" />
           <Label htmlFor="r3">选项 C</Label>
         </div>

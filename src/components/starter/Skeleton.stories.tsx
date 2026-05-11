@@ -25,11 +25,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-      <div className="flex items-center gap-base">
-        <Skeleton className={["h-xl w-xl rounded-full", audit.buildClassName(args as unknown as Record<string, string>)].filter(Boolean).join(" ")} />
-        <div className="space-y-xs">
-          <Skeleton className="h-base w-[250px]" />
-          <Skeleton className="h-base w-[200px]" />
+      <div className="flex items-center gap-4">
+        <Skeleton className={["h-8 w-8 rounded-full", audit.buildClassName(args as unknown as Record<string, string>)].filter(Boolean).join(" ")} />
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-[250px]" />
+          <Skeleton className="h-4 w-[200px]" />
         </div>
       </div>
     ),

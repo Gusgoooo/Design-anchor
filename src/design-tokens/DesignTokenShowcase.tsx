@@ -2,6 +2,9 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { ChevronDown, ChevronRight } from "lucide-react";
 import type { DesignTokenEntry } from "./token-registry";
+import spacingScale from "./spacing-scale.generated.json";
+
+type SpacingStepLabelJson = { suffix: string; zh: string; en: string };
 
 /* ────────────────────────────────────────────────────────────────────────── */
 /*  Chinese label mapping for all derived (map/alias) tokens                 */
@@ -149,21 +152,6 @@ const TOKEN_ZH: Record<string, string> = {
   "font-family": "正文字体",
   "font-family-code": "代码字体",
 
-  // Size
-  "size-xxl": "尺寸 XXL",
-  "size-xl": "尺寸 XL",
-  "size-lg": "尺寸 LG",
-  "size-md": "尺寸 MD",
-  "size-ms": "尺寸 MS",
-  size: "尺寸 默认",
-  "size-sm": "尺寸 SM",
-  "size-xs": "尺寸 XS",
-  "size-xxs": "尺寸 XXS",
-  "control-height": "控件高度",
-  "control-height-sm": "控件高度 SM",
-  "control-height-xs": "控件高度 XS",
-  "control-height-lg": "控件高度 LG",
-
   // Radius
   "border-radius": "基础圆角",
   "border-radius-xs": "XS 号圆角",
@@ -172,24 +160,7 @@ const TOKEN_ZH: Record<string, string> = {
   "border-radius-xl": "XL 号圆角",
   "border-radius-outer": "外圆角",
 
-  // Spacing
-  "padding-xxxs": "微小内间距",
-  "padding-xxs": "极小内间距",
-  "padding-xs": "特小内间距",
-  "padding-sm": "小内间距",
-  padding: "内间距",
-  "padding-md": "中等内间距",
-  "padding-lg": "大内间距",
-  "padding-xl": "特大内间距",
-  "margin-xxs": "外边距 XXS",
-  "margin-xs": "外边距 XS",
-  "margin-sm": "外边距 SM",
-  margin: "外边距",
-  "margin-md": "外边距 MD",
-  "margin-lg": "外边距 LG",
-  "margin-xl": "外边距 XL",
-  "margin-xxl": "外边距 XXL",
-
+  // spacing-/padding-/margin-：spacingTokenZh
   // Shadow
   "elevation-sm": "一级阴影",
   elevation: "二级阴影",
@@ -229,51 +200,7 @@ const TOKEN_ZH: Record<string, string> = {
   "chart-4": "图表色 4",
   "chart-5": "图表色 5",
 
-  // Layout
-  "layout-max-w-sm": "最大宽度 SM",
-  "layout-max-w-md": "最大宽度 MD",
-  "layout-max-w-lg": "最大宽度 LG",
-  "layout-max-w-xl": "最大宽度 XL",
-  "layout-max-w-2xl": "最大宽度 2XL",
-  "layout-max-w-3xl": "最大宽度 3XL",
-  "layout-max-w-4xl": "最大宽度 4XL",
-  "layout-max-w-5xl": "最大宽度 5XL",
-  "layout-max-w-6xl": "最大宽度 6XL",
-  "layout-max-w-7xl": "最大宽度 7XL",
-  "layout-max-w-full": "最大宽度 100%",
-  "layout-max-w-none": "不限制最大宽度",
-  "layout-min-w-0": "最小宽度 0",
-  "layout-min-w-2xs": "最小宽度 2XS",
-  "layout-min-w-xs": "最小宽度 XS",
-  "layout-min-w-sm": "最小宽度 SM",
-  "layout-min-w-md": "最小宽度 MD",
-  "layout-min-w-lg": "最小宽度 LG",
-  "layout-min-w-xl": "最小宽度 XL",
-  "layout-min-w-full": "最小宽度 100%",
   "elevation-none": "无阴影",
-
-  // Textarea
-  "textarea-min-height": "文本域最小高度",
-
-  // Space scale（Tailwind 数字间距）
-  "space-0": "间距 0",
-  "space-1": "间距 1（4px）",
-  "space-2": "间距 2（8px）",
-  "space-3": "间距 3（12px）",
-  "space-4": "间距 4（16px）",
-  "space-5": "间距 5（20px）",
-  "space-6": "间距 6（24px）",
-  "space-7": "间距 7（28px）",
-  "space-8": "间距 8（32px）",
-  "space-9": "间距 9（36px）",
-  "space-10": "间距 10（40px）",
-  "space-11": "间距 11（44px）",
-  "space-12": "间距 12（48px）",
-  "space-14": "间距 14（56px）",
-  "space-16": "间距 16（64px）",
-  "space-20": "间距 20（80px）",
-  "space-24": "间距 24（96px）",
-  "space-32": "间距 32（128px）",
 };
 
 /* ────────────────────────────────────────────────────────────────────────── */
@@ -283,8 +210,7 @@ const TOKEN_ZH: Record<string, string> = {
 type SeedSection = {
   title: string;
   seedKeys: string[];
-  editorType: "color" | "slider" | "number" | "text";
-  sliderRange?: { min: number; max: number; step: number };
+  editorType: "color" | "number" | "text";
   mapTokenPrefixes: string[];
   exactTokenIds?: string[];
   mapSubGroups?: { title: string; filter: (id: string) => boolean }[];
@@ -369,8 +295,7 @@ const SEED_SECTIONS: SeedSection[] = [
   {
     title: "文字",
     seedKeys: ["fontSize"],
-    editorType: "slider",
-    sliderRange: { min: 10, max: 24, step: 1 },
+    editorType: "number",
     mapTokenPrefixes: ["font-size", "line-height", "font-weight", "font-family"],
     mapSubGroups: [
       { title: "字号", filter: (id) => id.startsWith("font-size") },
@@ -382,21 +307,13 @@ const SEED_SECTIONS: SeedSection[] = [
   {
     title: "间距",
     seedKeys: ["sizeStep", "sizeUnit"],
-    editorType: "slider",
-    sliderRange: { min: 1, max: 10, step: 1 },
-    mapTokenPrefixes: ["margin", "padding", "size", "control-height"],
-    mapSubGroups: [
-      { title: "外间距", filter: (id) => id.startsWith("margin") },
-      { title: "内间距", filter: (id) => id.startsWith("padding") },
-      { title: "尺寸梯度", filter: (id) => id.startsWith("size") },
-      { title: "控件高度", filter: (id) => id.startsWith("control-height") },
-    ],
+    editorType: "number",
+    mapTokenPrefixes: ["spacing-"],
   },
   {
     title: "圆角",
     seedKeys: ["borderRadius"],
-    editorType: "slider",
-    sliderRange: { min: 0, max: 20, step: 1 },
+    editorType: "number",
     mapTokenPrefixes: ["border-radius"],
   },
   {
@@ -414,8 +331,7 @@ const SEED_SECTIONS: SeedSection[] = [
   {
     title: "边框",
     seedKeys: ["lineWidth"],
-    editorType: "slider",
-    sliderRange: { min: 0, max: 4, step: 1 },
+    editorType: "number",
     mapTokenPrefixes: ["line-width", "border-width", "ring-width", "ring-offset"],
   },
   {
@@ -425,26 +341,10 @@ const SEED_SECTIONS: SeedSection[] = [
     mapTokenPrefixes: ["opacity"],
   },
   {
-    title: "间距梯度",
-    seedKeys: [],
-    editorType: "text",
-    mapTokenPrefixes: ["space-"],
-  },
-  {
     title: "层级",
     seedKeys: ["zIndexBase", "zIndexPopupBase"],
     editorType: "number",
     mapTokenPrefixes: ["z-"],
-  },
-  {
-    title: "布局",
-    seedKeys: [],
-    editorType: "text",
-    mapTokenPrefixes: ["layout-"],
-    mapSubGroups: [
-      { title: "最大宽度", filter: (id) => id.startsWith("layout-max-w") },
-      { title: "最小宽度", filter: (id) => id.startsWith("layout-min-w") },
-    ],
   },
 ];
 
@@ -477,6 +377,20 @@ function ColorSwatch({ value, size = 32 }: { value: string; size?: number }) {
 /*  Derived token row                                                        */
 /* ────────────────────────────────────────────────────────────────────────── */
 
+/** spacing / padding / margin 数字档行文案 */
+function spacingTokenZh(id: string): string {
+  const m = id.match(/^(spacing|space|padding|margin)-(.+)$/);
+  if (!m) return "";
+  const [, kind, rawSuf] = m;
+  const suffix = rawSuf.replace(/\\\./g, ".");
+  const labels = spacingScale.stepLabels as SpacingStepLabelJson[];
+  const row = labels.find((l) => l.suffix === suffix);
+  const pair = row ? `${row.zh} / ${row.en}` : null;
+  const kindHint = kind === "padding" ? "padding" : kind === "margin" ? "margin" : "spacing";
+  if (pair) return `${kindHint} · ${pair}`;
+  return `${kindHint} · ${suffix}`;
+}
+
 function MapTokenRow({
   token,
   darkMode,
@@ -486,7 +400,7 @@ function MapTokenRow({
   darkMode?: boolean;
   onEdit?: (t: DesignTokenEntry) => void;
 }) {
-  const zh = TOKEN_ZH[token.id] ?? "";
+  const zh = TOKEN_ZH[token.id] ?? spacingTokenZh(token.id);
   const val = darkMode ? token.dark : token.light;
   const color = isColor(val);
 
@@ -506,7 +420,7 @@ function MapTokenRow({
           : undefined
       }
       className={cn(
-        "flex items-center gap-3 px-4 py-2.5 border-b border-border/50 last:border-b-0 hover:bg-muted/30 transition-colors",
+        "flex items-center gap-3 px-4 py-3 border-b border-border/50 last:border-b-0 hover:bg-muted/30 transition-colors",
         onEdit && "cursor-pointer",
       )}
     >
@@ -569,17 +483,19 @@ function MapSubGroup({
 
 function SeedColorInput({
   seedKey,
+  displayLabel,
   value,
   onChange,
 }: {
   seedKey: string;
+  displayLabel: string;
   value: string;
   onChange: (seedKey: string, val: string) => void;
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm font-medium text-foreground">{seedKey}</span>
-      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-2 py-1.5">
+      <span className="text-sm font-medium text-foreground min-w-0 max-w-[220px] leading-snug">{displayLabel}</span>
+      <div className="flex items-center gap-2 rounded-lg border border-border bg-background px-2 py-2">
         <input
           type="color"
           value={value.startsWith("#") ? value.slice(0, 7) : "#000000"}
@@ -597,54 +513,20 @@ function SeedColorInput({
   );
 }
 
-function SeedSliderInput({
-  seedKey,
-  value,
-  range,
-  onChange,
-}: {
-  seedKey: string;
-  value: number;
-  range: { min: number; max: number; step: number };
-  onChange: (seedKey: string, val: string) => void;
-}) {
-  return (
-    <div className="flex items-center gap-3">
-      <span className="text-sm font-medium text-foreground min-w-0">{seedKey}</span>
-      <input
-        type="range"
-        min={range.min}
-        max={range.max}
-        step={range.step}
-        value={value}
-        onChange={(e) => onChange(seedKey, e.target.value)}
-        className="h-1.5 w-28 cursor-pointer appearance-none rounded-full bg-primary/20 accent-primary [&::-webkit-slider-thumb]:h-3.5 [&::-webkit-slider-thumb]:w-3.5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow"
-      />
-      <input
-        type="number"
-        min={range.min}
-        max={range.max}
-        step={range.step}
-        value={value}
-        onChange={(e) => onChange(seedKey, e.target.value)}
-        className="w-16 rounded-md border border-border bg-background px-2 py-1 text-center font-mono text-sm text-foreground outline-none focus:ring-1 focus:ring-primary"
-      />
-    </div>
-  );
-}
-
 function SeedNumberInput({
   seedKey,
+  displayLabel,
   value,
   onChange,
 }: {
   seedKey: string;
+  displayLabel: string;
   value: number | string;
   onChange: (seedKey: string, val: string) => void;
 }) {
   return (
     <div className="flex items-center gap-3">
-      <span className="text-sm font-medium text-foreground">{seedKey}</span>
+      <span className="text-sm font-medium text-foreground min-w-0 max-w-[220px] leading-snug">{displayLabel}</span>
       <input
         type="number"
         value={value}
@@ -696,23 +578,14 @@ function SeedSectionCard({
             {section.seedKeys.map((key) => {
               const val = seeds[key];
               if (val === undefined) return null;
+              const displayLabel = key;
               if (section.editorType === "color") {
                 return (
                   <SeedColorInput
                     key={key}
                     seedKey={key}
+                    displayLabel={displayLabel}
                     value={String(val)}
-                    onChange={onSeedChange}
-                  />
-                );
-              }
-              if (section.editorType === "slider") {
-                return (
-                  <SeedSliderInput
-                    key={key}
-                    seedKey={key}
-                    value={Number(val)}
-                    range={section.sliderRange ?? { min: 0, max: 100, step: 1 }}
                     onChange={onSeedChange}
                   />
                 );
@@ -721,6 +594,7 @@ function SeedSectionCard({
                 <SeedNumberInput
                   key={key}
                   seedKey={key}
+                  displayLabel={displayLabel}
                   value={val}
                   onChange={onSeedChange}
                 />
@@ -803,7 +677,7 @@ export function DesignTokenShowcase({
       className={cn(
         // 暗色下不用 semantic background（#000），与 Storybook Docs / 预览 iframe 画布一致（#1c1c1e）
         "w-full min-w-0 bg-background text-foreground dark:bg-[#1c1c1e]",
-        embedded ? "" : "min-h-screen px-4 py-10 sm:px-6 lg:px-8",
+        embedded ? "" : "min-h-screen px-4 py-8 sm:px-6 lg:px-8",
       )}
     >
       <div className="flex w-full min-w-0 flex-col gap-5">

@@ -27,10 +27,10 @@ export const Default: Story = {
       <Comp.NavigationMenu className={audit.buildClassName(args)}>
         <Comp.NavigationMenuList>
           <Comp.NavigationMenuItem>
-            <Comp.NavigationMenuLink className="inline-flex items-center justify-center rounded-md px-base py-xs text-sm font-medium">首页</Comp.NavigationMenuLink>
+            <Comp.NavigationMenuLink className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium">首页</Comp.NavigationMenuLink>
           </Comp.NavigationMenuItem>
           <Comp.NavigationMenuItem>
-            <Comp.NavigationMenuLink className="inline-flex items-center justify-center rounded-md px-base py-xs text-sm font-medium">关于</Comp.NavigationMenuLink>
+            <Comp.NavigationMenuLink className="inline-flex items-center justify-center rounded-md px-4 py-2 text-sm font-medium">关于</Comp.NavigationMenuLink>
           </Comp.NavigationMenuItem>
         </Comp.NavigationMenuList>
       </Comp.NavigationMenu>

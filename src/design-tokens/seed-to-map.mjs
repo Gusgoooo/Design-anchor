@@ -4,7 +4,7 @@
  *   - @ant-design/colors (generate)
  *   - genColorMapToken / generateNeutralColorPalettes
  *   - genFontMapToken / genFontSizes
- *   - genSizeMapToken / genControlHeight / genRadius / genCommonMapToken
+ *   - genSizeMapToken / genRadius / genCommonMapToken
  *
  * Extended with custom alias generators for shadcn semantic colors,
  * shadows, spacing, opacity, font-weight, focus ring, z-index,
@@ -337,19 +337,6 @@ function genSizeMapToken(seed) {
 }
 
 // ---------------------------------------------------------------------------
-// genControlHeight (ported from antd shared/genControlHeight.ts)
-// ---------------------------------------------------------------------------
-
-function genControlHeight(seed) {
-  const { controlHeight } = seed;
-  return {
-    controlHeightSM: controlHeight * 0.75,
-    controlHeightXS: controlHeight * 0.5,
-    controlHeightLG: controlHeight * 1.25,
-  };
-}
-
-// ---------------------------------------------------------------------------
 // genRadius (ported from antd shared/genRadius.ts)
 // ---------------------------------------------------------------------------
 
@@ -417,55 +404,166 @@ function genShadowTokens(colorShadow, isDark) {
 }
 
 // ---------------------------------------------------------------------------
-// Custom: genSpacingTokens (from sizeUnit, matching Tailwind scale)
+// Custom: 版式 spacing = size 梯度 ÷ sizeUnit（线性，近似 Tailwind 4px 刻度）
+// 与手写 p-4=16px、gap-2=8px 等比例一致；另含 0 / px / 0.5
 // ---------------------------------------------------------------------------
 
-function genSpacingTokens(sizeUnit) {
-  const s = (n) => `${sizeUnit * n}px`;
-  return {
-    "space-0": "0",
-    "space-1": s(1),
-    "space-2": s(2),
-    "space-3": s(3),
-    "space-4": s(4),
-    "space-5": s(5),
-    "space-6": s(6),
-    "space-7": s(7),
-    "space-8": s(8),
-    "space-9": s(9),
-    "space-10": s(10),
-    "space-11": s(11),
-    "space-12": s(12),
-    "space-14": s(14),
-    "space-16": s(16),
-    "space-20": s(20),
-    "space-24": s(24),
-    "space-32": s(32),
-  };
+const SPACING_STEP_EN = [
+  "XS",
+  "SM",
+  "MD",
+  "LG",
+  "XL",
+  "2XL",
+  "3XL",
+  "4XL",
+  "5XL",
+  "6XL",
+  "7XL",
+  "8XL",
+  "9XL",
+  "10XL",
+  "11XL",
+  "12XL",
+];
+const SPACING_STEP_ZH = [
+  "特紧",
+  "紧凑",
+  "密",
+  "偏小",
+  "均衡",
+  "舒适",
+  "宽松",
+  "大留白",
+  "区块",
+  "大区块",
+  "特大",
+  "极大",
+  "超广",
+  "满幅",
+  "超满",
+  "极限",
+];
+
+/** 与 `genUnifiedSpacingScaleTokens` 输出键后缀一致，供 emit 排序 */
+function deriveSpacingScaleSuffixes(sizeUnit, sizeMap) {
+  const suffixes = new Set(["0", "px", "0.5"]);
+  for (const v of Object.values(sizeMap)) {
+    const px = Number(v);
+    if (!Number.isFinite(px) || px <= 0) continue;
+    const n = px / sizeUnit;
+    if (Math.abs(n - Math.round(n)) < 1e-9) suffixes.add(String(Math.round(n)));
+    else suffixes.add(String(n));
+  }
+  return sortSpacingSuffixesList([...suffixes]);
 }
 
-// ---------------------------------------------------------------------------
-// Custom: genPaddingTokens (antd alias-layer padding/margin from size tokens)
-// ---------------------------------------------------------------------------
-
-function genPaddingTokens(sizeTokens) {
-  return {
-    paddingXXS: sizeTokens.sizeXXS,
-    paddingXS: sizeTokens.sizeXS,
-    paddingSM: sizeTokens.sizeSM,
-    padding: sizeTokens.size,
-    paddingMD: sizeTokens.sizeMD,
-    paddingLG: sizeTokens.sizeLG,
-    paddingXL: sizeTokens.sizeXL,
-    marginXXS: sizeTokens.sizeXXS,
-    marginXS: sizeTokens.sizeXS,
-    marginSM: sizeTokens.sizeSM,
-    margin: sizeTokens.size,
-    marginMD: sizeTokens.sizeMD,
-    marginLG: sizeTokens.sizeLG,
-    marginXL: sizeTokens.sizeXL,
-    marginXXL: sizeTokens.sizeXXL,
+function sortSpacingSuffixesList(arr) {
+  const rank = (s) => {
+    if (s === "0") return [-1, 0];
+    if (s === "px") return [-1, 1];
+    if (s === "0.5") return [-1, 2];
+    const n = parseFloat(s);
+    return Number.isFinite(n) ? [0, n] : [1, 0];
   };
+  return arr.sort((a, b) => {
+    const [ra, va] = rank(a);
+    const [rb, vb] = rank(b);
+    if (ra !== rb) return ra - rb;
+    return va - vb;
+  });
+}
+
+/**
+ * @param {object} seed
+ * @returns {string[]} spacing 键后缀排序（与 @theme `--spacing-*` 一致）
+ */
+export function getSpacingSuffixSortOrderFromSeed(seed) {
+  const sizeMap = genSizeMapToken(seed);
+  return deriveSpacingScaleSuffixes(seed.sizeUnit, sizeMap);
+}
+
+/**
+ * `--spacing-{n}` → Tailwind gap-/p-/m- 数字类（唯一命名；不再重复 `--space-*`）。
+ */
+function genUnifiedSpacingScaleTokens(sizeUnit, sizeMap) {
+  /** @type {Record<string, string>} */
+  const out = {};
+
+  function addSpacing(suffix, value) {
+    out[`spacing-${suffix}`] = value;
+  }
+
+  const suffixes = deriveSpacingScaleSuffixes(sizeUnit, sizeMap);
+  for (const k of suffixes) {
+    if (k === "0") {
+      addSpacing("0", "0");
+      continue;
+    }
+    if (k === "px") {
+      addSpacing("px", "1px");
+      continue;
+    }
+    const m = Number(k);
+    const numPx = m * sizeUnit;
+    addSpacing(k, `${numPx}px`);
+  }
+  return out;
+}
+
+/**
+ * 与 @theme 完全一致的间距快照（供 spacing-scale.generated.json、审计控件）。
+ * @param {object} seed
+ */
+export function computeSpacingScaleSnapshot(seed) {
+  const sizeUnit = Number(seed.sizeUnit ?? 4);
+  const sizeStep = Number(seed.sizeStep ?? 4);
+  const sizeMap = genSizeMapToken(seed);
+  const suffixes = deriveSpacingScaleSuffixes(sizeUnit, sizeMap);
+  /** @type {{ suffix: string, px: number, pxStr: string }[]} */
+  const entries = [];
+  for (const k of suffixes) {
+    if (k === "0") entries.push({ suffix: "0", px: 0, pxStr: "0" });
+    else if (k === "px") entries.push({ suffix: "px", px: 1, pxStr: "1px" });
+    else {
+      const m = Number(k);
+      const numPx = m * sizeUnit;
+      entries.push({ suffix: k, px: numPx, pxStr: `${numPx}px` });
+    }
+  }
+
+  const stepLabels = entries.map((e) => {
+    if (e.suffix === "0") {
+      return { suffix: "0", zh: "零间距", en: "None (0)" };
+    }
+    if (e.suffix === "px") {
+      return { suffix: "px", zh: "1px 发丝线", en: "1px hairline" };
+    }
+    if (e.suffix === "0.5") {
+      return { suffix: "0.5", zh: `半步进 · ${e.px}px`, en: `Half-step · ${e.px}px` };
+    }
+    const idx = Math.round(Number(e.suffix)) - 1;
+    const en = SPACING_STEP_EN[idx] ?? `Step ${e.suffix}`;
+    const zh = SPACING_STEP_ZH[idx] ?? `第 ${e.suffix} 档`;
+    return {
+      suffix: e.suffix,
+      zh: `${zh} · ${e.px}px`,
+      en: `${en} · ${e.px}px`,
+    };
+  });
+
+  const suffixToPx = Object.fromEntries(entries.map((x) => [x.suffix, x.pxStr]));
+
+  return { sizeUnit, sizeStep, entries, stepLabels, suffixToPx };
+}
+
+function mirrorPaddingMarginFromSpacingVars(vars) {
+  for (const [k, v] of Object.entries(vars)) {
+    if (!k.startsWith("spacing-")) continue;
+    const sfx = k.slice("spacing-".length);
+    vars[`padding-${sfx}`] = v;
+    vars[`margin-${sfx}`] = v;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -547,7 +645,6 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   const colorMap = genColorMapToken(seed, dark);
   const fontMap = genFontMapToken(seed.fontSize);
   const sizeMap = genSizeMapToken(seed);
-  const heightMap = genControlHeight(seed);
   const commonMap = genCommonMapToken(seed);
 
   // Color map tokens → CSS variables
@@ -658,27 +755,6 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   };
   Object.assign(vars, fontVarMap);
 
-  // Size map tokens (use explicit names to avoid bad camelCase→kebab for abbreviations)
-  const sizeNames = {
-    sizeXXL: "size-xxl", sizeXL: "size-xl", sizeLG: "size-lg",
-    sizeMD: "size-md", sizeMS: "size-ms", size: "size",
-    sizeSM: "size-sm", sizeXS: "size-xs", sizeXXS: "size-xxs",
-  };
-  for (const [k, v] of Object.entries(sizeMap)) {
-    vars[sizeNames[k] || k] = `${v}px`;
-  }
-
-  // Control height tokens
-  vars["control-height"] = `${seed.controlHeight}px`;
-  const heightNames = {
-    controlHeightSM: "control-height-sm",
-    controlHeightXS: "control-height-xs",
-    controlHeightLG: "control-height-lg",
-  };
-  for (const [k, v] of Object.entries(heightMap)) {
-    vars[heightNames[k] || k] = `${v}px`;
-  }
-
   // Radius tokens
   vars["border-radius"] = `${commonMap.borderRadius}px`;
   vars["border-radius-xs"] = `${commonMap.borderRadiusXS}px`;
@@ -696,18 +772,9 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   vars["line-width"] = `${seed.lineWidth}px`;
   vars["line-width-bold"] = `${commonMap.lineWidthBold}px`;
 
-  // --- Alias layer: padding/margin ---
-  const paddingMap = genPaddingTokens(sizeMap);
-  const padNames = {
-    paddingXXS: "padding-xxs", paddingXS: "padding-xs", paddingSM: "padding-sm",
-    padding: "padding", paddingMD: "padding-md", paddingLG: "padding-lg", paddingXL: "padding-xl",
-    marginXXS: "margin-xxs", marginXS: "margin-xs", marginSM: "margin-sm",
-    margin: "margin", marginMD: "margin-md", marginLG: "margin-lg",
-    marginXL: "margin-xl", marginXXL: "margin-xxl",
-  };
-  for (const [k, v] of Object.entries(paddingMap)) {
-    vars[padNames[k] || k] = `${v}px`;
-  }
+  // --- Alias layer: Tailwind-aligned spacing（`spacing-{n}` + mirror → padding-/margin-）---
+  Object.assign(vars, genUnifiedSpacingScaleTokens(seed.sizeUnit, sizeMap));
+  mirrorPaddingMarginFromSpacingVars(vars);
 
   // --- Alias layer: shadcn semantic colors ---
   const shadcnAliases = genShadcnAliasTokens(colorMap);
@@ -730,10 +797,6 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   for (const [k, v] of Object.entries(shadowTokens)) {
     vars[shadowNames[k] || k] = v;
   }
-
-  // --- Alias layer: spacing ---
-  const spacingTokens = genSpacingTokens(seed.sizeUnit);
-  Object.assign(vars, spacingTokens);
 
   // --- Alias layer: z-index ---
   const zTokens = genZIndexTokens(seed);
@@ -760,8 +823,15 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   if (fixedAliases.fontWeightSemibold != null) vars["font-weight-semibold"] = fixedAliases.fontWeightSemibold;
   if (fixedAliases.ringWidth != null) vars["ring-width"] = fixedAliases.ringWidth;
   if (fixedAliases.ringOffset != null) vars["ring-offset"] = fixedAliases.ringOffset;
-  if (fixedAliases.paddingXXXS != null) vars["padding-xxxs"] = fixedAliases.paddingXXXS;
-  if (fixedAliases.textareaMinHeight != null) vars["textarea-min-height"] = fixedAliases.textareaMinHeight;
+  if (fixedAliases.paddingXXXS != null) {
+    const v =
+      typeof fixedAliases.paddingXXXS === "number"
+        ? `${fixedAliases.paddingXXXS}px`
+        : `${fixedAliases.paddingXXXS}`;
+    vars["spacing-0.5"] = v;
+    vars["padding-0.5"] = v;
+    vars["margin-0.5"] = v;
+  }
   if (fixedAliases.motionDuration150 != null) vars["motion-duration-150"] = fixedAliases.motionDuration150;
   if (fixedAliases.motionDurationLong != null) vars["motion-duration-long"] = fixedAliases.motionDurationLong;
   if (fixedAliases.motionDurationWhole != null) vars["motion-duration-whole"] = fixedAliases.motionDurationWhole;
@@ -773,35 +843,6 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   // Font family
   if (seed.fontFamily) vars["font-family"] = seed.fontFamily;
   if (seed.fontFamilyCode) vars["font-family-code"] = seed.fontFamilyCode;
-
-  // --- Layout tokens (max-width / min-width for story controls) ---
-  const layoutMaxW = {
-    "layout-max-w-sm": "24rem",
-    "layout-max-w-md": "28rem",
-    "layout-max-w-lg": "32rem",
-    "layout-max-w-xl": "36rem",
-    "layout-max-w-2xl": "42rem",
-    "layout-max-w-3xl": "48rem",
-    "layout-max-w-4xl": "56rem",
-    "layout-max-w-5xl": "64rem",
-    "layout-max-w-6xl": "72rem",
-    "layout-max-w-7xl": "80rem",
-    "layout-max-w-full": "100%",
-    "layout-max-w-none": "none",
-  };
-  Object.assign(vars, layoutMaxW);
-
-  const layoutMinW = {
-    "layout-min-w-0": "0",
-    "layout-min-w-2xs": "10rem",
-    "layout-min-w-xs": "12rem",
-    "layout-min-w-sm": "24rem",
-    "layout-min-w-md": "28rem",
-    "layout-min-w-lg": "32rem",
-    "layout-min-w-xl": "36rem",
-    "layout-min-w-full": "100%",
-  };
-  Object.assign(vars, layoutMinW);
 
   // Elevation "none" alias
   vars["elevation-none"] = "none";

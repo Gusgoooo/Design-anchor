@@ -26,7 +26,7 @@ export const Default: Story = {
     return (
       <Comp.Field className={audit.buildClassName(args)}>
         <Comp.FieldLabel>邮箱</Comp.FieldLabel>
-        <input className="flex h-xl w-full rounded-md border border-input bg-transparent px-sm py-xxs text-sm" placeholder="your@email.com" />
+        <input className="flex h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm" placeholder="your@email.com" />
         <Comp.FieldDescription>请输入有效的邮箱地址。</Comp.FieldDescription>
       </Comp.Field>
     );

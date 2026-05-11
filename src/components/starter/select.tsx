@@ -2,9 +2,11 @@
 
 import * as React from "react"
 import * as SelectPrimitive from "@radix-ui/react-select"
+import { cva, type VariantProps } from "class-variance-authority"
 import { Check, ChevronDown, ChevronUp } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { controlFieldSizeCore } from "./control-field-size"
 
 const Select = SelectPrimitive.Root
 
@@ -12,21 +14,37 @@ const SelectGroup = SelectPrimitive.Group
 
 const SelectValue = SelectPrimitive.Value
 
+const selectTriggerVariants = cva(
+  "flex w-full items-center justify-between rounded-md border border-input bg-background ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-disabled [&>span]:line-clamp-1",
+  {
+    variants: {
+      size: {
+        sm: cn(controlFieldSizeCore.sm, "gap-1 px-2.5 py-0"),
+        default: cn(controlFieldSizeCore.default, "gap-2 px-3 py-2"),
+        lg: cn(controlFieldSizeCore.lg, "gap-2 px-4 py-2"),
+      },
+    },
+    defaultVariants: {
+      size: "default",
+    },
+  },
+)
+
+export type SelectTriggerProps = React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger> &
+  VariantProps<typeof selectTriggerVariants>
+
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
-  React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, ...props }, ref) => (
+  SelectTriggerProps
+>(({ className, size, children, ...props }, ref) => (
   <SelectPrimitive.Trigger
     ref={ref}
-    className={cn(
-      "flex h-[var(--control-height)] w-full items-center justify-between rounded-md border border-input bg-background px-sm py-xs text-sm ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-disabled [&>span]:line-clamp-1",
-      className
-    )}
+    className={cn(selectTriggerVariants({ size }), className)}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-base w-base opacity-muted" />
+      <ChevronDown className="h-4 w-4 opacity-muted" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -39,12 +57,12 @@ const SelectScrollUpButton = React.forwardRef<
   <SelectPrimitive.ScrollUpButton
     ref={ref}
     className={cn(
-      "flex cursor-default items-center justify-center py-xxs",
+      "flex cursor-default items-center justify-center py-1",
       className
     )}
     {...props}
   >
-    <ChevronUp className="h-base w-base" />
+    <ChevronUp className="h-4 w-4" />
   </SelectPrimitive.ScrollUpButton>
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
@@ -56,12 +74,12 @@ const SelectScrollDownButton = React.forwardRef<
   <SelectPrimitive.ScrollDownButton
     ref={ref}
     className={cn(
-      "flex cursor-default items-center justify-center py-xxs",
+      "flex cursor-default items-center justify-center py-1",
       className
     )}
     {...props}
   >
-    <ChevronDown className="h-base w-base" />
+    <ChevronDown className="h-4 w-4" />
   </SelectPrimitive.ScrollDownButton>
 ))
 SelectScrollDownButton.displayName =
@@ -86,7 +104,7 @@ const SelectContent = React.forwardRef<
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          "p-xxs",
+          "p-1",
           position === "popper" &&
             "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
         )}
@@ -105,7 +123,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn("py-xxs pl-xl pr-xs text-sm font-semibold", className)}
+    className={cn("py-1 pl-8 pr-2 text-sm font-semibold", className)}
     {...props}
   />
 ))
@@ -118,14 +136,14 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-xxs pl-xl pr-xs text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-disabled",
+      "relative flex w-full cursor-default select-none items-center rounded-sm py-1 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-disabled",
       className
     )}
     {...props}
   >
-    <span className="absolute left-xs flex h-base w-base items-center justify-center">
+    <span className="absolute left-2 flex h-4 w-4 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-base w-base" />
+        <Check className="h-4 w-4" />
       </SelectPrimitive.ItemIndicator>
     </span>
 
@@ -140,7 +158,7 @@ const SelectSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={cn("-mx-xxs my-xxs h-xxxs bg-muted", className)}
+    className={cn("-mx-1 my-1 h-0.5 bg-muted", className)}
     {...props}
   />
 ))

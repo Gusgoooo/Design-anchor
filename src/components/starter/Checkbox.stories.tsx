@@ -26,7 +26,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-      <div className="flex items-center gap-xs">
+      <div className="flex items-center gap-2">
         <Checkbox id="terms" className={audit.buildClassName(args as unknown as Record<string, string>)} />
         <Label htmlFor="terms">同意条款</Label>
       </div>

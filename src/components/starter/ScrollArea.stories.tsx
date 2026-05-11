@@ -26,12 +26,12 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     rounded: "md",
-    p: "xxxs"
+    p: "0.5"
   },
 
   render: (args) => (
-      <ScrollArea className={["h-[200px] w-[350px] rounded-md border p-base", audit.buildClassName(args as unknown as Record<string, string>)].filter(Boolean).join(" ")}>
-        <div className="space-y-base">
+      <ScrollArea className={["h-[200px] w-[350px] rounded-md border p-4", audit.buildClassName(args as unknown as Record<string, string>)].filter(Boolean).join(" ")}>
+        <div className="space-y-4">
           {Array.from({ length: 20 }, (_, i) => (
             <div key={i} className="text-sm">列表项 {i + 1}</div>
           ))}

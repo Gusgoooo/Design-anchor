@@ -1,7 +1,7 @@
 /**
- * spec.json → Storybook Controls 桥接。
- * 从组件 spec 的 styleLock.blacklist 提取 hidePatterns / hidePrefixes，
- * 并导出 variant → token class 映射供 AI 使用。
+ * spec.json -> Storybook Controls bridge.
+ * Extracts hidePatterns / hidePrefixes from component spec's styleLock.blacklist,
+ * and exports variant -> token class mapping for AI use.
  */
 
 type SpecBlacklistEntry = {

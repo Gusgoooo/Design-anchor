@@ -404,8 +404,8 @@ function genShadowTokens(colorShadow, isDark) {
 }
 
 // ---------------------------------------------------------------------------
-// Custom: 版式 spacing = size 梯度 ÷ sizeUnit（线性，近似 Tailwind 4px 刻度）
-// 与手写 p-4=16px、gap-2=8px 等比例一致；另含 0 / px / 0.5
+// Custom: spacing = size scale / sizeUnit (linear, approximate to Tailwind 4px scale)
+// Proportionally consistent with handwritten p-4=16px, gap-2=8px etc.; also includes 0 / px / 0.5
 // ---------------------------------------------------------------------------
 
 const SPACING_STEP_EN = [
@@ -427,25 +427,25 @@ const SPACING_STEP_EN = [
   "12XL",
 ];
 const SPACING_STEP_ZH = [
-  "特紧",
-  "紧凑",
-  "密",
-  "偏小",
-  "均衡",
-  "舒适",
-  "宽松",
-  "大留白",
-  "区块",
-  "大区块",
-  "特大",
-  "极大",
-  "超广",
-  "满幅",
-  "超满",
-  "极限",
+  "Extra-tight",
+  "Compact",
+  "Dense",
+  "Small",
+  "Balanced",
+  "Comfortable",
+  "Relaxed",
+  "Large",
+  "Section",
+  "Large section",
+  "Extra-large",
+  "Huge",
+  "Ultra-wide",
+  "Full-width",
+  "Over-full",
+  "Maximum",
 ];
 
-/** 与 `genUnifiedSpacingScaleTokens` 输出键后缀一致，供 emit 排序 */
+/** Consistent with `genUnifiedSpacingScaleTokens` output key suffixes, for emit sorting */
 function deriveSpacingScaleSuffixes(sizeUnit, sizeMap) {
   const suffixes = new Set(["0", "px", "0.5"]);
   for (const v of Object.values(sizeMap)) {
@@ -476,7 +476,7 @@ function sortSpacingSuffixesList(arr) {
 
 /**
  * @param {object} seed
- * @returns {string[]} spacing 键后缀排序（与 @theme `--spacing-*` 一致）
+ * @returns {string[]} spacing key suffix sort order (consistent with @theme `--spacing-*`)
  */
 export function getSpacingSuffixSortOrderFromSeed(seed) {
   const sizeMap = genSizeMapToken(seed);
@@ -484,7 +484,7 @@ export function getSpacingSuffixSortOrderFromSeed(seed) {
 }
 
 /**
- * `--spacing-{n}` → Tailwind gap-/p-/m- 数字类（唯一命名；不再重复 `--space-*`）。
+ * `--spacing-{n}` -> Tailwind gap-/p-/m- numeric classes (unique naming; no longer duplicating `--space-*`).
  */
 function genUnifiedSpacingScaleTokens(sizeUnit, sizeMap) {
   /** @type {Record<string, string>} */
@@ -512,7 +512,7 @@ function genUnifiedSpacingScaleTokens(sizeUnit, sizeMap) {
 }
 
 /**
- * 与 @theme 完全一致的间距快照（供 spacing-scale.generated.json、审计控件）。
+ * Spacing scale snapshot fully consistent with @theme (for spacing-scale.generated.json, audit controls).
  * @param {object} seed
  */
 export function computeSpacingScaleSnapshot(seed) {
@@ -534,17 +534,17 @@ export function computeSpacingScaleSnapshot(seed) {
 
   const stepLabels = entries.map((e) => {
     if (e.suffix === "0") {
-      return { suffix: "0", zh: "零间距", en: "None (0)" };
+      return { suffix: "0", zh: "No spacing", en: "None (0)" };
     }
     if (e.suffix === "px") {
-      return { suffix: "px", zh: "1px 发丝线", en: "1px hairline" };
+      return { suffix: "px", zh: "1px hairline", en: "1px hairline" };
     }
     if (e.suffix === "0.5") {
-      return { suffix: "0.5", zh: `半步进 · ${e.px}px`, en: `Half-step · ${e.px}px` };
+      return { suffix: "0.5", zh: `Half-step · ${e.px}px`, en: `Half-step · ${e.px}px` };
     }
     const idx = Math.round(Number(e.suffix)) - 1;
     const en = SPACING_STEP_EN[idx] ?? `Step ${e.suffix}`;
-    const zh = SPACING_STEP_ZH[idx] ?? `第 ${e.suffix} 档`;
+    const zh = SPACING_STEP_ZH[idx] ?? `Step ${e.suffix}`;
     return {
       suffix: e.suffix,
       zh: `${zh} · ${e.px}px`,

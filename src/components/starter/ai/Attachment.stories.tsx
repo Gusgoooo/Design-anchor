@@ -14,7 +14,7 @@ type Args = Record<string, unknown> & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/Attachment",
+  title: "AI/Attachment",
   parameters: { layout: "centered" },
   args: {
     imageUrl: "https://placehold.co/200x200/eee/999?text=Preview",

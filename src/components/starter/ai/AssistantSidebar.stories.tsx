@@ -11,7 +11,7 @@ type Args = ClassOverrideArgs & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/AssistantSidebar",
+  title: "AI/AssistantSidebar",
   parameters: { layout: "fullscreen" },
   args: {
     contentText: "The assistant chat panel is on the right side, separated by a resizable handle.",

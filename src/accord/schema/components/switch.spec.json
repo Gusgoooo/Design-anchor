@@ -1,0 +1,73 @@
+{
+  "id": "switch",
+  "componentName": "Switch",
+  "version": "1.0.0",
+  "intent": "Toggle switch for boolean value changes (enable/disable features). Accessible checkbox with visual track.",
+  "wraps": {
+    "module": "@/components/starter/switch",
+    "primitives": [
+      "Switch"
+    ]
+  },
+  "requiredProps": [],
+  "optionalProps": [
+    {
+      "name": "checked",
+      "description": "Checked prop",
+      "type": "boolean",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "description": "Disabled state",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    },
+    {
+      "name": "onChange",
+      "description": "On Change prop",
+      "type": "React.ChangeEventHandler<HTMLInputElement>",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "inline-flex",
+      "h-5",
+      "w-9",
+      "shrink-0",
+      "cursor-pointer",
+      "rounded-full",
+      "border",
+      "shadow-inner",
+      "transition-colors",
+      "peer-checked:bg-primary"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(h-|w-)[0-9]",
+        "pattern": "^(h-|w-)[0-9]"
+      },
+      {
+        "description": "Do not override styles matching pattern ^rounded",
+        "pattern": "^rounded"
+      },
+      {
+        "description": "Do not override styles matching pattern ^(bg|peer-checked:bg)-(primary|secondary)",
+        "pattern": "^(bg|peer-checked:bg)-(primary|secondary)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Switch from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "switch",
+      "toggle",
+      "form",
+      "boolean"
+    ],
+    "category": "form",
+    "status": "stable"
+  }
+}

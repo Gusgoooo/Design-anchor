@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./empty.tsx?raw";
 import * as Comp from "./empty";
@@ -9,9 +9,9 @@ const audit = autoClassControls(componentSrc);
 type Args = { [k: string]: string };
 
 const meta = {
-  title: "基础组件库/Empty",
+  title: "Starter/Empty",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    accordTokenCompliance: storyAccordCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],
@@ -28,8 +28,8 @@ export const Default: Story = {
       <Comp.Empty className={prev.className}>
         <Comp.EmptyMedia className={slot[1]} />
         <Comp.EmptyHeader className={slot[0]}>
-          <Comp.EmptyTitle className={slot[2]}>暂无数据</Comp.EmptyTitle>
-          <Comp.EmptyDescription className={slot[3]}>这里还没有内容。</Comp.EmptyDescription>
+          <Comp.EmptyTitle className={slot[2]}>No Data</Comp.EmptyTitle>
+          <Comp.EmptyDescription className={slot[3]}>There is no content here yet.</Comp.EmptyDescription>
         </Comp.EmptyHeader>
       </Comp.Empty>
     );

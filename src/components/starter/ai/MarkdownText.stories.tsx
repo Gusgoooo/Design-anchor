@@ -44,7 +44,7 @@ type Args = Record<string, unknown> & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/MarkdownText",
+  title: "AI/MarkdownText",
   parameters: { layout: "centered" },
   args: {
     markdownContent: defaultMarkdown,

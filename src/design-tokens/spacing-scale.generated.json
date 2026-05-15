@@ -19,57 +19,57 @@
   "stepLabels": [
     {
       "suffix": "0",
-      "zh": "零间距",
+      "zh": "No spacing",
       "en": "None (0)"
     },
     {
       "suffix": "px",
-      "zh": "1px 发丝线",
+      "zh": "1px hairline",
       "en": "1px hairline"
     },
     {
       "suffix": "0.5",
-      "zh": "半步进 · 2px",
+      "zh": "Half-step · 2px",
       "en": "Half-step · 2px"
     },
     {
       "suffix": "1",
-      "zh": "特紧 · 4px",
+      "zh": "Extra-tight · 4px",
       "en": "XS · 4px"
     },
     {
       "suffix": "2",
-      "zh": "紧凑 · 8px",
+      "zh": "Compact · 8px",
       "en": "SM · 8px"
     },
     {
       "suffix": "3",
-      "zh": "密 · 12px",
+      "zh": "Dense · 12px",
       "en": "MD · 12px"
     },
     {
       "suffix": "4",
-      "zh": "偏小 · 16px",
+      "zh": "Small · 16px",
       "en": "LG · 16px"
     },
     {
       "suffix": "5",
-      "zh": "均衡 · 20px",
+      "zh": "Balanced · 20px",
       "en": "XL · 20px"
     },
     {
       "suffix": "6",
-      "zh": "舒适 · 24px",
+      "zh": "Comfortable · 24px",
       "en": "2XL · 24px"
     },
     {
       "suffix": "8",
-      "zh": "大留白 · 32px",
+      "zh": "Large · 32px",
       "en": "4XL · 32px"
     },
     {
       "suffix": "12",
-      "zh": "极大 · 48px",
+      "zh": "Huge · 48px",
       "en": "8XL · 48px"
     }
   ]

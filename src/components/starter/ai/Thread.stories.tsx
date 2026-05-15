@@ -10,7 +10,7 @@ const audit = autoClassControls(componentSrc);
 type Args = Record<string, unknown>;
 
 const meta: Meta<Args> = {
-  title: "AI组件库/Thread",
+  title: "AI/Thread",
   parameters: { layout: "fullscreen" },
   args: {
     ...audit.args,

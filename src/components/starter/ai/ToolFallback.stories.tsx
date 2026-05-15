@@ -21,7 +21,7 @@ type Args = Record<string, unknown> & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/ToolFallback",
+  title: "AI/ToolFallback",
   parameters: { layout: "centered" },
   args: {
     toolName: "searchDatabase",

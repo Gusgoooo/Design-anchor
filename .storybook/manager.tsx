@@ -14,10 +14,10 @@ import {
   serializePrimitives,
   type WrapPrimitiveInput,
   type WrapPrimitiveRef,
-} from "../src/harness/schema/types";
+} from "../src/accord/schema/types";
 
-/* ── 暗色模式基础 ── */
-const DARK_KEY = "harness-dark-mode";
+/* ── Dark mode basics ── */
+const DARK_KEY = "accord-dark-mode";
 const _initDark = typeof localStorage !== "undefined" && localStorage.getItem(DARK_KEY) === "true";
 if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", _initDark);
 
@@ -32,7 +32,7 @@ const lightTheme = create({
   barBg: "#ffffff",
   barTextColor: "#18181b",
   barSelectedColor: "#18181b",
-  brandTitle: "HarnessDesign",
+  brandTitle: "DesignAccord",
   colorPrimary: "#18181b",
   colorSecondary: "#18181b",
   inputBg: "#ffffff",
@@ -51,7 +51,7 @@ const darkTheme = create({
   barBg: "#1c1c1e",
   barTextColor: "#fafafa",
   barSelectedColor: "#fafafa",
-  brandTitle: "HarnessDesign",
+  brandTitle: "DesignAccord",
   colorPrimary: "#fafafa",
   colorSecondary: "#fafafa",
   inputBg: "#27272a",
@@ -78,9 +78,9 @@ function useManagerDarkMode() {
 const DarkCtx = React.createContext(false);
 function useIsDark() { return React.useContext(DarkCtx); }
 
-/* ── 辅助 ── */
+/* ── Helpers ── */
 
-/** Storybook Manager 与预览同源；显式 origin 避免相对路径在部分环境下未命中 Vite 中间件 */
+/** Storybook Manager shares origin with preview; explicit origin avoids relative paths missing Vite middleware in some environments */
 function devApi(path: string): string {
   if (typeof window === "undefined" || !path.startsWith("/")) return path;
   return `${window.location.origin}${path}`;
@@ -97,7 +97,7 @@ function getImportPath(api: API, item: API_ComponentEntry): string | null {
 }
 
 
-/* ── Kit 版本差异圆点（manifest 驱动） ── */
+/* ── Kit version diff dots (manifest-driven) ── */
 
 type KitStatusData = {
   kitVersion?: string;
@@ -146,12 +146,12 @@ function getComponentKitStatus(kitStatus: KitStatusData | null, item: API_Compon
 }
 
 
-/* ── 内联 SVG 图标 ── */
+/* ── Inline SVG icons ── */
 
 const IcoPlus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>;
 const IcoSwatch = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="12" r="1" fill="currentColor"/></svg>;
 const IcoX = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>;
-/** 圆形 i，Harness 面板说明用 */
+/** Circled i, used for Accord panel info */
 const IcoInfo = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <circle cx="12" cy="12" r="10" />
@@ -160,7 +160,7 @@ const IcoInfo = () => (
   </svg>
 );
 
-/** 悬停 / 聚焦显示说明，固定定位避免被折叠区 overflow 裁切 */
+/** Shows info on hover/focus; fixed positioning prevents clipping by collapsed area overflow */
 function InfoTip({ text }: { text: string }) {
   const wrapRef = React.useRef<HTMLSpanElement>(null);
   const [open, setOpen] = React.useState(false);
@@ -242,7 +242,7 @@ function InfoTip({ text }: { text: string }) {
     >
       <button
         type="button"
-        aria-label="说明"
+        aria-label="Info"
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
         onMouseDown={(e) => e.stopPropagation()}
         onFocus={() => { cancelClose(); setOpen(true); updatePos(); }}
@@ -269,7 +269,7 @@ function InfoTip({ text }: { text: string }) {
 }
 const IcoUp = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>;
 
-/* ── 自定义侧边栏图标 ── */
+/* ── Custom sidebar icons ── */
 const IcoChevron = ({ open }: { open: boolean }) => (
   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
     style={{ transition: "transform 150ms ease", transform: open ? "rotate(90deg)" : "rotate(0deg)" }}>
@@ -281,7 +281,7 @@ const IcoStory = () => <svg width="12" height="12" viewBox="0 0 24 24" fill="non
 const IcoBrain = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/><path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/><path d="M15 13a4.5 4.5 0 0 1-3-4 4.5 4.5 0 0 1-3 4"/><path d="M17.599 6.5a3 3 0 0 0 .399-1.375"/><path d="M6.003 5.125A3 3 0 0 0 6.401 6.5"/><path d="M3.477 10.896a4 4 0 0 1 .585-.396"/><path d="M19.938 10.5a4 4 0 0 1 .585.396"/><path d="M6 18a4 4 0 0 1-1.967-.516"/><path d="M19.967 17.484A4 4 0 0 1 18 18"/></svg>;
 const IcoGrid = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>;
 
-/* ── 自定义侧边栏树组件（替代 Storybook 原生 tree，Tailwind sidebar block 风格） ── */
+/* ── Custom sidebar tree component (replaces native Storybook tree, Tailwind sidebar block style) ── */
 
 type TreeNode = {
   id: string;
@@ -344,7 +344,7 @@ function SidebarTreeItem({
   const hoverBg = dark ? "rgba(255,255,255,0.04)" : "rgba(0,0,0,0.03)";
 
   if (node.type === "root") {
-    const isAI = node.name === "AI组件库";
+    const isAI = node.name === "AI";
     return (
       <div style={{ marginTop: depth === 0 ? 0 : undefined }}>
         <div style={{
@@ -506,7 +506,7 @@ function SidebarTree() {
         display: "flex", alignItems: "center", justifyContent: "center",
         padding: 24, color: "var(--mgr-text-tertiary)", fontSize: 13,
       }}>
-        加载中…
+        Loading...
       </div>
     );
   }
@@ -522,7 +522,7 @@ function SidebarTree() {
   );
 }
 
-/* ── 添加组件弹窗（仅上传 .tsx） ── */
+/* ── Add component dialog (upload .tsx only) ── */
 
 function AddComponentDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
   const [tsxFile, setTsxFile] = React.useState<File | null>(null);
@@ -543,7 +543,7 @@ function AddComponentDialog({ open, onClose }: { open: boolean; onClose: () => v
       fd.append("mode", "upload");
       fd.append("file", tsxFile);
       const r = await fetch(devApi("/api/upload-component"), { method: "POST", body: fd });
-      if (r.ok) { close(); window.location.reload(); } else alert("上传失败: " + (await r.text()));
+      if (r.ok) { close(); window.location.reload(); } else alert("Upload failed: " + (await r.text()));
     } catch (e) { alert(String(e)); } finally { setBusy(false); }
   }
 
@@ -566,12 +566,12 @@ function AddComponentDialog({ open, onClose }: { open: boolean; onClose: () => v
         overflow: "hidden", color: D.text, fontFamily: "system-ui,-apple-system,sans-serif" }}>
       <div onClick={e => e.stopPropagation()} style={{ display: "flex", flexDirection: "column" }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "16px 20px", borderBottom: `1px solid ${D.border}` }}>
-          <span style={{ fontSize: 16, fontWeight: 700 }}>添加组件</span>
+          <span style={{ fontSize: 16, fontWeight: 700 }}>Add Component</span>
           <button type="button" onClick={close} style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: D.muted, display: "flex" }}><IcoX /></button>
         </div>
         <div style={{ padding: 20 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, color: D.blue, marginBottom: 16 }}>
-            <IcoUp /><span style={{ fontSize: 14, fontWeight: 600 }}>上传 .tsx 组件文件</span>
+            <IcoUp /><span style={{ fontSize: 14, fontWeight: 600 }}>Upload .tsx component file</span>
           </div>
           <input ref={fileInput} type="file" accept=".tsx" style={{ display: "none" }} onChange={e => { if (e.target.files?.[0]) setTsxFile(e.target.files[0]); }} />
           <button type="button" onClick={() => fileInput.current?.click()}
@@ -579,25 +579,25 @@ function AddComponentDialog({ open, onClose }: { open: boolean; onClose: () => v
               border: `2px dashed ${D.border}`, borderRadius: D.radius, background: tsxFile ? (dark ? "#052e16" : "#f0fdf4") : D.bgMuted,
               cursor: "pointer", color: tsxFile ? "#16a34a" : D.muted, fontSize: 13, fontFamily: "inherit" }}
             onMouseEnter={e => e.currentTarget.style.borderColor = D.blue} onMouseLeave={e => e.currentTarget.style.borderColor = D.border}>
-            <IcoUp />{tsxFile ? <span style={{ fontWeight: 600 }}>{tsxFile.name}</span> : <span>点击选择 .tsx 文件</span>}
+            <IcoUp />{tsxFile ? <span style={{ fontWeight: 600 }}>{tsxFile.name}</span> : <span>Click to select .tsx file</span>}
           </button>
           <p style={{ fontSize: 12, color: D.muted, marginTop: 12, lineHeight: 1.5 }}>
-            支持上传组件文件（*.tsx），文件将被添加到 src/components/starter/ 目录。
+            Supports uploading component files (*.tsx), files will be added to the src/components/starter/ directory.
           </p>
         </div>
         <div style={{ display: "flex", justifyContent: "flex-end", gap: 8, padding: "12px 20px", borderTop: `1px solid ${D.border}` }}>
-          <button type="button" onClick={close} style={{ padding: "8px 20px", fontSize: 13, background: D.bg, border: `1px solid ${D.border}`, borderRadius: D.radius, cursor: "pointer", fontFamily: "inherit", color: D.text }}>取消</button>
+          <button type="button" onClick={close} style={{ padding: "8px 20px", fontSize: 13, background: D.bg, border: `1px solid ${D.border}`, borderRadius: D.radius, cursor: "pointer", fontFamily: "inherit", color: D.text }}>Cancel</button>
           <button type="button" disabled={!tsxFile || busy} onClick={() => void upload()} style={{
             padding: "8px 20px", fontSize: 13, fontWeight: 600, color: D.bg, background: D.text,
             border: "none", borderRadius: D.radius, cursor: "pointer", fontFamily: "inherit", opacity: (!tsxFile || busy) ? .5 : 1,
-          }}>{busy ? "上传中…" : "上传组件"}</button>
+          }}>{busy ? "Uploading..." : "Upload Component"}</button>
         </div>
       </div>
     </dialog>
   );
 }
 
-/* ── 隐藏原生侧边栏树 & 修正布局链 ── */
+/* ── Hide native sidebar tree & fix layout chain ── */
 
 function useHideNativeSidebar() {
   React.useEffect(() => {
@@ -633,7 +633,7 @@ function useHideNativeSidebar() {
         header.style.overflow = "hidden";
       }
 
-      const top = container.querySelector<HTMLElement>("[data-harness-sidebar-top]");
+      const top = container.querySelector<HTMLElement>("[data-accord-sidebar-top]");
       if (top) {
         top.style.flex = "1 1 0%";
         top.style.minHeight = "0";
@@ -646,7 +646,7 @@ function useHideNativeSidebar() {
   }, []);
 }
 
-/* ── 侧边栏顶部 ── */
+/* ── Sidebar top ── */
 
 function SidebarTop() {
   const api = useStorybookApi();
@@ -670,7 +670,7 @@ function SidebarTop() {
 
   return (
     <DarkCtx.Provider value={dark}>
-    <div data-harness-sidebar-top="" style={{
+    <div data-accord-sidebar-top="" style={{
       display: "flex", flexDirection: "column",
       height: "100%", overflow: "hidden",
       fontFamily: "system-ui,-apple-system,sans-serif",
@@ -683,11 +683,11 @@ function SidebarTop() {
       }}>
         <div style={{ display: "flex", alignItems: "center", padding: "0 4px" }}>
           <div style={{ fontSize: 21, fontWeight: 700, color: "var(--mgr-text)", letterSpacing: "-0.01em", flex: 1 }}>
-            HarnessDesign
+            DesignAccord
           </div>
           <button
             type="button"
-            title="切换暗色模式以预览所有暗色组件"
+            title="Toggle dark mode to preview all dark components"
             onClick={() => {
               const next = !dark;
               localStorage.setItem(DARK_KEY, String(next));
@@ -727,7 +727,7 @@ function SidebarTop() {
           }}
             onMouseEnter={e => e.currentTarget.style.background = primaryHover}
             onMouseLeave={e => e.currentTarget.style.background = primaryBg}>
-            <IcoPlus /> 添加组件
+            <IcoPlus /> Add Component
           </button>
 
           <button type="button"
@@ -761,7 +761,7 @@ function SidebarTop() {
   );
 }
 
-/* ── Spec.json 面板：与当前 Story 关联的规范编辑（落盘 *.spec.json；可选 storyHarness 变体层） ── */
+/* ── Spec.json panel: spec editing linked to the current Story (persists to *.spec.json; optional storyAccord variant layer) ── */
 
 type SpecData = {
   id: string;
@@ -776,7 +776,7 @@ type SpecData = {
   forbidden?: { htmlTag: string; reason: string; useInstead: string }[];
   corrections?: { id: string; violation: string; fixPrompt: string }[];
   referencePriority: string[];
-  /** Few-shot，进入 .cursorrules，每组件建议 1～2 条 */
+  /** Few-shot, written into .cursorrules, 1-2 per component recommended */
   examples?: { title: string; description?: string; snippet: string }[];
   tailwindExtend?: Record<string, Record<string, string>>;
   meta?: Record<string, unknown>;
@@ -784,7 +784,7 @@ type SpecData = {
 
 type SchemaListItem = { filename: string; id: string; componentName: string };
 
-type HarnessStoryContext = {
+type AccordStoryContext = {
   storyId: string | null;
   storyName: string | null;
   componentTitle: string | null;
@@ -810,12 +810,12 @@ function deepMergePlain(base: Record<string, unknown>, patch: Record<string, unk
   return out;
 }
 
-/** 将变体 patch 深度合并到组件基准 spec（数组字段整段替换） */
+/** Deep-merges variant patch into the component baseline spec (array fields are replaced wholesale) */
 function deepMergeSpecData(base: SpecData, patch: unknown): SpecData {
   if (!isPlainObject(patch)) return base;
   const out: Record<string, unknown> = { ...base };
   for (const k of Object.keys(patch)) {
-    if (k === "storyHarness") continue;
+    if (k === "storyAccord") continue;
     const pb = patch[k];
     const bk = (base as Record<string, unknown>)[k];
     if (isPlainObject(pb) && isPlainObject(bk)) {
@@ -845,8 +845,8 @@ const SPEC_PATCH_KEYS: (keyof SpecData)[] = [
   "meta",
 ];
 
-/** 相对组件基准的差异 → 写入 storyHarness[storyId]；无差异则删该变体条目 */
-function extractHarnessPatch(edited: SpecData, base: SpecData): Record<string, unknown> | undefined {
+/** Diff relative to component baseline -> writes to storyAccord[storyId]; if no diff, deletes that variant entry */
+function extractAccordPatch(edited: SpecData, base: SpecData): Record<string, unknown> | undefined {
   const patch: Record<string, unknown> = {};
   for (const key of SPEC_PATCH_KEYS) {
     if (JSON.stringify(edited[key]) !== JSON.stringify(base[key])) {
@@ -857,7 +857,7 @@ function extractHarnessPatch(edited: SpecData, base: SpecData): Record<string, u
 }
 
 function normalizeSpecBaseFromRaw(raw: Record<string, unknown>): SpecData {
-  const { harnessNarrative: _hn, storyHarness: _sh, ...rest } = raw;
+  const { accordNarrative: _hn, storyAccord: _sh, ...rest } = raw;
   const r = rest as SpecData;
   const wrapsRaw = raw.wraps;
   const wraps: SpecData["wraps"] =
@@ -882,7 +882,7 @@ function normalizeSpecBaseFromRaw(raw: Record<string, unknown>): SpecData {
   };
 }
 
-/** 落盘前压缩 primitives 写法，并递归处理 storyHarness 片段 */
+/** Compresses primitives notation before persisting, recursively processing storyAccord fragments */
 function compactSpecForDisk(doc: Record<string, unknown>): Record<string, unknown> {
   function compactWraps(w: unknown): unknown {
     if (!w || typeof w !== "object") return w;
@@ -892,7 +892,7 @@ function compactSpecForDisk(doc: Record<string, unknown>): Record<string, unknow
   }
   const out = { ...doc };
   if (out.wraps) out.wraps = compactWraps(out.wraps);
-  const sh = out.storyHarness;
+  const sh = out.storyAccord;
   if (sh && typeof sh === "object") {
     const next: Record<string, unknown> = { ...(sh as Record<string, unknown>) };
     for (const [k, frag] of Object.entries(next)) {
@@ -903,7 +903,7 @@ function compactSpecForDisk(doc: Record<string, unknown>): Record<string, unknow
         };
       }
     }
-    out.storyHarness = next;
+    out.storyAccord = next;
   }
   return out;
 }
@@ -937,19 +937,19 @@ function PropEditor({ prop, onChange }: { prop: SpecData["requiredProps"][0]; on
     <div style={{ border: "1px solid var(--mgr-border)", borderRadius: 6, padding: 10, marginBottom: 8, background: "var(--mgr-bg-muted)" }}>
       <div style={{ display: "flex", gap: 8, marginBottom: 6 }}>
         <div style={{ flex: 1 }}>
-          <div style={HS.label}>名称</div>
+          <div style={HS.label}>Name</div>
           <input style={HS.input} value={prop.name} onChange={e => onChange({ ...prop, name: e.target.value })} />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={HS.label}>类型</div>
+          <div style={HS.label}>Type</div>
           <input style={HS.input} value={prop.type} onChange={e => onChange({ ...prop, type: e.target.value })} />
         </div>
       </div>
-      <div style={HS.label}>描述</div>
+      <div style={HS.label}>Description</div>
       <input style={HS.input} value={prop.description} onChange={e => onChange({ ...prop, description: e.target.value })} />
       {prop.enumMap && (
         <div style={{ marginTop: 6 }}>
-          <div style={HS.label}>枚举映射 (JSON)</div>
+          <div style={HS.label}>Enum Map (JSON)</div>
           <textarea style={HS.mono} value={JSON.stringify(prop.enumMap, null, 2)} onChange={e => {
             try { const v = JSON.parse(e.target.value); onChange({ ...prop, enumMap: v }); } catch {}
           }} />
@@ -976,7 +976,7 @@ function CollapsibleSection({ title, hint, defaultOpen, children }: { title: str
           <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{title}</span>
           {hint ? <InfoTip text={hint} /> : null}
         </span>
-        <span style={{ color: "var(--mgr-text-muted)", fontSize: 11, fontWeight: 500, flexShrink: 0, marginLeft: 8 }}>{open ? "▼ 收起" : "▶ 展开"}</span>
+        <span style={{ color: "var(--mgr-text-muted)", fontSize: 11, fontWeight: 500, flexShrink: 0, marginLeft: 8 }}>{open ? "▼ Collapse" : "▶ Expand"}</span>
       </button>
       {open && <div style={{ padding: 12, borderTop: "1px solid var(--mgr-border)" }}>{children}</div>}
     </div>
@@ -989,7 +989,7 @@ function ExamplesEditor({ examples, onChange }: { examples: NonNullable<SpecData
     <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
       {list.map((ex, i) => (
         <div key={i} style={{ padding: 10, background: "var(--mgr-bg)", borderRadius: 6, border: "1px solid var(--mgr-border)" }}>
-          <div style={HS.label}>示例标题 {i + 1}</div>
+          <div style={HS.label}>Example Title {i + 1}</div>
           <input
             style={HS.input}
             value={ex.title}
@@ -999,11 +999,11 @@ function ExamplesEditor({ examples, onChange }: { examples: NonNullable<SpecData
               onChange(n);
             }}
           />
-          <div style={{ ...HS.label, marginTop: 6 }}>一句说明（可选）</div>
+          <div style={{ ...HS.label, marginTop: 6 }}>One-line description (optional)</div>
           <input
             style={HS.input}
             value={ex.description ?? ""}
-            placeholder="如：列表行内主按钮"
+            placeholder="e.g.: Primary button within list row"
             onChange={(e) => {
               const n = [...list];
               const v = e.target.value.trim();
@@ -1012,13 +1012,13 @@ function ExamplesEditor({ examples, onChange }: { examples: NonNullable<SpecData
             }}
           />
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6 }}>
-            <div style={HS.label}>最小 JSX</div>
-            <InfoTip text="最小可运行 JSX；保存并经 sync 后写入 .cursorrules，作为模型模仿结构与 import 的样板。" />
+            <div style={HS.label}>Minimal JSX</div>
+            <InfoTip text="Minimal runnable JSX; after saving and sync, written into .cursorrules as a template for models to imitate structure and imports." />
           </div>
           <textarea
             style={{ ...HS.mono, minHeight: 64 }}
             value={ex.snippet}
-            placeholder={'例如：<BusinessButton variant="default">保存</BusinessButton>'}
+            placeholder={'e.g.: <BusinessButton variant="default">Save</BusinessButton>'}
             onChange={(e) => {
               const n = [...list];
               n[i] = { ...ex, snippet: e.target.value };
@@ -1030,7 +1030,7 @@ function ExamplesEditor({ examples, onChange }: { examples: NonNullable<SpecData
             style={{ ...HS.btn(), marginTop: 6, fontSize: 11 }}
             onClick={() => onChange(list.filter((_, j) => j !== i))}
           >
-            删除此示例
+            Delete this example
           </button>
         </div>
       ))}
@@ -1038,9 +1038,9 @@ function ExamplesEditor({ examples, onChange }: { examples: NonNullable<SpecData
         <button
           type="button"
           style={{ ...HS.btn(), fontSize: 12 }}
-          onClick={() => onChange([...list, { title: `示例 ${list.length + 1}`, snippet: "" }])}
+          onClick={() => onChange([...list, { title: `Example ${list.length + 1}`, snippet: "" }])}
         >
-          + 添加示例（最多 2 条）
+          + Add example (max 2)
         </button>
       )}
     </div>
@@ -1053,7 +1053,7 @@ function BlacklistEditor({ rules, onChange }: { rules: SpecData["styleLock"]["bl
       {rules.map((rule, i) => (
         <div key={i} style={HS.blacklistRow}>
           <div style={{ flex: 2 }}>
-            <input style={HS.input} placeholder="描述" value={rule.description} onChange={e => {
+            <input style={HS.input} placeholder="Description" value={rule.description} onChange={e => {
               const n = [...rules]; n[i] = { ...rule, description: e.target.value }; onChange(n);
             }} />
           </div>
@@ -1069,7 +1069,7 @@ function BlacklistEditor({ rules, onChange }: { rules: SpecData["styleLock"]["bl
       ))}
       <button type="button" style={{ ...HS.btn(), fontSize: 11, marginTop: 6 }} onClick={() => {
         onChange([...rules, { description: "", pattern: "" }]);
-      }}>+ 添加黑名单规则</button>
+      }}>+ Add blacklist rule</button>
     </div>
   );
 }
@@ -1097,10 +1097,10 @@ function PrimitivesEditor({
           }}
         >
           <div style={{ flex: "1 1 140px", minWidth: 100 }}>
-            <div style={HS.label}>导出符号 symbol</div>
+            <div style={HS.label}>Export symbol</div>
             <input
               style={{ ...HS.input, fontFamily: "ui-monospace,monospace", fontSize: 12 }}
-              placeholder="如 TableCell、DialogContent"
+              placeholder="e.g. TableCell, DialogContent"
               value={row.symbol}
               onChange={(e) => {
                 const next = [...primitives];
@@ -1113,12 +1113,12 @@ function PrimitivesEditor({
           </div>
           <div style={{ flex: "1 1 160px", minWidth: 100 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-              <span style={HS.label}>Spec 展示名</span>
-              <InfoTip text="可与代码符号不同：写入 .cursorrules 时带上中文/业务称呼，便于模型理解子组件职责；留空则仅用 symbol。" />
+              <span style={HS.label}>Spec display name</span>
+              <InfoTip text="Can differ from code symbol: written into .cursorrules with a readable name to help models understand sub-component responsibilities; leave empty to use symbol only." />
             </div>
             <input
               style={HS.input}
-              placeholder="默认同 symbol，如：表头单元格"
+              placeholder="Defaults to symbol, e.g.: Table Header Cell"
               value={row.displayName ?? ""}
               onChange={(e) => {
                 const next = [...primitives];
@@ -1135,7 +1135,7 @@ function PrimitivesEditor({
             style={{ ...HS.btn(), fontSize: 11, flexShrink: 0 }}
             onClick={() => onChange(primitives.filter((_, j) => j !== i))}
           >
-            删除
+            Delete
           </button>
         </div>
       ))}
@@ -1144,15 +1144,15 @@ function PrimitivesEditor({
         style={{ ...HS.btn(), fontSize: 12 }}
         onClick={() => onChange([...primitives, { symbol: "" }])}
       >
-        + 添加子组件
+        + Add sub-component
       </button>
     </div>
   );
 }
 
-function useHarnessStoryContext(): HarnessStoryContext {
+function useAccordStoryContext(): AccordStoryContext {
   const api = useStorybookApi();
-  const [ctx, setCtx] = React.useState<HarnessStoryContext>({
+  const [ctx, setCtx] = React.useState<AccordStoryContext>({
     storyId: null,
     storyName: null,
     componentTitle: null,
@@ -1263,7 +1263,7 @@ function CreateSchemaPrompt({ leafTitle, onCreated }: { leafTitle: string; onCre
     <div style={{ ...HS.wrap, alignItems: "center", justifyContent: "center", color: "var(--mgr-text-tertiary)", gap: 12, padding: 24, textAlign: "center" as const }}>
           <div style={{ fontSize: 14, fontWeight: 500, color: "var(--mgr-text-secondary)" }}>{leafTitle}</div>
       <div style={{ fontSize: 12, lineHeight: 1.5, maxWidth: 320 }}>
-        尚未创建该组件的 <strong>Spec</strong> 规范（<code style={{ fontSize: 11 }}>*.spec.json</code>）
+        No <strong>Spec</strong> has been created for this component yet (<code style={{ fontSize: 11 }}>*.spec.json</code>)
       </div>
       <button
         type="button"
@@ -1278,22 +1278,22 @@ function CreateSchemaPrompt({ leafTitle, onCreated }: { leafTitle: string; onCre
           gap: 6,
         }}
       >
-        <IcoPlus /> {busy ? "创建中…" : "创建 Spec 规范"}
+        <IcoPlus /> {busy ? "Creating..." : "Create Spec"}
       </button>
       {error && <div style={{ fontSize: 12, color: "#dc2626", maxWidth: 300 }}>{error}</div>}
     </div>
   );
 }
 
-function HarnessPanel() {
+function AccordPanel() {
   const [schemas, setSchemas] = React.useState<SchemaListItem[]>([]);
   const [filename, setFilename] = React.useState("");
   const [baseCore, setBaseCore] = React.useState<SpecData | null>(null);
-  const [storyHarnessMap, setStoryHarnessMap] = React.useState<Record<string, unknown>>({});
+  const [storyAccordMap, setStoryAccordMap] = React.useState<Record<string, unknown>>({});
   const [spec, setSpec] = React.useState<SpecData | null>(null);
   const [status, setStatus] = React.useState<{ text: string; ok: boolean } | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const harnessCtx = useHarnessStoryContext();
+  const accordCtx = useAccordStoryContext();
 
   React.useEffect(() => {
     fetch(devApi("/api/schemas")).then(r => r.json()).then((list: SchemaListItem[]) => {
@@ -1302,11 +1302,11 @@ function HarnessPanel() {
   }, []);
 
   React.useEffect(() => {
-    const matched = matchSchemaForTitle(schemas, harnessCtx.leafTitle);
+    const matched = matchSchemaForTitle(schemas, accordCtx.leafTitle);
     if (matched && matched.filename !== filename) {
       setFilename(matched.filename);
     }
-  }, [harnessCtx.leafTitle, schemas, filename]);
+  }, [accordCtx.leafTitle, schemas, filename]);
 
   const load = React.useCallback(async () => {
     if (!filename) return;
@@ -1315,17 +1315,17 @@ function HarnessPanel() {
       const r = await fetch(devApi(`/api/schema/${encodeURIComponent(filename)}`));
       if (!r.ok) throw new Error(await r.text());
       const raw = (await r.json()) as Record<string, unknown>;
-      const shRaw = raw.storyHarness;
+      const shRaw = raw.storyAccord;
       const map = isPlainObject(shRaw) ? { ...shRaw } : {};
-      const { storyHarness: _sh, harnessNarrative: _legacyNarrative, ...rawBase } = raw;
+      const { storyAccord: _sh, accordNarrative: _legacyNarrative, ...rawBase } = raw;
       const normalized = normalizeSpecBaseFromRaw(rawBase);
-      setStoryHarnessMap(map);
+      setStoryAccordMap(map);
       setBaseCore(normalized);
     } catch (e) {
       setBaseCore(null);
-      setStoryHarnessMap({});
+      setStoryAccordMap({});
       setSpec(null);
-      setStatus({ text: `加载失败：${String(e)}`, ok: false });
+      setStatus({ text: `Load failed: ${String(e)}`, ok: false });
     }
     finally { setLoading(false); }
   }, [filename]);
@@ -1337,11 +1337,11 @@ function HarnessPanel() {
       setSpec(null);
       return;
     }
-    if (!harnessCtx.isStory || !harnessCtx.storyId) {
+    if (!accordCtx.isStory || !accordCtx.storyId) {
       setSpec(null);
       return;
     }
-    const frag = storyHarnessMap[harnessCtx.storyId];
+    const frag = storyAccordMap[accordCtx.storyId];
     const merged = deepMergeSpecData(baseCore, frag ?? {});
     setSpec({
       ...merged,
@@ -1351,7 +1351,7 @@ function HarnessPanel() {
         primitives: normalizePrimitives((merged.wraps?.primitives ?? []) as WrapPrimitiveInput[]),
       },
     });
-  }, [baseCore, storyHarnessMap, harnessCtx.storyId, harnessCtx.isStory]);
+  }, [baseCore, storyAccordMap, accordCtx.storyId, accordCtx.isStory]);
 
   function update<K extends keyof SpecData>(key: K, val: SpecData[K]) {
     if (!spec) return;
@@ -1360,8 +1360,8 @@ function HarnessPanel() {
 
   async function save() {
     if (!spec || !filename || !baseCore) return;
-    if (!harnessCtx.isStory || !harnessCtx.storyId) {
-      setStatus({ text: "请从侧栏选择一条具体 Story 变体后再保存（分组根节点 / 画布总览无法对应单一 storyId）。", ok: false });
+    if (!accordCtx.isStory || !accordCtx.storyId) {
+      setStatus({ text: "Please select a specific Story variant from the sidebar before saving (group root / canvas overview cannot map to a single storyId).", ok: false });
       return;
     }
     setStatus(null);
@@ -1373,12 +1373,12 @@ function HarnessPanel() {
           primitives: normalizePrimitives(spec.wraps.primitives as WrapPrimitiveInput[]),
         },
       };
-      const patch = extractHarnessPatch(pruned, baseCore);
-      const newMap = { ...storyHarnessMap };
-      if (!patch) delete newMap[harnessCtx.storyId];
-      else newMap[harnessCtx.storyId] = patch;
+      const patch = extractAccordPatch(pruned, baseCore);
+      const newMap = { ...storyAccordMap };
+      if (!patch) delete newMap[accordCtx.storyId];
+      else newMap[accordCtx.storyId] = patch;
       const doc: Record<string, unknown> = { ...(baseCore as unknown as Record<string, unknown>) };
-      if (Object.keys(newMap).length > 0) doc.storyHarness = newMap;
+      if (Object.keys(newMap).length > 0) doc.storyAccord = newMap;
       const r = await fetch(devApi("/api/save-schema"), {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filename, jsonText: JSON.stringify(compactSpecForDisk(doc), null, 2) }),
@@ -1393,26 +1393,26 @@ function HarnessPanel() {
         error?: string;
       };
       if (!r.ok) throw new Error(b.error ?? r.statusText);
-      if (!b.ok || !b.fileWritten) throw new Error(b.error ?? "未写入磁盘");
-      const parts: string[] = [`已写入磁盘：${b.path ?? filename}`];
+      if (!b.ok || !b.fileWritten) throw new Error(b.error ?? "Not written to disk");
+      const parts: string[] = [`Written to disk: ${b.path ?? filename}`];
       if (b.syncOk === false && b.syncError) {
-        parts.push(`⚠️ sync:harness 失败（spec 已落盘，请在本机终端手动执行 npm run sync:harness）：\n${b.syncError}`);
+        parts.push(`⚠️ sync:accord failed (spec is saved, please run npm run sync:accord manually in terminal):\n${b.syncError}`);
       } else if (b.syncOk !== false) {
-        parts.push("已执行 sync:harness。");
+        parts.push("sync:accord executed.");
       }
-      if (b.audit && b.audit.passed === false) parts.push(`⚠️ 审计: ${b.audit.output}`);
+      if (b.audit && b.audit.passed === false) parts.push(`⚠️ Audit: ${b.audit.output}`);
       const ok = b.syncOk !== false && (b.audit == null || b.audit.passed !== false);
       setStatus({ text: parts.join("\n"), ok });
       await load();
-    } catch (e) { setStatus({ text: `保存失败：${String(e)}`, ok: false }); }
+    } catch (e) { setStatus({ text: `Save failed: ${String(e)}`, ok: false }); }
   }
 
-  const matched = matchSchemaForTitle(schemas, harnessCtx.leafTitle);
+  const matched = matchSchemaForTitle(schemas, accordCtx.leafTitle);
 
-  if (!matched && harnessCtx.leafTitle) {
+  if (!matched && accordCtx.leafTitle) {
     return (
       <CreateSchemaPrompt
-        leafTitle={harnessCtx.leafTitle}
+        leafTitle={accordCtx.leafTitle}
         onCreated={(fn) => {
           setFilename(fn);
           fetch(devApi("/api/schemas")).then(r => r.json()).then((list: SchemaListItem[]) => setSchemas(list)).catch(() => {});
@@ -1425,10 +1425,10 @@ function HarnessPanel() {
     return <div style={{ ...HS.wrap, alignItems: "center", justifyContent: "center", color: "var(--mgr-text-tertiary)" }}>加载中…</div>;
   }
 
-  if (matched && (!harnessCtx.isStory || !harnessCtx.storyId)) {
+  if (matched && (!accordCtx.isStory || !accordCtx.storyId)) {
     return (
       <div style={{ ...HS.wrap, alignItems: "center", justifyContent: "center", color: "var(--mgr-text-tertiary)", gap: 10, padding: 24, textAlign: "center" as const, maxWidth: 360 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--mgr-text-secondary)" }}>{harnessCtx.leafTitle}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--mgr-text-secondary)" }}>{accordCtx.leafTitle}</div>
         <div style={{ fontSize: 12, lineHeight: 1.55 }}>
           <strong>Spec.json</strong> 面板按 <strong>Story 变体</strong> 写入：请在左侧树展开本组件，点选一条具体 Story（不要停在分组根或仅画布预览）。
         </div>
@@ -1453,14 +1453,14 @@ function HarnessPanel() {
           }}>{filename}</span>
           <div style={{ flex: 1 }} />
         </div>
-        {harnessCtx.storyId ? (
+        {accordCtx.storyId ? (
           <div style={{ fontSize: 11, color: "var(--mgr-text-muted)", lineHeight: 1.4, display: "flex", alignItems: "center", gap: 4 }}>
             <span>当前变体:</span>
             <span style={{
               fontWeight: 600, color: "var(--mgr-text)",
               padding: "1px 6px", borderRadius: 3,
               background: "var(--mgr-bg-subtle)",
-            }}>{harnessCtx.storyName ?? harnessCtx.storyId}</span>
+            }}>{accordCtx.storyName ?? accordCtx.storyId}</span>
           </div>
         ) : null}
       </div>
@@ -1468,7 +1468,7 @@ function HarnessPanel() {
       <div style={{ ...HS.body, flex: 1, minHeight: 0, overflow: "auto" }}>
         <CollapsibleSection
           title="Spec · 业务意图与依赖"
-          hint="与当前 Story 变体绑定：保存后写入 storyHarness[storyId]，与顶层 spec 深度合并，再经 sync 进入 .cursorrules；各变体互不影响。常用：Intent、schema 指令、首选 import。"
+          hint="与当前 Story 变体绑定：保存后写入 storyAccord[storyId]，与顶层 spec 深度合并，再经 sync 进入 .cursorrules；各变体互不影响。常用：Intent、schema 指令、首选 import。"
           defaultOpen={true}
         >
           <div style={HS.field}>
@@ -1515,7 +1515,7 @@ function HarnessPanel() {
 
         <CollapsibleSection
           title="Spec · 禁止项、纠错与 Few-shot"
-          hint="与 harness-audit、`.cursorrules` 对齐：原生标签替代关系、可判定违规→修复话术、可直接复制的最小 JSX；建议由熟悉业务语义的同学维护。"
+          hint="与 accord-audit、`.cursorrules` 对齐：原生标签替代关系、可判定违规→修复话术、可直接复制的最小 JSX；建议由熟悉业务语义的同学维护。"
           defaultOpen={false}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
@@ -1846,15 +1846,15 @@ addons.setConfig({
   },
 });
 
-addons.register("harness-design", () => {
-  addons.add("harness-design/sidebar-top", {
+addons.register("design-accord", () => {
+  addons.add("design-accord/sidebar-top", {
     type: types.experimental_SIDEBAR_TOP,
     render: () => <SidebarTop />,
   });
 
-  addons.add("harness-design/harness-panel", {
+  addons.add("design-accord/accord-panel", {
     type: types.PANEL,
     title: "Spec.json",
-    render: ({ active }) => active ? <HarnessPanel /> : null,
+    render: ({ active }) => active ? <AccordPanel /> : null,
   });
 });

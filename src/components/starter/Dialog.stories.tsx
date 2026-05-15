@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import dialogSrc from "./dialog.tsx?raw";
 import { Button } from "./button";
@@ -16,10 +16,10 @@ type DialogStoryArgs = {
 };
 
 const meta = {
-  title: "基础组件库/Dialog",
+  title: "Starter/Dialog",
   parameters: {
     layout: "fullscreen",
-    harnessTokenCompliance: storyHarnessCompliance({
+    accordTokenCompliance: storyAccordCompliance({
       ignoreArgNames: ["defaultOpen"],
     }),
   },
@@ -28,7 +28,7 @@ const meta = {
     ...audit.args,
   },
   argTypes: {
-    defaultOpen: { control: "boolean", description: "初始打开状态" },
+    defaultOpen: { control: "boolean", description: "Initially open state" },
     ...audit.argTypes,
   },
 } satisfies Meta<DialogStoryArgs>;
@@ -45,20 +45,20 @@ export const Default: Story = {
       <Dialog defaultOpen={args.defaultOpen}>
         <div className="flex min-h-screen items-center justify-center">
           <DialogTrigger asChild>
-            <Button variant="outline">打开对话框</Button>
+            <Button variant="outline">Open Dialog</Button>
           </DialogTrigger>
         </div>
         <DialogContent className={prev.className}>
           <DialogHeader className={slot[1]}>
-            <DialogTitle className={slot[3]}>对话框标题</DialogTitle>
-            <DialogDescription className={slot[4]}>这是一段描述文本。点击遮罩或按 Esc 关闭。</DialogDescription>
+            <DialogTitle className={slot[3]}>Dialog Title</DialogTitle>
+            <DialogDescription className={slot[4]}>This is a description. Click the overlay or press Esc to close.</DialogDescription>
           </DialogHeader>
-          <div className="py-4 text-sm">对话框内容区域</div>
+          <div className="py-4 text-sm">Dialog content area</div>
           <DialogFooter className={slot[2]}>
             <DialogClose asChild>
-              <Button variant="outline">取消</Button>
+              <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button type="button">确认</Button>
+            <Button type="button">Confirm</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

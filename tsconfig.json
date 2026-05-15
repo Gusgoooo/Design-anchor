@@ -14,5 +14,5 @@
       "vite-plugin-schema-api": ["./vite-plugin-schema-api.mjs"]
     }
   },
-  "include": ["src/**/*", ".storybook/preview.tsx", ".storybook/manager.tsx", "harness-vite.d.ts"]
+  "include": ["src/**/*", ".storybook/preview.tsx", ".storybook/manager.tsx", "accord-vite.d.ts"]
 }

@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * 将「线上 / 产品」下发的 tokens.json 拉取到本仓库唯一消费路径，并执行 sync:tokens。
+ * Pull the production/upstream tokens.json into this repo's canonical path, then run sync:tokens.
  *
- * 用法（在仓库根或含 src/design-tokens 的 kit 根执行）：
- *   HARNESS_TOKENS_URL=https://your-cdn.example.com/design/tokens.json npm run sync:tokens:pull
+ * Usage (run from repo root or a kit root containing src/design-tokens):
+ *   ACCORD_TOKENS_URL=https://your-cdn.example.com/design/tokens.json npm run sync:tokens:pull
  *   node scripts/pull-product-tokens.mjs --url=https://...
  *
- * 可选鉴权（勿把密钥写进仓库，用 CI Secret）：
- *   HARNESS_TOKENS_AUTH_HEADER='Bearer xxx'
+ * Optional auth (do not commit secrets; use CI secrets):
+ *   ACCORD_TOKENS_AUTH_HEADER='Bearer xxx'
  *
- * 可选指定根目录（消费者 .harness 子工程）：
- *   node scripts/pull-product-tokens.mjs --url=... --root=/path/to/.harness
+ * Optional root override (consumer .accord sub-project):
+ *   node scripts/pull-product-tokens.mjs --url=... --root=/path/to/.accord
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -30,27 +30,27 @@ function argValue(name) {
   return hit.slice(pre.length);
 }
 
-const url = argValue("--url") ?? process.env.HARNESS_TOKENS_URL;
+const url = argValue("--url") ?? process.env.ACCORD_TOKENS_URL;
 const repoRoot = path.resolve(argValue("--root") ?? process.cwd());
 const tokensPath = path.join(repoRoot, "src/design-tokens/tokens.json");
-const auth = process.env.HARNESS_TOKENS_AUTH_HEADER;
+const auth = process.env.ACCORD_TOKENS_AUTH_HEADER;
 
 if (!url || !String(url).trim()) {
   console.error(
-    "缺少令牌 URL：请设置环境变量 HARNESS_TOKENS_URL 或传入 --url=https://...\n" +
-      "示例：HARNESS_TOKENS_URL=https://api.example.com/v1/tokens.json npm run sync:tokens:pull",
+    "Missing token URL: set ACCORD_TOKENS_URL env var or pass --url=https://...\n" +
+      "Example: ACCORD_TOKENS_URL=https://api.example.com/v1/tokens.json npm run sync:tokens:pull",
   );
   process.exit(1);
 }
 
 function validateTokensDoc(doc) {
-  if (!doc || typeof doc !== "object") throw new Error("响应不是 JSON 对象");
+  if (!doc || typeof doc !== "object") throw new Error("Response is not a JSON object");
   if (doc.version === 2) {
-    if (!doc.seed || typeof doc.seed !== "object") throw new Error("v2 缺少 seed 对象");
+    if (!doc.seed || typeof doc.seed !== "object") throw new Error("v2 missing seed object");
     return;
   }
   if (doc.version === 1 || Array.isArray(doc.tokens)) return;
-  throw new Error("无法识别：需 version:2 + seed，或 v1 的 tokens 数组");
+  throw new Error("Unrecognized format: requires version:2 + seed, or v1 tokens array");
 }
 
 async function main() {
@@ -76,24 +76,24 @@ async function main() {
   try {
     doc = JSON.parse(text);
   } catch {
-    throw new Error("响应体不是合法 JSON");
+    throw new Error("Response body is not valid JSON");
   }
   validateTokensDoc(doc);
 
   const dir = path.dirname(tokensPath);
   if (!fs.existsSync(dir)) {
-    throw new Error(`目标目录不存在：${dir}（请确认 --root 指向含 src/design-tokens 的 kit 根）`);
+    throw new Error(`Target directory does not exist: ${dir} (ensure --root points to a kit root containing src/design-tokens)`);
   }
 
   const pretty = `${JSON.stringify(doc, null, 2)}\n`;
   fs.writeFileSync(tokensPath, pretty, "utf8");
-  console.log(`已写入 ${path.relative(repoRoot, tokensPath) || tokensPath}`);
+  console.log(`Wrote ${path.relative(repoRoot, tokensPath) || tokensPath}`);
 
   execSync("npm run sync:tokens", { cwd: repoRoot, stdio: "inherit" });
-  console.log("sync:tokens 已完成。");
+  console.log("sync:tokens complete.");
 }
 
 main().catch((e) => {
-  console.error(`pull-product-tokens 失败：${e.message || e}`);
+  console.error(`pull-product-tokens failed: ${e.message || e}`);
   process.exit(1);
 });

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./spinner.tsx?raw";
 import * as Comp from "./spinner";
@@ -9,9 +9,9 @@ const audit = autoClassControls(componentSrc);
 type Args = { [k: string]: string };
 
 const meta = {
-  title: "基础组件库/Spinner",
+  title: "Starter/Spinner",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    accordTokenCompliance: storyAccordCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],

@@ -3,7 +3,7 @@
   "hooks": {
     "afterFileEdit": [
       {
-        "command": "node .cursor/hooks/harness-audit-after-edit.mjs"
+        "command": "node .cursor/hooks/accord-audit-after-edit.mjs"
       }
     ]
   }

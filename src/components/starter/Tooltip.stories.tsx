@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./tooltip.tsx?raw";
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "./tooltip";
@@ -8,9 +8,9 @@ import { Button } from "./button";
 const audit = autoClassControls(componentSrc);
 
 const meta = {
-  title: "基础组件库/Tooltip",
+  title: "Starter/Tooltip",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children"] }),
   },
   args: { ...audit.args },
   argTypes: {
@@ -28,10 +28,10 @@ export const Default: Story = {
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline">悬停查看提示</Button>
+            <Button variant="outline">Hover for tooltip</Button>
           </TooltipTrigger>
           <TooltipContent className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>
-            <p>这是提示信息</p>
+            <p>This is a tooltip</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>

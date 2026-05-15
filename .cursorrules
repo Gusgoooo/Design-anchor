@@ -1,10 +1,10 @@
-# Harness Spec — 自动生成，请勿手改（修改 `*.spec.json` 后运行 npm run sync:harness 或 npm run generate:rules）
+# DesignAccord Spec — 自动生成，请勿手改（修改 `*.spec.json` 后运行 npm run sync:accord 或 npm run generate:rules）
 
 ## 核心契约（AI 必须遵守）
 
 1. **只用 Design Token**：颜色、间距、圆角等必须通过 token 语义类引用（如 `bg-primary`、`text-muted-foreground`），禁止硬编码色值或任意值 Tailwind。
 2. **组件优先**：页面开发必须使用 Spec 声明的业务组件，禁止原生 HTML 标签替代。
-3. **唯一数据源**：组件行为以 `src/harness/schema/components/*.spec.json` 为准，不凭记忆推断 API。
+3. **唯一数据源**：组件行为以 `src/accord/schema/components/*.spec.json` 为准，不凭记忆推断 API。
 
 ## 引用优先
 - **主路径**：每个组件只以该组件 `referencePriority[0]` 为默认 import；禁止在多条路径间随意切换。
@@ -36,7 +36,7 @@
 
 ## 样式锁定（黑名单思维）
 - 禁止在业务页面为表格/按钮等叠加任意值间距类（如 `m-[13px]`、`p-[7px]`）。
-- 禁止通过 className 覆盖下列语义（已在 harness styleLock 声明）：
+- 禁止通过 className 覆盖下列语义（已在 DesignAccord styleLock 声明）：
 ### Accordion (accordion)
 - 禁止覆盖过渡动画 — pattern: `^(transition-|duration-|data-)`
 ### AlertDialog (alert-dialog)

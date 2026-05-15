@@ -1,0 +1,101 @@
+{
+  "id": "sheet",
+  "componentName": "Sheet",
+  "version": "1.0.0",
+  "intent": "Slide-out panel (mobile drawer style, supports all 4 directions) for settings panels and detail views.",
+  "wraps": {
+    "module": "@/components/starter/sheet",
+    "primitives": [
+      "Sheet",
+      "SheetPortal",
+      "SheetOverlay",
+      "SheetTrigger",
+      "SheetClose",
+      "SheetContent",
+      "SheetHeader",
+      "SheetFooter",
+      "SheetTitle",
+      "SheetDescription"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "side",
+      "description": "Side prop",
+      "type": "\"top\" | \"bottom\" | \"left\" | \"right\"",
+      "required": false,
+      "defaultValue": "top",
+      "enumMap": {
+        "top": [
+          "inset-x-0",
+          "top-0",
+          "border-b",
+          "data-[state=closed]:slide-out-to-top",
+          "data-[state=open]:slide-in-from-top"
+        ],
+        "bottom": [
+          "inset-x-0",
+          "bottom-0",
+          "border-t",
+          "data-[state=closed]:slide-out-to-bottom",
+          "data-[state=open]:slide-in-from-bottom"
+        ],
+        "left": [
+          "inset-y-0",
+          "left-0",
+          "h-full",
+          "w-3/4",
+          "border-r",
+          "data-[state=closed]:slide-out-to-left",
+          "data-[state=open]:slide-in-from-left",
+          "sm:max-w-sm"
+        ],
+        "right": [
+          "inset-y-0",
+          "right-0",
+          "h-full",
+          "w-3/4",
+          "border-l",
+          "data-[state=closed]:slide-out-to-right",
+          "data-[state=open]:slide-in-from-right",
+          "sm:max-w-sm"
+        ]
+      }
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "flex-col",
+      "space-y-2",
+      "text-center"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override z-index positioning",
+        "pattern": "^(z-|fixed|absolute|inset)"
+      },
+      {
+        "description": "Do not override animations (controlled internally)",
+        "pattern": "^(animate-|transition-|duration-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Sheet from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "sheet",
+      "overlay"
+    ],
+    "category": "overlay",
+    "status": "stable"
+  }
+}

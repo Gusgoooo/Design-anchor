@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./progress.tsx?raw";
 import { Progress } from "./progress";
@@ -11,9 +11,9 @@ const audit = autoClassControls(componentSrc, {
 type Args = { value: number; [k: string]: unknown };
 
 const meta: Meta<Args> = {
-  title: "基础组件库/Progress",
+  title: "Starter/Progress",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["value", "children"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["value", "children"] }),
   },
   args: { value: 60, ...audit.args },
   argTypes: {

@@ -1,8 +1,8 @@
 /**
- * 自 arevalolance/design-system-template 的 `packages/ui/src/components/ui/button.tsx` 适配而来。
- * 上游快照：`vendor/design-system-template/packages-ui/`
+ * Adapted from arevalolance/design-system-template `packages/ui/src/components/ui/button.tsx`.
+ * Upstream snapshot: `vendor/design-system-template/packages-ui/`
  *
- * 颜色与圆角语义来自全局令牌：`src/design-tokens/tokens.json` → `sync:tokens`；样式请用 `bg-primary` 等语义类，勿手写离散色值。
+ * Colors and border-radius semantics come from global tokens: `src/design-tokens/tokens.json` -> `sync:tokens`; use semantic classes like `bg-primary`, do not hand-write discrete color values.
  */
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";

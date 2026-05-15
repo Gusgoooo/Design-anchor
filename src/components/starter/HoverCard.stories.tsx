@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./hover-card.tsx?raw";
 import * as Comp from "./hover-card";
@@ -9,9 +9,9 @@ const audit = autoClassControls(componentSrc);
 type Args = { [k: string]: string };
 
 const meta = {
-  title: "基础组件库/HoverCard",
+  title: "Starter/HoverCard",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    accordTokenCompliance: storyAccordCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],
@@ -24,11 +24,11 @@ export const Default: Story = {
   render: (args) => {
     return (
       <Comp.HoverCard>
-        <Comp.HoverCardTrigger asChild><button className="text-sm underline">悬停查看</button></Comp.HoverCardTrigger>
+        <Comp.HoverCardTrigger asChild><button className="text-sm underline">Hover to view</button></Comp.HoverCardTrigger>
         <Comp.HoverCardContent className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>
           <div className="space-y-1">
             <h4 className="text-sm font-semibold">Hover Card</h4>
-            <p className="text-sm text-muted-foreground">这是悬浮卡片的内容。</p>
+            <p className="text-sm text-muted-foreground">This is the hover card content.</p>
           </div>
         </Comp.HoverCardContent>
       </Comp.HoverCard>

@@ -3,7 +3,7 @@ import spacingScale from "./spacing-scale.generated.json";
 import { DESIGN_TOKENS } from "./token-registry";
 import { spacingUtilityPrefixLabelZh } from "./tw-class-audit";
 
-/** Story Controls 选项：tokenId 为 Controls 中的值，value 为映射到组件 prop 的字符串 */
+/** Story Controls options: tokenId is the value in Controls, value is the string mapped to component prop */
 export type StoryBindingRow = { tokenId: string; label?: string; value: string };
 
 type TokensRoot = {
@@ -31,22 +31,22 @@ export function mapBooleanFlag(tokenId: string | undefined, fallbackTokenId = "s
   return mapStoryBinding("booleanFlag", tokenId, fallbackTokenId) === "true";
 }
 
-/** CSS 变量引用（token id 对应 tokens.json 中生成的 --id） */
+/** CSS variable reference (token id corresponds to --id generated in tokens.json) */
 export function cssVar(tokenId: string): string {
   return `var(--${tokenId})`;
 }
 
-/** 透明：非 CSS 变量，供 Controls 选用 */
+/** Transparent: not a CSS variable, for Controls selection */
 export const STORY_COLOR_TRANSPARENT = "transparent";
 
-/** `transparent` 或空 → 透明；否则 `var(--tokenId)` */
+/** `transparent` or empty -> transparent; otherwise `var(--tokenId)` */
 export function cssVarOrTransparent(tokenId: string | undefined): string {
   if (tokenId == null || tokenId === "" || tokenId === STORY_COLOR_TRANSPARENT) return "transparent";
   return cssVar(tokenId);
 }
 
 /**
- * Story Controls 颜色类下拉：语义色 + 图表色 + 全量 antd 色板 map（与 token-registry 同步）。
+ * Story Controls color dropdown: semantic colors + chart colors + full antd palette map (synced with token-registry).
  */
 export function storyColorControlOptions(): string[] {
   const sem = tokenIdsByCategory("semantic");
@@ -55,17 +55,17 @@ export function storyColorControlOptions(): string[] {
   return [...new Set([...sem, ...chart, ...col])].sort((a, b) => a.localeCompare(b));
 }
 
-/** 颜色控件常用：首位为透明，便于「无填充 / 无边框」 */
+/** Common color controls: transparent first, for "no fill / no border" */
 export function storyColorControlOptionsWithTransparent(): string[] {
   return [STORY_COLOR_TRANSPARENT, ...storyColorControlOptions()];
 }
 
-/** 按分类列出可选 token id（供 argTypes.options） */
+/** List selectable token ids by category (for argTypes.options) */
 export function tokenIdsByCategory(category: string): string[] {
   return DESIGN_TOKENS.filter((t) => t.category === category).map((t) => t.id);
 }
 
-/** Story 用 Tailwind max-width 工具类（非设计 token；与 emit 中 MAX_WIDTH 语义一致） */
+/** Tailwind max-width utility classes for Story use (not design tokens; semantically consistent with MAX_WIDTH in emit) */
 export const STORY_TAILWIND_MAX_WIDTH_CLASSES: string[] = [
   "max-w-none",
   "max-w-xs",
@@ -86,7 +86,7 @@ export const STORY_TAILWIND_MAX_WIDTH_CLASSES: string[] = [
   "max-w-prose",
 ];
 
-/** Story 用 Tailwind min-width 工具类（非设计 token） */
+/** Tailwind min-width utility classes for Story use (not design tokens) */
 export const STORY_TAILWIND_MIN_WIDTH_CLASSES: string[] = [
   "min-w-0",
   "min-w-full",
@@ -107,8 +107,9 @@ export const STORY_TAILWIND_MIN_WIDTH_CLASSES: string[] = [
 ];
 
 /* ------------------------------------------------------------------ */
-/*  Story 语义化枚举控件：共享映射表                                    */
-/*  每个 MAP 伴随同 key 的 _LABEL：在 Storybook 下拉中显示实际值        */
+/*  Story semantic enum controls: shared mapping tables                 */
+/*  Each MAP has a corresponding _LABEL with same keys: shown in       */
+/*  Storybook dropdown with actual values                              */
 /* ------------------------------------------------------------------ */
 
 export const TEXT_SIZE_MAP: Record<string, string> = {
@@ -128,10 +129,10 @@ export const TONE_MAP: Record<string, string> = {
   primary: "text-primary",
 };
 export const TONE_LABEL: Record<string, string> = {
-  muted: "muted · 弱化前景",
-  default: "default · 默认前景",
-  secondary: "secondary · 次级前景",
-  primary: "primary · 主色",
+  muted: "muted · Muted foreground",
+  default: "default · Default foreground",
+  secondary: "secondary · Secondary foreground",
+  primary: "primary · Primary",
 };
 
 export const LEADING_MAP: Record<string, string> = {
@@ -156,7 +157,7 @@ export const TRIGGER_SIZES = ["default", "sm", "lg", "icon"] as const;
 
 type SpacingStepLabel = { suffix: string; zh: string; en: string };
 
-/** 与 `@theme --spacing-*` / Modular seed 一致 */
+/** Consistent with `@theme --spacing-*` / Modular seed */
 export const SPACING_MAP: Record<string, string> = Object.fromEntries(
   Object.keys(spacingScale.suffixToPx as Record<string, string>).map((k) => [k, k]),
 );
@@ -172,11 +173,11 @@ export const BG_MAP: Record<string, string> = {
   primary: "bg-primary",
 };
 export const BG_LABEL: Record<string, string> = {
-  transparent: "transparent · 透明",
-  card: "card · 卡片背景",
-  muted: "muted · 弱化背景",
-  background: "background · 页面背景",
-  primary: "primary · 主色背景",
+  transparent: "transparent · Transparent",
+  card: "card · Card background",
+  muted: "muted · Muted background",
+  background: "background · Page background",
+  primary: "primary · Primary background",
 };
 
 export const SHADOW_MAP: Record<string, string> = {
@@ -186,7 +187,7 @@ export const SHADOW_MAP: Record<string, string> = {
   lg: "shadow-lg",
 };
 export const SHADOW_LABEL: Record<string, string> = {
-  none: "none · 无", sm: "sm · 小", md: "md · 中", lg: "lg · 大",
+  none: "none · None", sm: "sm · Small", md: "md · Medium", lg: "lg · Large",
 };
 
 export const RADIUS_MAP: Record<string, string> = {
@@ -213,10 +214,10 @@ export const BORDER_STYLE_MAP: Record<string, string> = {
   dotted: "border border-dotted",
 };
 export const BORDER_STYLE_LABEL: Record<string, string> = {
-  none: "none · 无边框",
-  default: "default · 实线 1px",
-  dashed: "dashed · 虚线 1px",
-  dotted: "dotted · 点线 1px",
+  none: "none · No border",
+  default: "default · Solid 1px",
+  dashed: "dashed · Dashed 1px",
+  dotted: "dotted · Dotted 1px",
 };
 
 export const FONT_WEIGHT_MAP: Record<string, string> = {
@@ -262,7 +263,7 @@ export const OPACITY_LABEL: Record<string, string> = {
 };
 
 /* ------------------------------------------------------------------ */
-/*  tokenControls — 一键生成 args / argTypes / className builder       */
+/*  tokenControls — generate args / argTypes / className builder       */
 /* ------------------------------------------------------------------ */
 
 type TokenSlot = {
@@ -275,15 +276,15 @@ type TokenSlot = {
 };
 
 const TOKEN_SLOT_REGISTRY: Record<string, Omit<TokenSlot, "default">> = {
-  borderRadius:  { map: RADIUS_MAP,       labels: RADIUS_LABEL,       label: "圆角" },
-  fontSize:      { map: TEXT_SIZE_MAP,     labels: TEXT_SIZE_LABEL,     label: "字号" },
-  fontWeight:    { map: FONT_WEIGHT_MAP,   labels: FONT_WEIGHT_LABEL,  label: "字重" },
-  shadow:        { map: SHADOW_MAP,        labels: SHADOW_LABEL,       label: "阴影" },
-  bgColor:       { map: BG_MAP,           labels: BG_LABEL,           label: "背景色" },
-  textColor:     { map: TONE_MAP,         labels: TONE_LABEL,         label: "文字色调" },
-  borderStyle:   { map: BORDER_STYLE_MAP, labels: BORDER_STYLE_LABEL, label: "边框样式" },
-  duration:      { map: DURATION_MAP,     labels: DURATION_LABEL,     label: "动画时长" },
-  leading:       { map: LEADING_MAP,      labels: LEADING_LABEL,      label: "行高" },
+  borderRadius:  { map: RADIUS_MAP,       labels: RADIUS_LABEL,       label: "Border Radius" },
+  fontSize:      { map: TEXT_SIZE_MAP,     labels: TEXT_SIZE_LABEL,     label: "Font Size" },
+  fontWeight:    { map: FONT_WEIGHT_MAP,   labels: FONT_WEIGHT_LABEL,  label: "Font Weight" },
+  shadow:        { map: SHADOW_MAP,        labels: SHADOW_LABEL,       label: "Shadow" },
+  bgColor:       { map: BG_MAP,           labels: BG_LABEL,           label: "Background" },
+  textColor:     { map: TONE_MAP,         labels: TONE_LABEL,         label: "Text Tone" },
+  borderStyle:   { map: BORDER_STYLE_MAP, labels: BORDER_STYLE_LABEL, label: "Border Style" },
+  duration:      { map: DURATION_MAP,     labels: DURATION_LABEL,     label: "Duration" },
+  leading:       { map: LEADING_MAP,      labels: LEADING_LABEL,      label: "Line Height" },
 };
 
 type TokenControlsConfig = Record<string, string>;
@@ -299,7 +300,7 @@ export function tokenControls(config: TokenControlsConfig) {
     const prefix = prefixMatch?.[1]?.replace("spaceY", "space-y") ?? undefined;
 
     const reg = prefix
-      ? { map: SPACING_MAP, labels: SPACING_LABEL, label: `${prefix} 间距` }
+      ? { map: SPACING_MAP, labels: SPACING_LABEL, label: `${prefix} spacing` }
       : TOKEN_SLOT_REGISTRY[baseKey];
     if (!reg) continue;
 
@@ -313,7 +314,7 @@ export function tokenControls(config: TokenControlsConfig) {
       control: { type: "select" as const, labels: reg.labels },
       options: Object.keys(reg.map),
       description: reg.label,
-      table: { category: "样式令牌" },
+      table: { category: "Style Tokens" },
     };
     slots.push({ key, slot: reg, prefix });
   }
@@ -335,7 +336,7 @@ export function tokenControls(config: TokenControlsConfig) {
   return { args, argTypes, buildClassName };
 }
 
-/** 生成带标签的 argType，用于手写控件场景 */
+/** Generate a labeled argType for manually written control scenarios */
 export function labeledSelect(
   map: Record<string, string>,
   labels: Record<string, string>,

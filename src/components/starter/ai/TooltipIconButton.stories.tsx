@@ -13,7 +13,7 @@ type Args = ClassOverrideArgs & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/TooltipIconButton",
+  title: "AI/TooltipIconButton",
   parameters: { layout: "centered" },
   args: {
     tooltip: "Copy",

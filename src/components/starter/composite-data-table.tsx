@@ -9,7 +9,7 @@ export type CompositeDataColumnDef<T> = {
   id: string;
   header: React.ReactNode;
   accessor: (row: T) => React.ReactNode;
-  /** 若设置且 enableSort，该列表头可点击排序 */
+  /** If set and enableSort is true, this column header is clickable for sorting */
   sortKey?: keyof T;
   align?: "left" | "right";
 };
@@ -21,19 +21,19 @@ export interface CompositeDataTableProps<T> {
   variant?: "plain" | "striped";
   /** consumer className */
   className?: string;
-  /** 表格外层 overflow / min-w 等 */
+  /** Outer table container overflow / min-w etc. */
   tableClassName?: string;
   /**
-   * 纵向浅底条带：第 N 列（0 起算，仅数据列，不含复选框列）。
-   * null / undefined 关闭；越界视为关闭。
+   * Vertical light-band column: column N (0-indexed, data columns only, excludes checkbox column).
+   * null / undefined disables; out-of-bounds treated as disabled.
    */
   columnBandIndex?: number | null;
-  /** 复选框列 + 行选 + 全选 */
+  /** Checkbox column + row selection + select all */
   enableRowSelection?: boolean;
-  /** 表头排序（仅对声明了 sortKey 的列生效） */
+  /** Header sorting (only applies to columns that declare sortKey) */
   enableSort?: boolean;
   /**
-   * 行唯一键，多选与排序后状态依赖稳定 id；未传时退化为索引字符串（排序后多选可能异常）。
+   * Unique row key; multi-select and post-sort state depend on stable id. Falls back to index string when not provided (multi-select after sort may misbehave).
    */
   getRowKey?: (row: T) => string;
 }
@@ -48,7 +48,7 @@ function densityCellClasses(density: NonNullable<CompositeDataTableProps<unknown
   return twMerge(...(DENSITY_CLASSES[density] ?? DENSITY_CLASSES.default));
 }
 
-/** 与数据列垂直 padding 对齐的复选框列 */
+/** Checkbox column aligned with data column vertical padding */
 function densityCheckColumnClass(d: NonNullable<CompositeDataTableProps<unknown>["density"]>): string {
   const fixed = "w-11 min-w-[2.75rem] max-w-[2.75rem] box-border px-0 text-center align-middle";
   switch (d) {
@@ -91,14 +91,14 @@ function HeaderSelectAllCheckbox({
     <Checkbox
       checked={radixChecked}
       onCheckedChange={() => onChange()}
-      aria-label="全选"
+      aria-label="Select all"
     />
   );
 }
 
 /**
- * 复合表格内核：DataTable 与 KitchenSink 共用同一套密度 / 斑马纹 / 可选列条带 / 排序 / 多选。
- * - 关闭 enableRowSelection、enableSort 即为「简化版」展示表。
+ * Composite table core: DataTable and KitchenSink share the same density / stripes / optional column-band / sort / multi-select.
+ * - Disabling enableRowSelection and enableSort yields the "simplified" display table.
  */
 export function CompositeDataTable<T>({
   columns,
@@ -231,7 +231,7 @@ export function CompositeDataTable<T>({
                     <Checkbox
                       checked={selected.has(keyOf(row, i))}
                       onCheckedChange={() => toggleRow(row, i)}
-                      aria-label="选择行"
+                      aria-label="Select row"
                     />
                   </div>
                 </TableCell>

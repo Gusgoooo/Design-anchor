@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./select.tsx?raw";
 import { Button } from "./button";
@@ -20,11 +20,11 @@ const audit = autoClassControls(componentSrc);
 type Args = { size: "sm" | "default" | "lg"; [k: string]: unknown };
 
 const meta: Meta<Args> = {
-  title: "基础组件库/Select",
+  title: "Starter/Select",
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
-    harnessTokenCompliance: storyHarnessCompliance({
+    accordTokenCompliance: storyAccordCompliance({
       ignoreArgNames: ["children", "value", "defaultValue", "onValueChange", "size"],
     }),
   },
@@ -48,12 +48,12 @@ export const Default: Story = {
           size={args.size}
           className={audit.buildClassName(args as unknown as Record<string, string>)}
         >
-          <SelectValue placeholder="请选择" />
+          <SelectValue placeholder="Select" />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="a">选项 A</SelectItem>
-          <SelectItem value="b">选项 B</SelectItem>
-          <SelectItem value="c">选项 C</SelectItem>
+          <SelectItem value="a">Option A</SelectItem>
+          <SelectItem value="b">Option B</SelectItem>
+          <SelectItem value="c">Option C</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -67,12 +67,12 @@ export const AlignWithButtons: Story = {
         <div key={sz} className="flex flex-nowrap items-center gap-2">
           <span className="w-14 shrink-0 text-xs text-muted-foreground">{sz}</span>
           <Button type="button" size={sz} className="shrink-0">
-            按钮
+            Button
           </Button>
           <div className="w-[220px]">
             <Select>
               <SelectTrigger size={sz}>
-                <SelectValue placeholder="选择" />
+                <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="a">A</SelectItem>

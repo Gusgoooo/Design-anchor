@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./label.tsx?raw";
 import * as Comp from "./label";
@@ -9,9 +9,9 @@ const audit = autoClassControls(componentSrc);
 type Args = { [k: string]: string };
 
 const meta = {
-  title: "基础组件库/Label",
+  title: "Starter/Label",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    accordTokenCompliance: storyAccordCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],
@@ -22,7 +22,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => {
-    return (<Comp.Label className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>标签文本</Comp.Label>
+    return (<Comp.Label className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>Label Text</Comp.Label>
     );
   },
 };

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./button.tsx?raw";
 import { Button } from "./button";
@@ -9,9 +9,9 @@ const audit = autoClassControls(componentSrc);
 type Args = { variant: string; size: string; disabled: boolean; [k: string]: unknown };
 
 const meta: Meta<Args> = {
-  title: "基础组件库/Button",
+  title: "Starter/Button",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["variant", "size", "children", "asChild", "disabled"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["variant", "size", "children", "asChild", "disabled"] }),
   },
   args: { variant: "default", size: "default", disabled: false, ...audit.args },
   argTypes: {
@@ -35,7 +35,7 @@ export const Default: Story = {
       disabled={args.disabled}
       className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}
     >
-      按钮
+      Button
     </Button>
   ),
 };
@@ -55,9 +55,9 @@ export const AllVariants: Story = {
 export const AllSizes: Story = {
   render: (args) => (
     <div className="flex items-center gap-2">
-      <Button size="sm" className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>小按钮</Button>
-      <Button size="default" className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>默认按钮</Button>
-      <Button size="lg" className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>大按钮</Button>
+      <Button size="sm" className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>Small</Button>
+      <Button size="default" className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>Default</Button>
+      <Button size="lg" className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>Large</Button>
       <Button size="icon" className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>⚡</Button>
     </div>
   ),
@@ -67,9 +67,9 @@ export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => (
     <div className="flex gap-2">
-      <Button disabled={args.disabled} className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>禁用状态</Button>
-      <Button variant="outline" disabled={args.disabled} className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>禁用描边</Button>
-      <Button variant="destructive" disabled={args.disabled} className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>禁用危险</Button>
+      <Button disabled={args.disabled} className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>Disabled</Button>
+      <Button variant="outline" disabled={args.disabled} className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>Disabled Outline</Button>
+      <Button variant="destructive" disabled={args.disabled} className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>Disabled Destructive</Button>
     </div>
   ),
 };

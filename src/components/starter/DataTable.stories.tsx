@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./composite-data-table.tsx?raw";
 import { DataTable, type ColumnDef, type DataTableProps } from "./DataTable";
@@ -13,22 +13,22 @@ const audit = autoClassControls(componentSrc);
 type Row = { id: string; name: string; role: string };
 
 const columns: ColumnDef<Row>[] = [
-  { id: "name", header: "名称", accessor: (r) => r.name },
-  { id: "role", header: "角色", accessor: (r) => r.role },
+  { id: "name", header: "Name", accessor: (r) => r.name },
+  { id: "role", header: "Role", accessor: (r) => r.role },
 ];
 
 const sampleData: Row[] = [
-  { id: "1", name: "Northwind", role: "客户" },
-  { id: "2", name: "Contoso", role: "渠道" },
-  { id: "3", name: "Fabrikam", role: "供应商" },
+  { id: "1", name: "Northwind", role: "Customer" },
+  { id: "2", name: "Contoso", role: "Channel" },
+  { id: "3", name: "Fabrikam", role: "Supplier" },
 ];
 
 const sinkData: KitchenSinkRow[] = [
-  { id: "1", name: "Northwind", role: "客户", revenue: 128 },
-  { id: "2", name: "Contoso", role: "渠道", revenue: 86 },
-  { id: "3", name: "Fabrikam", role: "供应商", revenue: 210 },
-  { id: "4", name: "Adventure", role: "客户", revenue: 54 },
-  { id: "5", name: "Litware", role: "渠道", revenue: 92 },
+  { id: "1", name: "Northwind", role: "Customer", revenue: 128 },
+  { id: "2", name: "Contoso", role: "Channel", revenue: 86 },
+  { id: "3", name: "Fabrikam", role: "Supplier", revenue: 210 },
+  { id: "4", name: "Adventure", role: "Customer", revenue: 54 },
+  { id: "5", name: "Litware", role: "Channel", revenue: 92 },
 ];
 
 type DataTableStoryArgs = {
@@ -42,10 +42,10 @@ type DataTableStoryArgs = {
 };
 
 const meta = {
-  title: "基础组件库/Table",
+  title: "Starter/Table",
   component: DataTable,
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({
+    accordTokenCompliance: storyAccordCompliance({
       ignoreArgNames: ["columns", "data", "density", "variant", "columnBandIndex"],
     }),
   },
@@ -61,18 +61,18 @@ const meta = {
     density: {
       control: "select",
       options: ["compact", "comfortable", "default"],
-      table: { category: "表格" },
+      table: { category: "Table" },
     },
     variant: {
       control: "select",
       options: ["plain", "striped"],
-      table: { category: "表格" },
+      table: { category: "Table" },
     },
     columnBandIndex: {
       control: "select",
       options: [null, 0, 1],
-      description: "纵向浅底条带：第 N 列",
-      table: { category: "表格" },
+      description: "Vertical light-band column: column N",
+      table: { category: "Table" },
     },
     className: { table: { disable: true } },
     columns: { table: { disable: true } },
@@ -85,7 +85,7 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Playground: Story = {
-  name: "交互画布",
+  name: "Playground",
   render: (args) => {
     const a = args as DataTableStoryArgs;
     return (
@@ -102,7 +102,7 @@ export const Playground: Story = {
 };
 
 export const CompactStriped: Story = {
-  name: "紧凑+斑马纹",
+  name: "Compact + Striped",
   args: {
     density: "compact",
     variant: "striped",
@@ -123,7 +123,7 @@ export const CompactStriped: Story = {
 };
 
 export const Comfortable: Story = {
-  name: "宽松",
+  name: "Comfortable",
   args: {
     density: "comfortable",
     variant: "plain",
@@ -144,7 +144,7 @@ export const Comfortable: Story = {
 };
 
 export const SuperComposite: Story = {
-  name: "复合表格",
+  name: "Composite Table",
   args: {
     density: "default",
     variant: "striped",

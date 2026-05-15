@@ -1,8 +1,11 @@
 {
-  "name": "harness-design",
+  "name": "design-accord",
   "version": "1.0.0",
   "description": "AI coding governance pipeline — define design protocols, generate components + rules + audits automatically",
   "private": false,
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/"
+  },
   "type": "module",
   "license": "MIT",
   "keywords": [
@@ -11,10 +14,10 @@
     "tailwindcss",
     "ai-coding",
     "component-library",
-    "harness"
+    "design-accord"
   ],
   "bin": {
-    "harness": "./bin/harness.mjs"
+    "accord": "./bin/accord.mjs"
   },
   "files": [
     "bin/",
@@ -31,8 +34,8 @@
     "vite.config.ts",
     "vite-plugin-schema-api.mjs",
     "components.json",
-    "harness-vite.d.ts",
-    "tailwind.harness.generated.ts",
+    "accord-vite.d.ts",
+    "tailwind.accord.generated.ts",
     "src/design-tokens/spacing-scale.generated.json"
   ],
   "scripts": {
@@ -40,8 +43,8 @@
     "generate:rules": "node scripts/generate-cursorrules.mjs",
     "sync:tokens": "node scripts/emit-design-tokens-css.mjs",
     "sync:tokens:pull": "node scripts/pull-product-tokens.mjs",
-    "sync:harness": "npm run sync:tokens && node scripts/sync-from-schema.mjs",
-    "harness:audit": "node scripts/harness-audit.mjs",
+    "sync:accord": "npm run sync:tokens && node scripts/sync-from-schema.mjs",
+    "accord:audit": "node scripts/accord-audit.mjs",
     "dev:portal": "vite --config src/design-portal/vite.config.ts --open",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",

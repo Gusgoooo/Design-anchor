@@ -1,0 +1,14 @@
+---
+description: When implementing enterprise back-office workflows (filtering, forms, empty states, dialogs, etc.), cross-reference the IBM Carbon Universal Patterns official documentation (this repo only indexes the links; full content is on the official site).
+alwaysApply: false
+---
+
+# Carbon Patterns — How to Look Up
+
+This repo **does not embed** IBM's full content; the authoritative source is on the official site.
+
+1. **Human-readable table of contents**: `docs/patterns/carbon-design-system.md`
+2. **Link inventory (JSON)**: `src/accord/patterns/carbon-universal-patterns.json`
+3. **Overview**: [Carbon — Patterns overview](https://www.carbondesignsystem.com/patterns/overview/)
+
+When implementing, always prioritize satisfying this repo's **`*.spec.json`**, `.cursorrules`, and Business component constraints; Carbon is for **composition and workflow** reference only — component APIs follow DesignAccord.

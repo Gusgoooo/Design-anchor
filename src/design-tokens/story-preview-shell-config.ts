@@ -1,6 +1,6 @@
 /**
- * Story 级通用工具：radius 选项、合规声明。
- * 不含任何包装组件或全局覆盖。
+ * Story-level utility: radius options, compliance declaration.
+ * Does not contain any wrapper components or global overrides.
  */
 import { tokenIdsByCategory } from "./story-controls";
 
@@ -10,7 +10,7 @@ export function radiusTokenOptions(): string[] {
   );
 }
 
-export function storyHarnessCompliance(opts: {
+export function storyAccordCompliance(opts: {
   extraTokenIds?: string[];
   ignoreArgNames?: string[];
 }) {

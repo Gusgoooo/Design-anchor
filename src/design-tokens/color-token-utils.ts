@@ -1,4 +1,4 @@
-/** 是否为可在 OKLCH 编辑器中编辑的 CSS 颜色字面量 */
+/** Whether the value is a CSS color literal editable in the OKLCH editor */
 export function isColorCssValue(s: string): boolean {
   const t = s.trim().toLowerCase();
   return (

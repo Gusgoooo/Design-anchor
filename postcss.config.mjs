@@ -1,4 +1,4 @@
-/** Tailwind 由 Vite 的 @tailwindcss/vite 处理；此处仅保留后续 PostCSS 插件扩展位 */
+/** Tailwind is handled by Vite's @tailwindcss/vite; this file only reserves a slot for future PostCSS plugins */
 export default {
   plugins: {},
 };

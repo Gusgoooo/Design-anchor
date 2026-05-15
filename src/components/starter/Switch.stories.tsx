@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./switch.tsx?raw";
 import { Switch } from "./switch";
 import { Label } from "./label";
 
-/** Switch 轨道/拇指宽高、药丸圆角与拇指阴影由实现锁定，不在 Controls 里映射 spacing / radius / shadow */
+/** Switch track/thumb dimensions, pill radius, and thumb shadow are locked by implementation; not mapped in Controls for spacing / radius / shadow */
 const audit = autoClassControls(componentSrc, {
   hidePrefixes: ["w", "h", "rounded", "shadow"],
 });
@@ -17,9 +17,9 @@ type SwitchArgs = {
 };
 
 const meta = {
-  title: "基础组件库/Switch",
+  title: "Starter/Switch",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children", "id"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children", "id"] }),
   },
   args: {
     checked: false,
@@ -29,11 +29,11 @@ const meta = {
   argTypes: {
     checked: {
       control: "boolean",
-      description: "受控演示：是否打开",
+      description: "Controlled demo: whether on",
     },
     disabled: {
       control: "boolean",
-      description: "禁用态",
+      description: "Disabled state",
     },
     className: { table: { disable: true } },
     children: { table: { disable: true } },
@@ -60,7 +60,7 @@ export const Default: Story = {
           disabled={disabled}
           className={spreadAutoPreviewProps(audit, rest as ClassOverrideArgs).className}
         />
-        <Label htmlFor="airplane">飞行模式</Label>
+        <Label htmlFor="airplane">Airplane Mode</Label>
       </div>
     );
   },

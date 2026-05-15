@@ -12,7 +12,7 @@ import { DesignTokenShowcase } from "./DesignTokenShowcase";
 import type { DesignTokenEntry } from "./token-registry";
 import { detectTokenValueKind, parseCssLength, formatCssLength, type TokenValueKind } from "./token-value-type";
 
-/** 与 Vite 开发服同源；显式 origin，避免相对路径未命中保存 API */
+/** Same origin as the Vite dev server; explicit origin to avoid relative paths missing the save API */
 function devApi(path: string): string {
   if (typeof window === "undefined" || !path.startsWith("/")) return path;
   return `${window.location.origin}${path}`;
@@ -82,7 +82,7 @@ type TokensDocV2 = {
   version: 2;
   seed: Record<string, string | number>;
   seedDark?: Record<string, string | number>;
-  /** 覆盖派生 CSS 变量：light / dark 各自独立，写回 tokens.json 并参与 sync:tokens */
+  /** Override derived CSS variables: light / dark are independent, written back to tokens.json and included in sync:tokens */
   mapOverrides?: { light?: Record<string, string>; dark?: Record<string, string> };
   customSeeds?: Record<string, string>;
   fixedAliases?: Record<string, string | number>;
@@ -169,7 +169,7 @@ function normalizeDoc(raw: string): TokensDoc | null {
   }
 }
 
-/* ── Length slider 范围自适应 ── */
+/* ── Length slider adaptive range ── */
 const UNIT_RANGES: Record<string, { min: number; max: number; step: number }> = {
   rem: { min: 0, max: 5, step: 0.0625 },
   em: { min: 0, max: 5, step: 0.0625 },
@@ -178,7 +178,7 @@ const UNIT_RANGES: Record<string, { min: number; max: number; step: number }> = 
 };
 const DEFAULT_RANGE = { min: 0, max: 10, step: 0.1 };
 
-/* ── 颜色编辑器子组件 ── */
+/* ── Color editor sub-component ── */
 function ColorEditor({
   value,
   onChange,
@@ -238,7 +238,7 @@ function ColorEditor({
         </div>
 
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">CSS 颜色值</Label>
+          <Label className="text-xs text-muted-foreground">CSS Color Value</Label>
           <Input
             defaultValue={value}
             key={value}
@@ -256,7 +256,7 @@ function ColorEditor({
   );
 }
 
-/* ── CSS 长度编辑器子组件 ── */
+/* ── CSS length editor sub-component ── */
 function LengthEditor({
   value,
   onChange,
@@ -297,7 +297,7 @@ function LengthEditor({
 
   return (
     <div className="flex flex-col gap-6">
-      {/* 可视化预览 */}
+      {/* Visual preview */}
       <div className="flex items-center gap-4">
         <Ruler size={20} className="shrink-0 text-muted-foreground" />
         <div className="flex flex-1 items-end gap-3">
@@ -314,7 +314,7 @@ function LengthEditor({
       {/* Slider */}
       <div className="space-y-2">
         <Label className="text-xs text-muted-foreground">
-          拖拽调节（{range.min}{unit} – {range.max}{unit}，步长 {range.step}{unit}）
+          Drag to adjust ({range.min}{unit} – {range.max}{unit}, step {range.step}{unit})
         </Label>
         <input
           type="range"
@@ -327,10 +327,10 @@ function LengthEditor({
         />
       </div>
 
-      {/* 数值 + 单位 */}
+      {/* Number + Unit */}
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">数值</Label>
+          <Label className="text-xs text-muted-foreground">Value</Label>
           <Input
             type="number"
             min={0}
@@ -342,7 +342,7 @@ function LengthEditor({
           />
         </div>
         <div className="space-y-2">
-          <Label className="text-xs text-muted-foreground">单位</Label>
+          <Label className="text-xs text-muted-foreground">Unit</Label>
           <select
             value={unit}
             onChange={(e) => onChange(formatCssLength(num, e.target.value))}
@@ -355,9 +355,9 @@ function LengthEditor({
         </div>
       </div>
 
-      {/* 原始文本输入 */}
+      {/* Raw text input */}
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">CSS 值（自由输入）</Label>
+        <Label className="text-xs text-muted-foreground">CSS Value (free input)</Label>
         <Input
           value={textVal}
           onChange={(e) => setTextVal(e.target.value)}
@@ -372,7 +372,7 @@ function LengthEditor({
   );
 }
 
-/* ── 通用文本编辑器子组件 ── */
+/* ── Generic text editor sub-component ── */
 function GenericEditor({
   value,
   onChange,
@@ -390,11 +390,11 @@ function GenericEditor({
   return (
     <div className="flex flex-col gap-4">
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">当前值</Label>
+        <Label className="text-xs text-muted-foreground">Current Value</Label>
         <p className="font-mono text-sm break-all text-foreground">{value}</p>
       </div>
       <div className="space-y-2">
-        <Label className="text-xs text-muted-foreground">新值</Label>
+        <Label className="text-xs text-muted-foreground">New Value</Label>
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -409,7 +409,7 @@ function GenericEditor({
   );
 }
 
-/* ── 根据值类型选择编辑器 ── */
+/* ── Choose editor by value type ── */
 function TokenValueEditor({
   kind,
   value,
@@ -430,12 +430,12 @@ function TokenValueEditor({
 }
 
 const KIND_LABEL: Record<TokenValueKind, string> = {
-  color: "颜色",
-  length: "长度 / 尺寸",
-  generic: "通用",
+  color: "Color",
+  length: "Length / Size",
+  generic: "Generic",
 };
 
-/* ── 主页面 ── */
+/* ── Main page ── */
 
 export function DesignTokenPage() {
   const [raw, setRaw] = React.useState("");
@@ -447,7 +447,7 @@ export function DesignTokenPage() {
   const [copied, setCopied] = React.useState(false);
   const [codeOpen, setCodeOpen] = React.useState(false);
   const codeDialogRef = React.useRef<HTMLDialogElement>(null);
-  const DARK_KEY = "harness-dark-mode";
+  const DARK_KEY = "accord-dark-mode";
   const [darkMode, setDarkMode] = React.useState(() => {
     if (typeof localStorage !== "undefined") return localStorage.getItem(DARK_KEY) === "true";
     if (typeof document !== "undefined") return document.documentElement.classList.contains("dark");
@@ -457,7 +457,7 @@ export function DesignTokenPage() {
   React.useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("dark", darkMode);
-    // 与 Storybook Manager appContentBg 一致，画布与 Controls 面板同色
+    // Consistent with Storybook Manager appContentBg, canvas matches Controls panel color
     document.body.style.background = darkMode ? "#1c1c1e" : "#ffffff";
     localStorage.setItem(DARK_KEY, String(darkMode));
     try {
@@ -487,7 +487,7 @@ export function DesignTokenPage() {
       setRaw(JSON.stringify(tokensFallback as object, null, 2));
       setSaveApiAvailable(false);
       setStatus(
-        "未命中保存 API（常见原因：① 使用 `storybook build` 的静态站点无 Node 中间件；② 未通过 `npm run storybook` 启动）。已加载打包内嵌的 tokens.json，可本地改文案；**写回磁盘**请在本仓库执行 `npm run storybook` 后再点「保存并同步」。",
+        "Save API not available (common causes: 1) static site from `storybook build` has no Node middleware; 2) not started via `npm run storybook`). Loaded bundled tokens.json for local editing; to **write to disk**, run `npm run storybook` in this repo first, then click \"Save & Sync\".",
       );
     } finally {
       setLoading(false);
@@ -550,11 +550,11 @@ export function DesignTokenPage() {
     try {
       JSON.parse(raw);
     } catch (e) {
-      setStatus(`JSON 无效：${e instanceof Error ? e.message : String(e)}`);
+      setStatus(`Invalid JSON: ${e instanceof Error ? e.message : String(e)}`);
       return;
     }
     if (!saveApiAvailable) {
-      setStatus("当前环境无 /api/save-design-tokens，无法写盘。请运行 `npm run storybook` 后重试，或手动粘贴到 src/design-tokens/tokens.json。");
+      setStatus("No /api/save-design-tokens available in current environment, cannot write to disk. Please run `npm run storybook` and retry, or manually paste into src/design-tokens/tokens.json.");
       return;
     }
     try {
@@ -571,19 +571,19 @@ export function DesignTokenPage() {
         error?: string;
       };
       if (!res.ok) throw new Error(body.error ?? res.statusText);
-      if (!body.ok || !body.fileWritten) throw new Error(body.error ?? "未写入磁盘");
-      const parts: string[] = ["已写入磁盘：src/design-tokens/tokens.json"];
+      if (!body.ok || !body.fileWritten) throw new Error(body.error ?? "Not written to disk");
+      const parts: string[] = ["Written to disk: src/design-tokens/tokens.json"];
       if (body.syncOk === false && body.syncError) {
         parts.push(
-          `⚠️ sync:tokens 失败（JSON 已落盘，请在本机终端手动执行 npm run sync:tokens）：\n${body.syncError}`,
+          `⚠️ sync:tokens failed (JSON saved to disk, please manually run npm run sync:tokens in your terminal):\n${body.syncError}`,
         );
       } else if (body.syncOk !== false) {
-        parts.push("已执行 sync:tokens（design-tokens.generated.css 已更新）。");
+        parts.push("sync:tokens executed (design-tokens.generated.css updated).");
       }
       setStatus(parts.join("\n"));
       await load();
     } catch (e) {
-      setStatus(`保存失败：${e instanceof Error ? e.message : String(e)}`);
+      setStatus(`Save failed: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
@@ -697,10 +697,10 @@ export function DesignTokenPage() {
           <div className="min-w-0 space-y-2">
             <h1 className="text-3xl font-semibold tracking-tight">DesignToken</h1>
             <p className="max-w-3xl text-sm leading-relaxed text-muted-foreground">
-              Seed 与「暗色预览」下的 Seed 分别写入 <code className="rounded bg-muted px-1 font-mono text-xs">seed</code> /{" "}
-              <code className="rounded bg-muted px-1 font-mono text-xs">seedDark</code>；梯度变量可按当前预览模式单独覆盖并保存到{" "}
+              Seeds in light and dark preview are written to <code className="rounded bg-muted px-1 font-mono text-xs">seed</code> /{" "}
+              <code className="rounded bg-muted px-1 font-mono text-xs">seedDark</code> respectively; derived tokens can be individually overridden per preview mode and saved to{" "}
               <code className="rounded bg-muted px-1 font-mono text-xs">mapOverrides.light</code> /{" "}
-              <code className="rounded bg-muted px-1 font-mono text-xs">dark</code>。保存后执行 sync:tokens 生成 CSS。
+              <code className="rounded bg-muted px-1 font-mono text-xs">dark</code>. After saving, sync:tokens generates CSS.
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -708,7 +708,7 @@ export function DesignTokenPage() {
               type="button"
               variant="outline"
               onClick={() => setDarkMode(!darkMode)}
-              title={darkMode ? "切换到浅色模式" : "切换到暗色模式"}
+              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
             >
               {darkMode ? <Sun size={14} className="mr-2" /> : <Moon size={14} className="mr-2" />}
               {darkMode ? "Light" : "Dark"}
@@ -718,10 +718,10 @@ export function DesignTokenPage() {
               JSON
             </Button>
             <Button type="button" variant="outline" onClick={() => void load()} disabled={loading}>
-              重新加载
+              Reload
             </Button>
             <Button type="button" onClick={() => void save()}>
-              保存并同步
+              Save & Sync
             </Button>
           </div>
         </div>
@@ -738,7 +738,7 @@ export function DesignTokenPage() {
         />
       </div>
 
-      {/* ── Token 编辑弹框 ── */}
+      {/* ── Token edit dialog ── */}
       <dialog
         ref={dialogRef}
         className="rounded-xl border border-border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-zinc-950/30 backdrop:backdrop-blur-md"
@@ -755,14 +755,14 @@ export function DesignTokenPage() {
       >
         {pickedRow && picker && !tokenMissing ? (
           <div className="flex flex-col" onClick={(e) => e.stopPropagation()}>
-            {/* 标题栏：左右排版，无分割线 */}
+            {/* Title bar: left-right layout, no divider */}
             <div className="flex items-start justify-between gap-3 px-5 pt-5 pb-3">
               <div className="flex min-w-0 items-center gap-3">
                 <h2 className="truncate text-sm font-semibold text-foreground">
                   {picker.tokenId}
                 </h2>
                 <span className="shrink-0 text-xs text-muted-foreground">
-                  {picker.field === "light" ? "Light" : "Dark"} 模式
+                  {picker.field === "light" ? "Light" : "Dark"} mode
                 </span>
                 <span className="shrink-0 rounded bg-muted px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
                   {KIND_LABEL[valueKind]}
@@ -770,7 +770,7 @@ export function DesignTokenPage() {
               </div>
               <button
                 type="button"
-                aria-label="关闭"
+                aria-label="Close"
                 className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 onClick={closeDialog}
               >
@@ -778,7 +778,7 @@ export function DesignTokenPage() {
               </button>
             </div>
 
-            {/* 主体 */}
+            {/* Body */}
             <div className="px-5 pb-3">
               <TokenValueEditor
                 kind={valueKind}
@@ -787,33 +787,33 @@ export function DesignTokenPage() {
               />
             </div>
 
-            {/* 底部操作栏 */}
+            {/* Bottom action bar */}
             <div className="flex items-center gap-2 px-5 pb-5">
               <Button type="button" variant="outline" size="sm" onClick={resetPickedToBundledDefault}>
                 <RotateCcw size={14} className="mr-2" />
-                恢复默认
+                Reset Default
               </Button>
               <Button type="button" variant="outline" size="sm" onClick={() => void copyCurrentValue()}>
                 {copied ? <Check size={14} className="mr-2" /> : <Copy size={14} className="mr-2" />}
-                {copied ? "已复制" : "复制值"}
+                {copied ? "Copied" : "Copy Value"}
               </Button>
               <Button type="button" size="sm" className="ml-auto" onClick={() => void save()}>
                 <Save size={14} className="mr-2" />
-                保存
+                Save
               </Button>
             </div>
           </div>
         ) : tokenMissing ? (
           <div className="p-6">
-            <p className="text-sm text-destructive">当前 JSON 中不存在该 token，请修正或重新加载后再试。</p>
+            <p className="text-sm text-destructive">This token does not exist in the current JSON. Please fix or reload and try again.</p>
             <Button type="button" variant="outline" className="mt-4" onClick={closeDialog}>
-              关闭
+              Close
             </Button>
           </div>
         ) : null}
       </dialog>
 
-      {/* ── 代码查看/编辑模态框 ── */}
+      {/* ── Code view/edit modal ── */}
       <dialog
         ref={codeDialogRef}
         className="fixed top-1/2 left-1/2 z-50 m-0 w-[calc(100vw-4rem)] max-w-3xl -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-0 text-card-foreground shadow-2xl backdrop:bg-zinc-950/30 backdrop:backdrop-blur-md"
@@ -825,14 +825,14 @@ export function DesignTokenPage() {
             <div className="flex items-center gap-3">
               <h2 className="text-sm font-semibold text-foreground">tokens.json</h2>
               {saveApiAvailable ? (
-                <span className="text-xs text-emerald-600 dark:text-emerald-400">API 已连接</span>
+                <span className="text-xs text-emerald-600 dark:text-emerald-400">API Connected</span>
               ) : (
-                <span className="text-xs text-amber-600 dark:text-amber-400">只读内嵌</span>
+                <span className="text-xs text-amber-600 dark:text-amber-400">Read-only Embedded</span>
               )}
             </div>
             <button
               type="button"
-              aria-label="关闭"
+              aria-label="Close"
               className="shrink-0 rounded-md p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
               onClick={() => setCodeOpen(false)}
             >
@@ -847,7 +847,7 @@ export function DesignTokenPage() {
               </div>
             ) : null}
             {!doc ? (
-              <p className="mb-3 text-xs text-destructive">JSON 无法解析，请检查语法。</p>
+              <p className="mb-3 text-xs text-destructive">JSON cannot be parsed, please check syntax.</p>
             ) : null}
             <textarea
               className="h-[min(60vh,480px)] w-full rounded-lg border border-input bg-background p-4 font-mono text-xs leading-relaxed text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
@@ -859,11 +859,11 @@ export function DesignTokenPage() {
 
           <div className="flex items-center justify-end gap-2 px-5 pb-5">
             <Button type="button" variant="outline" size="sm" onClick={() => setCodeOpen(false)}>
-              关闭
+              Close
             </Button>
             <Button type="button" size="sm" onClick={() => { void save(); }}>
               <Save size={14} className="mr-2" />
-              保存并同步
+              Save & Sync
             </Button>
           </div>
         </div>

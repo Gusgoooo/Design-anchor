@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./navigation-menu.tsx?raw";
 import * as Comp from "./navigation-menu";
@@ -9,15 +9,15 @@ const audit = autoClassControls(componentSrc);
 
 type Args = { [k: string]: string };
 
-/** Storybook 依赖 URL；演示用锚点会改写 hash，破坏路由并易被误认为「全屏/丢界面」 */
+/** Storybook depends on URL; demo anchors rewrite the hash, breaking routing and easily mistaken for "fullscreen/lost UI" */
 function preventStoryNav(e: React.MouseEvent<HTMLAnchorElement>) {
   e.preventDefault();
 }
 
 const meta = {
-  title: "基础组件库/NavigationMenu",
+  title: "Starter/NavigationMenu",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    accordTokenCompliance: storyAccordCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],
@@ -35,12 +35,12 @@ export const Default: Story = {
         <Comp.NavigationMenuList className={slot[0]}>
           <Comp.NavigationMenuItem>
             <Comp.NavigationMenuLink href="#" onClick={preventStoryNav} className={slot[3]}>
-              首页
+              Home
             </Comp.NavigationMenuLink>
           </Comp.NavigationMenuItem>
           <Comp.NavigationMenuItem>
             <Comp.NavigationMenuLink href="#" onClick={preventStoryNav} className={slot[3]}>
-              关于
+              About
             </Comp.NavigationMenuLink>
           </Comp.NavigationMenuItem>
         </Comp.NavigationMenuList>

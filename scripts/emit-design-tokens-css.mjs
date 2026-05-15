@@ -39,7 +39,7 @@ if (doc.version === 1 || Array.isArray(doc.tokens)) {
   }
   rootLines.push("}");
   darkLines.push("}");
-  const banner = `/* AUTO-GENERATED (v1 legacy) — 源：tokens.json；请勿手改 */\n\n`;
+  const banner = `/* AUTO-GENERATED (v1 legacy) — source: tokens.json; do not edit manually */\n\n`;
   fs.writeFileSync(out, `${banner}${rootLines.join("\n")}\n\n${darkLines.join("\n")}\n`, "utf8");
   console.log(`[v1] Wrote ${path.relative(root, out)} (${tokens.length} rows)`);
   process.exit(0);
@@ -79,7 +79,7 @@ fs.writeFileSync(
   "utf8",
 );
 
-/** CSS 自定义属性名中的 `.` 需转义（如 `spacing-1.5` → `--spacing-1\.5`） */
+/** Escape `.` in CSS custom property names (e.g. `spacing-1.5` → `--spacing-1\.5`) */
 function cssEscapedCustomProp(kebabTokenName) {
   return kebabTokenName.replace(/\./g, "\\.");
 }
@@ -232,7 +232,7 @@ function buildThemeBlock(vars) {
   }
 
   lines.push("");
-  lines.push("  /* Spacing — 由 size 梯度 ÷ sizeUnit 推导的有限数字档（与 p-4、gap-2 等一致） */");
+  lines.push("  /* Spacing — finite numeric steps derived from size scale / sizeUnit (aligns with p-4, gap-2, etc.) */");
   const spacingKeys = sortSpacingThemeKeys(
     Object.keys(vars).filter((k) => k.startsWith("spacing-")),
   );
@@ -298,7 +298,7 @@ function toCSS(vars, selector) {
 
 // ─── Write output ───────────────────────────────────────────────────────────
 
-const banner = "/* AUTO-GENERATED (v2 Seed→Map) — 源：tokens.json seed 层；请勿手改。运行 npm run sync:tokens */\n\n";
+const banner = "/* AUTO-GENERATED (v2 Seed→Map) — source: tokens.json seed layer; do not edit manually. Run npm run sync:tokens */\n\n";
 const themeBlock = buildThemeBlock(lightVarsMerged);
 const rootBlock = toCSS(lightVarsMerged, ":root");
 const darkBlock = toCSS(darkVarsMerged, ".dark");

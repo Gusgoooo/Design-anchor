@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./badge.tsx?raw";
 import { Badge } from "./badge";
@@ -9,9 +9,9 @@ const audit = autoClassControls(componentSrc);
 type Args = { variant: string; [k: string]: unknown };
 
 const meta: Meta<Args> = {
-  title: "基础组件库/Badge",
+  title: "Starter/Badge",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["variant", "children"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["variant", "children"] }),
   },
   args: { variant: "default", ...audit.args },
   argTypes: {
@@ -32,7 +32,7 @@ export const Default: Story = {
 
   render: (args) => (
     <Badge variant={args.variant as "default" | "secondary" | "destructive" | "outline"} className={spreadAutoPreviewProps(audit, args as ClassOverrideArgs).className}>
-      标签
+      Badge
     </Badge>
   )
 };

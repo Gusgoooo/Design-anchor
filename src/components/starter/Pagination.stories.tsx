@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./pagination.tsx?raw";
 import * as Comp from "./pagination";
@@ -11,9 +11,9 @@ type Args = { [k: string]: string };
 const noop = (e: React.MouseEvent) => e.preventDefault();
 
 const meta = {
-  title: "基础组件库/Pagination",
+  title: "Starter/Pagination",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({}),
+    accordTokenCompliance: storyAccordCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],

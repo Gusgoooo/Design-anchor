@@ -26,7 +26,7 @@ type Args = ClassOverrideArgs & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/ModelSelector",
+  title: "AI/ModelSelector",
   parameters: { layout: "centered" },
   args: {
     variant: "outline",

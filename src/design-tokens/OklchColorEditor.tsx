@@ -18,7 +18,7 @@ export type OklchColorEditorProps = {
   value: string;
   onChange: (nextCssColor: string) => void;
   disabled?: boolean;
-  /** panel：starter Card 包裹；plain：仅间距，供嵌入紧凑布局 */
+  /** panel: wrapped in starter Card; plain: spacing only, for embedding in compact layouts */
   variant?: "panel" | "plain";
 };
 
@@ -40,7 +40,7 @@ function rgbChannelsFromCss(value: string): { r: number; g: number; b: number; a
 const inputMonoClass = "font-mono tabular-nums";
 
 /**
- * OKLCH / sRGB 编辑：OKLCH、RGBA、Hex+透明度 三种方式；表单项使用 starter `Input` / `Label` / `Button`，面板使用 `Card`。
+ * OKLCH / sRGB editor: supports OKLCH, RGBA, and Hex+Alpha modes; form elements use starter `Input` / `Label` / `Button`, panel uses `Card`.
  */
 export function OklchColorEditor({ label, value, onChange, disabled, variant = "panel" }: OklchColorEditorProps) {
   const uid = React.useId();
@@ -115,7 +115,7 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
     if (a >= 0.999) return hex6;
     const alphaByte = Math.round(clamp(a, 0, 1) * 255);
     const hex8 = `#${hex6.slice(1)}${alphaByte.toString(16).padStart(2, "0")}`;
-    return `${hex6} · α ${aStr} · 8 位 ${hex8}`;
+    return `${hex6} · α ${aStr} · 8-digit ${hex8}`;
   }, [text]);
 
   const applyOklch = (l: number, c: number, h: number) => {
@@ -230,29 +230,29 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
       {variant === "plain" ? <div className="text-base font-medium text-foreground">{label}</div> : null}
 
       <div className="space-y-3">
-        <div className="flex flex-wrap gap-2" role="group" aria-label="颜色编辑方式">
+        <div className="flex flex-wrap gap-2" role="group" aria-label="Color edit mode">
           {modeButton("oklch", "OKLCH")}
           {modeButton("rgba", "RGBA")}
-          {modeButton("hex", "Hex + 透明度")}
+          {modeButton("hex", "Hex + Alpha")}
         </div>
 
         <div className="flex flex-wrap items-start gap-4">
           <div
             className="h-12 w-14 shrink-0 rounded-md border border-border shadow-inner"
             style={{ background: text || "transparent" }}
-            title="预览"
+            title="Preview"
           />
           <div className="min-w-0 flex-1 space-y-3">
             <div>
-              <p className="text-xs font-medium text-muted-foreground">当前映射 · OKLCH</p>
+              <p className="text-xs font-medium text-muted-foreground">Current mapping · OKLCH</p>
               <p className="mt-1 font-mono text-sm break-all text-foreground">{parsed ? oklchCss : "—"}</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground">当前映射 · RGBA</p>
+              <p className="text-xs font-medium text-muted-foreground">Current mapping · RGBA</p>
               <p className="mt-1 font-mono text-sm break-all text-foreground">{rgbaDisplay}</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-muted-foreground">当前映射 · Hex 与透明度</p>
+              <p className="text-xs font-medium text-muted-foreground">Current mapping · Hex & Alpha</p>
               <p className="mt-1 font-mono text-sm break-all text-foreground">{hexAlphaDisplay}</p>
             </div>
           </div>
@@ -262,8 +262,8 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
       {editMode === "oklch" ? (
         <div className="mt-5 grid gap-5 sm:grid-cols-3">
           <div className="min-w-0 space-y-2">
-            <Label htmlFor={`${uid}-l`}>L（亮度）</Label>
-            <p className="text-xs text-muted-foreground leading-snug">0–1，例如 0.65</p>
+            <Label htmlFor={`${uid}-l`}>L (Lightness)</Label>
+            <p className="text-xs text-muted-foreground leading-snug">0–1, e.g. 0.65</p>
             <Input
               id={`${uid}-l`}
               inputMode="decimal"
@@ -277,8 +277,8 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
             />
           </div>
           <div className="min-w-0 space-y-2">
-            <Label htmlFor={`${uid}-c`}>C（色度）</Label>
-            <p className="text-xs text-muted-foreground leading-snug">通常约 0–0.4</p>
+            <Label htmlFor={`${uid}-c`}>C (Chroma)</Label>
+            <p className="text-xs text-muted-foreground leading-snug">Typically about 0–0.4</p>
             <Input
               id={`${uid}-c`}
               inputMode="decimal"
@@ -292,7 +292,7 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
             />
           </div>
           <div className="min-w-0 space-y-2">
-            <Label htmlFor={`${uid}-h`}>H（色相）</Label>
+            <Label htmlFor={`${uid}-h`}>H (Hue)</Label>
             <p className="text-xs text-muted-foreground leading-snug">0–360°</p>
             <Input
               id={`${uid}-h`}
@@ -357,8 +357,8 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
             />
           </div>
           <div className="min-w-0 space-y-2">
-            <Label htmlFor={`${uid}-a`}>A（透明度）</Label>
-            <p className="text-xs text-muted-foreground leading-snug">0–1，1 为不透明</p>
+            <Label htmlFor={`${uid}-a`}>A (Alpha)</Label>
+            <p className="text-xs text-muted-foreground leading-snug">0–1, 1 is opaque</p>
             <Input
               id={`${uid}-a`}
               inputMode="decimal"
@@ -378,7 +378,7 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
           <div className="min-w-0 space-y-2">
             <Label htmlFor={`${uid}-hex`}>Hex</Label>
-            <p className="text-xs text-muted-foreground leading-snug">#RRGGBB 或 RRGGBB，支持 3 位简写</p>
+            <p className="text-xs text-muted-foreground leading-snug">#RRGGBB or RRGGBB, supports 3-char shorthand</p>
             <Input
               id={`${uid}-hex`}
               disabled={disabled}
@@ -392,8 +392,8 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
             />
           </div>
           <div className="min-w-0 space-y-2">
-            <Label htmlFor={`${uid}-hexa`}>α（透明度）</Label>
-            <p className="text-xs text-muted-foreground leading-snug">0–1；写入 JSON 时为 rgba()</p>
+            <Label htmlFor={`${uid}-hexa`}>Alpha</Label>
+            <p className="text-xs text-muted-foreground leading-snug">0–1; written to JSON as rgba()</p>
             <Input
               id={`${uid}-hexa`}
               inputMode="decimal"
@@ -410,9 +410,9 @@ export function OklchColorEditor({ label, value, onChange, disabled, variant = "
       ) : null}
 
       <div className="mt-5 space-y-2">
-        <Label htmlFor={`${uid}-css`}>CSS 颜色（原始字符串）</Label>
+        <Label htmlFor={`${uid}-css`}>CSS Color (raw string)</Label>
         <p className="text-xs text-muted-foreground leading-snug">
-          可直接粘贴 oklch()、rgba()、#hex；失焦时由 culori 规范化为 CSS；与上方模式编辑互通。
+          Paste oklch(), rgba(), or #hex directly; normalized to CSS by culori on blur; interoperable with mode editors above.
         </p>
         <Input
           id={`${uid}-css`}

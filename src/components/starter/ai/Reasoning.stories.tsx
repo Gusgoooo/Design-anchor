@@ -18,7 +18,7 @@ type Args = Record<string, unknown> & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/Reasoning",
+  title: "AI/Reasoning",
   parameters: { layout: "centered" },
   args: {
     variant: "outline",

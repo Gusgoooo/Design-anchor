@@ -9,7 +9,7 @@ const audit = autoClassControls(componentSrc);
 type Args = Record<string, unknown>;
 
 const meta: Meta<Args> = {
-  title: "AI组件库/AssistantModal",
+  title: "AI/AssistantModal",
   parameters: { layout: "fullscreen" },
   args: {
     ...audit.args,

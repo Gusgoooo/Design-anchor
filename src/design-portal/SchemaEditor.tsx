@@ -1,19 +1,19 @@
 import { useCallback, useEffect, useState } from "react";
 
-/** 与 Storybook 预览同源；显式 origin，避免相对路径未命中 Vite 中间件 */
+/** Same origin as Storybook preview; explicit origin to avoid relative paths missing Vite middleware */
 function devApi(path: string): string {
   if (typeof window === "undefined" || !path.startsWith("/")) return path;
   return `${window.location.origin}${path}`;
 }
 
 export interface SchemaEditorProps {
-  /** 默认打开的 spec 文件名 */
+  /** Default spec filename to open */
   defaultFilename?: string;
 }
 
 /**
- * Schema 可视化编辑（供独立 Portal 与 Storybook 复用）。
- * 依赖开发服务器的 `/api/schema/*` 与 `/api/save-schema`（见 vite-plugin-schema-api.mjs）。
+ * Schema visual editor (shared between standalone Portal and Storybook).
+ * Depends on dev server `/api/schema/*` and `/api/save-schema` (see vite-plugin-schema-api.mjs).
  */
 export function SchemaEditor({ defaultFilename = "data-table.spec.json" }: SchemaEditorProps) {
   const [filename, setFilename] = useState(defaultFilename);
@@ -30,7 +30,7 @@ export function SchemaEditor({ defaultFilename = "data-table.spec.json" }: Schem
       const raw = await res.text();
       setText(raw);
     } catch (e) {
-      setStatus(`加载失败：${e instanceof Error ? e.message : String(e)}`);
+      setStatus(`Load failed: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setLoading(false);
     }
@@ -45,7 +45,7 @@ export function SchemaEditor({ defaultFilename = "data-table.spec.json" }: Schem
     try {
       JSON.parse(text);
     } catch (e) {
-      setStatus(`JSON 无效：${e instanceof Error ? e.message : String(e)}`);
+      setStatus(`Invalid JSON: ${e instanceof Error ? e.message : String(e)}`);
       return;
     }
     try {
@@ -64,38 +64,38 @@ export function SchemaEditor({ defaultFilename = "data-table.spec.json" }: Schem
         error?: string;
       };
       if (!res.ok) throw new Error(body.error ?? res.statusText);
-      if (!body.ok || !body.fileWritten) throw new Error(body.error ?? "未写入磁盘");
-      const parts: string[] = [`已写入磁盘：${body.path ?? filename}`];
+      if (!body.ok || !body.fileWritten) throw new Error(body.error ?? "Not written to disk");
+      const parts: string[] = [`Written to disk: ${body.path ?? filename}`];
       if (body.syncOk === false && body.syncError) {
         parts.push(
-          `⚠️ sync:harness 失败（spec 已落盘，请在本机终端手动执行 npm run sync:harness）：\n${body.syncError}`,
+          `⚠️ sync:accord failed (spec saved to disk, please manually run npm run sync:accord in your terminal):\n${body.syncError}`,
         );
       } else if (body.syncOk !== false) {
-        parts.push("已执行 sync:harness。");
+        parts.push("sync:accord executed.");
       }
-      if (body.audit && body.audit.passed === false) parts.push(`⚠️ 审计: ${body.audit.output}`);
+      if (body.audit && body.audit.passed === false) parts.push(`⚠️ Audit: ${body.audit.output}`);
       setStatus(parts.join("\n"));
       await load();
     } catch (e) {
-      setStatus(`保存失败：${e instanceof Error ? e.message : String(e)}`);
+      setStatus(`Save failed: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
 
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-4 p-8">
       <header className="space-y-1 border-b border-zinc-700 pb-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Harness · Spec</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">DesignAccord · Spec</h1>
         <p className="text-sm text-zinc-400">
-          在此直接编辑 <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">*.spec.json</code>（真源为手写落盘，不经云端模型改写）；保存后自动同步
-          Tailwind 生成物、<code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">.cursorrules</code> 与{" "}
-          <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">HARNESS_RULES.md</code>。
-          Storybook 右侧「Spec」面板提供分栏编辑（含子组件展示名、Intent、指令等）；Props / styleLock 等完整字段也可在此 JSON 中维护。
+          Edit <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">*.spec.json</code> directly here (source of truth is the file on disk, not rewritten by cloud models); after saving, automatically syncs
+          Tailwind artifacts, <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">.cursorrules</code> and{" "}
+          <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">ACCORD_RULES.md</code>.
+          The Storybook "Spec" panel on the right provides split-pane editing (including sub-component display name, Intent, directives, etc.); Props / styleLock and other fields can also be maintained in this JSON.
         </p>
       </header>
 
       <div className="flex flex-wrap items-center gap-3">
         <label className="flex items-center gap-2 text-sm">
-          <span className="text-zinc-400">文件</span>
+          <span className="text-zinc-400">File</span>
           <input
             className="rounded-md border border-zinc-600 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 shadow-sm"
             value={filename}
@@ -107,16 +107,16 @@ export function SchemaEditor({ defaultFilename = "data-table.spec.json" }: Schem
           className="rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white shadow hover:bg-emerald-500"
           onClick={() => void load()}
         >
-          重新加载
+          Reload
         </button>
         <button
           type="button"
           className="rounded-md border border-zinc-600 bg-zinc-900 px-4 py-2 text-sm font-medium text-zinc-100 shadow-sm hover:bg-zinc-800"
           onClick={() => void save()}
         >
-          保存并同步
+          Save & Sync
         </button>
-        {loading ? <span className="text-sm text-zinc-500">加载中…</span> : null}
+        {loading ? <span className="text-sm text-zinc-500">Loading...</span> : null}
       </div>
 
       {status ? (

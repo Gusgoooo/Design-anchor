@@ -36,13 +36,13 @@ function Calendar({
       defaultClassNames.months,
       userClassNames?.months,
     ),
-    /** w-fit + min-w 与表同宽：既不拉满 Story 画布，也不会因列宽未生效而塌成一条 */
+    /** w-fit + min-w matches table width: neither fills the Story canvas nor collapses to a single line if column width is not applied */
     month: cn(
       "flex w-fit min-w-[calc(7*var(--cell-size))] max-w-full flex-col gap-4",
       defaultClassNames.month,
       userClassNames?.month,
     ),
-    /** 表宽显式绑定 7 列 × cell；列宽须用 var(--cell-size)，勿写 w-[--cell-size]（Tailwind 不会当长度解析） */
+    /** Table width explicitly bound to 7 columns x cell; column width must use var(--cell-size), do not write w-[--cell-size] (Tailwind won't parse it as a length) */
     month_grid: cn(
       "w-[calc(7*var(--cell-size))] border-collapse table-fixed",
       defaultClassNames.month_grid,

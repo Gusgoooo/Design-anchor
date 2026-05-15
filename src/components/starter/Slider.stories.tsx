@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./slider.tsx?raw";
 import { Slider } from "./slider";
@@ -9,9 +9,9 @@ const audit = autoClassControls(componentSrc, {
 });
 
 const meta = {
-  title: "基础组件库/Slider",
+  title: "Starter/Slider",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children", "defaultValue", "max", "step"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children", "defaultValue", "max", "step"] }),
   },
   args: { ...audit.args },
   argTypes: {

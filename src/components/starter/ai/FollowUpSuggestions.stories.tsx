@@ -13,7 +13,7 @@ type Args = Record<string, unknown> & {
 };
 
 const meta: Meta<Args> = {
-  title: "AI组件库/FollowUpSuggestions",
+  title: "AI/FollowUpSuggestions",
   parameters: { layout: "centered" },
   args: {
     userMessage: "Tell me about React",

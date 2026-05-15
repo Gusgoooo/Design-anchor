@@ -1,20 +1,20 @@
 /**
- * Tailwind ClassName → Token 自动审计（Storybook「Token 修改」控件）
+ * Tailwind ClassName -> Token auto-audit (Storybook "Token Override" controls)
  *
- * 用法：
+ * Usage:
  *   import src from './button.tsx?raw';
  *   const audit = autoClassControls(src);
- *   // audit.args / argTypes：已映射刻度 → `Token 修改 · 已绑定`（select）；
- *   //   未映射 → `Token 修改 · 未映射（可输入）`（text + 可选 token 下拉，可不绑定）；
- *   //   数字类但不在设计 spacing 刻度 → `Token 修改 · 未使用令牌（px 微调）`（number，提示未引用 token）
- *   // audit.buildClassName(args) → 根据控件值拼出覆盖 class 串
- *   // audit.entries → 完整审计（含非 token），nonTokenCount 供合规统计
+ *   // audit.args / argTypes: mapped scale -> `Token Override · Bound` (select);
+ *   //   unmapped -> `Token Override · Unmapped` (text + optional token dropdown, binding optional);
+ *   //   numeric class not in design spacing scale -> `Token Override · px Tweak` (number, hints not referencing token)
+ *   // audit.buildClassName(args) -> builds override class string from control values
+ *   // audit.entries -> full audit (including non-token), nonTokenCount for compliance stats
  */
 
 import spacingScale from "./spacing-scale.generated.json";
 
 /* ================================================================== */
-/*  1. Token 定义（与 @theme 保持一致）                                 */
+/*  1. Token definitions (consistent with @theme)                      */
 /* ================================================================== */
 
 const TOKEN_RADIUS: Record<string, string> = {
@@ -51,10 +51,10 @@ const TOKEN_DURATION: Record<string, string> = {
   whole: "1s",
 };
 
-/** Tailwind 数字间距 → px（与 `spacing-scale.generated.json` / Modular seed 同源） */
+/** Tailwind numeric spacing -> px (same source as `spacing-scale.generated.json` / Modular seed) */
 const TW_NUM_SPACING_PX: Record<string, string> = spacingScale.suffixToPx as Record<string, string>;
 
-/** Tailwind 默认圆角 → px */
+/** Tailwind default border radius -> px */
 const TW_NUM_RADIUS_PX: Record<string, string> = {
   none: "0px", sm: "2px", DEFAULT: "4px", md: "6px",
   lg: "8px", xl: "12px", "2xl": "16px", "3xl": "24px", full: "9999px",
@@ -83,7 +83,7 @@ const TW_NUM_DURATION_MS: Record<string, string> = {
   "200": "0.2s", "300": "0.3s", "500": "0.5s", "700": "0.7s", "1000": "1s",
 };
 
-/** @theme 注册的语义色名（bg-primary, text-foreground 等） */
+/** Semantic color names registered in @theme (bg-primary, text-foreground, etc.) */
 const SEMANTIC_COLORS = new Set([
   "background", "foreground", "card", "card-foreground",
   "popover", "popover-foreground", "primary", "primary-foreground",
@@ -98,7 +98,7 @@ const SEMANTIC_COLORS = new Set([
 ]);
 
 /* ================================================================== */
-/*  2. 类名提取                                                        */
+/*  2. Class name extraction                                           */
 /* ================================================================== */
 
 export function extractClasses(source: string): string[] {
@@ -129,7 +129,7 @@ export function extractClasses(source: string): string[] {
 }
 
 /* ================================================================== */
-/*  3. 类名分类 & Token 匹配                                           */
+/*  3. Class name categorization & Token matching                      */
 /* ================================================================== */
 
 export type AuditCategory =
@@ -156,7 +156,7 @@ function parsePx(css: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** 在给定语义 token→px 映射中，选择与目标最接近的 key；并列时优先较大 px（「就近偏大」）。 */
+/** In a given semantic token->px mapping, select the key closest to the target; when tied, prefer larger px ("nearest larger"). */
 export function nearestTokenKeyPreferLarger(
   targetPx: number,
   tokens: Record<string, string>,
@@ -185,7 +185,7 @@ function parseCssSeconds(s: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-/** 不透明度的绝对值在 [0,1]，并列时优先较大的语义值（更「实」的一侧）。 */
+/** Opacity absolute value in [0,1]; when tied, prefer the larger semantic value (more opaque side). */
 function nearestOpacitySemantic(target: number): string | null {
   let bestK: string | null = null;
   let bestD = Infinity;
@@ -203,7 +203,7 @@ function nearestOpacitySemantic(target: number): string | null {
   return bestK;
 }
 
-/** 动画时长就近语义（并列取较大时长）。 */
+/** Animation duration nearest semantic (when tied, pick larger duration). */
 function nearestDurationSemantic(targetSec: number): string | null {
   let bestK: string | null = null;
   let bestD = Infinity;
@@ -221,7 +221,7 @@ function nearestDurationSemantic(targetSec: number): string | null {
   return bestK;
 }
 
-/** 字号：px 映射上的就近偏大（仅用于非精确匹配）。 */
+/** Font size: nearest larger on the px mapping (only for non-exact matches). */
 function nearestFontSizeSemantic(targetPx: number): string | null {
   let bestKey: string | null = null;
   let bestDist = Infinity;
@@ -239,7 +239,7 @@ function nearestFontSizeSemantic(targetPx: number): string | null {
   return bestKey;
 }
 
-/** 字重数值就近语义（并列取较大粗细）。 */
+/** Font weight nearest semantic (when tied, pick heavier weight). */
 function nearestFontWeightSemantic(target: number): string | null {
   let bestK: string | null = null;
   let bestD = Infinity;
@@ -296,14 +296,14 @@ function auditSpacingOrSizing(
 }
 
 /**
- * Tailwind 默认 spacing(n)=n×0.25rem；在 16px root 下即 n×4px。
- * 用于「刻度后缀不在 design spacing-scale 内」时的 px 估算与 Storybook 微调。
+ * Tailwind default spacing(n)=n*0.25rem; at 16px root that's n*4px.
+ * Used for px estimation and Storybook fine-tuning when scale suffix is not in design spacing-scale.
  */
 function tailwindDefaultSpacingToPx(n: number): number {
   return n * 4;
 }
 
-/** 数字刻度类（如 h-9、gap-7）但后缀不在 `spacing-scale.generated` 中时，视为未引用 spacing 设计令牌。 */
+/** Numeric scale classes (e.g. h-9, gap-7) with suffix not in `spacing-scale.generated` are treated as not referencing spacing design tokens. */
 function auditNumericOutsideDesignSpacingToken(
   cls: string,
   prefix: string,
@@ -348,7 +348,7 @@ export function auditClass(cls: string): AuditEntry | null {
     return null;
   }
 
-  // --- Spacing / sizing utilities（与 `@theme --spacing-{n}` 数字刻度一致）
+  // --- Spacing / sizing utilities (consistent with `@theme --spacing-{n}` numeric scale)
   const spM = cls.match(SPACING_PREFIXES);
   if (spM) {
     const [, prefix, val] = spM;
@@ -558,19 +558,19 @@ function arb(
 }
 
 /* ================================================================== */
-/*  4. 自动生成 Storybook Controls                                     */
+/*  4. Auto-generate Storybook Controls                                */
 /* ================================================================== */
 
 type CategoryMeta = {
   tokens: Record<string, string>;
   label: string;
-  /** 生成 className，e.g. (prefix, key) => `${prefix}-${key}` */
+  /** Generate className, e.g. (prefix, key) => `${prefix}-${key}` */
   makeClass: (prefix: string, key: string) => string;
 };
 
-const CATEGORY_BOUND = "Token 修改 · 已绑定";
-const CATEGORY_UNMAPPED = "Token 修改 · 未映射";
-const CATEGORY_LAYOUT_NON_TOKEN = "Token 修改 · px 微调";
+const CATEGORY_BOUND = "Token Override · Bound";
+const CATEGORY_UNMAPPED = "Token Override · Unmapped";
+const CATEGORY_LAYOUT_NON_TOKEN = "Token Override · px Tweak";
 
 function readPxArg(raw: unknown): number | null {
   if (typeof raw === "number" && Number.isFinite(raw)) return raw;
@@ -586,89 +586,89 @@ function makeLayoutPxClass(prefix: string, px: number): string {
   return `${prefix}-[${px}px]`;
 }
 
-/** 允许在「未映射」文本框中填写的 Tailwind 刻度后缀 / arbitrary 片段（防注入） */
+/** Allowed Tailwind scale suffixes / arbitrary fragments in "Unmapped" text fields (injection prevention) */
 function isSafeTailwindSuffix(s: string): boolean {
   return /^[\w.[\]\/-]+$/.test(s);
 }
 
 /**
- * Tailwind 工具类前缀 → Controls「名称」列简短中文（与内部 args 键 `controlId` 无关）。
- * 未列出的前缀在运行时按 category 回退。
+ * Tailwind utility prefix -> Controls "name" column short label (unrelated to internal args key `controlId`).
+ * Unlisted prefixes fall back by category at runtime.
  */
 const SPACING_PREFIX_LABEL_ZH: Record<string, string> = {
-  p: "全向内边距",
-  px: "左右内边距",
-  py: "上下内边距",
-  pt: "上内边距",
-  pb: "下内边距",
-  pl: "左内边距",
-  pr: "右内边距",
-  m: "全向外边距",
-  mx: "左右外边距",
-  my: "上下外边距",
-  mt: "上外边距",
-  mb: "下外边距",
-  ml: "左外边距",
-  mr: "右外边距",
-  gap: "元素间距",
-  "gap-x": "横向元素间距",
-  "gap-y": "纵向元素间距",
-  "space-x": "子项横向间隔",
-  "space-y": "子项纵向间隔",
-  "inset-x": "左右内缩",
-  "inset-y": "上下内缩",
-  inset: "四向内缩",
-  top: "距顶偏移",
-  right: "距右偏移",
-  bottom: "距底偏移",
-  left: "距左偏移",
-  size: "宽高同值",
-  w: "宽度",
-  h: "高度",
-  "min-w": "最小宽度",
-  "max-w": "最大宽度",
-  "min-h": "最小高度",
-  "max-h": "最大高度",
+  p: "Padding (all)",
+  px: "Padding (horizontal)",
+  py: "Padding (vertical)",
+  pt: "Padding (top)",
+  pb: "Padding (bottom)",
+  pl: "Padding (left)",
+  pr: "Padding (right)",
+  m: "Margin (all)",
+  mx: "Margin (horizontal)",
+  my: "Margin (vertical)",
+  mt: "Margin (top)",
+  mb: "Margin (bottom)",
+  ml: "Margin (left)",
+  mr: "Margin (right)",
+  gap: "Gap",
+  "gap-x": "Gap (horizontal)",
+  "gap-y": "Gap (vertical)",
+  "space-x": "Space X",
+  "space-y": "Space Y",
+  "inset-x": "Inset X",
+  "inset-y": "Inset Y",
+  inset: "Inset (all)",
+  top: "Top offset",
+  right: "Right offset",
+  bottom: "Bottom offset",
+  left: "Left offset",
+  size: "Size (w=h)",
+  w: "Width",
+  h: "Height",
+  "min-w": "Min width",
+  "max-w": "Max width",
+  "min-h": "Min height",
+  "max-h": "Max height",
 };
 
 const RADIUS_PREFIX_LABEL_ZH: Record<string, string> = {
-  rounded: "圆角",
-  "rounded-t": "顶边圆角",
-  "rounded-r": "右侧圆角",
-  "rounded-b": "底边圆角",
-  "rounded-l": "左侧圆角",
-  "rounded-tl": "左上角",
-  "rounded-tr": "右上角",
-  "rounded-bl": "左下角",
-  "rounded-br": "右下角",
-  "rounded-ss": "起角圆角",
-  "rounded-se": "止前圆角",
-  "rounded-es": "止后圆角",
-  "rounded-ee": "对角圆角",
+  rounded: "Border radius",
+  "rounded-t": "Top border radius",
+  "rounded-r": "Right border radius",
+  "rounded-b": "Bottom border radius",
+  "rounded-l": "Left border radius",
+  "rounded-tl": "Top-left radius",
+  "rounded-tr": "Top-right radius",
+  "rounded-bl": "Bottom-left radius",
+  "rounded-br": "Bottom-right radius",
+  "rounded-ss": "Start-start radius",
+  "rounded-se": "Start-end radius",
+  "rounded-es": "End-start radius",
+  "rounded-ee": "End-end radius",
 };
 
 const CATEGORY_FALLBACK_LABEL_ZH: Record<AuditCategory, string> = {
-  spacing: "间距",
-  layout: "间距",
-  radius: "圆角",
-  shadow: "阴影",
-  fontSize: "字号",
-  fontWeight: "字重",
-  textColor: "文字色",
-  bgColor: "背景色",
-  borderColor: "边框色",
-  opacity: "透明度",
-  duration: "动画时长",
-  other: "样式",
+  spacing: "Spacing",
+  layout: "Spacing",
+  radius: "Border Radius",
+  shadow: "Shadow",
+  fontSize: "Font Size",
+  fontWeight: "Font Weight",
+  textColor: "Text Color",
+  bgColor: "Background",
+  borderColor: "Border Color",
+  opacity: "Opacity",
+  duration: "Duration",
+  other: "Style",
 };
 
-/** 与 autoClassControls 一致：Tailwind spacing/sizing 前缀 → Controls 名称列 */
+/** Consistent with autoClassControls: Tailwind spacing/sizing prefix -> Controls name column */
 export function spacingUtilityPrefixLabelZh(prefix: string): string {
   const neg = prefix.startsWith("-");
   const p = neg ? prefix.slice(1) : prefix;
   const base = SPACING_PREFIX_LABEL_ZH[p];
   if (!base) return prefix;
-  return neg ? `${base}·负` : base;
+  return neg ? `${base} (neg)` : base;
 }
 
 function controlNameZh(entry: AuditEntry): string {
@@ -682,100 +682,100 @@ function controlNameZh(entry: AuditEntry): string {
   } else if (entry.category === "radius") {
     title = RADIUS_PREFIX_LABEL_ZH[entry.prefix] ?? RADIUS_PREFIX_LABEL_ZH[p];
   } else if (entry.category === "shadow") {
-    title = "阴影";
+    title = "Shadow";
   } else if (entry.category === "fontSize") {
-    title = "字号";
+    title = "Font Size";
   } else if (entry.category === "fontWeight") {
-    title = "字重";
+    title = "Font Weight";
   } else if (entry.category === "opacity") {
-    title = "透明度";
+    title = "Opacity";
   } else if (entry.category === "duration") {
-    title = "动画时长";
+    title = "Duration";
   } else if (entry.category === "textColor") {
-    title = `文字色·${entry.value}`;
+    title = `Text·${entry.value}`;
   } else if (entry.category === "bgColor") {
-    title = `背景色·${entry.value}`;
+    title = `Background·${entry.value}`;
   } else if (entry.category === "borderColor") {
-    title = `边框色·${entry.value}`;
+    title = `Border·${entry.value}`;
   }
   if (!title) title = CATEGORY_FALLBACK_LABEL_ZH[entry.category] ?? p;
-  return neg ? `${title}·负` : title;
+  return neg ? `${title} (neg)` : title;
 }
 
-/** 语义色下拉选项（bg-/text-/border- 通用） */
+/** Semantic color dropdown options (shared for bg-/text-/border-) */
 const TOKEN_SEMANTIC_COLOR: Record<string, string> = {
-  background: "页面背景",
-  foreground: "默认前景",
-  card: "卡片背景",
-  "card-foreground": "卡片前景",
-  popover: "弹出背景",
-  "popover-foreground": "弹出前景",
-  primary: "主色",
-  "primary-foreground": "主色前景",
-  secondary: "次级填充",
-  "secondary-foreground": "次级前景",
-  muted: "弱化背景",
-  "muted-foreground": "弱化前景",
-  accent: "强调填充",
-  "accent-foreground": "强调前景",
-  destructive: "危险色",
-  "destructive-foreground": "危险前景",
-  border: "边框",
-  input: "输入框边框",
-  ring: "焦点环",
-  transparent: "透明",
+  background: "Page background",
+  foreground: "Default foreground",
+  card: "Card background",
+  "card-foreground": "Card foreground",
+  popover: "Popover background",
+  "popover-foreground": "Popover foreground",
+  primary: "Primary",
+  "primary-foreground": "Primary foreground",
+  secondary: "Secondary fill",
+  "secondary-foreground": "Secondary foreground",
+  muted: "Muted background",
+  "muted-foreground": "Muted foreground",
+  accent: "Accent fill",
+  "accent-foreground": "Accent foreground",
+  destructive: "Destructive",
+  "destructive-foreground": "Destructive foreground",
+  border: "Border",
+  input: "Input border",
+  ring: "Focus ring",
+  transparent: "Transparent",
 };
 
 const CATEGORY_META: Record<string, CategoryMeta> = {
   spacing: {
     tokens: TW_NUM_SPACING_PX,
-    label: "间距",
+    label: "Spacing",
     makeClass: (p, k) =>
       k === "0" ? `${p}-0` : k === "px" ? `${p}-px` : `${p}-${k}`,
   },
   radius: {
     tokens: TOKEN_RADIUS,
-    label: "圆角",
+    label: "Border Radius",
     makeClass: (p, k) => (k === "none" ? `${p}-none` : k === "full" ? `${p}-full` : `${p}-${k}`),
   },
   shadow: {
     tokens: TOKEN_SHADOW,
-    label: "阴影",
+    label: "Shadow",
     makeClass: (_p, k) => (k === "none" ? "shadow-none" : k === "DEFAULT" ? "shadow" : `shadow-${k}`),
   },
   fontSize: {
     tokens: TOKEN_FONT_SIZE,
-    label: "字号",
+    label: "Font Size",
     makeClass: (_p, k) => `text-${k}`,
   },
   fontWeight: {
     tokens: TOKEN_FONT_WEIGHT,
-    label: "字重",
+    label: "Font Weight",
     makeClass: (_p, k) => `font-${k}`,
   },
   opacity: {
     tokens: TOKEN_OPACITY,
-    label: "透明度",
+    label: "Opacity",
     makeClass: (_p, k) => `opacity-${k}`,
   },
   duration: {
     tokens: TOKEN_DURATION,
-    label: "动画时长",
+    label: "Duration",
     makeClass: (_p, k) => `duration-${k}`,
   },
   textColor: {
     tokens: TOKEN_SEMANTIC_COLOR,
-    label: "文字颜色",
+    label: "Text Color",
     makeClass: (_p, k) => `text-${k}`,
   },
   bgColor: {
     tokens: TOKEN_SEMANTIC_COLOR,
-    label: "背景颜色",
+    label: "Background Color",
     makeClass: (_p, k) => `bg-${k}`,
   },
   borderColor: {
     tokens: TOKEN_SEMANTIC_COLOR,
-    label: "边框颜色",
+    label: "Border Color",
     makeClass: (_p, k) => `border-${k}`,
   },
 };
@@ -787,43 +787,43 @@ function makeLabels(
   const labels: Record<string, string> = {};
   for (const [k, v] of Object.entries(tokens)) {
     let lbl = `${k} · ${v}`;
-    if (equivalentToken === k) lbl += " ← 等值";
+    if (equivalentToken === k) lbl += " <- equivalent";
     labels[k] = lbl;
   }
   return labels;
 }
 
-/** Storybook `args` 传入 `buildClassName` 时的形状（含 number 控件的运行时值） */
+/** Shape of Storybook `args` passed to `buildClassName` (includes runtime values from number controls) */
 export type ClassOverrideArgs = Record<string, string | number | undefined>;
 
-/** Story 侧把 token 覆盖路由到正确 DOM：根 `className` 与（若有）`classNames` 各槽 */
+/** Routes token overrides from Story side to correct DOM: root `className` and (if any) `classNames` slots */
 export type AutoPreviewProps = {
   className: string;
   classNames?: Record<string, string>;
   /**
-   * 源码中第 2 个及之后的 `className={cn(` 槽上的覆盖类（与 `extractClassNameCnBodiesWithStart` 顺序一致）；
-   * 第 1 个槽合并进 `className`。仅当文件中存在多个 `className={cn(` 时出现。
+   * Override classes on the 2nd and subsequent `className={cn(` slots in source (order matches `extractClassNameCnBodiesWithStart`);
+   * The 1st slot merges into `className`. Only present when multiple `className={cn(` exist in the file.
    */
   previewCnSlotOverrides?: string[];
 };
 
 export type AutoControlsResult = {
   entries: AuditEntry[];
-  /** 与 Meta.args 兼容：全部为 string */
+  /** Compatible with Meta.args: all string */
   args: Record<string, string>;
   argTypes: Record<string, unknown>;
   buildClassName: (runtimeArgs: ClassOverrideArgs) => string;
   /**
-   * 将 `buildClassName` 的片段按源码中 `classNames.xxx: cn(...)` / 根 `className={cn(...)}` 分流，
-   * 避免把 `gap-*` 等加在根节点而实际样式写在 `classNames.month` 上导致「改了控件没反应」。
+   * Routes `buildClassName` fragments by source `classNames.xxx: cn(...)` / root `className={cn(...)}`,
+   * preventing `gap-*` etc. from being added to root when the actual style is on `classNames.month` (avoids "control changed but no effect").
    */
   buildPreview: (runtimeArgs: ClassOverrideArgs) => AutoPreviewProps;
   resolveArgTypes: (runtimeArgs: ClassOverrideArgs) => Record<string, unknown>;
-  /** 非 token 条目总数 */
+  /** Total non-token entry count */
   nonTokenCount: number;
 };
 
-/** 供 Story 解构：`{...spreadAutoPreviewProps(audit, args)}` */
+/** For Story destructuring: `{...spreadAutoPreviewProps(audit, args)}` */
 export function spreadAutoPreviewProps(
   audit: AutoControlsResult,
   args: ClassOverrideArgs,
@@ -850,7 +850,7 @@ const PREVIEW_ROOT = "__root__";
 
 type ClassNamesObjectSlice = { absInnerStart: number; inner: string };
 
-/** `classNames={{ ... }}` 内对象字面量正文（不含包裹它的 `{` `}`）及在源码中的起点 */
+/** `classNames={{ ... }}` inner object literal content (excluding wrapping `{` `}`) and its start position in source */
 function sliceClassNamesObjectInner(source: string): ClassNamesObjectSlice | null {
   const o = source.indexOf("classNames={");
   if (o < 0) return null;
@@ -870,7 +870,7 @@ function sliceClassNamesObjectInner(source: string): ClassNamesObjectSlice | nul
   return { absInnerStart, inner: source.slice(absInnerStart, i) };
 }
 
-/** `classNames` 里 `key: cn( ... )` 各槽在源码中的 cn 参数区间（绝对下标） */
+/** `classNames` `key: cn( ... )` slot cn parameter ranges in source (absolute indices) */
 function extractClassNamesSlotRegions(
   source: string,
 ): { key: string; innerStart: number; innerEnd: number }[] {
@@ -899,7 +899,7 @@ function extractClassNamesSlotRegions(
   return out;
 }
 
-/** 源码中所有 `className={cn( ... )}` 的 cn 参数体及起始下标 */
+/** All `className={cn( ... )}` cn parameter bodies and start indices in source */
 function extractClassNameCnBodiesWithStart(
   source: string,
 ): { start: number; body: string }[] {
@@ -924,7 +924,7 @@ function extractClassNameCnBodiesWithStart(
   return out;
 }
 
-/** 根据源码判断该 token 槽应对应 `classNames` 的哪个 key，否则走根 `className` / 第 N 个 `className={cn(` */
+/** Determines which `classNames` key a token slot should map to based on source, otherwise falls back to root `className` / Nth `className={cn(` */
 function inferTokenPreviewSlot(source: string, entry: AuditEntry): string {
   const raw = entry.raw;
   const regions = extractClassNamesSlotRegions(source);
@@ -941,16 +941,16 @@ function inferTokenPreviewSlot(source: string, entry: AuditEntry): string {
   return PREVIEW_ROOT;
 }
 
-/** `autoClassControls` 可选配置 */
+/** `autoClassControls` optional configuration */
 export type AutoClassControlsOptions = {
   /**
-   * 不在 Storybook Controls 中生成的 Tailwind **前缀**（如 `w`、`h`、`rounded`）。
-   * 用于轨道/拇指尺寸、药丸圆角等由实现锁定、不应交给设计师改 spacing / shadow token 映射的场景。
+   * Tailwind **prefixes** not generated in Storybook Controls (e.g. `w`, `h`, `rounded`).
+   * For track/thumb sizes, pill radius, etc. locked by implementation that designers should not remap spacing/shadow tokens.
    */
   hidePrefixes?: string[];
   /**
-   * 正则模式列表（对应 spec.json 的 styleLock.blacklist[].pattern）。
-   * 若 entry.raw 匹配任何模式则不生成控件。比 hidePrefixes 更精确。
+   * Regex pattern list (corresponds to spec.json styleLock.blacklist[].pattern).
+   * If entry.raw matches any pattern, no control is generated. More precise than hidePrefixes.
    */
   hidePatterns?: RegExp[];
 };
@@ -1018,10 +1018,10 @@ export function autoClassControls(
       const controlId = `layout_${entry.prefix.replace(/-/g, "_")}_${String(entry.value).replace(/\./g, "_")}`;
       const suggest =
         entry.equivalentToken != null
-          ? `\n近似令牌：${entry.equivalentToken} = ${TW_NUM_SPACING_PX[entry.equivalentToken] ?? "?"}`
+          ? `\nNearest token: ${entry.equivalentToken} = ${TW_NUM_SPACING_PX[entry.equivalentToken] ?? "?"}`
           : "";
       const desc =
-        `源码类 ${entry.raw} ≈ ${entry.cssValue}，未绑定 spacing 令牌。${suggest}`;
+        `Source class ${entry.raw} ≈ ${entry.cssValue}, not bound to spacing token.${suggest}`;
       args[controlId] = String(px);
       argTypes[controlId] = {
         name: controlNameZh(entry),
@@ -1052,7 +1052,7 @@ export function autoClassControls(
     const labels = makeLabels(catMeta.tokens, null);
 
     if (entry.isToken) {
-      const desc = `${catMeta.label} · 已对齐设计刻度 · ${entry.raw}`;
+      const desc = `${catMeta.label} · aligned to design scale · ${entry.raw}`;
       args[controlId] = defaultKey;
       argTypes[controlId] = {
         name: controlNameZh(entry),
@@ -1073,7 +1073,7 @@ export function autoClassControls(
 
     const allLabels: Record<string, string> = { ...labels };
     if (!tokenKeys.includes(defaultKey)) {
-      allLabels[defaultKey] = `${defaultKey} (源码值)`;
+      allLabels[defaultKey] = `${defaultKey} (source value)`;
     }
     const options = tokenKeys.includes(defaultKey)
       ? [...tokenKeys]

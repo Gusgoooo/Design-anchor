@@ -1,0 +1,45 @@
+{
+  "id": "input-otp",
+  "componentName": "InputOtp",
+  "version": "1.0.0",
+  "intent": "One-time password input (OTP/verification code) with fixed-digit segmented fields.",
+  "wraps": {
+    "module": "@/components/starter/input-otp",
+    "primitives": [
+      "InputOTP",
+      "InputOTPGroup",
+      "InputOTPSlot",
+      "InputOTPSeparator"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(ring-|outline-)",
+        "pattern": "^(ring-|outline-)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^h-",
+        "pattern": "^h-"
+      }
+    ]
+  },
+  "aiPrompt": "Use InputOtp from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "input-otp",
+      "input"
+    ],
+    "category": "input",
+    "status": "stable"
+  }
+}

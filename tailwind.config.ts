@@ -1,26 +1,26 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
-import { harnessSafelist, harnessTailwindExtend } from "./tailwind.harness.generated";
+import { accordSafelist, accordTailwindExtend } from "./tailwind.accord.generated";
 
 const extend: Record<string, Record<string, string>> = {};
-if (Object.keys(harnessTailwindExtend.spacing).length) {
-  extend.spacing = { ...harnessTailwindExtend.spacing };
+if (Object.keys(accordTailwindExtend.spacing).length) {
+  extend.spacing = { ...accordTailwindExtend.spacing };
 }
-if (Object.keys(harnessTailwindExtend.colors).length) {
-  extend.colors = { ...harnessTailwindExtend.colors };
+if (Object.keys(accordTailwindExtend.colors).length) {
+  extend.colors = { ...accordTailwindExtend.colors };
 }
-if (Object.keys(harnessTailwindExtend.borderRadius).length) {
-  extend.borderRadius = { ...harnessTailwindExtend.borderRadius };
+if (Object.keys(accordTailwindExtend.borderRadius).length) {
+  extend.borderRadius = { ...accordTailwindExtend.borderRadius };
 }
 
 export default {
   content: [
     "./src/**/*.{ts,tsx}",
     "./src/design-portal/**/*.{html,ts,tsx}",
-    "./src/harness/schema/**/*.json",
+    "./src/accord/schema/**/*.json",
     "./.storybook/**/*.{ts,tsx}",
   ],
-  safelist: harnessSafelist,
+  safelist: accordSafelist,
   theme: {
     extend,
   },

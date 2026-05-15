@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
 
-/** 同步落盘并 fsync，避免进程崩溃时缓冲区未刷盘 */
+/** Write to disk synchronously with fsync, preventing unflushed buffers on process crash */
 function writeFileWithFsync(absPath, data) {
   fs.writeFileSync(absPath, data, "utf8");
   let fd;
@@ -32,11 +32,11 @@ function execSyncCaptured(cmd, opts) {
 }
 
 /**
- * Portal API 写入白名单 — 只有这些目录下的文件允许被 API 写入。
- * 防止 Portal 或恶意请求写到仓库任意位置。
+ * Portal API write whitelist -- only files under these directories are allowed to be written by the API.
+ * Prevents Portal or malicious requests from writing to arbitrary repo locations.
  */
 const WRITE_WHITELIST_PREFIXES = [
-  "src/harness/schema/",
+  "src/accord/schema/",
   "src/design-tokens/",
   "src/components/starter/",
 ];
@@ -47,16 +47,16 @@ function isWriteAllowed(repoRoot, absPath) {
 }
 
 /**
- * 开发服务器中间件：读写 src/harness/schema/components/*.spec.json，保存后执行 sync:harness。
- * 供独立 Portal 与 Storybook 共用。
+ * Dev server middleware: reads/writes src/accord/schema/components/*.spec.json, executes sync:accord after saving.
+ * Shared by standalone Portal and Storybook.
  */
 export function schemaApiPlugin(repoRoot) {
-  const specDir = path.join(repoRoot, "src/harness/schema/components");
+  const specDir = path.join(repoRoot, "src/accord/schema/components");
   const tokensPath = path.join(repoRoot, "src/design-tokens/tokens.json");
 
   return {
-    name: "harness-schema-api",
-    /** 尽量先于静态资源处理，避免 /api/* 被错误吞掉 */
+    name: "accord-schema-api",
+    /** Try to run before static asset handling to prevent /api/* from being incorrectly consumed */
     enforce: "pre",
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
@@ -283,10 +283,10 @@ export function schemaApiPlugin(repoRoot) {
               writeFileWithFsync(file, pretty);
               const relPath = path.relative(repoRoot, file).split(path.sep).join("/");
 
-              const harnessSync = execSyncCaptured("npm run sync:harness", { cwd: repoRoot });
+              const accordSync = execSyncCaptured("npm run sync:accord", { cwd: repoRoot });
               let auditResult = null;
-              if (harnessSync.ok) {
-                const audit = execSyncCaptured("npm run harness:audit", {
+              if (accordSync.ok) {
+                const audit = execSyncCaptured("npm run accord:audit", {
                   cwd: repoRoot,
                   timeout: 120000,
                 });
@@ -301,8 +301,8 @@ export function schemaApiPlugin(repoRoot) {
                   ok: true,
                   fileWritten: true,
                   path: relPath,
-                  syncOk: harnessSync.ok,
-                  syncError: harnessSync.ok ? null : harnessSync.stderr || harnessSync.stdout || null,
+                  syncOk: accordSync.ok,
+                  syncError: accordSync.ok ? null : accordSync.stderr || accordSync.stdout || null,
                   audit: auditResult,
                 }),
               );
@@ -423,7 +423,7 @@ export function schemaApiPlugin(repoRoot) {
               if (!filename || !filename.endsWith(".tsx")) {
                 res.statusCode = 400;
                 res.setHeader("Content-Type", "application/json");
-                res.end(JSON.stringify({ ok: false, error: "需要 .tsx 文件" }));
+                res.end(JSON.stringify({ ok: false, error: "Requires a .tsx file" }));
                 return;
               }
 
@@ -446,7 +446,7 @@ export function schemaApiPlugin(repoRoot) {
               if (!fs.existsSync(storyPath)) {
                 const story = [
                   `import type { Meta, StoryObj } from "@storybook/react";`,
-                  `import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";`,
+                  `import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";`,
                   `import { autoClassControls } from "@/design-tokens/tw-class-audit";`,
                   `import componentSrc from "./${compName}.tsx?raw";`,
                   `import { ${pascal} } from "./${compName}";`,
@@ -456,7 +456,7 @@ export function schemaApiPlugin(repoRoot) {
                   `const meta = {`,
                   `  title: "${pascal}",`,
                   `  component: ${pascal},`,
-                  `  parameters: { harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }) },`,
+                  `  parameters: { accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children"] }) },`,
                   `  args: { ...audit.args },`,
                   `  argTypes: { ...audit.argTypes },`,
                   `} satisfies Meta<typeof ${pascal}>;`,
@@ -467,7 +467,7 @@ export function schemaApiPlugin(repoRoot) {
                   `export const Default: Story = {`,
                   `  render: (args) => (`,
                   `    <${pascal} className={audit.buildClassName(args as unknown as Record<string, string>)}>`,
-                  `      示例内容`,
+                  `      Sample content`,
                   `    </${pascal}>`,
                   `  ),`,
                   `};`,

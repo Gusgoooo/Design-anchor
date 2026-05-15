@@ -5,21 +5,21 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 /**
- * 推导仓库根目录：
- * 1. 优先用 rootOverride
- * 2. 其次检测 cwd 是否有 src/harness（支持 harness init 生成的目录）
- * 3. 最后回退到 scripts 所在的上两级
+ * Resolve repository root:
+ * 1. Use rootOverride if provided
+ * 2. Check if cwd contains src/accord (supports accord-init generated directories)
+ * 3. Fall back to two levels above the scripts directory
  */
 export function getRepoRoot(rootOverride) {
   if (rootOverride) return path.resolve(rootOverride);
   const cwd = process.cwd();
-  if (fs.existsSync(path.join(cwd, "src/harness/schema/components"))) return cwd;
+  if (fs.existsSync(path.join(cwd, "src/accord/schema/components"))) return cwd;
   return path.resolve(__dirname, "../..");
 }
 
 export function loadSpecs(rootOverride) {
   const root = getRepoRoot(rootOverride);
-  const specDir = path.join(root, "src/harness/schema/components");
+  const specDir = path.join(root, "src/accord/schema/components");
   if (!fs.existsSync(specDir)) return [];
   const files = fs.readdirSync(specDir).filter((f) => f.endsWith(".spec.json"));
   return files.map((f) => {
@@ -30,7 +30,7 @@ export function loadSpecs(rootOverride) {
 
 export function loadDecorativeLibs(rootOverride) {
   const root = getRepoRoot(rootOverride);
-  const file = path.join(root, "src/harness/references/decorative-libs.json");
+  const file = path.join(root, "src/accord/references/decorative-libs.json");
   if (!fs.existsSync(file)) return null;
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }

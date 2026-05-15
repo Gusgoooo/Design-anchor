@@ -21,17 +21,17 @@ export interface DataTableProps<T> {
   variant?: "plain" | "striped";
   className?: string;
   /**
-   * 纵向浅底条带：第 N 列（0 起算）。与复合表格语义一致。
-   * null / undefined 关闭；越界视为关闭。
+   * Vertical light-band column: column N (0-indexed). Semantically consistent with CompositeDataTable.
+   * null / undefined disables; out-of-bounds treated as disabled.
    */
   columnBandIndex?: number | null;
-  /** 稳定行键（分页、局部更新时建议提供） */
+  /** Stable row key (recommended for pagination and partial updates) */
   getRowKey?: (row: T) => string;
 }
 
 /**
- * BusinessTable：复合表格的简化版（无复选框、无表头排序），密度/斑马纹/列条带与 KitchenSink 同源。
- * Schema 即单一事实来源（aiPrompt、styleLock 同步参与 generate-cursorrules）。
+ * BusinessTable: simplified version of CompositeDataTable (no checkboxes, no header sorting); density/stripes/column-band share the same source as KitchenSink.
+ * Schema is the single source of truth (aiPrompt, styleLock participate in generate-cursorrules).
  */
 export function DataTable<T>({
   columns,

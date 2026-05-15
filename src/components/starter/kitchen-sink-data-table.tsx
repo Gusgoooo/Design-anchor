@@ -12,12 +12,12 @@ export type KitchenSinkRow = {
 };
 
 const KITCHEN_COLUMNS: CompositeDataColumnDef<KitchenSinkRow>[] = [
-  { id: "name", header: "名称", accessor: (r) => r.name, sortKey: "name" },
-  { id: "role", header: "角色", accessor: (r) => r.role, sortKey: "role" },
+  { id: "name", header: "Name", accessor: (r) => r.name, sortKey: "name" },
+  { id: "role", header: "Role", accessor: (r) => r.role, sortKey: "role" },
   {
     id: "revenue",
-    header: "营收（万）",
-    accessor: (r) => r.revenue.toLocaleString("zh-CN"),
+    header: "Revenue (10K)",
+    accessor: (r) => r.revenue.toLocaleString("en-US"),
     sortKey: "revenue",
     align: "right",
   },
@@ -29,8 +29,8 @@ export type KitchenSinkDataTableProps = Omit<
 >;
 
 /**
- * Storybook 复合表：与 {@link CompositeDataTable} / {@link DataTable} 同一内核；
- * 开启排序 + 行选 + 全选。业务列表请用 `DataTable`。
+ * Storybook composite table: shares the same core as {@link CompositeDataTable} / {@link DataTable};
+ * enables sorting + row selection + select all. Use `DataTable` for business lists.
  */
 export function KitchenSinkDataTable({ data, ...rest }: KitchenSinkDataTableProps) {
   return (

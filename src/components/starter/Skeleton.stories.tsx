@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./skeleton.tsx?raw";
 import { Skeleton } from "./skeleton";
@@ -7,9 +7,9 @@ import { Skeleton } from "./skeleton";
 const audit = autoClassControls(componentSrc);
 
 const meta = {
-  title: "基础组件库/Skeleton",
+  title: "Starter/Skeleton",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children"] }),
   },
   args: { ...audit.args },
   argTypes: {

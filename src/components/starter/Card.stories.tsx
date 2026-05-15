@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./card.tsx?raw";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "./card";
@@ -7,9 +7,9 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter }
 const audit = autoClassControls(componentSrc);
 
 const meta = {
-  title: "基础组件库/Card",
+  title: "Starter/Card",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children"] }),
   },
   args: { ...audit.args },
   argTypes: {
@@ -25,20 +25,20 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: (args) => {
     const prev = spreadAutoPreviewProps(audit, args as ClassOverrideArgs);
-    /** 与 `card.tsx` 中第 2～6 个 `className={cn(` 顺序一致（根 Card 用 `prev.className`） */
+    /** Matches the 2nd–6th `className={cn(` in `card.tsx` (root Card uses `prev.className`) */
     const slot = prev.previewCnSlotOverrides ?? [];
     return (
       <div className="w-[360px]">
         <Card className={prev.className}>
           <CardHeader className={slot[0]}>
-            <CardTitle className={slot[1]}>卡片标题</CardTitle>
-            <CardDescription className={slot[2]}>卡片描述文本</CardDescription>
+            <CardTitle className={slot[1]}>Card Title</CardTitle>
+            <CardDescription className={slot[2]}>Card description text</CardDescription>
           </CardHeader>
           <CardContent className={slot[3]}>
-            <p>这是卡片的主要内容区域。</p>
+            <p>This is the main content area of the card.</p>
           </CardContent>
           <CardFooter className={slot[4]}>
-            <p>页脚信息</p>
+            <p>Footer info</p>
           </CardFooter>
         </Card>
       </div>

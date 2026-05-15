@@ -1,0 +1,60 @@
+{
+  "id": "progress",
+  "componentName": "Progress",
+  "version": "1.0.0",
+  "intent": "Progress bar showing task completion percentage. Supports custom max value and accessibility attributes.",
+  "wraps": {
+    "module": "@/components/starter/progress",
+    "primitives": [
+      "Progress"
+    ]
+  },
+  "requiredProps": [],
+  "optionalProps": [
+    {
+      "name": "value",
+      "description": "Value prop",
+      "type": "number",
+      "required": false,
+      "defaultValue": 0
+    },
+    {
+      "name": "max",
+      "description": "Max value",
+      "type": "number",
+      "required": false,
+      "defaultValue": 100
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "relative",
+      "h-2",
+      "w-full",
+      "overflow-hidden",
+      "rounded-full",
+      "bg-secondary"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override progress bar height and radius",
+        "pattern": "^(h-|rounded)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^bg-(primary|secondary)",
+        "pattern": "^bg-(primary|secondary)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Progress from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "progress",
+      "loading",
+      "bar",
+      "percentage"
+    ],
+    "category": "feedback",
+    "status": "stable"
+  }
+}

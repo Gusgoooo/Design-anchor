@@ -21,7 +21,7 @@ const SEM_TO_NUM = {
   xl: "8",
 };
 
-/** 不包含 min-w/max-w/min-h/max-h，避免误伤 `max-w-sm` 等布局类名。 */
+/** Excludes min-w/max-w/min-h/max-h to avoid false positives on layout classes like `max-w-sm`. */
 const POS_PREFIXES = [
   "p", "px", "py", "pt", "pb", "pl", "pr",
   "m", "mx", "my", "mt", "mb", "ml", "mr",

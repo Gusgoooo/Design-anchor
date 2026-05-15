@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyHarnessCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./avatar.tsx?raw";
 import { Avatar, AvatarImage, AvatarFallback } from "./avatar";
@@ -7,9 +7,9 @@ import { Avatar, AvatarImage, AvatarFallback } from "./avatar";
 const audit = autoClassControls(componentSrc);
 
 const meta = {
-  title: "基础组件库/Avatar",
+  title: "Starter/Avatar",
   parameters: {
-    harnessTokenCompliance: storyHarnessCompliance({ ignoreArgNames: ["children"] }),
+    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children"] }),
   },
   args: { ...audit.args },
   argTypes: {
@@ -28,7 +28,7 @@ export const Default: Story = {
     const slot = prev.previewCnSlotOverrides ?? [];
     return (
       <Avatar className={prev.className}>
-        <AvatarImage src="https://github.com/shadcn.png" alt="头像" className={slot[0]} />
+        <AvatarImage src="https://github.com/shadcn.png" alt="Avatar" className={slot[0]} />
         <AvatarFallback className={slot[1]}>CN</AvatarFallback>
       </Avatar>
     );

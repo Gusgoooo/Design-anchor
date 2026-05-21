@@ -14,7 +14,7 @@ type Args = Record<string, unknown> & {
 
 const meta: Meta<Args> = {
   title: "AI/FollowUpSuggestions",
-  parameters: { layout: "centered" },
+  parameters: { layout: "fullscreen" },
   args: {
     userMessage: "Tell me about React",
     assistantReply:

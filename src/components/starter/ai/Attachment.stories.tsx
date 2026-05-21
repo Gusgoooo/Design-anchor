@@ -15,7 +15,7 @@ type Args = Record<string, unknown> & {
 
 const meta: Meta<Args> = {
   title: "AI/Attachment",
-  parameters: { layout: "centered" },
+  parameters: { layout: "fullscreen" },
   args: {
     imageUrl: "https://placehold.co/200x200/eee/999?text=Preview",
     userText: "Can you analyze this image?",

@@ -36,15 +36,34 @@ const preview: Preview = {
     },
   },
   decorators: [
-    (Story) => (
-      <DarkModeSync>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "2rem" }}>
-          <div style={{ width: "100%", maxWidth: "480px" }}>
+    (Story, ctx) => {
+      const layout = (ctx.parameters?.layout as string | undefined) ?? "centered";
+      if (layout === "fullscreen") {
+        return (
+          <DarkModeSync>
             <Story />
+          </DarkModeSync>
+        );
+      }
+      if (layout === "padded") {
+        return (
+          <DarkModeSync>
+            <div style={{ padding: "2rem" }}>
+              <Story />
+            </div>
+          </DarkModeSync>
+        );
+      }
+      return (
+        <DarkModeSync>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", padding: "2rem" }}>
+            <div style={{ width: "100%", maxWidth: "480px" }}>
+              <Story />
+            </div>
           </div>
-        </div>
-      </DarkModeSync>
-    ),
+        </DarkModeSync>
+      );
+    },
   ],
 };
 

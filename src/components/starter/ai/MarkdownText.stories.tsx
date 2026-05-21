@@ -45,7 +45,7 @@ type Args = Record<string, unknown> & {
 
 const meta: Meta<Args> = {
   title: "AI/MarkdownText",
-  parameters: { layout: "centered" },
+  parameters: { layout: "fullscreen" },
   args: {
     markdownContent: defaultMarkdown,
     ...audit.args,

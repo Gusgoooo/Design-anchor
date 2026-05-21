@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";
 import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./button.tsx?raw";

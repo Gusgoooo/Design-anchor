@@ -313,7 +313,7 @@
   ```
 ### ModelSelector
 - **Upstream module**: `@/components/starter/ai/model-selector`
-- **Sub-components (Spec)**: `ModelSelector`, `ModelSelectorRoot`, `ModelSelectorTrigger`, `ModelSelectorContent`
+- **Sub-components (Spec)**: `ModelSelector`, `ModelSelectorRoot`, `ModelSelectorTrigger`, `ModelSelectorContent`, `ModelSelectorItem`, `ModelSelectorValue`
 - **Intent**: AI model selector dropdown. Lets users switch the current conversation's AI model with icons, descriptions, and disabled states.
 - **Spec directive**: Use ModelSelector from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
@@ -338,7 +338,7 @@
   ```
 ### Reasoning
 - **Upstream module**: `@/components/starter/ai/reasoning`
-- **Sub-components (Spec)**: `ReasoningRoot`, `ReasoningTrigger`, `ReasoningContent`, `ReasoningText`
+- **Sub-components (Spec)**: `Reasoning`, `ReasoningRoot`, `ReasoningGroup`, `ReasoningTrigger`, `ReasoningContent`, `ReasoningText`, `ReasoningFade`
 - **Intent**: AI reasoning/chain-of-thought display. Collapsible panel showing AI thinking process with outline/ghost/muted visual variants.
 - **Spec directive**: Use Reasoning from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
@@ -382,7 +382,7 @@
   ```
 ### ToolFallback
 - **Upstream module**: `@/components/starter/ai/tool-fallback`
-- **Sub-components (Spec)**: `ToolFallbackRoot`, `ToolFallbackTrigger`, `ToolFallbackContent`, `ToolFallbackArgs`, `ToolFallbackResult`, `ToolFallbackError`
+- **Sub-components (Spec)**: `ToolFallback`, `ToolFallbackRoot`, `ToolFallbackTrigger`, `ToolFallbackContent`, `ToolFallbackArgs`, `ToolFallbackResult`, `ToolFallbackError`
 - **Intent**: AI tool call display. Shows a single tool invocation's name, status (running/complete/incomplete), arguments, and result.
 - **Spec directive**: Use ToolFallback from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
@@ -397,7 +397,7 @@
   ```
 ### ToolGroup
 - **Upstream module**: `@/components/starter/ai/tool-group`
-- **Sub-components (Spec)**: `ToolGroupRoot`, `ToolGroupTrigger`, `ToolGroupContent`
+- **Sub-components (Spec)**: `ToolGroup`, `ToolGroupRoot`, `ToolGroupTrigger`, `ToolGroupContent`
 - **Intent**: AI tool call group container. Aggregates multiple ToolFallback items in a collapsible panel with call count and active state.
 - **Spec directive**: Use ToolGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):

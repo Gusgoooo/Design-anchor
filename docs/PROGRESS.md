@@ -139,9 +139,24 @@ Button, Input, InputGroup, InputOtp, Textarea, Card, Badge, Alert, Empty, Skelet
 - ✅ `npm run anchor:audit`（portal/demo 已加入排除）
 - ✅ `npm run sync:anchor`
 
-### ⏳ 阶段 3.7 — AI 组件（assistant-ui 系列，未开始）
+### ✅ 阶段 3.7 — AI 组件（assistant-ui 系列）
 
-assistant-ui 还有依赖兼容问题（`@assistant-ui/store` 类型不一致），建议先锁版本或升级再补齐。涉及组件：Thread / Attachment / FollowUpSuggestions / MarkdownText / AssistantSidebar / AssistantModal / ModelSelector / Reasoning / ThreadList / ToolFallback / ToolGroup / TooltipIconButton。
+12 个 AI 组件 wrapper 与 demo 此前已搭建完毕；本次只修订 `wraps.primitives` 与实际命名导出对齐，确保 `anchor:audit` / `sync:anchor` 看到完整组件表面：
+
+| 组件 | 新增（之前漏写） |
+|---|---|
+| Reasoning | `Reasoning`、`ReasoningGroup`、`ReasoningFade` |
+| ToolFallback | `ToolFallback`（all-in-one wrapper） |
+| ToolGroup | `ToolGroup`（all-in-one wrapper） |
+| ModelSelector | `ModelSelectorItem`、`ModelSelectorValue` |
+
+其余 8 个 spec（Thread、ThreadList、AssistantModal、AssistantSidebar、Attachment、FollowUpSuggestions、MarkdownText、TooltipIconButton）的 primitives 已经齐全，未改。
+
+**已确认**：
+- `npx tsc --noEmit` 通过 — 旧 PROGRESS 中提到的 `@assistant-ui/store` `ClientSchema` vs `ClientSchemas` 类型问题在当前依赖（`@assistant-ui/store@0.2.10`）下已不复现，不再是阻塞。
+- `npm run sync:anchor` 重新生成 64 个 spec catalog（`.cursorrules` / `ANCHOR_RULES.md` 同步更新）。
+- `npm run anchor:audit` 通过。
+- 所有 12 个 AI demo 已挂载在 portal sidebar `AI/*` 分组下，`MockRuntimeProvider` 提供假运行时供预览。
 
 ### ⏳ 阶段 4 — Token 驱动验收（未开始）
 - 修改任意 token，全组件实时响应
@@ -153,10 +168,9 @@ assistant-ui 还有依赖兼容问题（`@assistant-ui/store` 类型不一致）
 
 ## 当前已知问题 / 阶段 2 遗留
 
-1. **`@assistant-ui/store` 类型定义不完整**：`ClientSchema` 在 index.d.ts 重导出但 client.d.ts 实际名为 `ClientSchemas`（复数）。运行时不影响（仅类型层面）。AI 组件如出现 "Failed to fetch dynamically imported module" 错误，需要在阶段 3 顺手锁版本或升级。
-2. **Patterns 路由是占位符**：`docs/PatternsRoute.tsx` 仅渲染一个空白页面，等产品内容到位再补。
-3. **kit-status 路径迁移**：消费者 `anchor init` 后新位置是 `.anchor-portal/kit-status.json`；schema plugin 同时兼容 `.storybook/kit-status.json` 旧路径。老消费者跑一次 `anchor upgrade` 后会迁移。
-4. **`src/design-portal/`** 仍保留（SchemaEditor 独立工具，与 anchor-portal 不冲突）。如果未来不再需要，可整体删除。
+1. **Patterns 路由是占位符**：`docs/PatternsRoute.tsx` 仅渲染一个空白页面，等产品内容到位再补。
+2. **kit-status 路径迁移**：消费者 `anchor init` 后新位置是 `.anchor-portal/kit-status.json`；schema plugin 同时兼容 `.storybook/kit-status.json` 旧路径。老消费者跑一次 `anchor upgrade` 后会迁移。
+3. **`src/design-portal/`** 仍保留（SchemaEditor 独立工具，与 anchor-portal 不冲突）。如果未来不再需要，可整体删除。
 
 ---
 
@@ -206,4 +220,4 @@ assistant-ui 还有依赖兼容问题（`@assistant-ui/store` 类型不一致）
 
 ---
 
-**最后更新**：阶段 3 Radix 系组件完成 — commit `338455e`（AI 组件 3.7 待开始）
+**最后更新**：阶段 3 全部完成（包含 3.7 AI 组件 spec primitives 对齐），下一步进入阶段 4 token 验收

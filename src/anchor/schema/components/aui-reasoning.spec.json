@@ -6,10 +6,13 @@
   "wraps": {
     "module": "@/components/starter/ai/reasoning",
     "primitives": [
+      "Reasoning",
       "ReasoningRoot",
+      "ReasoningGroup",
       "ReasoningTrigger",
       "ReasoningContent",
-      "ReasoningText"
+      "ReasoningText",
+      "ReasoningFade"
     ]
   },
   "requiredProps": [

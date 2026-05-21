@@ -6,6 +6,7 @@
   "wraps": {
     "module": "@/components/starter/ai/tool-fallback",
     "primitives": [
+      "ToolFallback",
       "ToolFallbackRoot",
       "ToolFallbackTrigger",
       "ToolFallbackContent",

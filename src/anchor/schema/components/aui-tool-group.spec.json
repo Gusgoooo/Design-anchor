@@ -6,6 +6,7 @@
   "wraps": {
     "module": "@/components/starter/ai/tool-group",
     "primitives": [
+      "ToolGroup",
       "ToolGroupRoot",
       "ToolGroupTrigger",
       "ToolGroupContent"

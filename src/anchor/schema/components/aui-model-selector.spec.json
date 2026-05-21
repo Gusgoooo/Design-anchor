@@ -9,7 +9,9 @@
       "ModelSelector",
       "ModelSelectorRoot",
       "ModelSelectorTrigger",
-      "ModelSelectorContent"
+      "ModelSelectorContent",
+      "ModelSelectorItem",
+      "ModelSelectorValue"
     ]
   },
   "requiredProps": [

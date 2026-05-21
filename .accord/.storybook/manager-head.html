@@ -1,0 +1,82 @@
+<style>
+  /* ─── Manager Theme CSS Custom Properties ─── */
+  :root {
+    --mgr-bg: #ffffff;
+    --mgr-text: #18181b;
+    --mgr-text-muted: #71717a;
+    --mgr-text-secondary: #52525b;
+    --mgr-text-tertiary: #a1a1aa;
+    --mgr-border: #e4e4e7;
+    --mgr-bg-subtle: #f4f4f5;
+    --mgr-bg-muted: #fafafa;
+    --mgr-border-light: #f0f0f0;
+    --mgr-blue: #2563eb;
+    --mgr-btn-hover: #333;
+    --mgr-input-bg: #ffffff;
+  }
+  :root.dark {
+    --mgr-bg: #1c1c1e;
+    --mgr-text: #fafafa;
+    --mgr-text-muted: #a1a1aa;
+    --mgr-text-secondary: #a1a1aa;
+    --mgr-text-tertiary: #52525b;
+    --mgr-border: #3f3f46;
+    --mgr-bg-subtle: #27272a;
+    --mgr-bg-muted: #27272a;
+    --mgr-border-light: #3f3f46;
+    --mgr-blue: #3b82f6;
+    --mgr-btn-hover: #d4d4d8;
+    --mgr-input-bg: #27272a;
+  }
+
+  /* ─── Hide default Brand / collapse / search ─── */
+  .sidebar-header > div:not([data-accord-sidebar-top]):not(:has([data-accord-sidebar-top])) {
+    display: none !important;
+  }
+  .sidebar-header > button {
+    display: none !important;
+  }
+  .search-field {
+    display: none !important;
+  }
+
+  /* ─── Hide ALL native sidebar tree, root headings, search, create-story ─── */
+  .sidebar-container nav {
+    display: none !important;
+  }
+  .sidebar-subheading {
+    display: none !important;
+  }
+  #storybook-explorer-tree {
+    display: none !important;
+  }
+  [data-action="create-new-story"],
+  button[aria-label="Create a new story"] {
+    display: none !important;
+  }
+
+  /* ─── Layout: sidebar-header fills container via scroll-area chain ─── */
+  .sidebar-container {
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  .sidebar-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    min-height: 0 !important;
+    gap: 0 !important;
+  }
+  [data-accord-sidebar-top] {
+    flex: 1 1 0% !important;
+    min-height: 0 !important;
+  }
+
+  /* ─── Hide Storybook notifications ─── */
+  #storybook-notifications-container,
+  div[class*="NotificationList"],
+  div[class*="notification" i] {
+    display: none !important;
+  }
+</style>

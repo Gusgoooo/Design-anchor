@@ -1,0 +1,98 @@
+{
+  "id": "aui-tooltip-icon-button",
+  "componentName": "TooltipIconButton",
+  "version": "1.0.0",
+  "intent": "Icon button with tooltip. For AI interface action buttons (copy, edit, retry) that show text on hover.",
+  "wraps": {
+    "module": "@/components/starter/ai/tooltip-icon-button",
+    "primitives": [
+      "TooltipIconButton"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "tooltip",
+      "description": "Tooltip text",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "children",
+      "description": "Icon element",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "side",
+      "description": "Tooltip placement",
+      "type": "\"top\" | \"bottom\" | \"left\" | \"right\"",
+      "required": false,
+      "defaultValue": "bottom"
+    },
+    {
+      "name": "variant",
+      "description": "Button variant (inherits Button)",
+      "type": "\"default\" | \"outline\" | \"ghost\"",
+      "required": false,
+      "defaultValue": "ghost"
+    },
+    {
+      "name": "size",
+      "description": "Size prop",
+      "type": "\"default\" | \"sm\" | \"lg\" | \"icon\"",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "rounded-md",
+      "transition-colors",
+      "hover:bg-accent",
+      "hover:text-accent-foreground"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(h-|w-|size-|p-|px-|py-)",
+        "pattern": "^(h-|w-|size-|p-|px-|py-)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^rounded",
+        "pattern": "^rounded"
+      },
+      {
+        "description": "Do not override tooltip positioning",
+        "pattern": "^(z-|fixed|absolute)"
+      }
+    ]
+  },
+  "aiPrompt": "Use TooltipIconButton from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "referencePriority": [
+    "@/components/starter/ai/tooltip-icon-button"
+  ],
+  "corrections": [
+    {
+      "id": "no-raw-button-tooltip-combo",
+      "violation": "Violation: using raw tag or hand-built alternative",
+      "fixPrompt": "Replace with the proper component import and use semantic props for styling."
+    }
+  ],
+  "examples": [
+    {
+      "title": "Copy Button",
+      "snippet": "<TooltipIconButton tooltip=\"Copy\" variant=\"ghost\">\n  <CopyIcon />\n</TooltipIconButton>"
+    }
+  ],
+  "meta": {
+    "tags": [
+      "button",
+      "icon",
+      "tooltip",
+      "action",
+      "ai"
+    ],
+    "category": "ai",
+    "status": "stable"
+  }
+}

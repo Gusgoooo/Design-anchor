@@ -1,0 +1,49 @@
+{
+  "id": "pagination",
+  "componentName": "Pagination",
+  "version": "1.0.0",
+  "intent": "Pagination controls providing page number jumps and previous/next page navigation.",
+  "wraps": {
+    "module": "@/components/starter/pagination",
+    "primitives": [
+      "Pagination",
+      "PaginationContent",
+      "PaginationEllipsis",
+      "PaginationItem",
+      "PaginationLink",
+      "PaginationNext",
+      "PaginationPrevious"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "mx-auto",
+      "flex",
+      "w-full",
+      "justify-center"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(flex|grid|gap-|items-|justify-)",
+        "pattern": "^(flex|grid|gap-|items-|justify-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Pagination from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "pagination",
+      "navigation"
+    ],
+    "category": "navigation",
+    "status": "stable"
+  }
+}

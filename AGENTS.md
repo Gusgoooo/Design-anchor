@@ -1,27 +1,23 @@
-# AGENTS.md — AI Coding Boundaries & Contract
+# AGENTS.md — AI 编码边界与契约
 
-## Directory Conventions
+## 目录约定（三条硬规则）
 
-1. **UI / Components / Token source of truth** → `src/components/` and `src/design-tokens/`
-2. **Portal / sync / kit integration** → root-level CLI, scripts, .storybook
-3. **Upstream npm package** → `node_modules/design-accord/` **read-only**, sync via `accord upgrade`
+1. **UI / 组件 / token 真源** → `./.accord/src/components/` 与 `./.accord/src/design-tokens/`
+   - 所有组件实现、变体、样式变更只在此处修改。
+   - 业务代码通过 `@design` 别名或相对路径引用，禁止复制组件实现到 `src/`。
 
-## AI Coding Contract
+2. **Portal / sync / kit 集成** → `./.accord/` 根层（CLI、scripts、.storybook）
+   - 仅用于 Storybook 配置、schema 同步、Portal 适配。
+   - 非组件实现代码。
 
-- **Imports**: Prefer `@design` alias; never import kit components from deep `node_modules` paths.
-- **Colors**: Only Design Token semantic classes — no hardcoded color values.
-- **Spacing**: No arbitrary Tailwind (`m-[13px]`) — use schema semantic props.
-- **Component specs**: `src/accord/schema/components/*.spec.json` is the single source of truth.
-- **After changes**: Run `npm run sync:accord` to regenerate .cursorrules.
+3. **上游 npm 包** → `node_modules/design-accord/` **只读**
+   - 通过 `accord upgrade` 同步变更到 `./.accord/`。
+   - 禁止直接修改 `node_modules` 内文件。
 
-## Workflow (auto-run after edits)
+## AI 编码契约
 
-After modifying any .tsx/.jsx/.ts file:
-1. Run `npx accord audit` — compliance check
-2. Fix any violations before proceeding
-
-After modifying any *.spec.json file:
-3. Run `npx accord sync` — regenerate rules + Tailwind extensions
-
-Before committing:
-4. Run `npx tsc --noEmit` — type check
+- **Import 来源**：优先 `@design`（指向 `./.accord/index.ts`）；禁止从 `node_modules` 深路径引用 kit 组件。
+- **颜色**：仅使用 Design Token 语义类（`bg-primary`、`text-muted-foreground`），禁止硬编码色值。
+- **间距**：禁止任意值 Tailwind（`m-[13px]`），使用 schema 声明的语义 props。
+- **组件规范**：以 `./.accord/src/accord/schema/components/*.spec.json` 为唯一数据源。
+- **修改后**：运行 `npm run sync:accord` 同步 .cursorrules 与 Tailwind 扩展。

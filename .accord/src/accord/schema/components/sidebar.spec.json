@@ -1,0 +1,108 @@
+{
+  "id": "sidebar",
+  "componentName": "Sidebar",
+  "version": "1.0.0",
+  "intent": "Application sidebar skeleton with header/content/footer/menu navigation layout.",
+  "wraps": {
+    "module": "@/components/starter/sidebar",
+    "primitives": [
+      "Sidebar",
+      "SidebarContent",
+      "SidebarFooter",
+      "SidebarGroup",
+      "SidebarGroupAction",
+      "SidebarGroupContent",
+      "SidebarGroupLabel",
+      "SidebarHeader",
+      "SidebarInput",
+      "SidebarInset",
+      "SidebarMenu",
+      "SidebarMenuAction",
+      "SidebarMenuBadge",
+      "SidebarMenuButton",
+      "SidebarMenuItem",
+      "SidebarMenuSkeleton",
+      "SidebarMenuSub",
+      "SidebarMenuSubButton",
+      "SidebarMenuSubItem",
+      "SidebarProvider",
+      "SidebarRail",
+      "SidebarSeparator",
+      "SidebarTrigger"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Variant prop",
+      "type": "\"default\" | \"outline\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "hover:bg-sidebar-accent",
+          "hover:text-sidebar-accent-foreground"
+        ],
+        "outline": [
+          "bg-background",
+          "shadow-[0_0_0_1px_hsl(var(--sidebar-border))]",
+          "hover:bg-sidebar-accent",
+          "hover:text-sidebar-accent-foreground",
+          "hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]"
+        ]
+      }
+    },
+    {
+      "name": "size",
+      "description": "Size prop",
+      "type": "\"default\" | \"sm\" | \"lg\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "h-8",
+          "text-sm"
+        ],
+        "sm": [
+          "h-8",
+          "text-xs"
+        ],
+        "lg": [
+          "h-8",
+          "text-sm",
+          "group-data-[collapsible=icon]:!p-0"
+        ]
+      }
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "min-h-svh",
+      "w-full"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(flex|grid|gap-|items-|justify-)",
+        "pattern": "^(flex|grid|gap-|items-|justify-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Sidebar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "sidebar",
+      "navigation"
+    ],
+    "category": "navigation",
+    "status": "stable"
+  }
+}

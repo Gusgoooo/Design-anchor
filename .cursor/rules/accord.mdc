@@ -1,126 +1,129 @@
 ---
-description: DesignAccord AI coding governance rules — component usage constraints for existing projects
+description: DesignAccord component governance rules — AI must follow these constraints
 alwaysApply: true
 ---
 
-# DesignAccord AI Coding Governance
+# DesignAccord Component Governance
 
-This project uses DesignAccord governance mode (`accord govern`). AI coding must follow the rules below.
+This project uses the DesignAccord component library (at `./.accord`, typically the hidden `./.accord` directory). All UI development must follow these rules.
+
+## Directory Conventions
+
+- **Application / business pages**: Write in your project's own `src/` (or your project's original app directory). **Do NOT** write business pages, routes, or feature code inside `./.accord`.
+- **Component library & Design Tokens**: Maintained only in `./.accord`; DesignAccord injects capabilities via `./.accord` and `.cursor/`, it does not replace your project's own folder structure.
+
+## 场景 → 组件速查（重要：先查此表再动手写）
+
+遇到以下场景时，**必须使用对应组件，禁止从零手写**：
+
+| 场景 | 使用组件 | 禁止 |
+|------|---------|------|
+| 进度展示 | Accordion、Progress | 手写替代实现 |
+| AI 助手集成 | AssistantModal、AssistantSidebar、FollowUpSuggestions、Thread | 从零手写聊天/AI UI |
+| 弹窗/浮层 | AssistantModal、Dialog | 手写替代实现 |
+| AI 对话/聊天界面 | AssistantSidebar、Attachment、ModelSelector、ThreadList、Thread | 从零手写聊天/AI UI |
+| 侧边栏/工作台布局 | AssistantSidebar、Sidebar | 手写替代实现 |
+| 文件上传/附件 | Attachment | 手写替代实现 |
+| Markdown/富文本渲染 | MarkdownText | 手写替代实现 |
+| AI 模型切换 | ModelSelector | 从零手写聊天/AI UI |
+| AI 思考过程展示 | Reasoning | 从零手写聊天/AI UI |
+| 用户头像 | Avatar | 手写替代实现 |
+| 导航 | Breadcrumb、NavigationMenu | 原生 `<nav>` + 手写链接列表 |
+| 日期选择 | Calendar | 手写替代实现 |
+| 数据表格展示 | DataTable、Table | 原生 `<table>` + 手写样式 |
+| 空状态 | Empty | 手写替代实现 |
+| 加载状态 | Sidebar、Skeleton、Spinner | 手写 CSS 动画 spinner |
+| 操作反馈/通知 | Sonner | `alert()` 或手写 toast |
+
+> **规则：写任何 UI 前，先在此表中查找是否已有对应组件。找到就用，找不到再造。**
 
 
+## 组件引用规则
 
-## Component Reference Rules
+1. **禁止使用原生 HTML 标签**：`<button>`、`<input>`、`<table>` 等，必须使用业务组件
+2. **导入路径**：**优先**使用已在业务 `tsconfig` / Vite 中配置的 **`@design`**（见项目根 `ACCORD_INTEGRATION.md`）；否则从 `./.accord/src/components/starter/` 导入
+3. **禁止手写间距**：不允许 `m-[13px]`、`p-[7px]` 等任意值 Tailwind 类
+4. **颜色仅用语义类**：`bg-primary`、`text-muted-foreground` 等，禁止硬编码色值
 
-1. **Do not use raw HTML tags in place of existing components**: If the project already has wrapped components like Button, Input, Table, etc., do not bypass them with native tags
-2. **Do not hand-write spacing**: Arbitrary-value Tailwind classes like `m-[13px]`, `p-[7px]` are not allowed; use the predefined spacing scale
-3. **Use only semantic color classes**: `bg-primary`, `text-muted-foreground`, etc. Hard-coded color values (e.g. `#ff6600`, `rgb()`) are forbidden
-4. **Consistent design language**: New UI must be visually consistent with existing components
+## 可用组件
 
-## Component Spec Reference
-
-The following component specs come from the DesignAccord component library. AI should reference these patterns:
-
-- **Accordion**: Collapsible content panel group, suitable for FAQs, settings groups, and other scenarios requiring item-by-item expansion.
-- **AlertDialog**: Blocking confirmation dialog for irreversible actions (delete, submit) that requires explicit user response before proceeding.
-- **Alert**: Displays important messages to users such as success, warning, or error status feedback; supports title and description combination.
-- **AspectRatio**: Fixed aspect-ratio container for images, videos, maps, and other media that needs to maintain proportions.
-- **AssistantModal**: Floating AI assistant modal. Displays a trigger button in the bottom-right corner that opens a popup with a full Thread. Suitable for embedding an AI assistant on any page.
-- **AssistantSidebar**: Sidebar-style AI assistant. Splits the page into a main content area and an AI conversation sidebar with a draggable divider. Suitable for workbench scenarios requiring AI assistance.
-- **Attachment**: Attachment display and upload component for AI conversations. Includes user message attachment preview, input field attachment list, and add attachment button.
-- **FollowUpSuggestions**: Follow-up suggestion button group after AI replies. Displays clickable follow-up question suggestions below assistant messages.
-- **MarkdownText**: Markdown renderer for AI messages. Renders AI-returned Markdown text as formatted HTML (headings, lists, code blocks, tables, links, etc.).
-- **ModelSelector**: AI model selector. Dropdown menu allowing users to switch the AI model for the current conversation, with support for icons, descriptions, and disabled states.
-- **Reasoning**: AI reasoning process display component (chain of thought). Collapsible panel showing the AI's thinking process, supporting outline/ghost/muted visual variants.
-- **ThreadList**: AI conversation history list showing multiple conversation threads. Supports creating, archiving, and deleting threads.
-- **Thread**: AI conversation thread main container, including message list, welcome page, input (Composer), and scroll control. Core component of assistant-ui.
-- **ToolFallback**: AI tool call display component. Shows a single tool call's name, status (running/complete/incomplete), arguments, and results.
-- **ToolGroup**: AI tool call grouping container. Aggregates multiple ToolFallback items in a collapsible panel showing tool call count and active state.
-- **TooltipIconButton**: Icon button with Tooltip. Used for action buttons in AI interfaces (copy, edit, retry, etc.) that show text hints on hover.
-- **Avatar**: Displays user avatars with image loading and text fallback; used in user lists, comments, navigation bars, etc.
-- **Badge**: Unified entry for status markers, tags, and count bubbles; do not hand-write span+bg for similar effects in business pages.
-- **Breadcrumb**: Hierarchical navigation breadcrumb showing the current page's position in the site structure, supporting level-by-level navigation.
-- **ButtonGroup**: Button grouping container that visually combines related action buttons (e.g. toolbars, segmented controls).
-- **Button**: Unified entry for all clickable actions: primary actions, secondary actions, link navigation, etc.; do not scatter raw <button> elements with hand-written spacing and brand colors in business pages.
-- **Calendar**: Date selection calendar panel, serving as the core rendering layer for date range selectors.
-- **Card**: General-purpose content container for grouping related information; supports structured layout with title, description, body, and footer actions.
-- **Carousel**: Carousel container for product images, banners, card lists, and other horizontal scroll displays.
-- **Checkbox**: Unified entry for check/uncheck: form consent items, multi-select filters, batch selection, etc.; do not use bare <input type=checkbox> in business pages.
-- **Collapsible**: Single collapsible region, lighter than Accordion — used for standalone "show more/less" scenarios.
-- **Command**: Command palette (like VS Code Ctrl+K / Spotlight) for global search and quick action entry.
-- **ContextMenu**: Right-click context menu providing context-relevant action options for selected content.
-- **DataTable**: Primary table for displaying business list data: pagination, sorting, and batch operations are consolidated here; do not scatter raw <table> elements with arbitrary spacing classes in business pages.
-- **Dialog**: Modal dialog for scenarios requiring user confirmation or input; blocks background interaction, supports controlled and uncontrolled modes.
-- **Drawer**: Bottom/side drawer panel, suitable for mobile action panels or auxiliary content display.
-- **DropdownMenu**: Dropdown menu displaying action lists below a trigger button; suitable for more actions, batch operations, etc.
-- **Empty**: Empty state placeholder component showing explanatory text and guided actions when lists/pages have no data.
-- **Field**: Form field container that unifies the layout and accessibility binding of label + input + description + error.
-- **HoverCard**: Hover card showing additional preview information (e.g. user profile, link preview) on mouse hover.
-- **InputGroup**: Input combination container that visually merges prefix/suffix (icons, text, buttons) with the input.
-- **InputOtp**: One-time password input (OTP/verification code), fixed-digit segmented input fields.
-- **Input**: Unified entry for all text input scenarios: search, form fields, passwords, etc.; do not scatter raw <input> elements with hand-written spacing and borders in business pages.
-- **Item**: List item layout component providing a standard row structure with icon/media + text + action buttons.
-- **Kbd**: Keyboard shortcut label displaying key combinations (e.g. Ctrl+S) with visual styling.
-- **Label**: Form label used with Input/Select and other form controls; provides consistent font styling and disabled state association.
-- **Menubar**: Menu bar (like desktop app top menus) with multiple dropdown menus displayed side by side.
-- **NavigationMenu**: Top navigation menu supporting simple link lists or complex navigation structures with dropdown panels.
-- **Pagination**: Pagination navigation providing page number jumps and previous/next page controls.
-- **Popover**: Popup bubble for displaying additional content or lightweight interactions near the trigger element; auto-closes on outside click.
-- **Progress**: Progress bar for displaying task completion percentage; supports custom max value and accessibility attributes.
-- **RadioGroup**: Radio button group for selecting one option from multiple mutually exclusive choices; supports controlled and uncontrolled modes.
+- **Accordion**: Collapsible content panels for FAQ, settings groups, and progressive disclosure.
+- **AlertDialog**: Blocking confirmation dialog for irreversible actions (delete, submit). User must respond before continuing.
+- **Alert**: Displays important status feedback (success, warning, error) with optional title and description.
+- **AspectRatio**: Fixed aspect-ratio container for images, videos, maps, and other media that must maintain proportions.
+- **AssistantModal**: Floating AI assistant modal. Shows a trigger button (bottom-right) that opens a full Thread dialog. Use when embedding AI assistant on any page.
+- **AssistantSidebar**: Sidebar AI assistant layout. Splits page into main content and AI conversation sidebar with a draggable divider. For workspace scenarios needing AI assistance.
+- **Attachment**: Attachment display and upload for AI conversations. Includes message attachment previews, input attachment list, and add-attachment button.
+- **FollowUpSuggestions**: Follow-up suggestion buttons after AI replies. Displays clickable next-question suggestions below assistant messages.
+- **MarkdownText**: Markdown renderer for AI messages. Renders AI-returned Markdown as formatted HTML (headings, lists, code blocks, tables, links).
+- **ModelSelector**: AI model selector dropdown. Lets users switch the current conversation's AI model with icons, descriptions, and disabled states.
+- **Reasoning**: AI reasoning/chain-of-thought display. Collapsible panel showing AI thinking process with outline/ghost/muted visual variants.
+- **ThreadList**: AI conversation history list showing multiple threads. Supports create, archive, and delete operations.
+- **Thread**: AI conversation thread container with message list, welcome screen, Composer input, and scroll control. Core assistant-ui component.
+- **ToolFallback**: AI tool call display. Shows a single tool invocation's name, status (running/complete/incomplete), arguments, and result.
+- **ToolGroup**: AI tool call group container. Aggregates multiple ToolFallback items in a collapsible panel with call count and active state.
+- **TooltipIconButton**: Icon button with tooltip. For AI interface action buttons (copy, edit, retry) that show text on hover.
+- **Avatar**: User avatar with image loading and text fallback. Used in user lists, comments, and navigation bars.
+- **Badge**: Unified entry for status marks, labels, and count bubbles. Do not hand-build span+bg alternatives.
+- **Breadcrumb**: Hierarchical breadcrumb navigation showing current page position in site structure with back navigation.
+- **ButtonGroup**: Button group container that visually combines related action buttons (toolbars, segmented controls).
+- **Button**: Unified clickable action entry for primary, secondary, and link navigation actions. Raw <button> with manual spacing and brand colors is forbidden.
+- **Calendar**: Date picker calendar panel. Core rendering layer for date range selectors.
+- **Card**: General content container for grouped information display. Supports title, description, body, and footer actions.
+- **Carousel**: Carousel/slider container for product images, banners, and horizontal card scrolling.
+- **Checkbox**: Unified check/uncheck entry for form agreements, multi-select filters, and batch selection. Raw <input type=checkbox> is forbidden.
+- **Collapsible**: Single collapsible region. Lighter than Accordion — for standalone expand/collapse scenarios.
+- **Command**: Command palette (VS Code Ctrl+K / Spotlight style) for global search and quick action entry.
+- **ContextMenu**: Right-click context menu providing contextual actions for selected content.
+- **DataTable**: Primary business data table: pagination, sorting, bulk actions converge here. Raw <table> with arbitrary spacing is forbidden.
+- **Dialog**: Modal dialog for user confirmation or input. Blocks background interaction, supports controlled and uncontrolled modes.
+- **Drawer**: Bottom/side drawer panel for mobile action sheets or auxiliary content display.
+- **DropdownMenu**: Dropdown menu for action lists below a trigger button. For 'more actions', bulk operations, etc.
+- **Empty**: Empty state placeholder for lists/pages with no data. Shows explanatory text and guidance actions.
+- **Field**: Form field container unifying label + input + description + error layout with accessibility bindings.
+- **HoverCard**: Hover card showing extra preview info (user profiles, link previews) on mouse hover.
+- **InputGroup**: Input group container combining prefix/suffix (icons, text, buttons) with input as a visual unit.
+- **InputOtp**: One-time password input (OTP/verification code) with fixed-digit segmented fields.
+- **Input**: Unified text input entry for search, form fields, passwords, etc. Raw <input> with manual spacing and borders is forbidden.
+- **Item**: List item layout providing icon/media + text + action button standard row structure.
+- **Kbd**: Keyboard shortcut label displaying key combinations (e.g., Ctrl+S) with visual styling.
+- **Label**: Form label paired with Input/Select controls. Provides consistent font styling and disabled state association.
+- **Menubar**: Menu bar (desktop app-style top menu) with multiple dropdown menus side by side.
+- **NavigationMenu**: Top navigation menu supporting simple link lists or complex dropdown panel navigation.
+- **Pagination**: Pagination controls providing page number jumps and previous/next page navigation.
+- **Popover**: Popover bubble for showing extra content or lightweight interactions near a trigger. Auto-closes on outside click.
+- **Progress**: Progress bar showing task completion percentage. Supports custom max value and accessibility attributes.
+- **RadioGroup**: Radio button group for selecting one option from mutually exclusive choices. Supports controlled and uncontrolled modes.
 - **Resizable**: Draggable resizable panel group for IDE-style multi-panel layouts.
-- **ScrollArea**: Custom scroll area container for limiting content height and providing scroll capability; maintains scroll behavior consistency.
-- **Select**: Native dropdown selector with unified border and interaction styles; for simple option scenarios, wrap externally for complex async options.
-- **Separator**: Divider line for visually separating content areas; supports horizontal and vertical directions.
-- **Sheet**: Side sliding panel (like mobile drawer but supports all four directions), used for settings panels and detail views.
-- **Sidebar**: Application sidebar skeleton containing a complete navigation layout with header/content/footer/menu.
-- **Skeleton**: Skeleton screen placeholder showing expected layout shape during content loading; reduces page jitter.
-- **Slider**: Slider control for selecting a value within a range; implemented based on native range input.
-- **Sonner**: Toast notifications (based on sonner library) for lightweight action feedback (success/failure/info).
-- **Spinner**: Loading spinner indicator for in-button/area/full-screen loading states.
-- **Switch**: Toggle component for boolean switching scenarios (e.g. enable/disable features); implemented with accessible checkbox + visual track.
-- **Table**: Base data table layer providing semantic HTML wrappers (table/thead/tbody/tr/th/td) with consistent styling.
-- **Tabs**: Tab component for switching between different views/panels within the same area; supports controlled and uncontrolled modes.
-- **Textarea**: Multi-line text input for scenarios requiring longer text; unified border, border-radius, and focus styles.
-- **ToggleGroup**: Toggle button group, a set of mutually exclusive or multi-select toggle buttons (e.g. view modes: list/grid/kanban).
-- **Toggle**: Toggle button (pressed/released state) for enabling/disabling a feature or switching view modes.
-- **Tooltip**: Text hint bubble showing auxiliary description text on hover; does not carry interactive content.
+- **ScrollArea**: Custom scroll area container with constrained height and consistent scrollbar behavior.
+- **Select**: Dropdown select with unified border and interaction styles. For simple options; wrap externally for async/complex cases.
+- **Separator**: Visual separator between content areas. Supports horizontal and vertical directions.
+- **Sheet**: Slide-out panel (mobile drawer style, supports all 4 directions) for settings panels and detail views.
+- **Sidebar**: Application sidebar skeleton with header/content/footer/menu navigation layout.
+- **Skeleton**: Skeleton loading placeholder showing expected layout shape during content loading. Reduces page jank.
+- **Slider**: Slider control for selecting a value within a range. Based on native range input.
+- **Sonner**: Toast notifications (via sonner library) for lightweight action feedback (success/failure/info).
+- **Spinner**: Loading spinner indicator for in-button, area, or full-screen loading states.
+- **Switch**: Toggle switch for boolean value changes (enable/disable features). Accessible checkbox with visual track.
+- **Table**: Base data table layer providing semantic HTML table/thead/tbody/tr/th/td with consistent styling.
+- **Tabs**: Tab component for switching between views/panels in the same area. Supports controlled and uncontrolled modes.
+- **Textarea**: Multi-line text input for longer text entry. Unified border, border-radius, and focus styles.
+- **ToggleGroup**: Toggle button group — mutually exclusive or multi-select toggles (e.g., view modes: list/grid/board).
+- **Toggle**: Toggle button (pressed/released state) for enabling/disabling features or view mode switching.
+- **Tooltip**: Text tooltip bubble showing helper text on hover. Must not contain interactive content.
 
 
-## Detailed Constraints
+## 组件规范（JSON，非独立「Schema 编辑器」产品）
 
+规范文件在 `./.accord/src/accord/schema/components/*.spec.json`。在 IDE 里直接改 JSON 即可；改完后在 `./.accord` 下执行 `npm run sync:accord`（或 `accord sync .`）生成 `.cursorrules` 与 Tailwind 生成物。
 
-### Thread — Forbidden
-- ❌ undefined: Do not hand-write chat containers (div+input+message list) in business pages instead of the Thread component
+## MCP 工具（若已配置 .cursor/mcp.json）
 
-### Thread — Corrections
-- ⚠️ no-manual-chat-ui: undefined → undefined (undefined)
+按需使用，例如：`list_components`、`read_component`、`create_component`、`list_tokens`、`update_token`、`run_audit`、`sync_rules`；规范相关也可用 `read_schema` / `update_schema`（与手写 JSON 等价）。
 
-### TooltipIconButton — Corrections
-- ⚠️ no-raw-button-tooltip-combo: undefined → undefined (undefined)
+## AI 核心契约
 
-### Button — Forbidden
-- ❌ undefined: Bare <button> is forbidden in business scenarios to ensure consistent border-radius, spacing, and brand colors
-
-### Button — Corrections
-- ⚠️ no-raw-button: undefined → undefined (undefined)
-
-### DataTable — Forbidden
-- ❌ undefined: Business lists should use the unified DataTable to ensure consistent spacing and brand styling
-
-### DataTable — Corrections
-- ⚠️ no-raw-table: undefined → undefined (undefined)
-- ⚠️ no-hacky-spacing: undefined → undefined (undefined)
-
-### Input — Forbidden
-- ❌ undefined: Bare <input> is forbidden in business scenarios to ensure consistent height, border, and focus styles
-
-### Input — Corrections
-- ⚠️ no-raw-input: undefined → undefined (undefined)
-
-
-## AI Core Contract
-
-1. Prioritize reusing existing UI components in the project; do not reinvent the wheel
-2. Reference colors and spacing only via Design Tokens / CSS variables / Tailwind semantic classes
-3. Review existing components and patterns in the project before modifying UI
-4. Do not introduce third-party UI libraries whose style is inconsistent with the project's existing design system
+详见项目根目录 **AGENTS.md**，三条硬规则：
+1. UI 真源在 `./.accord`，禁止在业务 `src/` 复制组件实现
+2. 仅通过 Design Token 引用颜色/间距，禁止硬编码
+3. 组件行为以 schema JSON 为唯一数据源

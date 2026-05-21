@@ -1,0 +1,52 @@
+{
+  "id": "label",
+  "componentName": "Label",
+  "version": "1.0.0",
+  "intent": "Form label paired with Input/Select controls. Provides consistent font styling and disabled state association.",
+  "wraps": {
+    "module": "@/components/starter/label",
+    "primitives": [
+      "Label"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children prop",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "htmlFor",
+      "description": "Html For prop",
+      "type": "string",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "text-sm",
+      "leading-none",
+      "peer-disabled:cursor-not-allowed",
+      "peer-disabled:opacity-70"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(text-|font-)",
+        "pattern": "^(text-|font-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Label from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "label",
+      "form",
+      "accessibility"
+    ],
+    "category": "form",
+    "status": "stable"
+  }
+}

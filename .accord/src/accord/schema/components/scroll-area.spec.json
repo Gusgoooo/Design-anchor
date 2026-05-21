@@ -1,0 +1,44 @@
+{
+  "id": "scroll-area",
+  "componentName": "ScrollArea",
+  "version": "1.0.0",
+  "intent": "Custom scroll area container with constrained height and consistent scrollbar behavior.",
+  "wraps": {
+    "module": "@/components/starter/scroll-area",
+    "primitives": [
+      "ScrollArea"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children prop",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "relative",
+      "overflow-auto",
+      "overscroll-contain"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^overflow",
+        "pattern": "^overflow"
+      }
+    ]
+  },
+  "aiPrompt": "Use ScrollArea from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "scroll",
+      "container",
+      "overflow"
+    ],
+    "category": "layout",
+    "status": "stable"
+  }
+}

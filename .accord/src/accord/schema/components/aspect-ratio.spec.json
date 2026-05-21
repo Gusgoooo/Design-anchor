@@ -1,0 +1,38 @@
+{
+  "id": "aspect-ratio",
+  "componentName": "AspectRatio",
+  "version": "1.0.0",
+  "intent": "Fixed aspect-ratio container for images, videos, maps, and other media that must maintain proportions.",
+  "wraps": {
+    "module": "@/components/starter/aspect-ratio",
+    "primitives": [
+      "AspectRatio"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [],
+    "blacklist": [
+      {
+        "description": "Do not override overflow and positioning",
+        "pattern": "^(overflow|position|relative|absolute)"
+      }
+    ]
+  },
+  "aiPrompt": "Use AspectRatio from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "aspect-ratio",
+      "layout"
+    ],
+    "category": "layout",
+    "status": "stable"
+  }
+}

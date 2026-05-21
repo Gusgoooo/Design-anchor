@@ -1,0 +1,102 @@
+{
+  "id": "aui-reasoning",
+  "componentName": "Reasoning",
+  "version": "1.0.0",
+  "intent": "AI reasoning/chain-of-thought display. Collapsible panel showing AI thinking process with outline/ghost/muted visual variants.",
+  "wraps": {
+    "module": "@/components/starter/ai/reasoning",
+    "primitives": [
+      "ReasoningRoot",
+      "ReasoningTrigger",
+      "ReasoningContent",
+      "ReasoningText"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Structure: ReasoningTrigger + ReasoningContent > ReasoningText",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Visual variant",
+      "type": "\"outline\" | \"ghost\" | \"muted\"",
+      "required": false,
+      "defaultValue": "outline",
+      "enumMap": {
+        "outline": [
+          "rounded-lg",
+          "border",
+          "px-3",
+          "py-2"
+        ],
+        "ghost": [],
+        "muted": [
+          "rounded-lg",
+          "bg-muted/50",
+          "px-3",
+          "py-2"
+        ]
+      }
+    },
+    {
+      "name": "defaultOpen",
+      "description": "Initial expanded state",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "mb-4",
+      "w-full",
+      "rounded-lg",
+      "border",
+      "px-3",
+      "py-2",
+      "text-sm",
+      "text-muted-foreground",
+      "transition-colors"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(animate-|transition-|duration-)",
+        "pattern": "^(animate-|transition-|duration-)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^(rounded|border)",
+        "pattern": "^(rounded|border)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^bg-(muted|secondary|accent|background)",
+        "pattern": "^bg-(muted|secondary|accent|background)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Reasoning from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "referencePriority": [
+    "@/components/starter/ai/reasoning"
+  ],
+  "examples": [
+    {
+      "title": "Show Reasoning Process",
+      "snippet": "<ReasoningRoot variant=\"outline\" defaultOpen={isStreaming}>\n  <ReasoningTrigger active={isStreaming} />\n  <ReasoningContent>\n    <ReasoningText>{children}</ReasoningText>\n  </ReasoningContent>\n</ReasoningRoot>"
+    }
+  ],
+  "meta": {
+    "tags": [
+      "reasoning",
+      "thinking",
+      "chain-of-thought",
+      "collapsible",
+      "ai"
+    ],
+    "category": "ai",
+    "status": "stable"
+  }
+}

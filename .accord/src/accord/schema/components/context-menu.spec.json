@@ -1,0 +1,66 @@
+{
+  "id": "context-menu",
+  "componentName": "ContextMenu",
+  "version": "1.0.0",
+  "intent": "Right-click context menu providing contextual actions for selected content.",
+  "wraps": {
+    "module": "@/components/starter/context-menu",
+    "primitives": [
+      "ContextMenu",
+      "ContextMenuTrigger",
+      "ContextMenuContent",
+      "ContextMenuItem",
+      "ContextMenuCheckboxItem",
+      "ContextMenuRadioItem",
+      "ContextMenuLabel",
+      "ContextMenuSeparator",
+      "ContextMenuShortcut",
+      "ContextMenuGroup",
+      "ContextMenuPortal",
+      "ContextMenuSub",
+      "ContextMenuSubContent",
+      "ContextMenuSubTrigger",
+      "ContextMenuRadioGroup"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "cursor-default",
+      "select-none",
+      "items-center",
+      "rounded-sm",
+      "px-2",
+      "py-2",
+      "text-sm",
+      "outline-none"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override z-index positioning",
+        "pattern": "^(z-|fixed|absolute|inset)"
+      },
+      {
+        "description": "Do not override animations (controlled internally)",
+        "pattern": "^(animate-|transition-|duration-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use ContextMenu from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "context-menu",
+      "overlay"
+    ],
+    "category": "overlay",
+    "status": "stable"
+  }
+}

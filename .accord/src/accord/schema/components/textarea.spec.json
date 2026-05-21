@@ -1,0 +1,79 @@
+{
+  "id": "textarea",
+  "componentName": "Textarea",
+  "version": "1.0.0",
+  "intent": "Multi-line text input for longer text entry. Unified border, border-radius, and focus styles.",
+  "wraps": {
+    "module": "@/components/starter/textarea",
+    "primitives": [
+      "Textarea"
+    ]
+  },
+  "requiredProps": [],
+  "optionalProps": [
+    {
+      "name": "placeholder",
+      "description": "Placeholder prop",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "disabled",
+      "description": "Disabled state",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    },
+    {
+      "name": "rows",
+      "description": "Rows prop",
+      "type": "number",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "min-h-[80px]",
+      "w-full",
+      "rounded-md",
+      "border",
+      "border-input",
+      "bg-transparent",
+      "text-sm",
+      "shadow-sm",
+      "transition-colors",
+      "placeholder:text-muted-foreground",
+      "focus-visible:outline-none",
+      "focus-visible:ring-1",
+      "focus-visible:ring-ring",
+      "disabled:cursor-not-allowed",
+      "disabled:opacity-50"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(min-h-|rounded)",
+        "pattern": "^(min-h-|rounded)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^(bg|border)-(input|transparent|background)",
+        "pattern": "^(bg|border)-(input|transparent|background)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^(px-|py-|p-)",
+        "pattern": "^(px-|py-|p-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Textarea from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "textarea",
+      "form",
+      "input",
+      "text"
+    ],
+    "category": "form",
+    "status": "stable"
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "id": "empty",
+  "componentName": "Empty",
+  "version": "1.0.0",
+  "intent": "Empty state placeholder for lists/pages with no data. Shows explanatory text and guidance actions.",
+  "wraps": {
+    "module": "@/components/starter/empty",
+    "primitives": [
+      "Empty",
+      "EmptyHeader",
+      "EmptyTitle",
+      "EmptyDescription",
+      "EmptyContent",
+      "EmptyMedia"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Variant prop",
+      "type": "\"default\" | \"icon\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "bg-transparent"
+        ],
+        "icon": [
+          "bg-muted",
+          "text-foreground",
+          "flex",
+          "size-8",
+          "shrink-0",
+          "items-center",
+          "justify-center",
+          "rounded-lg",
+          "[&_svg:not([class*="
+        ]
+      }
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "min-w-0",
+      "flex-1",
+      "flex-col",
+      "items-center",
+      "justify-center",
+      "gap-6",
+      "text-balance",
+      "rounded-lg",
+      "border-dashed",
+      "p-6",
+      "text-center"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override animations",
+        "pattern": "^(animate-|transition-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Empty from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "empty",
+      "feedback"
+    ],
+    "category": "feedback",
+    "status": "stable"
+  }
+}

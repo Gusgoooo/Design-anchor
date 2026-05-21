@@ -30,7 +30,7 @@
   }
 
   /* ─── Hide default Brand / collapse / search ─── */
-  .sidebar-header > div:not([data-harness-sidebar-top]):not(:has([data-harness-sidebar-top])) {
+  .sidebar-header > div:not([data-accord-sidebar-top]):not(:has([data-accord-sidebar-top])) {
     display: none !important;
   }
   .sidebar-header > button {
@@ -68,9 +68,15 @@
     min-height: 0 !important;
     gap: 0 !important;
   }
-  [data-harness-sidebar-top] {
+  [data-accord-sidebar-top] {
     flex: 1 1 0% !important;
     min-height: 0 !important;
+  }
+
+  /* ─── Controls panel: hide "Default" column (3rd in expanded mode) ─── */
+  [id^="panel-tab-content"] table thead tr th:nth-child(3),
+  [id^="panel-tab-content"] table tbody tr td:nth-child(3) {
+    display: none !important;
   }
 
   /* ─── Hide Storybook notifications ─── */

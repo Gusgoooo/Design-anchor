@@ -1,0 +1,51 @@
+{
+  "id": "field",
+  "componentName": "Field",
+  "version": "1.0.0",
+  "intent": "Form field container unifying label + input + description + error layout with accessibility bindings.",
+  "wraps": {
+    "module": "@/components/starter/field",
+    "primitives": [
+      "Field",
+      "FieldLabel",
+      "FieldDescription",
+      "FieldError",
+      "FieldGroup",
+      "FieldLegend",
+      "FieldSeparator",
+      "FieldSet",
+      "FieldContent",
+      "FieldTitle"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "flex-col",
+      "gap-6"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(flex|grid|gap-)",
+        "pattern": "^(flex|grid|gap-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Field from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "field",
+      "form"
+    ],
+    "category": "form",
+    "status": "stable"
+  }
+}

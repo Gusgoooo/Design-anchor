@@ -98,15 +98,50 @@ npm run dev                                  # 启动 anchor-portal（Vite + 自
 - [ ] **自动 Token Override · Bound controls**：在 Button story 的 Controls 面板里能看到 "Token Override · Bound" 类别下的 select 控件（来自 `autoClassControls`）
 - [ ] **AI 组件**：sidebar AI 分组下 Thread / Attachment / FollowUpSuggestions / MarkdownText / AssistantSidebar / AssistantModal 都能渲染（layout 多为 fullscreen）
 
-### ⏳ 阶段 3 — Radix UI 对齐（未开始）
+### 🟡 阶段 3 — Radix UI 对齐（Radix 系全部完成，custom 系剩 AI 组件）
 
-每组件 1-2 小时，~80-100 小时人工。建议拆 batch、每批 5-10 个组件提交一次。优先级：高频通用（Button / Input / Select / Dialog / Popover / Tabs / Form / Checkbox / Radio）→ 数据展示（Table / DataTable / Pagination）→ 反馈（Alert / Toast / Tooltip）→ 复杂（Calendar / Carousel）→ AI 组件（最后做，因为 assistant-ui 还有依赖兼容问题）。
+**已完成的 Radix-backed 组件（commit `5b390ea`、`338455e`）**：
 
-每组件需做：
-1. 对照 https://www.radix-ui.com/primitives/docs/components/ 列出缺失的 sub-components / parts
-2. 补齐 size / variant / state / orientation 等 variant
-3. 所有视觉属性走 token CSS 变量；用 `npm run anchor:audit` 扫硬编码
-4. 更新 `src/anchor/schema/components/<name>.spec.json`：完整 `wraps.primitives`、`styleLock.baselineTokens`、`styleLock.blacklist`、`forbidden`、`corrections`
+| 组件 | 改动 | 新导出 / 变体 |
+|---|---|---|
+| Select | 补齐 Radix 全表面 | SelectPortal / SelectIcon / SelectViewport / SelectItemText / SelectItemIndicator / SelectArrow + selectTriggerVariants |
+| Popover | 补齐 Radix 全表面 | PopoverAnchor / PopoverPortal / PopoverClose / PopoverArrow（fill-popover token） |
+| Checkbox | 补齐状态与尺寸 | indeterminate 状态（Minus 图标）+ size sm/default/lg + CheckboxIndicator |
+| RadioGroup | 补齐排版与尺寸 | orientation horizontal/vertical + size sm/default/lg + RadioGroupIndicator |
+| Tabs | 补齐风格与方向 | variant pill/underline + orientation horizontal/vertical |
+| Accordion | 补齐 Header | AccordionHeader |
+| ScrollArea | 补齐 Radix 全表面 | ScrollAreaViewport / ScrollAreaCorner / ScrollAreaThumb / ScrollAreaScrollbar |
+| Tooltip | 补齐 Portal / Arrow | TooltipPortal / TooltipArrow |
+| HoverCard | 补齐 Portal / Arrow | HoverCardPortal / HoverCardArrow |
+| DropdownMenu | 补齐 Arrow / Indicator | DropdownMenuArrow / DropdownMenuItemIndicator |
+| ContextMenu | 补齐 Arrow / Indicator | ContextMenuArrow / ContextMenuItemIndicator |
+| Menubar | 补齐 Arrow / Indicator | MenubarArrow / MenubarItemIndicator |
+| Switch | 补齐尺寸 + Thumb | size sm/default/lg + SwitchThumb |
+| Slider | 补齐方向 + 子部件 | orientation horizontal/vertical + SliderTrack / SliderRange / SliderThumb |
+| Progress | 补齐 Indicator | ProgressIndicator |
+| Avatar | 切换到 Radix UI | 使用 @radix-ui/react-avatar 获得图像加载失败自动 fallback |
+
+**已验收 / Radix 表面已齐全的组件（无需改动）**：
+
+Dialog, AlertDialog, Sheet（Radix Dialog 实现）, Menubar*, NavigationMenu, DropdownMenu*, ContextMenu*, Collapsible, AspectRatio, Label, Toggle, ToggleGroup, Separator
+*：通过 3.4 commit 补齐了 Arrow / Indicator
+
+**非 Radix（自定义实现，按需补 variants）**：
+
+Button, Input, InputGroup, InputOtp, Textarea, Card, Badge, Alert, Empty, Skeleton, Spinner, Kbd, Item, ButtonGroup, Breadcrumb, Pagination, Calendar（react-day-picker）, Carousel（embla）, Command（cmdk）, Resizable（react-resizable-panels）, Drawer（vaul）, Sidebar, Sonner, Form, Field, Chart, Table, DataTable
+
+> 这些组件本身不是 Radix 包装，主要是产品级变体（size/variant/intent）补全工作；变体口径由产品决定，建议按使用频率逐个补。
+
+**spec.json 同步**：所有改动的组件 `wraps.primitives` 已写齐；`npm run sync:anchor` 重新生成 `.cursorrules` / `ANCHOR_RULES.md` / tailwind 扩展（覆盖 64 个 spec）。
+
+**自动化验证（已通过）**：
+- ✅ `npx tsc --noEmit`
+- ✅ `npm run anchor:audit`（portal/demo 已加入排除）
+- ✅ `npm run sync:anchor`
+
+### ⏳ 阶段 3.7 — AI 组件（assistant-ui 系列，未开始）
+
+assistant-ui 还有依赖兼容问题（`@assistant-ui/store` 类型不一致），建议先锁版本或升级再补齐。涉及组件：Thread / Attachment / FollowUpSuggestions / MarkdownText / AssistantSidebar / AssistantModal / ModelSelector / Reasoning / ThreadList / ToolFallback / ToolGroup / TooltipIconButton。
 
 ### ⏳ 阶段 4 — Token 驱动验收（未开始）
 - 修改任意 token，全组件实时响应
@@ -171,4 +206,4 @@ npm run dev                                  # 启动 anchor-portal（Vite + 自
 
 ---
 
-**最后更新**：阶段 2 完成（去 Storybook 化）— commit `589e097`
+**最后更新**：阶段 3 Radix 系组件完成 — commit `338455e`（AI 组件 3.7 待开始）

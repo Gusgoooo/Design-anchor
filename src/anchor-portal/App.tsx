@@ -6,6 +6,7 @@ import { useRoute } from "./router";
 import { Sidebar } from "./sidebar/SidebarTop";
 import { StorySessionProvider } from "./usePreviewState";
 import { Canvas } from "./canvas/Canvas";
+import { ControlsPanel } from "./controls/ControlsPanel";
 
 export default function App() {
   return (
@@ -57,8 +58,14 @@ function PanelTabs() {
         <TabButton active={tab === "controls"} onClick={() => setTab("controls")} icon={<Sliders size={13} />} label="Controls" />
         <TabButton active={tab === "spec"} onClick={() => setTab("spec")} icon={<FileText size={13} />} label="Spec.json" />
       </div>
-      <div className="flex-1 overflow-auto p-4 text-xs text-muted-foreground">
-        {tab === "controls" ? "Controls — TODO (Stage 2.E)" : "Spec.json — TODO (Stage 2.F)"}
+      <div className="flex-1 overflow-hidden">
+        {tab === "controls" ? (
+          <ControlsPanel />
+        ) : (
+          <div className="flex h-full items-center justify-center px-6 text-center text-xs text-muted-foreground">
+            Spec.json — TODO (Stage 2.F)
+          </div>
+        )}
       </div>
     </div>
   );

@@ -1,0 +1,63 @@
+{
+  "id": "toggle",
+  "componentName": "Toggle",
+  "version": "1.0.0",
+  "intent": "Toggle button (pressed/released state) for enabling/disabling features or view mode switching.",
+  "wraps": {
+    "module": "@/components/starter/toggle",
+    "primitives": [
+      "Toggle"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Variant prop",
+      "type": "\"default\" | \"outline\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "bg-transparent"
+        ],
+        "outline": [
+          "border",
+          "border-input",
+          "bg-transparent",
+          "hover:bg-accent",
+          "hover:text-accent-foreground"
+        ]
+      }
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(ring-|outline-)",
+        "pattern": "^(ring-|outline-)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^h-",
+        "pattern": "^h-"
+      }
+    ]
+  },
+  "aiPrompt": "Use Toggle from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "toggle",
+      "input"
+    ],
+    "category": "input",
+    "status": "stable"
+  }
+}

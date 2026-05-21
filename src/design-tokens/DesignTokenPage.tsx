@@ -485,7 +485,7 @@ export function DesignTokenPage() {
       setRaw(JSON.stringify(tokensFallback as object, null, 2));
       setSaveApiAvailable(false);
       setStatus(
-        "Save API not available (common causes: 1) static site from `storybook build` has no Node middleware; 2) not started via `npm run storybook`). Loaded bundled tokens.json for local editing; to **write to disk**, run `npm run storybook` in this repo first, then click \"Save & Sync\".",
+        "Save API not available (the dev middleware is not running). Loaded bundled tokens.json for local editing; to **write to disk**, run `npm run dev` (or `anchor dev .`) first, then click \"Save & Sync\".",
       );
     } finally {
       setLoading(false);
@@ -552,7 +552,7 @@ export function DesignTokenPage() {
       return;
     }
     if (!saveApiAvailable) {
-      setStatus("No /api/save-design-tokens available in current environment, cannot write to disk. Please run `npm run storybook` and retry, or manually paste into src/design-tokens/tokens.json.");
+      setStatus("No /api/save-design-tokens available in current environment, cannot write to disk. Please run `npm run dev` and retry, or manually paste into src/design-tokens/tokens.json.");
       return;
     }
     try {
@@ -690,20 +690,6 @@ export function DesignTokenPage() {
 
   return (
     <div className="not-prose flex min-h-screen w-full min-w-0 flex-col bg-background text-foreground">
-      {/* Override Storybook docs page wrappers so dark mode covers the entire viewport.
-          Removed in Stage 2 once we no longer render inside Storybook's docs container. */}
-      <style>{`
-        .sbdocs.sbdocs-preview,
-        .sbdocs.sbdocs-content,
-        .sbdocs-wrapper,
-        .docs-story,
-        #storybook-docs {
-          background: var(--background) !important;
-          max-width: none !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-      `}</style>
       <div className="sticky top-0 z-30 w-full min-w-0 border-b border-border bg-background/90 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:px-6 lg:px-8">
         <div className="flex w-full min-w-0 items-center justify-between gap-6">
           <h1 className="text-3xl font-semibold tracking-tight">DesignToken</h1>

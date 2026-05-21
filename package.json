@@ -10,7 +10,7 @@
   "license": "MIT",
   "keywords": [
     "design-tokens",
-    "storybook",
+    "design-system",
     "tailwindcss",
     "ai-coding",
     "component-library",
@@ -24,7 +24,6 @@
     "scripts/",
     "src/",
     "docs/",
-    ".storybook/",
     "vendor/",
     "AGENTS.md",
     ".cursorrules",
@@ -46,8 +45,8 @@
     "sync:anchor": "npm run sync:tokens && node scripts/sync-from-schema.mjs",
     "anchor:audit": "node scripts/anchor-audit.mjs",
     "dev:portal": "vite --config src/design-portal/vite.config.ts --open",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build",
+    "dev": "vite --config src/anchor-portal/vite.config.ts",
+    "build": "vite build --config src/anchor-portal/vite.config.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -115,10 +114,6 @@
     "zustand": "^5.0.13"
   },
   "devDependencies": {
-    "@storybook/addon-docs": "^8.6.0",
-    "@storybook/addon-essentials": "^8.6.0",
-    "@storybook/react": "^8.6.0",
-    "@storybook/react-vite": "^8.6.0",
     "@tailwindcss/vite": "^4.2.4",
     "@types/culori": "^4.0.1",
     "@types/node": "^22.10.0",
@@ -127,8 +122,6 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
-    "react-docgen-typescript": "^2.2.2",
-    "storybook": "^8.6.0",
     "tailwindcss": "^4.2.4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.7.0",

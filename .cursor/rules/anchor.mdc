@@ -1,16 +1,16 @@
 ---
-description: DesignAccord component governance rules — AI must follow these constraints
+description: Design-anchor component governance rules — AI must follow these constraints
 alwaysApply: true
 ---
 
-# DesignAccord Component Governance
+# Design-anchor Component Governance
 
-This project uses the DesignAccord component library (at `./.accord`, typically the hidden `./.accord` directory). All UI development must follow these rules.
+This project uses the Design-anchor component library (at `./.anchor`, typically the hidden `./.anchor` directory). All UI development must follow these rules.
 
 ## Directory Conventions
 
-- **Application / business pages**: Write in your project's own `src/` (or your project's original app directory). **Do NOT** write business pages, routes, or feature code inside `./.accord`.
-- **Component library & Design Tokens**: Maintained only in `./.accord`; DesignAccord injects capabilities via `./.accord` and `.cursor/`, it does not replace your project's own folder structure.
+- **Application / business pages**: Write in your project's own `src/` (or your project's original app directory). **Do NOT** write business pages, routes, or feature code inside `./.anchor`.
+- **Component library & Design Tokens**: Maintained only in `./.anchor`; Design-anchor injects capabilities via `./.anchor` and `.cursor/`, it does not replace your project's own folder structure.
 
 ## 场景 → 组件速查（重要：先查此表再动手写）
 
@@ -41,7 +41,7 @@ This project uses the DesignAccord component library (at `./.accord`, typically 
 ## 组件引用规则
 
 1. **禁止使用原生 HTML 标签**：`<button>`、`<input>`、`<table>` 等，必须使用业务组件
-2. **导入路径**：**优先**使用已在业务 `tsconfig` / Vite 中配置的 **`@design`**（见项目根 `ACCORD_INTEGRATION.md`）；否则从 `./.accord/src/components/starter/` 导入
+2. **导入路径**：**优先**使用已在业务 `tsconfig` / Vite 中配置的 **`@design`**（见项目根 `ANCHOR_INTEGRATION.md`）；否则从 `./.anchor/src/components/starter/` 导入
 3. **禁止手写间距**：不允许 `m-[13px]`、`p-[7px]` 等任意值 Tailwind 类
 4. **颜色仅用语义类**：`bg-primary`、`text-muted-foreground` 等，禁止硬编码色值
 
@@ -115,7 +115,7 @@ This project uses the DesignAccord component library (at `./.accord`, typically 
 
 ## 组件规范（JSON，非独立「Schema 编辑器」产品）
 
-规范文件在 `./.accord/src/accord/schema/components/*.spec.json`。在 IDE 里直接改 JSON 即可；改完后在 `./.accord` 下执行 `npm run sync:accord`（或 `accord sync .`）生成 `.cursorrules` 与 Tailwind 生成物。
+规范文件在 `./.anchor/src/anchor/schema/components/*.spec.json`。在 IDE 里直接改 JSON 即可；改完后在 `./.anchor` 下执行 `npm run sync:anchor`（或 `anchor sync .`）生成 `.cursorrules` 与 Tailwind 生成物。
 
 ## MCP 工具（若已配置 .cursor/mcp.json）
 
@@ -124,6 +124,6 @@ This project uses the DesignAccord component library (at `./.accord`, typically 
 ## AI 核心契约
 
 详见项目根目录 **AGENTS.md**，三条硬规则：
-1. UI 真源在 `./.accord`，禁止在业务 `src/` 复制组件实现
+1. UI 真源在 `./.anchor`，禁止在业务 `src/` 复制组件实现
 2. 仅通过 Design Token 引用颜色/间距，禁止硬编码
 3. 组件行为以 schema JSON 为唯一数据源

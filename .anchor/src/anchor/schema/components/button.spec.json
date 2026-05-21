@@ -1,0 +1,165 @@
+{
+  "id": "button",
+  "componentName": "Button",
+  "version": "1.0.0",
+  "intent": "Unified clickable action entry for primary, secondary, and link navigation actions. Raw <button> with manual spacing and brand colors is forbidden.",
+  "wraps": {
+    "module": "@/components/starter/button",
+    "primitives": [
+      "Button"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Button label or icon",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Visual variant",
+      "type": "\"default\" | \"destructive\" | \"outline\" | \"secondary\" | \"ghost\" | \"link\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "bg-primary",
+          "text-primary-foreground",
+          "shadow",
+          "hover:bg-primary/90"
+        ],
+        "destructive": [
+          "bg-destructive",
+          "text-destructive-foreground",
+          "shadow-sm",
+          "hover:bg-destructive/90"
+        ],
+        "outline": [
+          "border",
+          "border-input",
+          "bg-background",
+          "shadow-sm",
+          "hover:bg-accent",
+          "hover:text-accent-foreground"
+        ],
+        "secondary": [
+          "bg-secondary",
+          "text-secondary-foreground",
+          "shadow-sm",
+          "hover:bg-secondary/80"
+        ],
+        "ghost": [
+          "hover:bg-accent",
+          "hover:text-accent-foreground"
+        ],
+        "link": [
+          "text-primary",
+          "underline-offset-4",
+          "hover:underline"
+        ]
+      }
+    },
+    {
+      "name": "size",
+      "description": "Size",
+      "type": "\"default\" | \"sm\" | \"lg\" | \"icon\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "h-9",
+          "px-4",
+          "py-2",
+          "text-sm"
+        ],
+        "sm": [
+          "h-7",
+          "px-3",
+          "text-xs"
+        ],
+        "lg": [
+          "h-11",
+          "px-8",
+          "text-sm"
+        ],
+        "icon": [
+          "size-9",
+          "shrink-0",
+          "p-0"
+        ]
+      }
+    },
+    {
+      "name": "disabled",
+      "description": "Disabled state",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "inline-flex",
+      "items-center",
+      "justify-center",
+      "rounded-md",
+      "text-sm",
+      "font-medium",
+      "transition-colors",
+      "focus-visible:outline-none",
+      "focus-visible:ring-1",
+      "focus-visible:ring-ring",
+      "disabled:pointer-events-none",
+      "disabled:opacity-50"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override button height and padding (mapped by size)",
+        "pattern": "^(h-|px-|py-|p-|pt-|pb-|pl-|pr-)"
+      },
+      {
+        "description": "Do not override border-radius (driven by design token --radius)",
+        "pattern": "^rounded"
+      },
+      {
+        "description": "Do not override brand/semantic colors (mapped by variant)",
+        "pattern": "^(bg|text|border)-(primary|secondary|destructive|accent|muted)"
+      },
+      {
+        "description": "Do not use arbitrary spacing values",
+        "pattern": "^(m|p|gap|space-[xy])-\\["
+      }
+    ]
+  },
+  "aiPrompt": "Must use @/components/starter/button. Use variant prop for visual style，Use size prop for dimensions. Do not stack Tailwind overrides on JSX. Colors must use design token semantic classes only.",
+  "forbidden": [
+    {
+      "htmlTag": "button",
+      "reason": "Raw <button> is forbidden to ensure consistent border-radius, spacing, and brand colors",
+      "useInstead": "@/components/starter/button"
+    }
+  ],
+  "corrections": [
+    {
+      "id": "no-raw-button",
+      "violation": "Using raw native  <button>",
+      "fixPrompt": "Replace with  import { Button } from '@/components/starter/Button', Use variant and size props for styling. "
+    }
+  ],
+  "referencePriority": [
+    "@/components/starter/button",
+    "@/components/starter"
+  ],
+  "meta": {
+    "tags": [
+      "button",
+      "action",
+      "cta"
+    ],
+    "category": "action",
+    "status": "stable"
+  }
+}

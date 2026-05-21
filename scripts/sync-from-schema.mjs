@@ -99,7 +99,7 @@ function writeAgentsMd() {
 ## Directory Conventions
 
 1. **UI / components / token source of truth** → \`src/components/\` and \`src/design-tokens/\`
-2. **Portal / sync / kit integration** → root-level CLI, scripts, .storybook
+2. **Portal / sync / kit integration** → root-level CLI, scripts, src/anchor-portal
 3. **Upstream npm package** → \`node_modules/design-anchor/\` **read-only**, synced via \`anchor upgrade\`
 
 ## AI Coding Contracts

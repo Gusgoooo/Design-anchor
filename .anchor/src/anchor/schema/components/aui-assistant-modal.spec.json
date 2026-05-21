@@ -1,0 +1,64 @@
+{
+  "id": "aui-assistant-modal",
+  "componentName": "AssistantModal",
+  "version": "1.0.0",
+  "intent": "Floating AI assistant modal. Shows a trigger button (bottom-right) that opens a full Thread dialog. Use when embedding AI assistant on any page.",
+  "wraps": {
+    "module": "@/components/starter/ai/assistant-modal",
+    "primitives": [
+      "AssistantModal"
+    ]
+  },
+  "requiredProps": [],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "fixed",
+      "z-50",
+      "rounded-xl",
+      "border",
+      "bg-popover",
+      "shadow-md",
+      "overflow-clip"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override positioning and z-index",
+        "pattern": "^(z-|fixed|absolute|inset|end-|bottom-)"
+      },
+      {
+        "description": "Do not override popup dimensions",
+        "pattern": "^(h-|w-|max-h-|max-w-)"
+      },
+      {
+        "description": "Do not override animations",
+        "pattern": "^(animate-|transition-|duration-|data-\\[state)"
+      },
+      {
+        "description": "Do not override popup background and border",
+        "pattern": "^(bg|border)-(popover|border|background)"
+      }
+    ]
+  },
+  "aiPrompt": "Use AssistantModal from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "referencePriority": [
+    "@/components/starter/ai/assistant-modal"
+  ],
+  "examples": [
+    {
+      "title": "Floating Corner Assistant",
+      "snippet": "<AssistantRuntimeProvider runtime={runtime}>\n  <YourPageContent />\n  <AssistantModal />\n</AssistantRuntimeProvider>"
+    }
+  ],
+  "meta": {
+    "tags": [
+      "modal",
+      "popup",
+      "floating",
+      "assistant",
+      "ai"
+    ],
+    "category": "ai",
+    "status": "stable"
+  }
+}

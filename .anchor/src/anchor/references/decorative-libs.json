@@ -1,0 +1,43 @@
+{
+  "description": "Decorative/animation component libraries available during page generation; AI can pick suitable components as visual accents",
+  "libraries": [
+    {
+      "name": "Magic UI",
+      "id": "magicui",
+      "url": "https://magicui.design",
+      "install": "npx magicui-cli@latest add <component-name>",
+      "outputDir": "src/components/magicui/",
+      "dependencies": ["motion"],
+      "categories": {
+        "text": ["animated-shiny-text", "number-ticker", "sparkles-text", "typing-animation", "text-reveal", "word-rotate", "flip-text", "gradual-spacing"],
+        "background": ["particles", "meteors", "ripple", "dot-pattern", "grid-pattern", "retro-grid"],
+        "layout": ["bento-grid", "dock", "marquee", "safari", "iphone-15-pro"],
+        "card": ["magic-card", "neon-gradient-card", "lens"],
+        "border": ["border-beam", "shimmer-button", "shine-border", "pulsating-button"],
+        "other": ["animated-beam", "globe", "orbit", "cool-mode", "confetti", "animated-list"]
+      }
+    },
+    {
+      "name": "Aceternity UI",
+      "id": "aceternity",
+      "url": "https://ui.aceternity.com",
+      "install": "npx aceternity-ui@latest add <component-name>",
+      "outputDir": "src/components/aceternity/",
+      "dependencies": ["motion"],
+      "categories": {
+        "background": ["aurora-background", "background-beams", "background-gradient", "wavy-background", "vortex", "background-boxes"],
+        "text": ["text-generate-effect", "typewriter-effect", "hero-highlight", "flip-words", "text-reveal-card"],
+        "card": ["card-hover-effect", "3d-card-effect", "direction-aware-hover", "hover-border-gradient"],
+        "navigation": ["floating-navbar"],
+        "border": ["moving-border", "glowing-stars"],
+        "layout": ["infinite-moving-cards", "lamp", "spotlight", "tracing-beam", "parallax-scroll", "sticky-scroll-reveal", "images-slider"]
+      }
+    }
+  ],
+  "usageGuidelines": {
+    "when": "When the page needs visual highlights / animation accents (Hero area, Landing Page, empty state, loading state, CTA area)",
+    "howMany": "Use at most 1-2 decorative components per page to avoid performance issues or visual fatigue from excessive animation",
+    "priority": "Core interactive components still use @/components/starter/*; decorative components are only for non-functional visual enhancement",
+    "tokens": "Decorative components should use project design token colors (e.g. hsl(var(--primary))); avoid hard-coded color values"
+  }
+}

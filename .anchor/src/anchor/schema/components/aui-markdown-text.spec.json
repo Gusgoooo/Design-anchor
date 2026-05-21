@@ -1,0 +1,59 @@
+{
+  "id": "aui-markdown-text",
+  "componentName": "MarkdownText",
+  "version": "1.0.0",
+  "intent": "Markdown renderer for AI messages. Renders AI-returned Markdown as formatted HTML (headings, lists, code blocks, tables, links).",
+  "wraps": {
+    "module": "@/components/starter/ai/markdown-text",
+    "primitives": [
+      "MarkdownText"
+    ]
+  },
+  "requiredProps": [],
+  "optionalProps": [],
+  "styleLock": {
+    "baselineTokens": [
+      "prose",
+      "text-sm",
+      "text-foreground",
+      "rounded-md",
+      "bg-muted",
+      "font-mono"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(prose|leading-|tracking-)",
+        "pattern": "^(prose|leading-|tracking-)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^font-(mono|sans|serif)",
+        "pattern": "^font-(mono|sans|serif)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^bg-(muted|zinc|gray|slate)",
+        "pattern": "^bg-(muted|zinc|gray|slate)"
+      }
+    ]
+  },
+  "aiPrompt": "Use MarkdownText from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "referencePriority": [
+    "@/components/starter/ai/markdown-text"
+  ],
+  "examples": [
+    {
+      "title": "Standalone Usage (outside Thread)",
+      "snippet": "import { MarkdownText } from '@/components/starter/ai/markdown-text';\n\n<MarkdownText />"
+    }
+  ],
+  "meta": {
+    "tags": [
+      "markdown",
+      "text",
+      "prose",
+      "render",
+      "ai"
+    ],
+    "category": "ai",
+    "status": "stable"
+  }
+}

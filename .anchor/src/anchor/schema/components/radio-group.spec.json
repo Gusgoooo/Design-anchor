@@ -1,0 +1,74 @@
+{
+  "id": "radio-group",
+  "componentName": "RadioGroup",
+  "version": "1.0.0",
+  "intent": "Radio button group for selecting one option from mutually exclusive choices. Supports controlled and uncontrolled modes.",
+  "wraps": {
+    "module": "@/components/starter/radio-group",
+    "primitives": [
+      "RadioGroup",
+      "RadioGroupItem"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children prop",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "defaultValue",
+      "description": "Default Value prop",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "value",
+      "description": "Value prop",
+      "type": "string",
+      "required": false
+    },
+    {
+      "name": "onValueChange",
+      "description": "On Value Change prop",
+      "type": "(value: string) => void",
+      "required": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "grid",
+      "aspect-square",
+      "h-4",
+      "w-4",
+      "rounded-full",
+      "border",
+      "border-input",
+      "bg-background"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(h-|w-)[0-9]",
+        "pattern": "^(h-|w-)[0-9]"
+      },
+      {
+        "description": "Do not override styles matching pattern ^rounded",
+        "pattern": "^rounded"
+      }
+    ]
+  },
+  "aiPrompt": "Use RadioGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "radio",
+      "form",
+      "selection",
+      "group"
+    ],
+    "category": "form",
+    "status": "stable"
+  }
+}

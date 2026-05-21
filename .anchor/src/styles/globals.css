@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "./design-tokens.generated.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* react-colorful：防止色选器在 dialog 等受限容器中被压缩 */
+.react-colorful {
+  width: 220px !important;
+  min-width: 220px !important;
+  height: 220px !important;
+}
+
+/* Harness：合并 schema 生成的扩展 token / safelist（Tailwind v4 兼容层） */
+@config "../../tailwind.config.ts";

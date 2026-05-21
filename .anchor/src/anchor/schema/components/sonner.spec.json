@@ -1,0 +1,38 @@
+{
+  "id": "sonner",
+  "componentName": "Sonner",
+  "version": "1.0.0",
+  "intent": "Toast notifications (via sonner library) for lightweight action feedback (success/failure/info).",
+  "wraps": {
+    "module": "@/components/starter/sonner",
+    "primitives": [
+      "Toaster"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [],
+    "blacklist": [
+      {
+        "description": "Do not override animations",
+        "pattern": "^(animate-|transition-)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Sonner from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "sonner",
+      "feedback"
+    ],
+    "category": "feedback",
+    "status": "stable"
+  }
+}

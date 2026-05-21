@@ -6,8 +6,8 @@
    - 所有组件实现、变体、样式变更只在此处修改。
    - 业务代码通过 `@design` 别名或相对路径引用，禁止复制组件实现到 `src/`。
 
-2. **Portal / sync / kit 集成** → `./.anchor/` 根层（CLI、scripts、.storybook）
-   - 仅用于 Storybook 配置、schema 同步、Portal 适配。
+2. **Portal / sync / kit 集成** → `./.anchor/` 根层（CLI、scripts、anchor-portal）
+   - 仅用于 anchor-portal 配置、schema 同步、Portal 适配。
    - 非组件实现代码。
 
 3. **上游 npm 包** → `node_modules/design-anchor/` **只读**

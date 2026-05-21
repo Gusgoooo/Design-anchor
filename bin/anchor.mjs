@@ -14,19 +14,19 @@ const [, , cmd, ...rest] = process.argv;
 /** 消费者项目中的组件库根目录：隐藏目录，与业务 `src/` 分离；治理文件在 `.cursor/` */
 const DEFAULT_ANCHOR_DIR = ".anchor";
 
-const PORTAL_PATH = "/?path=/docs/designtoken--docs";
+const PORTAL_PATH = "/#/_designtoken";
 const DEFAULT_PORT = 6006;
 
 const MANIFEST_FILE = ".design-kit-manifest.json";
-const KIT_STATUS_FILE = ".storybook/kit-status.json";
+const KIT_STATUS_FILE = ".anchor-portal/kit-status.json";
 
 /**
  * Reference Policy — 决定「被引用」的含义与侧栏圆点语义。
  *
  * 引用扫描范围：
  *   scan:    **\/*.{ts,tsx,js,jsx}
- *   exclude: **\/*.stories.*, node_modules/**
- *   即：仅生产/业务代码的 import 算「被引用」；stories 内的引用不算。
+ *   exclude: **\/*.demo.*, **\/*.stories.*, node_modules/**
+ *   即：仅生产/业务代码的 import 算「被引用」；demo / stories 内的引用不算。
  *
  * 圆点语义（侧栏组件行右侧）：
  *   蓝色 #3b82f6  = NEW     该组件由本次 kit sync/upgrade 新增
@@ -40,7 +40,7 @@ const KIT_STATUS_FILE = ".storybook/kit-status.json";
  */
 const REFERENCE_POLICY = {
   scanGlobs: ["**/*.{ts,tsx,js,jsx}"],
-  excludeGlobs: ["**/*.stories.*", "node_modules/**"],
+  excludeGlobs: ["**/*.demo.*", "**/*.stories.*", "node_modules/**"],
   dotColors: {
     new: "#3b82f6",
     modified: "#f59e0b",
@@ -61,7 +61,7 @@ anchor — AI coding governance CLI
   anchor govern              治理模式：仅注入 AI 规则文件，不拷贝组件/CSS（适合已有项目）
   anchor theme  <文件>       从 Design Prompt 提取 Token，写入 tokens.json 并生成主题规则
   anchor upgrade [目标目录]  升级 kit：新增组件直接加入、未修改覆盖、已修改跳过
-  anchor dev   [目标目录]    启动 Storybook 并自动打开 Portal 页面
+  anchor dev   [目标目录]    启动 anchor-portal（Storybook 替代）并打开浏览器
   anchor mcp   [目标目录]    启动 MCP Server（供 Cursor Agent 使用）
   anchor sync  [目标目录]    同步 schema → Tailwind + .cursorrules + 规则镜像
   anchor audit [目标目录]    运行合规审计（检测禁止标签 + 任意值 Tailwind）
@@ -114,10 +114,10 @@ function fileHash(absPath) {
   return createHash("sha256").update(readFileSync(absPath)).digest("hex").slice(0, 16);
 }
 
-/** Files the kit manages (non-stories source under toCopy dirs). */
+/** Files the kit manages (non-demo source under toCopy dirs). */
 function collectKitFiles(kitRoot) {
   const entries = [];
-  const dirs = ["src/components", "src/design-tokens", "src/styles", "src/lib", ".storybook"];
+  const dirs = ["src/components", "src/design-tokens", "src/styles", "src/lib", "src/anchor-portal"];
   for (const dir of dirs) {
     const abs = join(kitRoot, dir);
     if (!existsSync(abs)) continue;
@@ -177,7 +177,7 @@ function buildKitStatus(manifest) {
     const m = rel.match(/^src\/components\/starter\/([^/]+)\.tsx$/);
     if (!m) continue;
     const fileName = m[1];
-    if (fileName.includes(".stories")) continue;
+    if (fileName.includes(".demo") || fileName.includes(".stories")) continue;
     const name = fileName.charAt(0).toUpperCase() + fileName.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
     const prev = components[name];
     if (!prev || statusPriority(info.status) > statusPriority(prev.status)) {
@@ -198,7 +198,7 @@ function statusPriority(s) {
 
 function writeKitStatus(target, manifest) {
   const status = buildKitStatus(manifest);
-  const dir = join(target, ".storybook");
+  const dir = join(target, ".anchor-portal");
   mkdirSync(dir, { recursive: true });
   writeFileSync(join(target, KIT_STATUS_FILE), JSON.stringify(status, null, 2) + "\n");
 }
@@ -224,7 +224,7 @@ function doInit(targetArg) {
     "src/design-tokens",
     "src/styles",
     "src/lib",
-    ".storybook",
+    "src/anchor-portal",
     "vite-plugin-schema-api.mjs",
     "tsconfig.json",
     "tailwind.config.ts",
@@ -268,8 +268,8 @@ function doInit(targetArg) {
       "sync:tokens": parentPkg.scripts?.["sync:tokens"] || "node scripts/emit-design-tokens-css.mjs",
       "sync:anchor": parentPkg.scripts?.["sync:anchor"] || "npm run sync:tokens && node scripts/sync-from-schema.mjs",
       "anchor:audit": parentPkg.scripts?.["anchor:audit"] || "node scripts/anchor-audit.mjs",
-      storybook: "storybook dev -p 6006",
-      "build-storybook": "storybook build",
+      dev: "vite --config src/anchor-portal/vite.config.ts",
+      build: "vite build --config src/anchor-portal/vite.config.ts",
       typecheck: "tsc --noEmit",
     },
     dependencies,
@@ -288,7 +288,7 @@ function doInit(targetArg) {
   const manifest = buildManifest(target, kitVersion);
   writeManifest(target, manifest);
   writeKitStatus(target, manifest);
-  console.log("  ✅ .design-kit-manifest.json + .storybook/kit-status.json");
+  console.log("  ✅ .design-kit-manifest.json + .anchor-portal/kit-status.json");
 
   // 生成 Cursor 集成文件（写到用户项目根目录）
   const projectRoot = resolve(target, "..");
@@ -429,7 +429,9 @@ function generateIndex(target) {
   // starter 组件
   const starterDir = join(compsDir, "starter");
   if (existsSync(starterDir)) {
-    const files = readdirSyncSafe(starterDir).filter(f => f.endsWith(".tsx") && !f.includes(".stories."));
+    const files = readdirSyncSafe(starterDir).filter(
+      (f) => f.endsWith(".tsx") && !f.includes(".demo.") && !f.includes(".stories."),
+    );
     for (const f of files) {
       const mod = f.replace(/\.tsx$/, "");
       lines.push(`export * from "./src/components/starter/${mod}";`);
@@ -593,8 +595,8 @@ function generateAgentsMd(projectRoot, libTarget) {
    - 所有组件实现、变体、样式变更只在此处修改。
    - 业务代码通过 \`@design\` 别名或相对路径引用，禁止复制组件实现到 \`src/\`。
 
-2. **Portal / sync / kit 集成** → \`${relLib}/\` 根层（CLI、scripts、.storybook）
-   - 仅用于 Storybook 配置、schema 同步、Portal 适配。
+2. **Portal / sync / kit 集成** → \`${relLib}/\` 根层（CLI、scripts、anchor-portal）
+   - 仅用于 anchor-portal 配置、schema 同步、Portal 适配。
    - 非组件实现代码。
 
 3. **上游 npm 包** → \`node_modules/design-anchor/\` **只读**
@@ -1388,12 +1390,13 @@ function doStart(targetArg) {
 
 /* ─── dev ─── */
 
-/** 损坏的 Storybook manager 缓存会导致 manager-bundle.js 等 404、页面一片空白 */
-function clearStorybookManagerCache(target) {
+/** Stale Vite caches occasionally produce 404s on /@fs assets after dependency upgrades. */
+function clearPortalCache(target) {
   const dirs = [
-    join("node_modules", ".cache", "storybook"),
     join("node_modules", ".vite"),
-    join("node_modules", ".vite-storybook-anchor"),
+    join("node_modules", ".vite-anchor-portal"),
+    join("node_modules", ".vite-storybook-anchor"), // legacy
+    join("node_modules", ".cache", "storybook"), // legacy
   ];
   for (const rel of dirs) {
     const p = join(target, rel);
@@ -1437,8 +1440,9 @@ function openUrl(url) {
 function doDev(targetArg) {
   const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
-  if (!existsSync(join(target, ".storybook"))) {
-    console.error(`❌ 未找到配置，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
+  const portalConfig = join(target, "src/anchor-portal/vite.config.ts");
+  if (!existsSync(portalConfig)) {
+    console.error(`❌ 未找到 anchor-portal 配置，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
 
@@ -1454,23 +1458,23 @@ function doDev(targetArg) {
   console.log(`  📂 组件库: ${target}`);
   console.log(`  🌐 地址:   http://localhost:${port}`);
   console.log(`  🎨 Portal: ${portalUrl}`);
-  console.log(`\n  启动中…（首次会编译 Storybook 管理端，约 10–30 秒）\n`);
+  console.log(`\n  启动中…（首次编译约 5–10 秒）\n`);
 
-  clearStorybookManagerCache(target);
+  clearPortalCache(target);
 
-  const storybookCli = join(target, "node_modules", ".bin", "storybook");
-  if (!existsSync(storybookCli)) {
-    console.error(`❌ 未找到 Storybook，请在目录下执行: cd "${target}" && npm install`);
+  const viteCli = join(target, "node_modules", ".bin", "vite");
+  if (!existsSync(viteCli)) {
+    console.error(`❌ 未找到 Vite，请在目录下执行: cd "${target}" && npm install`);
     process.exit(1);
   }
 
   const child = spawn(
     process.execPath,
-    [storybookCli, "dev", "-p", String(port), "--no-open", "--disable-telemetry", "--quiet"],
+    [viteCli, "--config", "src/anchor-portal/vite.config.ts", "--port", String(port), "--strictPort", "false"],
     {
       cwd: target,
       stdio: "inherit",
-      env: { ...process.env, STORYBOOK_DISABLE_TELEMETRY: "1" },
+      env: { ...process.env },
     },
   );
 

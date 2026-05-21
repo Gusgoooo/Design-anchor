@@ -1,0 +1,78 @@
+{
+  "id": "item",
+  "componentName": "Item",
+  "version": "1.0.0",
+  "intent": "List item layout providing icon/media + text + action button standard row structure.",
+  "wraps": {
+    "module": "@/components/starter/item",
+    "primitives": [
+      "Item",
+      "ItemMedia",
+      "ItemContent",
+      "ItemActions",
+      "ItemGroup",
+      "ItemSeparator",
+      "ItemTitle",
+      "ItemDescription",
+      "ItemHeader",
+      "ItemFooter"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children content",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Variant prop",
+      "type": "\"default\" | \"icon\" | \"image\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "bg-transparent"
+        ],
+        "icon": [
+          "bg-muted",
+          "size-8",
+          "rounded-sm",
+          "border",
+          "[&_svg:not([class*="
+        ],
+        "image": [
+          "size-8",
+          "overflow-hidden",
+          "rounded-sm",
+          "[&_img]:size-full",
+          "[&_img]:object-cover"
+        ]
+      }
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "flex",
+      "flex-col"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override overflow and positioning",
+        "pattern": "^(overflow|position|relative|absolute)"
+      }
+    ]
+  },
+  "aiPrompt": "Use Item from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "meta": {
+    "tags": [
+      "item",
+      "layout"
+    ],
+    "category": "layout",
+    "status": "stable"
+  }
+}

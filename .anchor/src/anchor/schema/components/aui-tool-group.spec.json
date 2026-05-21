@@ -1,0 +1,111 @@
+{
+  "id": "aui-tool-group",
+  "componentName": "ToolGroup",
+  "version": "1.0.0",
+  "intent": "AI tool call group container. Aggregates multiple ToolFallback items in a collapsible panel with call count and active state.",
+  "wraps": {
+    "module": "@/components/starter/ai/tool-group",
+    "primitives": [
+      "ToolGroupRoot",
+      "ToolGroupTrigger",
+      "ToolGroupContent"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "ToolGroupTrigger + ToolGroupContent structure",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Visual variant",
+      "type": "\"outline\" | \"ghost\" | \"muted\"",
+      "required": false,
+      "defaultValue": "outline",
+      "enumMap": {
+        "outline": [
+          "rounded-lg",
+          "border",
+          "py-3"
+        ],
+        "ghost": [],
+        "muted": [
+          "rounded-lg",
+          "border",
+          "border-muted-foreground/30",
+          "bg-muted/30",
+          "py-3"
+        ]
+      }
+    },
+    {
+      "name": "defaultOpen",
+      "description": "Initial expanded state",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    },
+    {
+      "name": "count",
+      "description": "Tool call count (shown in Trigger)",
+      "type": "number",
+      "required": false
+    },
+    {
+      "name": "active",
+      "description": "Whether executing (Trigger shows spinner)",
+      "type": "boolean",
+      "required": false,
+      "defaultValue": false
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "w-full",
+      "rounded-lg",
+      "border",
+      "px-3",
+      "py-2",
+      "text-sm",
+      "text-muted-foreground"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(animate-|transition-|duration-)",
+        "pattern": "^(animate-|transition-|duration-)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^(rounded|border)",
+        "pattern": "^(rounded|border)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^bg-(muted|secondary|accent)",
+        "pattern": "^bg-(muted|secondary|accent)"
+      }
+    ]
+  },
+  "aiPrompt": "Use ToolGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "referencePriority": [
+    "@/components/starter/ai/tool-group"
+  ],
+  "examples": [
+    {
+      "title": "Grouped Tool Calls",
+      "snippet": "<ToolGroupRoot variant=\"outline\">\n  <ToolGroupTrigger count={3} active={isRunning} />\n  <ToolGroupContent>\n    {toolCalls.map(tc => <ToolFallback key={tc.id} {...tc} />)}\n  </ToolGroupContent>\n</ToolGroupRoot>"
+    }
+  ],
+  "meta": {
+    "tags": [
+      "tool-group",
+      "function-calls",
+      "collapsible",
+      "ai"
+    ],
+    "category": "ai",
+    "status": "stable"
+  }
+}

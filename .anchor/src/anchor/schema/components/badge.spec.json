@@ -1,0 +1,99 @@
+{
+  "id": "badge",
+  "componentName": "Badge",
+  "version": "1.0.0",
+  "intent": "Unified entry for status marks, labels, and count bubbles. Do not hand-build span+bg alternatives.",
+  "wraps": {
+    "module": "@/components/starter/badge",
+    "primitives": [
+      "Badge"
+    ]
+  },
+  "requiredProps": [
+    {
+      "name": "children",
+      "description": "Children prop",
+      "type": "React.ReactNode",
+      "required": true
+    }
+  ],
+  "optionalProps": [
+    {
+      "name": "variant",
+      "description": "Visual variant",
+      "type": "\"default\" | \"secondary\" | \"destructive\" | \"outline\"",
+      "required": false,
+      "defaultValue": "default",
+      "enumMap": {
+        "default": [
+          "border-transparent",
+          "bg-primary",
+          "text-primary-foreground",
+          "shadow"
+        ],
+        "secondary": [
+          "border-transparent",
+          "bg-secondary",
+          "text-secondary-foreground"
+        ],
+        "destructive": [
+          "border-transparent",
+          "bg-destructive",
+          "text-destructive-foreground",
+          "shadow"
+        ],
+        "outline": [
+          "text-foreground"
+        ]
+      }
+    }
+  ],
+  "styleLock": {
+    "baselineTokens": [
+      "inline-flex",
+      "items-center",
+      "rounded-md",
+      "border",
+      "px-2",
+      "py-0.5",
+      "text-xs",
+      "font-semibold",
+      "transition-colors"
+    ],
+    "blacklist": [
+      {
+        "description": "Do not override styles matching pattern ^(px-|py-|p-|pt-|pb-|pl-|pr-)",
+        "pattern": "^(px-|py-|p-|pt-|pb-|pl-|pr-)"
+      },
+      {
+        "description": "Do not override styles matching pattern ^(border|rounded)",
+        "pattern": "^(border|rounded)"
+      },
+      {
+        "description": "Do not override brand/semantic colors (mapped by variant)",
+        "pattern": "^(bg|text)-(primary|secondary|destructive|accent|muted)"
+      },
+      {
+        "description": "Do not use arbitrary spacing values",
+        "pattern": "^(m|p|gap)-\\["
+      }
+    ]
+  },
+  "aiPrompt": "Use Badge from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "forbidden": [],
+  "corrections": [],
+  "referencePriority": [
+    "@/components/starter/badge",
+    "@/components/starter"
+  ],
+  "meta": {
+    "tags": [
+      "badge",
+      "tag",
+      "label",
+      "status"
+    ],
+    "category": "data-display",
+    "status": "stable"
+  }
+}

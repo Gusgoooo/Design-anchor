@@ -15,6 +15,7 @@ import {
 } from "../story-registry";
 import { navigateTo, type Route } from "../router";
 import { dotColorFor, getComponentStatus, useKitStatus } from "./kit-status";
+import { globPathToRepoPath, openContextMenu } from "./ContextMenu";
 
 type Props = {
   entries: ComponentEntry[];
@@ -170,6 +171,21 @@ function ComponentRow({
   const containsCurrent = currentStoryId
     ? entry.stories.some((s) => s.id === currentStoryId)
     : false;
+  const componentName = entry.title.split("/").pop() ?? entry.title;
+
+  const handleContextMenu = React.useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openContextMenu({
+        x: e.clientX,
+        y: e.clientY,
+        componentName,
+        importPath: globPathToRepoPath(entry.filePath),
+      });
+    },
+    [componentName, entry.filePath],
+  );
 
   return (
     <div>
@@ -177,7 +193,7 @@ function ComponentRow({
         depth={depth}
         chevron={hasStories ? (isOpen ? "open" : "closed") : "none"}
         icon={<ComponentIcon size={13} className="text-muted-foreground" />}
-        label={entry.title.split("/").pop() ?? entry.title}
+        label={componentName}
         onClick={() => {
           toggle(entry.id);
           // jump to first story when expanding for the first time
@@ -185,8 +201,9 @@ function ComponentRow({
             navigateTo({ kind: "story", storyId: entry.stories[0].id } satisfies Route);
           }
         }}
+        onContextMenu={handleContextMenu}
         isSelected={containsCurrent && !isOpen}
-        statusName={entry.title.split("/").pop()}
+        statusName={componentName}
       />
       {isOpen &&
         entry.stories.map((story) => (
@@ -229,6 +246,7 @@ function RowButton({
   icon,
   label,
   onClick,
+  onContextMenu,
   isSelected,
   compact,
   statusName,
@@ -238,6 +256,7 @@ function RowButton({
   icon: React.ReactNode;
   label: string;
   onClick: () => void;
+  onContextMenu?: (e: React.MouseEvent) => void;
   isSelected: boolean;
   compact?: boolean;
   statusName?: string;
@@ -246,6 +265,7 @@ function RowButton({
     <button
       type="button"
       onClick={onClick}
+      onContextMenu={onContextMenu}
       style={{ paddingLeft: 8 + depth * 14 }}
       className={cn(
         "group mx-1.5 flex w-[calc(100%-12px)] items-center gap-1.5 rounded-md py-1 pr-2 text-left text-[13px] transition-colors",

@@ -7,6 +7,7 @@ import { Sidebar } from "./sidebar/SidebarTop";
 import { StorySessionProvider } from "./usePreviewState";
 import { Canvas } from "./canvas/Canvas";
 import { ControlsPanel } from "./controls/ControlsPanel";
+import { SpecPanel } from "./spec-editor/SpecPanel";
 
 export default function App() {
   return (
@@ -59,13 +60,7 @@ function PanelTabs() {
         <TabButton active={tab === "spec"} onClick={() => setTab("spec")} icon={<FileText size={13} />} label="Spec.json" />
       </div>
       <div className="flex-1 overflow-hidden">
-        {tab === "controls" ? (
-          <ControlsPanel />
-        ) : (
-          <div className="flex h-full items-center justify-center px-6 text-center text-xs text-muted-foreground">
-            Spec.json — TODO (Stage 2.F)
-          </div>
-        )}
+        {tab === "controls" ? <ControlsPanel /> : <SpecPanel />}
       </div>
     </div>
   );

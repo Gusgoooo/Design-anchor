@@ -1,19 +1,20 @@
 import * as React from "react";
 import { Moon, Palette, Plus, Sun } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { useTheme } from "../theme/DarkModeProvider";
 import { navigateTo } from "../router";
 import { useRegistry } from "../story-registry";
 import { SidebarTree } from "./SidebarTree";
+import { AddComponentDialog } from "./AddComponentDialog";
+import { ComponentContextMenu } from "./ContextMenu";
 
 type Props = {
   currentStoryId: string | null;
-  onAddComponent?: () => void;
 };
 
-export function Sidebar({ currentStoryId, onAddComponent }: Props) {
+export function Sidebar({ currentStoryId }: Props) {
   const { dark, toggle } = useTheme();
   const registry = useRegistry();
+  const [addOpen, setAddOpen] = React.useState(false);
 
   return (
     <div className="flex h-full flex-col">
@@ -38,11 +39,8 @@ export function Sidebar({ currentStoryId, onAddComponent }: Props) {
         <div className="flex flex-col gap-1.5">
           <button
             type="button"
-            onClick={onAddComponent}
-            className={cn(
-              "inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-[13px] font-medium text-background transition-opacity",
-              onAddComponent ? "hover:opacity-90" : "cursor-not-allowed opacity-60",
-            )}
+            onClick={() => setAddOpen(true)}
+            className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-[13px] font-medium text-background transition-opacity hover:opacity-90"
           >
             <Plus size={13} /> Add Component
           </button>
@@ -65,6 +63,9 @@ export function Sidebar({ currentStoryId, onAddComponent }: Props) {
           <SidebarTree entries={registry} currentStoryId={currentStoryId} />
         )}
       </div>
+
+      <AddComponentDialog open={addOpen} onClose={() => setAddOpen(false)} />
+      <ComponentContextMenu />
     </div>
   );
 }

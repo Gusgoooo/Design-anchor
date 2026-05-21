@@ -3,14 +3,16 @@ import { Loader2, MousePointerClick } from "lucide-react";
 import { useRoute } from "../router";
 import { useStorySession } from "../usePreviewState";
 import { PreviewFrame } from "./PreviewFrame";
+import { DesignTokenRoute } from "../docs/DesignTokenRoute";
+import { PatternsRoute } from "../docs/PatternsRoute";
 
 export function Canvas() {
   const route = useRoute();
   const { session, loading, error, registry } = useStorySession();
 
   if (route.kind === "welcome") return <WelcomeScreen registryCount={registry?.length ?? 0} />;
-  if (route.kind === "designtoken") return <RoutePlaceholder name="DesignToken" />;
-  if (route.kind === "patterns") return <RoutePlaceholder name="Patterns" />;
+  if (route.kind === "designtoken") return <DesignTokenRoute />;
+  if (route.kind === "patterns") return <PatternsRoute />;
 
   if (loading) return <CenterMessage icon={<Loader2 size={16} className="animate-spin" />} text="Loading story…" />;
   if (error) return <CenterMessage icon={null} text={error} variant="error" />;
@@ -51,16 +53,6 @@ function WelcomeScreen({ registryCount }: { registryCount: number }) {
             : "Add a *.demo.tsx file under src/components/ to get started."}
         </p>
       </div>
-    </div>
-  );
-}
-
-function RoutePlaceholder({ name }: { name: string }) {
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 px-8 text-center text-sm text-muted-foreground">
-      <p>
-        <strong>{name}</strong> route — TODO (Stage 2.F)
-      </p>
     </div>
   );
 }

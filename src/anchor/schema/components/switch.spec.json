@@ -6,7 +6,8 @@
   "wraps": {
     "module": "@/components/starter/switch",
     "primitives": [
-      "Switch"
+      "Switch",
+      "SwitchThumb"
     ]
   },
   "requiredProps": [],
@@ -25,10 +26,17 @@
       "defaultValue": false
     },
     {
-      "name": "onChange",
-      "description": "On Change prop",
-      "type": "React.ChangeEventHandler<HTMLInputElement>",
+      "name": "onCheckedChange",
+      "description": "Fires when the controlled state changes",
+      "type": "(checked: boolean) => void",
       "required": false
+    },
+    {
+      "name": "size",
+      "description": "Track / thumb size",
+      "type": "\"sm\" | \"default\" | \"lg\"",
+      "required": false,
+      "defaultValue": "default"
     }
   ],
   "styleLock": {

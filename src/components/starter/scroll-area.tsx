@@ -45,4 +45,17 @@ const ScrollBar = React.forwardRef<
 ))
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName
 
-export { ScrollArea, ScrollBar }
+/** Standalone Radix parts for advanced composition (custom viewport, nested scrollbars, etc.) */
+const ScrollAreaViewport = ScrollAreaPrimitive.Viewport
+const ScrollAreaCorner = ScrollAreaPrimitive.Corner
+const ScrollAreaThumb = ScrollAreaPrimitive.ScrollAreaThumb
+const ScrollAreaScrollbar = ScrollAreaPrimitive.ScrollAreaScrollbar
+
+export {
+  ScrollArea,
+  ScrollBar,
+  ScrollAreaViewport,
+  ScrollAreaCorner,
+  ScrollAreaThumb,
+  ScrollAreaScrollbar,
+}

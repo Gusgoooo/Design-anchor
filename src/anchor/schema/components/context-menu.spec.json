@@ -20,7 +20,9 @@
       "ContextMenuSub",
       "ContextMenuSubContent",
       "ContextMenuSubTrigger",
-      "ContextMenuRadioGroup"
+      "ContextMenuRadioGroup",
+      "ContextMenuArrow",
+      "ContextMenuItemIndicator"
     ]
   },
   "requiredProps": [

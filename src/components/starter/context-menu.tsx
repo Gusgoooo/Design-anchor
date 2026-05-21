@@ -165,6 +165,20 @@ const ContextMenuSeparator = React.forwardRef<
 ))
 ContextMenuSeparator.displayName = ContextMenuPrimitive.Separator.displayName
 
+const ContextMenuArrow = React.forwardRef<
+  React.ElementRef<typeof ContextMenuPrimitive.Arrow>,
+  React.ComponentPropsWithoutRef<typeof ContextMenuPrimitive.Arrow>
+>(({ className, ...props }, ref) => (
+  <ContextMenuPrimitive.Arrow
+    ref={ref}
+    className={cn("fill-popover", className)}
+    {...props}
+  />
+))
+ContextMenuArrow.displayName = ContextMenuPrimitive.Arrow.displayName
+
+const ContextMenuItemIndicator = ContextMenuPrimitive.ItemIndicator
+
 const ContextMenuShortcut = ({
   className,
   ...props
@@ -197,4 +211,6 @@ export {
   ContextMenuSubContent,
   ContextMenuSubTrigger,
   ContextMenuRadioGroup,
+  ContextMenuArrow,
+  ContextMenuItemIndicator,
 }

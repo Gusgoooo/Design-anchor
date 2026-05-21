@@ -8,6 +8,7 @@
     "primitives": [
       "Accordion",
       "AccordionItem",
+      "AccordionHeader",
       "AccordionTrigger",
       "AccordionContent"
     ]

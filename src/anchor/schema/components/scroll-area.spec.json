@@ -6,7 +6,12 @@
   "wraps": {
     "module": "@/components/starter/scroll-area",
     "primitives": [
-      "ScrollArea"
+      "ScrollArea",
+      "ScrollBar",
+      "ScrollAreaViewport",
+      "ScrollAreaCorner",
+      "ScrollAreaThumb",
+      "ScrollAreaScrollbar"
     ]
   },
   "requiredProps": [

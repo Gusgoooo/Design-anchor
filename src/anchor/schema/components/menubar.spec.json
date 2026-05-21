@@ -21,7 +21,9 @@
       "MenubarSubTrigger",
       "MenubarGroup",
       "MenubarSub",
-      "MenubarShortcut"
+      "MenubarShortcut",
+      "MenubarArrow",
+      "MenubarItemIndicator"
     ]
   },
   "requiredProps": [

@@ -168,6 +168,20 @@ const DropdownMenuSeparator = React.forwardRef<
 ))
 DropdownMenuSeparator.displayName = DropdownMenuPrimitive.Separator.displayName
 
+const DropdownMenuArrow = React.forwardRef<
+  React.ElementRef<typeof DropdownMenuPrimitive.Arrow>,
+  React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Arrow>
+>(({ className, ...props }, ref) => (
+  <DropdownMenuPrimitive.Arrow
+    ref={ref}
+    className={cn("fill-popover", className)}
+    {...props}
+  />
+))
+DropdownMenuArrow.displayName = DropdownMenuPrimitive.Arrow.displayName
+
+const DropdownMenuItemIndicator = DropdownMenuPrimitive.ItemIndicator
+
 const DropdownMenuShortcut = ({
   className,
   ...props
@@ -197,4 +211,6 @@ export {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuRadioGroup,
+  DropdownMenuArrow,
+  DropdownMenuItemIndicator,
 }

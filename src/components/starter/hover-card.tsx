@@ -9,6 +9,20 @@ const HoverCard = HoverCardPrimitive.Root
 
 const HoverCardTrigger = HoverCardPrimitive.Trigger
 
+const HoverCardPortal = HoverCardPrimitive.Portal
+
+const HoverCardArrow = React.forwardRef<
+  React.ElementRef<typeof HoverCardPrimitive.Arrow>,
+  React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Arrow>
+>(({ className, ...props }, ref) => (
+  <HoverCardPrimitive.Arrow
+    ref={ref}
+    className={cn("fill-popover", className)}
+    {...props}
+  />
+))
+HoverCardArrow.displayName = HoverCardPrimitive.Arrow.displayName
+
 const HoverCardContent = React.forwardRef<
   React.ElementRef<typeof HoverCardPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof HoverCardPrimitive.Content>
@@ -26,4 +40,10 @@ const HoverCardContent = React.forwardRef<
 ))
 HoverCardContent.displayName = HoverCardPrimitive.Content.displayName
 
-export { HoverCard, HoverCardTrigger, HoverCardContent }
+export {
+  HoverCard,
+  HoverCardTrigger,
+  HoverCardPortal,
+  HoverCardArrow,
+  HoverCardContent,
+}

@@ -8,6 +8,8 @@
     "primitives": [
       "HoverCard",
       "HoverCardTrigger",
+      "HoverCardPortal",
+      "HoverCardArrow",
       "HoverCardContent"
     ]
   },

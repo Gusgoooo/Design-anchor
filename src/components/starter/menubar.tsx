@@ -220,6 +220,20 @@ const MenubarSeparator = React.forwardRef<
 ))
 MenubarSeparator.displayName = MenubarPrimitive.Separator.displayName
 
+const MenubarArrow = React.forwardRef<
+  React.ElementRef<typeof MenubarPrimitive.Arrow>,
+  React.ComponentPropsWithoutRef<typeof MenubarPrimitive.Arrow>
+>(({ className, ...props }, ref) => (
+  <MenubarPrimitive.Arrow
+    ref={ref}
+    className={cn("fill-popover", className)}
+    {...props}
+  />
+))
+MenubarArrow.displayName = MenubarPrimitive.Arrow.displayName
+
+const MenubarItemIndicator = MenubarPrimitive.ItemIndicator
+
 const MenubarShortcut = ({
   className,
   ...props
@@ -253,4 +267,6 @@ export {
   MenubarGroup,
   MenubarSub,
   MenubarShortcut,
+  MenubarArrow,
+  MenubarItemIndicator,
 }

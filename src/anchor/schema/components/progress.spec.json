@@ -6,7 +6,8 @@
   "wraps": {
     "module": "@/components/starter/progress",
     "primitives": [
-      "Progress"
+      "Progress",
+      "ProgressIndicator"
     ]
   },
   "requiredProps": [],

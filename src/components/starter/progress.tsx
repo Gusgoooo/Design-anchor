@@ -38,4 +38,7 @@ const Progress = React.forwardRef<
 })
 Progress.displayName = ProgressPrimitive.Root.displayName
 
-export { Progress }
+/** Standalone Indicator for fully custom progress visuals. */
+const ProgressIndicator = ProgressPrimitive.Indicator
+
+export { Progress, ProgressIndicator }

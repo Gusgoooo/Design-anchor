@@ -6,7 +6,10 @@
   "wraps": {
     "module": "@/components/starter/slider",
     "primitives": [
-      "Slider"
+      "Slider",
+      "SliderTrack",
+      "SliderRange",
+      "SliderThumb"
     ]
   },
   "requiredProps": [],
@@ -38,6 +41,13 @@
       "type": "boolean",
       "required": false,
       "defaultValue": false
+    },
+    {
+      "name": "orientation",
+      "description": "Layout direction; vertical sliders need an explicit height on the parent",
+      "type": "\"horizontal\" | \"vertical\"",
+      "required": false,
+      "defaultValue": "horizontal"
     }
   ],
   "styleLock": {

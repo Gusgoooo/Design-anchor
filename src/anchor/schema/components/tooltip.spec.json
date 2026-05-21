@@ -9,6 +9,8 @@
       "TooltipProvider",
       "Tooltip",
       "TooltipTrigger",
+      "TooltipPortal",
+      "TooltipArrow",
       "TooltipContent"
     ]
   },

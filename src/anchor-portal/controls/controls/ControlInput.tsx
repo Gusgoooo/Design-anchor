@@ -1,4 +1,5 @@
 import * as React from "react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NormalizedControl } from "../normalize";
 
@@ -200,21 +201,28 @@ function SelectInput({
   }
   const cur = value == null ? "" : String(value);
   return (
-    <select
-      value={cur}
-      onChange={(e) => onChange(e.target.value)}
-      className={cn(inputBase, "font-mono")}
-      aria-label={argName}
-    >
-      {!options.some((o) => String(o) === cur) && cur !== "" ? (
-        <option value={cur}>{cur} (current)</option>
-      ) : null}
-      {options.map((opt, i) => (
-        <option key={i} value={String(opt)}>
-          {labelFor(opt, labels)}
-        </option>
-      ))}
-    </select>
+    <div className="relative">
+      <select
+        value={cur}
+        onChange={(e) => onChange(e.target.value)}
+        className={cn(inputBase, "appearance-none pr-7 font-mono")}
+        aria-label={argName}
+      >
+        {!options.some((o) => String(o) === cur) && cur !== "" ? (
+          <option value={cur}>{cur} (current)</option>
+        ) : null}
+        {options.map((opt, i) => (
+          <option key={i} value={String(opt)}>
+            {labelFor(opt, labels)}
+          </option>
+        ))}
+      </select>
+      <ChevronDown
+        size={12}
+        aria-hidden
+        className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+      />
+    </div>
   );
 }
 

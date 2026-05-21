@@ -52,10 +52,10 @@ export function ControlsPanel() {
       ) : (
         <div className="flex-1 overflow-y-auto">
           <table className="w-full border-collapse text-[12px]">
-            <thead className="sticky top-0 z-10 bg-background text-left text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+            <thead className="sticky top-0 z-10 bg-background text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
               <tr className="border-b border-border">
-                <th className="w-[42%] px-3 py-1.5 font-semibold">Name</th>
-                <th className="px-3 py-1.5 font-semibold">Control</th>
+                <th className="w-[42%] px-3 py-1.5 text-left font-semibold">Name</th>
+                <th className="px-3 py-1.5 pr-4 text-right font-semibold">Control</th>
               </tr>
             </thead>
             <tbody>
@@ -114,8 +114,8 @@ function ArgRow({
           ) : null}
         </div>
       </td>
-      <td className="px-3 py-2 align-top">
-        <div className="max-w-[280px]">
+      <td className="px-3 py-2 pr-4 align-top">
+        <div className="ml-auto max-w-[280px]">
           <ControlInput control={row.control} value={value} onChange={onChange} argName={row.argName} />
         </div>
       </td>

@@ -28,17 +28,18 @@ function AppShell() {
     <StorySessionProvider storyId={currentStoryId}>
       <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
         <Group id="anchor-portal-h" orientation="horizontal" className="flex h-full w-full">
-          <Panel id="sidebar" defaultSize={20} minSize={14} maxSize={36} className="flex flex-col">
+          {/* v4 size props are pixels when numeric; use "%" strings for ratios. */}
+          <Panel id="sidebar" defaultSize="20%" minSize="14%" maxSize="36%" className="flex flex-col">
             <Sidebar currentStoryId={currentStoryId} />
           </Panel>
           <Separator className={SEP_H} />
-          <Panel id="main" defaultSize={80} minSize={40} className="flex flex-col">
+          <Panel id="main" defaultSize="80%" minSize="40%" className="flex flex-col">
             <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
-              <Panel id="canvas" defaultSize={62} minSize={20} className="flex flex-col bg-background">
+              <Panel id="canvas" defaultSize="62%" minSize="20%" className="flex flex-col bg-background">
                 <Canvas />
               </Panel>
               <Separator className={SEP_V} />
-              <Panel id="panel" defaultSize={38} minSize={12} className="flex flex-col">
+              <Panel id="panel" defaultSize="38%" minSize="12%" className="flex flex-col">
                 <PanelTabs />
               </Panel>
             </Group>

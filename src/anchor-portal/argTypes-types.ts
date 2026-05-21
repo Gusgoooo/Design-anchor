@@ -94,11 +94,17 @@ type ArgsOf<T> =
         ? T
         : Record<string, unknown>;
 
+// `component` is intentionally permissive — Storybook lets users hand in any
+// React component (generic / forwardRef / memo wrappers) and we don't have a
+// docgen pass to narrow the prop type. Strict typing here breaks demos.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AnyComponent = ComponentType<any>;
+
 export type Meta<T = unknown> = {
   title?: string;
   id?: string;
-  component?: ComponentType<unknown>;
-  subcomponents?: Record<string, ComponentType<unknown>>;
+  component?: AnyComponent;
+  subcomponents?: Record<string, AnyComponent>;
   parameters?: Parameters;
   args?: Partial<ArgsOf<T>>;
   argTypes?: Record<string, ArgType>;

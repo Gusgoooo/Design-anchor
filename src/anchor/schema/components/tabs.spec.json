@@ -38,6 +38,20 @@
       "description": "On Value Change prop",
       "type": "(value: string) => void",
       "required": false
+    },
+    {
+      "name": "orientation",
+      "description": "Layout direction passed to TabsList + TabsContent for vertical vs horizontal tabs",
+      "type": "\"horizontal\" | \"vertical\"",
+      "required": false,
+      "defaultValue": "horizontal"
+    },
+    {
+      "name": "variant",
+      "description": "Visual style for TabsList + TabsTrigger",
+      "type": "\"pill\" | \"underline\"",
+      "required": false,
+      "defaultValue": "pill"
     }
   ],
   "styleLock": {

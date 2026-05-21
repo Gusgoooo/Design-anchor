@@ -6,7 +6,22 @@
   "wraps": {
     "module": "@/components/starter/select",
     "primitives": [
-      "Select"
+      "Select",
+      "SelectGroup",
+      "SelectValue",
+      "SelectTrigger",
+      "SelectContent",
+      "SelectLabel",
+      "SelectItem",
+      "SelectSeparator",
+      "SelectScrollUpButton",
+      "SelectScrollDownButton",
+      "SelectPortal",
+      "SelectIcon",
+      "SelectViewport",
+      "SelectItemText",
+      "SelectItemIndicator",
+      "SelectArrow"
     ]
   },
   "requiredProps": [

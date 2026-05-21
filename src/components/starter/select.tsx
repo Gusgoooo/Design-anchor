@@ -14,6 +14,14 @@ const SelectGroup = SelectPrimitive.Group
 
 const SelectValue = SelectPrimitive.Value
 
+/** Radix re-exports — surface every primitive part so consumers can compose freely */
+const SelectPortal = SelectPrimitive.Portal
+const SelectIcon = SelectPrimitive.Icon
+const SelectViewport = SelectPrimitive.Viewport
+const SelectItemText = SelectPrimitive.ItemText
+const SelectItemIndicator = SelectPrimitive.ItemIndicator
+const SelectArrow = SelectPrimitive.Arrow
+
 const selectTriggerVariants = cva(
   "flex w-full items-center justify-between rounded-md border border-input bg-background ring-offset-background data-[placeholder]:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-disabled [&>span]:line-clamp-1",
   {
@@ -175,4 +183,11 @@ export {
   SelectSeparator,
   SelectScrollUpButton,
   SelectScrollDownButton,
+  SelectPortal,
+  SelectIcon,
+  SelectViewport,
+  SelectItemText,
+  SelectItemIndicator,
+  SelectArrow,
+  selectTriggerVariants,
 }

@@ -8,6 +8,10 @@
     "primitives": [
       "Popover",
       "PopoverTrigger",
+      "PopoverAnchor",
+      "PopoverPortal",
+      "PopoverClose",
+      "PopoverArrow",
       "PopoverContent"
     ]
   },

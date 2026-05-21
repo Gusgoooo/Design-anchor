@@ -1,5 +1,5 @@
 /* eslint-disable */
-// AUTO-GENERATED — 运行 npm run sync:anchor 重新生成；请勿手改。
+// AUTO-GENERATED — run npm run sync:anchor to regenerate; do not edit manually.
 export const anchorTailwindExtend = {
   "spacing": {
     "business-table-cell-y-compact": "0.5rem",
@@ -10,7 +10,7 @@ export const anchorTailwindExtend = {
   "borderRadius": {}
 } as const;
 
-/** 来自 schema enumMap / baselineTokens，供 Tailwind JIT 拣选 */
+/** From schema enumMap / baselineTokens, for Tailwind JIT safelist */
 export const anchorSafelist: string[] = [
   "[&>svg:not([class*=",
   "[&_img]:object-cover",
@@ -28,6 +28,7 @@ export const anchorSafelist: string[] = [
   "bg-card",
   "bg-destructive",
   "bg-muted",
+  "bg-muted/30",
   "bg-muted/50",
   "bg-popover",
   "bg-primary",
@@ -41,6 +42,7 @@ export const anchorSafelist: string[] = [
   "border-destructive/50",
   "border-input",
   "border-l",
+  "border-muted-foreground/30",
   "border-r",
   "border-t",
   "border-transparent",
@@ -69,7 +71,6 @@ export const anchorSafelist: string[] = [
   "flex-wrap",
   "focus-visible:outline-none",
   "focus-visible:ring-1",
-  "focus-visible:ring-2",
   "focus-visible:ring-ring",
   "font-medium",
   "font-mono",
@@ -152,6 +153,7 @@ export const anchorSafelist: string[] = [
   "py-1",
   "py-1.5",
   "py-2",
+  "py-3",
   "py-business-table-cell-y-comfortable",
   "py-business-table-cell-y-compact",
   "py-business-table-cell-y-default",

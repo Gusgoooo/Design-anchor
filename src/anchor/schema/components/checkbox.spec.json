@@ -6,7 +6,8 @@
   "wraps": {
     "module": "@/components/starter/checkbox",
     "primitives": [
-      "Checkbox"
+      "Checkbox",
+      "CheckboxIndicator"
     ]
   },
   "requiredProps": [],
@@ -21,9 +22,22 @@
     {
       "name": "defaultChecked",
       "description": "Default Checked prop",
-      "type": "boolean",
+      "type": "boolean | \"indeterminate\"",
       "required": false,
       "defaultValue": false
+    },
+    {
+      "name": "checked",
+      "description": "Controlled checked state; pass \"indeterminate\" for the mixed state.",
+      "type": "boolean | \"indeterminate\"",
+      "required": false
+    },
+    {
+      "name": "size",
+      "description": "Box + icon size",
+      "type": "\"sm\" | \"default\" | \"lg\"",
+      "required": false,
+      "defaultValue": "default"
     }
   ],
   "styleLock": {

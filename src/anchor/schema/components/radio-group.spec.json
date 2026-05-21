@@ -7,7 +7,8 @@
     "module": "@/components/starter/radio-group",
     "primitives": [
       "RadioGroup",
-      "RadioGroupItem"
+      "RadioGroupItem",
+      "RadioGroupIndicator"
     ]
   },
   "requiredProps": [
@@ -36,6 +37,20 @@
       "description": "On Value Change prop",
       "type": "(value: string) => void",
       "required": false
+    },
+    {
+      "name": "orientation",
+      "description": "Layout direction; horizontal switches to grid-flow-col",
+      "type": "\"horizontal\" | \"vertical\"",
+      "required": false,
+      "defaultValue": "vertical"
+    },
+    {
+      "name": "size",
+      "description": "Item size (applies per RadioGroupItem)",
+      "type": "\"sm\" | \"default\" | \"lg\"",
+      "required": false,
+      "defaultValue": "default"
     }
   ],
   "styleLock": {

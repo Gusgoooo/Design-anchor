@@ -1,15 +1,9 @@
 import * as React from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
-import {
-  Component as ComponentIcon,
-  FileText,
-  Sliders,
-  Moon,
-  Sun,
-} from "lucide-react";
-import { DarkModeProvider, useTheme } from "./theme/DarkModeProvider";
-import { useRoute } from "./router";
-import { useRegistry } from "./story-registry";
+import { FileText, Sliders } from "lucide-react";
+import { DarkModeProvider } from "./theme/DarkModeProvider";
+import { useRoute, type Route } from "./router";
+import { Sidebar } from "./sidebar/SidebarTop";
 
 export default function App() {
   return (
@@ -24,13 +18,13 @@ const SEP_V = "h-px bg-border hover:bg-foreground/30 data-[dragging]:bg-foregrou
 
 function AppShell() {
   const route = useRoute();
-  const registry = useRegistry();
+  const currentStoryId = route.kind === "story" ? route.storyId : null;
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
       <Group id="anchor-portal-h" orientation="horizontal" className="flex h-full w-full">
         <Panel id="sidebar" defaultSize={20} minSize={14} maxSize={36} className="flex flex-col">
-          <SidebarStub registryReady={!!registry} count={registry?.length ?? 0} />
+          <Sidebar currentStoryId={currentStoryId} />
         </Panel>
         <Separator className={SEP_H} />
         <Panel id="main" defaultSize={80} minSize={40} className="flex flex-col">
@@ -45,32 +39,6 @@ function AppShell() {
           </Group>
         </Panel>
       </Group>
-    </div>
-  );
-}
-
-function SidebarStub({ registryReady, count }: { registryReady: boolean; count: number }) {
-  const { dark, toggle } = useTheme();
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex items-center justify-between gap-2 border-b border-border px-3 py-3">
-        <div className="flex items-center gap-2 text-sm font-semibold tracking-tight">
-          <ComponentIcon size={16} className="text-foreground" />
-          Design-anchor
-        </div>
-        <button
-          type="button"
-          onClick={toggle}
-          title={dark ? "Switch to light" : "Switch to dark"}
-          className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          {dark ? <Sun size={14} /> : <Moon size={14} />}
-        </button>
-      </div>
-      <div className="flex-1 overflow-y-auto px-3 py-3 text-xs text-muted-foreground space-y-2">
-        <p>{registryReady ? `${count} components discovered` : "Scanning *.demo.tsx…"}</p>
-        <p className="italic">Sidebar tree — TODO (Stage 2.C)</p>
-      </div>
     </div>
   );
 }

@@ -2,8 +2,10 @@ import * as React from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { FileText, Sliders } from "lucide-react";
 import { DarkModeProvider } from "./theme/DarkModeProvider";
-import { useRoute, type Route } from "./router";
+import { useRoute } from "./router";
 import { Sidebar } from "./sidebar/SidebarTop";
+import { StorySessionProvider } from "./usePreviewState";
+import { Canvas } from "./canvas/Canvas";
 
 export default function App() {
   return (
@@ -21,39 +23,27 @@ function AppShell() {
   const currentStoryId = route.kind === "story" ? route.storyId : null;
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
-      <Group id="anchor-portal-h" orientation="horizontal" className="flex h-full w-full">
-        <Panel id="sidebar" defaultSize={20} minSize={14} maxSize={36} className="flex flex-col">
-          <Sidebar currentStoryId={currentStoryId} />
-        </Panel>
-        <Separator className={SEP_H} />
-        <Panel id="main" defaultSize={80} minSize={40} className="flex flex-col">
-          <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
-            <Panel id="canvas" defaultSize={62} minSize={20} className="flex flex-col bg-background">
-              <CanvasStub route={route} />
-            </Panel>
-            <Separator className={SEP_V} />
-            <Panel id="panel" defaultSize={38} minSize={12} className="flex flex-col">
-              <PanelTabs />
-            </Panel>
-          </Group>
-        </Panel>
-      </Group>
-    </div>
-  );
-}
-
-function CanvasStub({ route }: { route: ReturnType<typeof useRoute> }) {
-  return (
-    <div className="flex h-full flex-col">
-      <div className="flex shrink-0 items-center gap-2 border-b border-border px-3 py-2 text-xs text-muted-foreground">
-        <FileText size={14} />
-        <span className="font-mono">route: {JSON.stringify(route)}</span>
+    <StorySessionProvider storyId={currentStoryId}>
+      <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
+        <Group id="anchor-portal-h" orientation="horizontal" className="flex h-full w-full">
+          <Panel id="sidebar" defaultSize={20} minSize={14} maxSize={36} className="flex flex-col">
+            <Sidebar currentStoryId={currentStoryId} />
+          </Panel>
+          <Separator className={SEP_H} />
+          <Panel id="main" defaultSize={80} minSize={40} className="flex flex-col">
+            <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
+              <Panel id="canvas" defaultSize={62} minSize={20} className="flex flex-col bg-background">
+                <Canvas />
+              </Panel>
+              <Separator className={SEP_V} />
+              <Panel id="panel" defaultSize={38} minSize={12} className="flex flex-col">
+                <PanelTabs />
+              </Panel>
+            </Group>
+          </Panel>
+        </Group>
       </div>
-      <div className="flex-1 overflow-auto p-6 text-sm text-muted-foreground">
-        Canvas — TODO (Stage 2.D)
-      </div>
-    </div>
+    </StorySessionProvider>
   );
 }
 

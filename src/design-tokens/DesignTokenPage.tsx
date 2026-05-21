@@ -457,8 +457,6 @@ export function DesignTokenPage() {
   React.useEffect(() => {
     const root = document.documentElement;
     root.classList.toggle("dark", darkMode);
-    // Consistent with Storybook Manager appContentBg, canvas matches Controls panel color
-    document.body.style.background = darkMode ? "#1c1c1e" : "#ffffff";
     localStorage.setItem(DARK_KEY, String(darkMode));
     try {
       const ch = new BroadcastChannel(DARK_KEY);
@@ -691,43 +689,55 @@ export function DesignTokenPage() {
   }
 
   return (
-    <div className="not-prose flex min-h-[70vh] w-full min-w-0 flex-col text-foreground">
-      <header className="w-full min-w-0 border-b border-border">
-        <div className="sticky top-0 z-30 border-b border-border bg-background/90 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:px-6 lg:px-8">
-          <div className="flex w-full min-w-0 items-center justify-between gap-6">
-            <h1 className="text-3xl font-semibold tracking-tight">DesignToken</h1>
-            <div className="flex shrink-0 items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setDarkMode(!darkMode)}
-                title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
-              >
-                {darkMode ? <Sun size={14} className="mr-2" /> : <Moon size={14} className="mr-2" />}
-                {darkMode ? "Light" : "Dark"}
-              </Button>
-              <Button type="button" variant="outline" onClick={() => setCodeOpen(true)}>
-                <Code size={14} className="mr-2" />
-                JSON
-              </Button>
-              <Button type="button" variant="outline" onClick={() => void load()} disabled={loading}>
-                Reload
-              </Button>
-              <Button type="button" onClick={() => void save()}>
-                Save & Sync
-              </Button>
-            </div>
+    <div className="not-prose flex min-h-screen w-full min-w-0 flex-col bg-background text-foreground">
+      {/* Override Storybook docs page wrappers so dark mode covers the entire viewport.
+          Removed in Stage 2 once we no longer render inside Storybook's docs container. */}
+      <style>{`
+        .sbdocs.sbdocs-preview,
+        .sbdocs.sbdocs-content,
+        .sbdocs-wrapper,
+        .docs-story,
+        #storybook-docs {
+          background: var(--background) !important;
+          max-width: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+      `}</style>
+      <div className="sticky top-0 z-30 w-full min-w-0 border-b border-border bg-background/90 px-4 py-4 backdrop-blur supports-[backdrop-filter]:bg-background/75 sm:px-6 lg:px-8">
+        <div className="flex w-full min-w-0 items-center justify-between gap-6">
+          <h1 className="text-3xl font-semibold tracking-tight">DesignToken</h1>
+          <div className="flex shrink-0 items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDarkMode(!darkMode)}
+              title={darkMode ? "Switch to light mode" : "Switch to dark mode"}
+            >
+              {darkMode ? <Sun size={14} className="mr-2" /> : <Moon size={14} className="mr-2" />}
+              {darkMode ? "Light" : "Dark"}
+            </Button>
+            <Button type="button" variant="outline" onClick={() => setCodeOpen(true)}>
+              <Code size={14} className="mr-2" />
+              JSON
+            </Button>
+            <Button type="button" variant="outline" onClick={() => void load()} disabled={loading}>
+              Reload
+            </Button>
+            <Button type="button" onClick={() => void save()}>
+              Save & Sync
+            </Button>
           </div>
         </div>
-        <div className="px-4 py-6 sm:px-6 lg:px-8">
-          <p className="max-w-5xl text-sm leading-relaxed text-muted-foreground">
-            Seeds in light and dark preview are written to <code className="rounded bg-muted px-1 font-mono text-xs">seed</code> /{" "}
-            <code className="rounded bg-muted px-1 font-mono text-xs">seedDark</code> respectively; derived tokens can be individually overridden per preview mode and saved to{" "}
-            <code className="rounded bg-muted px-1 font-mono text-xs">mapOverrides.light</code> /{" "}
-            <code className="rounded bg-muted px-1 font-mono text-xs">dark</code>. After saving, sync:tokens generates CSS.
-          </p>
-        </div>
-      </header>
+      </div>
+      <div className="w-full min-w-0 border-b border-border px-4 py-6 sm:px-6 lg:px-8">
+        <p className="max-w-5xl text-sm leading-relaxed text-muted-foreground">
+          Seeds in light and dark preview are written to <code className="rounded bg-muted px-1 font-mono text-xs">seed</code> /{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">seedDark</code> respectively; derived tokens can be individually overridden per preview mode and saved to{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">mapOverrides.light</code> /{" "}
+          <code className="rounded bg-muted px-1 font-mono text-xs">dark</code>. After saving, sync:tokens generates CSS.
+        </p>
+      </div>
 
       <div className="flex w-full min-w-0 flex-col gap-8 px-4 py-8 sm:px-6 lg:px-8">
         <DesignTokenShowcase

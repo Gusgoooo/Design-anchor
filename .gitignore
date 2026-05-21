@@ -5,3 +5,4 @@ storybook-static/
 *.log
 .cursorrules
 .design-kit-manifest.json
+.accord/

@@ -5,4 +5,5 @@ dist/
 .cursorrules
 .design-kit-manifest.json
 .accord/
+.anchor/
 .anchor-portal/

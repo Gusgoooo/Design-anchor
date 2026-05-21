@@ -1,4 +1,4 @@
-/* AUTO-GENERATED (v2 Seed→Map) — 源：tokens.json seed 层；请勿手改。运行 npm run sync:tokens */
+/* AUTO-GENERATED (v2 Seed→Map) — source: tokens.json seed layer; do not edit manually. Run npm run sync:tokens */
 
 @theme inline {
   /* Semantic colors — var() refs; dark mode switches the underlying variable */
@@ -51,7 +51,7 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
-  /* Spacing — 由 size 梯度 ÷ sizeUnit 推导的有限数字档（与 p-4、gap-2 等一致） */
+  /* Spacing — finite numeric steps derived from size scale / sizeUnit (aligns with p-4, gap-2, etc.) */
   --spacing-0: 0;
   --spacing-px: 1px;
   --spacing-0\.5: 2px;

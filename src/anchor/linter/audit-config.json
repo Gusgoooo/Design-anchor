@@ -6,10 +6,12 @@
     "/components/ui/",
     "/components/starter/",
     "/anchor/schema/",
+    "/anchor-portal/",
     "/design-portal/",
     "/design-tokens/",
     "/stories/",
     ".stories.",
+    ".demo.",
     ".spec.json",
     "/__fixtures__/"
   ],

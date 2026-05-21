@@ -22,20 +22,22 @@
 cd ~/Documents/Design-anchor
 claude --permission-mode bypassPermissions   # 免确认 Claude 会话
 # 然后在 Claude 内或另一个终端：
-npx storybook dev -p 6006 --no-open          # 当前临时验证用
+npm run dev                                  # 启动 anchor-portal（Vite + 自研 SPA）
+# 或： npx anchor dev .                      # CLI 入口
+# 默认 6006 端口；端口被占会自动找下一个
 ```
 
-> Storybook 是阶段 2 要被替换掉的（见下文）。当前阶段 1 完成时仍依赖它做回归测试。
+> Storybook 已在阶段 2 完全移除：依赖卸载、`.storybook/` 删除、所有 `*.stories.tsx` 改名 `*.demo.tsx`，运行时切换到 `src/anchor-portal/`。
 
 ---
 
 ## 整体目标（用户原始诉求）
 
-1. **重命名**：DesignAccord → Design-anchor，所有 `harness` / `accord` 引用清除，统一为 `anchor`
-2. **去 Storybook 化**：完全复刻 Storybook 当前提供的功能（侧边栏 / Controls / Spec.json 编辑 / DesignToken 文档 / 暗黑切换 / kit-status / 添加组件），但不再依赖 `storybook` / `@storybook/*` 任何包；产品可自由演化
-3. **Radix UI 全量对齐**：每个组件补齐 Radix UI 文档中的所有 sub-component 与 variant
-4. **Token 驱动**：所有视觉属性（color / spacing / radius / shadow / typography / motion）必须映射 design tokens；修改 token 后所有组件自动响应；硬编码值由 `accord-audit`（已改名 `anchor-audit`）扫出
-5. **零遗留错误**：全盘排查，确保产品无错误或隐藏问题
+1. ✅ **重命名**：DesignAccord → Design-anchor，所有 `harness` / `accord` 引用清除，统一为 `anchor`
+2. ✅ **去 Storybook 化**：完全复刻 Storybook 当前提供的功能；不再依赖 `storybook` / `@storybook/*` 任何包；产品自由演化
+3. ⏳ **Radix UI 全量对齐**：每个组件补齐 Radix UI 文档中的所有 sub-component 与 variant
+4. ⏳ **Token 驱动**：所有视觉属性（color / spacing / radius / shadow / typography / motion）必须映射 design tokens；修改 token 后所有组件自动响应；硬编码值由 `anchor-audit` 扫出
+5. ⏳ **零遗留错误**：全盘排查，确保产品无错误或隐藏问题
 
 ---
 
@@ -44,99 +46,57 @@ npx storybook dev -p 6006 --no-open          # 当前临时验证用
 | # | 决策 | 选择 |
 |---|---|---|
 | 1 | 阶段 2 预览隔离方式 | **B**：同帧 + CSS scope（不用 iframe） |
-| 2 | Stories 文件类型 | **B**：阶段 2 改名 `*.stories.tsx` → `*.demo.tsx` |
-| 3 | Controls UI 风格 | **A**：复刻 Storybook 两列表格（Name + Control 两栏，可选 expanded 显示 Description） |
-
-> 注意：决策 1 选了同帧，但用户后续要求各组件预览可以居中且限宽（默认 480px），并支持 stories 通过 `parameters: { layout: "fullscreen" | "centered" | "padded" }` 控制。这一行为已在 `.storybook/preview.tsx` 实现，迁移到阶段 2 portal 时需保留同样语义。
+| 2 | Stories 文件类型 | **B**：阶段 2 改名 `*.stories.tsx` → `*.demo.tsx` ✅ |
+| 3 | Controls UI 风格 | **A**：复刻 Storybook 两栏表格（Name + Control 两栏，可选 expanded 显示 Description） ✅ |
+| 4 | 布局形态 | Storybook-like：左栏导航 / 右上 Canvas / 右下 Controls·Spec tabs；icon 用 `lucide-react` |
 
 ---
 
 ## 阶段进度
 
 ### ✅ 阶段 0 — 基线（commit `1cf5167`、`b3f50a4`）
-- 干净 git 工作树、`.accord/` 加入 .gitignore（postinstall 产物）
-- 完整代码盘点
+干净 git 工作树、`.accord/` `.anchor/` 加入 `.gitignore`、完整代码盘点。
 
 ### ✅ 阶段 1 — 全局重命名（commit `f7d8e57`）
-**已完成**：
-- `src/accord/` → `src/anchor/`
-- `bin/{accord,accord-mcp}.mjs` → `bin/{anchor,anchor-mcp}.mjs`
-- `scripts/accord-audit.mjs` → `scripts/anchor-audit.mjs`
-- `scripts/lib/render-accord-rules.mjs` → `render-anchor-rules.mjs`
-- `tailwind.accord.generated.ts` → `tailwind.anchor.generated.ts`
-- `accord-vite.d.ts` → `anchor-vite.d.ts`
-- `.cursor/{rules,hooks}/accord-*.{mdc,mjs}` → `anchor-*`
-- `docs/ACCORD_*.md` → `docs/ANCHOR_*.md`
-- 仓库父目录 `~/Documents/DesignAccord/` → `~/Documents/Design-anchor/`
-- 157 个文件中的标识符替换：`accord` / `Accord` / `ACCORD` → `anchor` / `Anchor` / `ANCHOR`
-- 包名 `design-accord` → `design-anchor`，CLI `accord` → `anchor`
-- `Accordion` / `AccordionPrimitive`（Radix UI 原语）保留未改
-- `tsc --noEmit` 通过，Storybook 启动正常（93 stories）
+157 个文件、目录、CLI、包名全部替换为 `anchor`。`Accordion` Radix 原语未改。
 
-### ⏳ 阶段 2 — 去 Storybook 化（**未开始**）
+### ✅ 阶段 2 — 去 Storybook 化（commits `66bbd98` → `589e097`）
 
-**目标**：用 Vite + React 自定义 SPA 完全替代 Storybook，移除所有 storybook 依赖。
+**已交付**（按 sub-stage 顺序）：
 
-**待办子任务**（按建议执行顺序）：
+| Sub-stage | Commit | 内容 |
+|---|---|---|
+| 2.A 基础设施 | `66bbd98` | `src/anchor-portal/{vite.config.ts, index.html, main.tsx, argTypes-types.ts, story-registry.ts, router.ts, theme/DarkModeProvider.tsx, App.tsx}` + Button.stories→Button.demo 烟雾测试 |
+| 2.B App shell | `66bbd98` | `react-resizable-panels` v4 三区可拖拽（左 sidebar / 右上 canvas / 右下 panel tabs），lucide 图标 |
+| 2.C 侧边栏 | `3530ddd` | `sidebar/{SidebarTop.tsx, SidebarTree.tsx, kit-status.ts}`，递归树 + 红点 + 暗黑切换 + DesignToken 按钮 |
+| 2.D Canvas | `0168642` | `canvas/{Canvas.tsx, PreviewFrame.tsx}` + `usePreviewState.tsx`（StorySessionProvider）；layout 装饰器 fullscreen/centered/padded；StoryErrorBoundary |
+| 2.E Controls | `92a32bb` | `controls/{ControlsPanel.tsx, normalize.ts, controls/ControlInput.tsx}`，两栏表格、八种控件类型、分类分组、reset |
+| 2.F SpecPanel | `6c52f86` | `spec-editor/SpecPanel.tsx`（直接移植 `AnchorPanel`），`docs/{DesignTokenRoute, PatternsRoute}.tsx`，`sidebar/{AddComponentDialog, ContextMenu}.tsx` |
+| 2.G 批量改名 | `dad6609` | 61 个 `*.stories.tsx → *.demo.tsx`（git mv 保留历史），sed 替换 `@storybook/react` import → `@/anchor-portal/argTypes-types`，relaxed `Meta.component` 兼容泛型 |
+| 2.H 清理依赖 | `fd38f0b` | 卸载 `storybook` / `@storybook/*` / `react-docgen-typescript`；package.json scripts `dev`/`build`；删除 `.storybook/` 与 `DesignToken.mdx`；schema plugin 更新 `.demo.tsx` 与 `.anchor-portal/kit-status.json`；bin/anchor.mjs CLI 全部走 Vite |
+| 2.I 回归 + 文档 | _本次_ | audit-config 增 `/anchor-portal/`、`.demo.` 排除；本文档更新 |
 
-1. **新建 `src/anchor-portal/`**（替代当前 `src/design-portal/` 与 `.storybook/`）
-   ```
-   src/anchor-portal/
-   ├── index.html
-   ├── main.tsx
-   ├── App.tsx                # 三栏布局：sidebar / preview / controls+spec
-   ├── vite.config.ts
-   ├── router.ts              # 自研轻量路由（hash-based 简单）
-   ├── story-registry.ts      # import.meta.glob('../components/**/*.demo.tsx', { eager: false })
-   ├── sidebar/               # 移植自 .storybook/manager.tsx 的自定义树
-   │   ├── SidebarTree.tsx
-   │   ├── SidebarTop.tsx     # 含 DesignToken / Add Component 按钮、暗黑切换
-   │   └── kit-status.ts      # 红点（manifest 驱动）
-   ├── canvas/
-   │   └── PreviewFrame.tsx   # 同帧 + CSS scope；尊重 layout 参数
-   ├── controls/
-   │   ├── ControlsPanel.tsx  # Name / Description / Control 两栏（决策 3A）
-   │   ├── controls/          # select / boolean / text / number / color / object
-   │   └── argTypes-types.ts  # 自定义 Meta / StoryObj 类型替代 @storybook/react
-   ├── spec-editor/
-   │   └── SpecPanel.tsx      # 移植自 manager.tsx 的 AccordPanel（已改名）
-   ├── docs/
-   │   ├── DesignTokenRoute.tsx # 直接渲染 DesignTokenPage（已是 TSX）
-   │   └── PatternsRoute.tsx    # 替代 patterns.mdx
-   └── theme/
-       └── DarkModeProvider.tsx # localStorage 'anchor-dark-mode' + class 切换
-   ```
+**自动化验证（已通过）**：
+- ✅ `npx tsc --noEmit` 全量通过
+- ✅ `npm run anchor:audit` 通过（扫描 1 个 .tsx，无违规）
+- ✅ `npm run sync:tokens` 通过
+- ✅ `npm install` 已剥离 storybook 包，lockfile 减少 ~2200 行
+- ✅ Portal `/api/schemas` 返回 64 条；`/api/kit-status` 返回空 components；`/api/design-tokens` 可读
+- ✅ Vite glob 发现 62 个 `*.demo.tsx`
 
-2. **修改 `*.stories.tsx` → `*.demo.tsx`**（62 个文件）
-   - `git mv` 保留历史
-   - 替换 import：`import type { Meta, StoryObj } from "@storybook/react"` → `import type { Meta, StoryObj } from "@/anchor-portal/controls/argTypes-types"`
-   - 自定义 Meta 类型签名要兼容现有写法（title, parameters.layout, args, argTypes, decorators, render, parameters.anchorTokenCompliance）
+**回归测试清单（用户需在浏览器验证）**：
 
-3. **MDX 改 TSX**
-   - `src/design-tokens/DesignToken.mdx` 是个空 wrapper（仅 import DesignTokenPage），删除
-   - `src/components/starter/patterns.mdx`（如有）改为纯 TSX
+打开 http://localhost:6006/（或 portal 启动时显示的端口），逐项核对：
 
-4. **schemaApiPlugin 复用**
-   - `vite-plugin-schema-api.mjs` 已有的 `/api/schemas`、`/api/schema/:f`、`/api/save-schema`、`/api/upload-component`、`/api/delete-component`、`/api/kit-status` 端点保留，挂到 anchor-portal 的 vite dev server 即可
-
-5. **移除依赖**
-   - `package.json` 卸载：`storybook`、`@storybook/*`（addon-docs、addon-essentials、react、react-vite）
-   - `package.json` `keywords` 去掉 `"storybook"`
-   - `scripts.storybook` / `scripts.build-storybook` 删除，改为 `dev: "vite --config src/anchor-portal/vite.config.ts"` / `build`
-   - `bin/anchor.mjs` 中关于 storybook 的命令（accord dev / start）改为启动 anchor-portal
-   - 删除 `.storybook/` 整个目录
-   - `package.json` `files` 列表里去掉 `.storybook/`
-
-6. **回归测试清单**
-   - [ ] 侧边栏树渲染、点击切换组件
-   - [ ] DesignToken 编辑面板（含 sticky 标题 + 4 按钮）
-   - [ ] Spec.json 面板按 story 变体加载、保存调用 sync:anchor
-   - [ ] Add Component 上传 .tsx 走 `/api/upload-component`
-   - [ ] 右键删除组件
-   - [ ] 暗黑切换（标题、画布、Controls 三处一致）
-   - [ ] kit-status 红点
-   - [ ] 自动 Token Override · Bound controls（来自 `tw-class-audit`）
-   - [ ] AI 组件（Thread / Attachment / FollowUpSuggestions / MarkdownText / AssistantSidebar / AssistantModal）能渲染（依赖 `_story-runtime.tsx`）
+- [ ] **侧边栏树渲染、点击切换组件**：左栏出现树，点击 chevron 展开 stories；点击 story 名进入预览
+- [ ] **DesignToken 编辑面板**：点 "DesignToken" 按钮，sticky 标题 + 4 按钮（Light/Dark、JSON、Reload、Save & Sync）正常
+- [ ] **Spec.json 面板按 story 变体加载、保存调用 sync:anchor**：选 Button → Default，切到 Spec.json tab，编辑 intent 字段后 Save，应看到 "Written to disk + sync:anchor executed"
+- [ ] **Add Component 上传 .tsx 走 `/api/upload-component`**：点 "Add Component" 按钮，选一个 .tsx 文件，上传成功后 portal reload，新组件出现
+- [ ] **右键删除组件**：sidebar 中右键任意组件 → Delete confirm → 文件被删除（小心！可在测试组件上验证）
+- [ ] **暗黑切换（标题、画布、Controls 三处一致）**：点 sidebar 头部的月亮/太阳图标，整个 portal 切换
+- [ ] **kit-status 红点**：仅在消费者项目（`anchor init` 后）有 `.anchor-portal/kit-status.json` 才会显示；dev 仓库默认为空，跳过
+- [ ] **自动 Token Override · Bound controls**：在 Button story 的 Controls 面板里能看到 "Token Override · Bound" 类别下的 select 控件（来自 `autoClassControls`）
+- [ ] **AI 组件**：sidebar AI 分组下 Thread / Attachment / FollowUpSuggestions / MarkdownText / AssistantSidebar / AssistantModal 都能渲染（layout 多为 fullscreen）
 
 ### ⏳ 阶段 3 — Radix UI 对齐（未开始）
 
@@ -156,26 +116,40 @@ npx storybook dev -p 6006 --no-open          # 当前临时验证用
 
 ---
 
-## 当前已知问题（阶段 1 后遗留）
+## 当前已知问题 / 阶段 2 遗留
 
-1. **`@assistant-ui/store` 类型定义不完整**：`ClientSchema` 在 index.d.ts 重导出但 client.d.ts 实际名为 `ClientSchemas`（复数）。运行时不影响（仅类型层面）。但 AI 组件之前出现"Failed to fetch dynamically imported module" 错误，建议在阶段 2 顺手锁版本或升级。
-2. **Storybook Canvas 模式下的 Controls 面板原生 select 全宽**：是 Storybook 默认行为，**阶段 2 自研 Controls 时按决策 3A 复刻为两栏表格但限制 control 列宽 320px 即可解决**。
-3. **未提交的工作树修改**（编辑器/HMR 期产生）：
-   - `.storybook/preview.tsx` — decorator 按 `parameters.layout` 分支（fullscreen / padded / centered）
-   - `src/components/starter/ai/{Attachment,FollowUpSuggestions,MarkdownText}.stories.tsx` — layout 改 fullscreen
-   - `src/design-tokens/DesignTokenPage.tsx` — 标题+4 按钮 sticky，描述独占一行
-   - **下次新对话开始前应先 `git add -A && git commit`**，或读这份 doc 时让 Claude 处理
+1. **`@assistant-ui/store` 类型定义不完整**：`ClientSchema` 在 index.d.ts 重导出但 client.d.ts 实际名为 `ClientSchemas`（复数）。运行时不影响（仅类型层面）。AI 组件如出现 "Failed to fetch dynamically imported module" 错误，需要在阶段 3 顺手锁版本或升级。
+2. **Patterns 路由是占位符**：`docs/PatternsRoute.tsx` 仅渲染一个空白页面，等产品内容到位再补。
+3. **kit-status 路径迁移**：消费者 `anchor init` 后新位置是 `.anchor-portal/kit-status.json`；schema plugin 同时兼容 `.storybook/kit-status.json` 旧路径。老消费者跑一次 `anchor upgrade` 后会迁移。
+4. **`src/design-portal/`** 仍保留（SchemaEditor 独立工具，与 anchor-portal 不冲突）。如果未来不再需要，可整体删除。
 
 ---
 
-## 关键文件 / 模块速查
+## 关键文件 / 模块速查（阶段 2 后）
 
 | 模块 | 路径 | 作用 |
 |---|---|---|
-| Schema 端点 | `vite-plugin-schema-api.mjs` | dev server middleware，spec.json 读写 + sync 触发 |
-| 自定义侧边栏 | `.storybook/manager.tsx`（待迁出） | 1860 行，含 SidebarTree / AccordPanel(SpecPanel) / AddComponentDialog / kit-status |
+| Portal 入口 | `src/anchor-portal/main.tsx` | React 19 createRoot |
+| App shell | `src/anchor-portal/App.tsx` | `react-resizable-panels` 三区布局 |
+| Story 注册表 | `src/anchor-portal/story-registry.ts` | `import.meta.glob('../components/**/*.demo.tsx')` |
+| Meta 类型 | `src/anchor-portal/argTypes-types.ts` | 替代 `@storybook/react` 的类型层 |
+| 路由 | `src/anchor-portal/router.ts` | hash-based `/story/...` `/_designtoken` `/_patterns` |
+| Session 状态 | `src/anchor-portal/usePreviewState.tsx` | StorySessionProvider + useStorySession() |
+| 暗黑切换 | `src/anchor-portal/theme/DarkModeProvider.tsx` | localStorage `anchor-dark-mode` + BroadcastChannel |
+| 侧边栏树 | `src/anchor-portal/sidebar/SidebarTree.tsx` | 递归 + 选中 + kit-status 红点 |
+| 顶部 + 按钮 | `src/anchor-portal/sidebar/SidebarTop.tsx` | 含 Add Component / DesignToken / 暗黑 |
+| 添加组件弹窗 | `src/anchor-portal/sidebar/AddComponentDialog.tsx` | 上传 .tsx 走 `/api/upload-component` |
+| 右键菜单 | `src/anchor-portal/sidebar/ContextMenu.tsx` | 删除组件走 `/api/delete-component` |
+| 预览框 | `src/anchor-portal/canvas/PreviewFrame.tsx` | layout 装饰器 + 错误边界 |
+| Canvas | `src/anchor-portal/canvas/Canvas.tsx` | 路由分派 + toolbar |
+| Controls 主面板 | `src/anchor-portal/controls/ControlsPanel.tsx` | 两栏表格 + 分类分组（决策 3A） |
+| 控件渲染器 | `src/anchor-portal/controls/controls/ControlInput.tsx` | 八种 control kind |
+| argType 规范化 | `src/anchor-portal/controls/normalize.ts` | shorthand → NormalizedArgType |
+| Spec 编辑器 | `src/anchor-portal/spec-editor/SpecPanel.tsx` | 旧 AnchorPanel 直接移植 |
+| DesignToken 路由 | `src/anchor-portal/docs/DesignTokenRoute.tsx` | 包装 `DesignTokenPage` |
+| Schema 端点 | `vite-plugin-schema-api.mjs` | dev server middleware（spec.json / tokens / kit-status / upload / delete） |
 | 自动 Controls | `src/design-tokens/tw-class-audit.ts` | 扫描组件源码生成 Token Override · Bound 控件 |
-| Story 兼容声明 | `src/design-tokens/story-preview-shell.tsx` | 导出 `storyAnchorCompliance`（重命名后） |
+| Story 兼容声明 | `src/design-tokens/story-preview-shell.tsx` | 导出 `storyAnchorCompliance` |
 | 组件 spec | `src/anchor/schema/components/*.spec.json` | 64 个组件协议 |
 | Token 数据 | `src/design-tokens/tokens.json` | seed / seedDark / mapOverrides / customSeeds |
 | 生成产物 | `src/styles/design-tokens.generated.css`、`tailwind.anchor.generated.ts` | sync:tokens 输出，禁止手改 |
@@ -185,12 +159,16 @@ npx storybook dev -p 6006 --no-open          # 当前临时验证用
 
 ## 下次会话 Claude 的开场动作（建议）
 
-1. `git status` / `git log --oneline -5` 确认基线
+1. `git status` / `git log --oneline -10` 确认基线（应在 `589e097` 或更新提交）
 2. 读取 `docs/PROGRESS.md`（这份文档）
 3. 检查工作树是否有未提交修改 — 若有，问用户是否提交
-4. 询问用户："继续阶段 2 还是阶段 3？" 然后按这份文档列出的待办子任务执行
-5. 阶段 2 是大动作，建议先按 SidebarTree / Canvas / Controls 三个组件分支独立开发，每个完成后回来集成
+4. 询问用户："开始阶段 3（Radix UI 对齐）？" 或 "继续完善阶段 2 的某个 portal 子模块？"
+5. **阶段 3 注意事项**：
+   - 按 PROGRESS.md 上的优先级分批做
+   - 每批 5-10 个组件一个 commit
+   - 每改完一个组件，跑 `npm run anchor:audit` + `npm run dev` 在浏览器看 demo 是否仍然渲染
+   - 修改组件源后，对应的 `.spec.json` 也要同步更新 `wraps.primitives` / `styleLock.baselineTokens`，否则 `anchor-audit` 会漏报新 Radix 子组件
 
 ---
 
-**最后更新**：阶段 1 完成 + DesignToken 标题 sticky 修复（commit f7d8e57 之后的工作树状态）
+**最后更新**：阶段 2 完成（去 Storybook 化）— commit `589e097`

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./navigation-menu.tsx?raw";
 import * as Comp from "./navigation-menu";
@@ -17,7 +17,7 @@ function preventStoryNav(e: React.MouseEvent<HTMLAnchorElement>) {
 const meta = {
   title: "Starter/NavigationMenu",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({}),
+    anchorTokenCompliance: storyAnchorCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],

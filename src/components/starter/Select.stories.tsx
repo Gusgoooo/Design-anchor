@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./select.tsx?raw";
 import { Button } from "./button";
@@ -24,7 +24,7 @@ const meta: Meta<Args> = {
   tags: ["autodocs"],
   parameters: {
     layout: "centered",
-    accordTokenCompliance: storyAccordCompliance({
+    anchorTokenCompliance: storyAnchorCompliance({
       ignoreArgNames: ["children", "value", "defaultValue", "onValueChange", "size"],
     }),
   },

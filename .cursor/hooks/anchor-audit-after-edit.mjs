@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * Cursor afterFileEdit hook: After the Agent writes a .tsx file, runs accord-audit
- * in the associated component library root (.accord/ or legacy accord-ui/).
+ * Cursor afterFileEdit hook: After the Agent writes a .tsx file, runs anchor-audit
+ * in the associated component library root (.anchor/ or legacy anchor-ui/).
  * On failure, feeds the report back into the conversation via additional_context to prompt the model to fix issues.
  */
 import fs from "node:fs";
@@ -35,18 +35,18 @@ function isRelevantTsx(abs) {
   return n.includes("/src/");
 }
 
-function isAccordRoot(dir) {
-  return fs.existsSync(path.join(dir, "src", "accord", "schema", "components"));
+function isAnchorRoot(dir) {
+  return fs.existsSync(path.join(dir, "src", "anchor", "schema", "components"));
 }
 
-function findAccordRoot(filePath) {
+function findAnchorRoot(filePath) {
   if (!filePath) return null;
   let dir = path.dirname(path.resolve(filePath));
   for (;;) {
-    if (isAccordRoot(dir)) return dir;
-    for (const sub of [".accord", "accord-ui"]) {
+    if (isAnchorRoot(dir)) return dir;
+    for (const sub of [".anchor", "anchor-ui"]) {
       const nested = path.join(dir, sub);
-      if (isAccordRoot(nested)) return nested;
+      if (isAnchorRoot(nested)) return nested;
     }
     const parent = path.dirname(dir);
     if (parent === dir) break;
@@ -55,12 +55,12 @@ function findAccordRoot(filePath) {
   return null;
 }
 
-function runAudit(accordRoot) {
-  const script = path.join(accordRoot, "scripts", "accord-audit.mjs");
+function runAudit(anchorRoot) {
+  const script = path.join(anchorRoot, "scripts", "anchor-audit.mjs");
   if (!fs.existsSync(script)) return { ok: true, skip: true, out: "" };
   try {
     execFileSync(process.execPath, [script], {
-      cwd: accordRoot,
+      cwd: anchorRoot,
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
       maxBuffer: 10 * 1024 * 1024,
@@ -80,13 +80,13 @@ if (!isRelevantTsx(filePath)) {
   process.exit(0);
 }
 
-const accordRoot = findAccordRoot(filePath);
-if (!accordRoot) {
+const anchorRoot = findAnchorRoot(filePath);
+if (!anchorRoot) {
   process.stdout.write("{}\n");
   process.exit(0);
 }
 
-const result = runAudit(accordRoot);
+const result = runAudit(anchorRoot);
 if (result.skip || result.ok) {
   process.stdout.write("{}\n");
   process.exit(0);
@@ -95,7 +95,7 @@ if (result.skip || result.ok) {
 const snippet = result.out.slice(0, 12_000);
 const payload = {
   additional_context: [
-    "[DesignAccord] Auto-run `accord audit` after save did not pass. Please fix according to project rules (prefer Business components, forbidden native tags and arbitrary-value Tailwind declared in specs). Save again to re-verify after fixing.",
+    "[Design-anchor] Auto-run `anchor audit` after save did not pass. Please fix according to project rules (prefer Business components, forbidden native tags and arbitrary-value Tailwind declared in specs). Save again to re-verify after fixing.",
     "",
     snippet,
   ].join("\n"),

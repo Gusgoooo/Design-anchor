@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./checkbox.tsx?raw";
 import { Checkbox } from "./checkbox";
@@ -10,7 +10,7 @@ const audit = autoClassControls(componentSrc);
 const meta = {
   title: "Starter/Checkbox",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children", "id"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children", "id"] }),
   },
   args: { ...audit.args },
   argTypes: {

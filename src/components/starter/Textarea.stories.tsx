@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./textarea.tsx?raw";
 import { Textarea } from "./textarea";
@@ -10,7 +10,7 @@ const audit = autoClassControls(componentSrc);
 const meta = {
   title: "Starter/Textarea",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children", "id", "placeholder", "disabled"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children", "id", "placeholder", "disabled"] }),
   },
   args: { disabled: false, ...audit.args },
   argTypes: {

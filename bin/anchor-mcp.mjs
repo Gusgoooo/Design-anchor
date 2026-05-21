@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * DesignAccord MCP Server — Exposes component library operations to Cursor Agent via stdio JSON-RPC
+ * Design-anchor MCP Server — Exposes component library operations to Cursor Agent via stdio JSON-RPC
  *
  * Tools:
  *   list_components    List all components
@@ -19,7 +19,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = resolve(__dirname, "..");
 
-const LIB_ROOT = resolve(process.argv[2] || ".accord");
+const LIB_ROOT = resolve(process.argv[2] || ".anchor");
 
 if (!existsSync(LIB_ROOT)) {
   process.stderr.write(`Error: directory ${LIB_ROOT} does not exist\n`);
@@ -121,12 +121,12 @@ const TOOLS = [
   },
   {
     name: "run_audit",
-    description: "Run compliance audit (accord-audit): detect forbidden HTML tags and arbitrary-value Tailwind classes",
+    description: "Run compliance audit (anchor-audit): detect forbidden HTML tags and arbitrary-value Tailwind classes",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
     name: "sync_rules",
-    description: "Trigger sync:accord full sync: spec -> Tailwind extensions + .cursorrules + rule mirror",
+    description: "Trigger sync:anchor full sync: spec -> Tailwind extensions + .cursorrules + rule mirror",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
@@ -202,7 +202,7 @@ function writeFile(relPath, content) {
 /* ─── Schema governance handlers ─── */
 
 function listSchemas() {
-  const specDir = join(LIB_ROOT, "src/accord/schema/components");
+  const specDir = join(LIB_ROOT, "src/anchor/schema/components");
   if (!existsSync(specDir)) return [];
   return readdirSync(specDir)
     .filter((f) => f.endsWith(".spec.json"))
@@ -220,7 +220,7 @@ function listSchemas() {
 }
 
 function readSchema(idOrFilename) {
-  const specDir = join(LIB_ROOT, "src/accord/schema/components");
+  const specDir = join(LIB_ROOT, "src/anchor/schema/components");
   if (!existsSync(specDir)) throw new Error("schema directory does not exist");
   const files = readdirSync(specDir).filter((f) => f.endsWith(".spec.json"));
   for (const f of files) {
@@ -233,7 +233,7 @@ function readSchema(idOrFilename) {
 
 function updateSchema(filename, content) {
   if (!/^[\w.-]+\.spec\.json$/.test(filename)) throw new Error("Invalid filename format");
-  const specDir = join(LIB_ROOT, "src/accord/schema/components");
+  const specDir = join(LIB_ROOT, "src/anchor/schema/components");
   mkdirSync(specDir, { recursive: true });
   const abs = join(specDir, filename);
   JSON.parse(content);
@@ -243,10 +243,10 @@ function updateSchema(filename, content) {
 }
 
 function runAudit() {
-  const auditScript = join(PKG_ROOT, "scripts/accord-audit.mjs");
+  const auditScript = join(PKG_ROOT, "scripts/anchor-audit.mjs");
   if (!existsSync(auditScript)) {
-    const localAudit = join(LIB_ROOT, "scripts/accord-audit.mjs");
-    if (!existsSync(localAudit)) throw new Error("accord-audit.mjs does not exist");
+    const localAudit = join(LIB_ROOT, "scripts/anchor-audit.mjs");
+    if (!existsSync(localAudit)) throw new Error("anchor-audit.mjs does not exist");
     try {
       const output = execSync(`node "${localAudit}"`, { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
       return { passed: true, output };
@@ -266,7 +266,7 @@ function runSyncRules() {
   const syncScript = join(PKG_ROOT, "scripts/sync-from-schema.mjs");
   if (!existsSync(syncScript)) {
     try {
-      execSync("npm run sync:accord", { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+      execSync("npm run sync:anchor", { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
       return "sync complete";
     } catch (e) {
       return `sync failed: ${e.message}`;
@@ -327,7 +327,7 @@ function handleMessage(msg) {
     return send(makeResponse(id, {
       protocolVersion: "2024-11-05",
       capabilities: { tools: { listChanged: false } },
-      serverInfo: { name: "accord-mcp", version: "0.1.0" },
+      serverInfo: { name: "anchor-mcp", version: "0.1.0" },
     }));
   }
 
@@ -360,7 +360,7 @@ function handleMessage(msg) {
 
 /* ─── Startup ─── */
 
-process.stderr.write(`🔌 DesignAccord MCP Server started → ${LIB_ROOT}\n`);
+process.stderr.write(`🔌 Design-anchor MCP Server started → ${LIB_ROOT}\n`);
 
 let buffer = "";
 process.stdin.setEncoding("utf8");

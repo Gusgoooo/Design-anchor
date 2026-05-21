@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./skeleton.tsx?raw";
 import { Skeleton } from "./skeleton";
@@ -9,7 +9,7 @@ const audit = autoClassControls(componentSrc);
 const meta = {
   title: "Starter/Skeleton",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children"] }),
   },
   args: { ...audit.args },
   argTypes: {

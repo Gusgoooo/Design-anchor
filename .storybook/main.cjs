@@ -4,7 +4,7 @@ const repoRoot = path.join(__dirname, "..");
 
 /** @type {import('@storybook/react-vite').StorybookConfig} */
 module.exports = {
-  /** 仅收录业务/组件与文档 MDX，不包含 accord 目录 */
+  /** 仅收录业务/组件与文档 MDX，不包含 anchor 目录 */
   stories: ["../src/**/*.mdx", "../src/components/**/*.stories.@(ts|tsx)"],
   addons: [
     {
@@ -47,7 +47,7 @@ module.exports = {
        * 与仓库内其它 Vite/Storybook 实例默认共用 `node_modules/.vite` 时，易出现依赖预构建缓存串台，
        * 表现为预览 iframe 动态 import 报 “Failed to fetch dynamically imported module”。
        */
-      cacheDir: path.join(repoRoot, "node_modules/.vite-storybook-accord"),
+      cacheDir: path.join(repoRoot, "node_modules/.vite-storybook-anchor"),
       plugins: [tailwindcss(), schemaApiPlugin(repoRoot)],
       resolve: {
         alias: {

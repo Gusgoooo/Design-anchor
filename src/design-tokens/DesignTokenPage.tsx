@@ -447,7 +447,7 @@ export function DesignTokenPage() {
   const [copied, setCopied] = React.useState(false);
   const [codeOpen, setCodeOpen] = React.useState(false);
   const codeDialogRef = React.useRef<HTMLDialogElement>(null);
-  const DARK_KEY = "accord-dark-mode";
+  const DARK_KEY = "anchor-dark-mode";
   const [darkMode, setDarkMode] = React.useState(() => {
     if (typeof localStorage !== "undefined") return localStorage.getItem(DARK_KEY) === "true";
     if (typeof document !== "undefined") return document.documentElement.classList.contains("dark");

@@ -6,7 +6,7 @@
 import { readFileSync, writeFileSync, readdirSync } from "fs";
 import { join } from "path";
 
-const dir = "src/accord/schema/components";
+const dir = "src/anchor/schema/components";
 
 // Translation maps for common patterns
 const propDescMap = {

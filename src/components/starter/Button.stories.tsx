@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./button.tsx?raw";
 import { Button } from "./button";
@@ -11,7 +11,7 @@ type Args = { variant: string; size: string; disabled: boolean; [k: string]: unk
 const meta: Meta<Args> = {
   title: "Starter/Button",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["variant", "size", "children", "asChild", "disabled"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["variant", "size", "children", "asChild", "disabled"] }),
   },
   args: { variant: "default", size: "default", disabled: false, ...audit.args },
   argTypes: {

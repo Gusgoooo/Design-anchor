@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./radio-group.tsx?raw";
 import { RadioGroup, RadioGroupItem } from "./radio-group";
@@ -10,7 +10,7 @@ const audit = autoClassControls(componentSrc);
 const meta = {
   title: "Starter/RadioGroup",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children", "defaultValue", "value", "onValueChange"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children", "defaultValue", "value", "onValueChange"] }),
   },
   args: { ...audit.args },
   argTypes: {

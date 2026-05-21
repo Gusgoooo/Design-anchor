@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./breadcrumb.tsx?raw";
 import * as Comp from "./breadcrumb";
@@ -13,7 +13,7 @@ const noop = (e: React.MouseEvent) => e.preventDefault();
 const meta = {
   title: "Starter/Breadcrumb",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({}),
+    anchorTokenCompliance: storyAnchorCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],

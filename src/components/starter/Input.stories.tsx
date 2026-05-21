@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./input.tsx?raw";
 import { Button } from "./button";
@@ -14,7 +14,7 @@ const meta: Meta<Args> = {
   title: "Starter/Input",
   tags: ["autodocs"],
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({
+    anchorTokenCompliance: storyAnchorCompliance({
       ignoreArgNames: ["children", "id", "type", "placeholder", "disabled", "size"],
     }),
   },

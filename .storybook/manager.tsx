@@ -14,10 +14,10 @@ import {
   serializePrimitives,
   type WrapPrimitiveInput,
   type WrapPrimitiveRef,
-} from "../src/accord/schema/types";
+} from "../src/anchor/schema/types";
 
 /* ── Dark mode basics ── */
-const DARK_KEY = "accord-dark-mode";
+const DARK_KEY = "anchor-dark-mode";
 const _initDark = typeof localStorage !== "undefined" && localStorage.getItem(DARK_KEY) === "true";
 if (typeof document !== "undefined") document.documentElement.classList.toggle("dark", _initDark);
 
@@ -32,7 +32,7 @@ const lightTheme = create({
   barBg: "#ffffff",
   barTextColor: "#18181b",
   barSelectedColor: "#18181b",
-  brandTitle: "DesignAccord",
+  brandTitle: "Design-anchor",
   colorPrimary: "#18181b",
   colorSecondary: "#18181b",
   inputBg: "#ffffff",
@@ -51,7 +51,7 @@ const darkTheme = create({
   barBg: "#1c1c1e",
   barTextColor: "#fafafa",
   barSelectedColor: "#fafafa",
-  brandTitle: "DesignAccord",
+  brandTitle: "Design-anchor",
   colorPrimary: "#fafafa",
   colorSecondary: "#fafafa",
   inputBg: "#27272a",
@@ -151,7 +151,7 @@ function getComponentKitStatus(kitStatus: KitStatusData | null, item: API_Compon
 const IcoPlus = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg>;
 const IcoSwatch = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><circle cx="8" cy="8" r="1" fill="currentColor"/><circle cx="12" cy="8" r="1" fill="currentColor"/><circle cx="8" cy="12" r="1" fill="currentColor"/></svg>;
 const IcoX = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18M6 6l12 12"/></svg>;
-/** Circled i, used for Accord panel info */
+/** Circled i, used for Anchor panel info */
 const IcoInfo = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
     <circle cx="12" cy="12" r="10" />
@@ -633,7 +633,7 @@ function useHideNativeSidebar() {
         header.style.overflow = "hidden";
       }
 
-      const top = container.querySelector<HTMLElement>("[data-accord-sidebar-top]");
+      const top = container.querySelector<HTMLElement>("[data-anchor-sidebar-top]");
       if (top) {
         top.style.flex = "1 1 0%";
         top.style.minHeight = "0";
@@ -670,7 +670,7 @@ function SidebarTop() {
 
   return (
     <DarkCtx.Provider value={dark}>
-    <div data-accord-sidebar-top="" style={{
+    <div data-anchor-sidebar-top="" style={{
       display: "flex", flexDirection: "column",
       height: "100%", overflow: "hidden",
       fontFamily: "system-ui,-apple-system,sans-serif",
@@ -683,7 +683,7 @@ function SidebarTop() {
       }}>
         <div style={{ display: "flex", alignItems: "center", padding: "0 4px" }}>
           <div style={{ fontSize: 21, fontWeight: 700, color: "var(--mgr-text)", letterSpacing: "-0.01em", flex: 1 }}>
-            DesignAccord
+            Design-anchor
           </div>
           <button
             type="button"
@@ -761,7 +761,7 @@ function SidebarTop() {
   );
 }
 
-/* ── Spec.json panel: spec editing linked to the current Story (persists to *.spec.json; optional storyAccord variant layer) ── */
+/* ── Spec.json panel: spec editing linked to the current Story (persists to *.spec.json; optional storyAnchor variant layer) ── */
 
 type SpecData = {
   id: string;
@@ -784,7 +784,7 @@ type SpecData = {
 
 type SchemaListItem = { filename: string; id: string; componentName: string };
 
-type AccordStoryContext = {
+type AnchorStoryContext = {
   storyId: string | null;
   storyName: string | null;
   componentTitle: string | null;
@@ -815,7 +815,7 @@ function deepMergeSpecData(base: SpecData, patch: unknown): SpecData {
   if (!isPlainObject(patch)) return base;
   const out: Record<string, unknown> = { ...base };
   for (const k of Object.keys(patch)) {
-    if (k === "storyAccord") continue;
+    if (k === "storyAnchor") continue;
     const pb = patch[k];
     const bk = (base as Record<string, unknown>)[k];
     if (isPlainObject(pb) && isPlainObject(bk)) {
@@ -845,8 +845,8 @@ const SPEC_PATCH_KEYS: (keyof SpecData)[] = [
   "meta",
 ];
 
-/** Diff relative to component baseline -> writes to storyAccord[storyId]; if no diff, deletes that variant entry */
-function extractAccordPatch(edited: SpecData, base: SpecData): Record<string, unknown> | undefined {
+/** Diff relative to component baseline -> writes to storyAnchor[storyId]; if no diff, deletes that variant entry */
+function extractAnchorPatch(edited: SpecData, base: SpecData): Record<string, unknown> | undefined {
   const patch: Record<string, unknown> = {};
   for (const key of SPEC_PATCH_KEYS) {
     if (JSON.stringify(edited[key]) !== JSON.stringify(base[key])) {
@@ -857,7 +857,7 @@ function extractAccordPatch(edited: SpecData, base: SpecData): Record<string, un
 }
 
 function normalizeSpecBaseFromRaw(raw: Record<string, unknown>): SpecData {
-  const { accordNarrative: _hn, storyAccord: _sh, ...rest } = raw;
+  const { anchorNarrative: _hn, storyAnchor: _sh, ...rest } = raw;
   const r = rest as SpecData;
   const wrapsRaw = raw.wraps;
   const wraps: SpecData["wraps"] =
@@ -882,7 +882,7 @@ function normalizeSpecBaseFromRaw(raw: Record<string, unknown>): SpecData {
   };
 }
 
-/** Compresses primitives notation before persisting, recursively processing storyAccord fragments */
+/** Compresses primitives notation before persisting, recursively processing storyAnchor fragments */
 function compactSpecForDisk(doc: Record<string, unknown>): Record<string, unknown> {
   function compactWraps(w: unknown): unknown {
     if (!w || typeof w !== "object") return w;
@@ -892,7 +892,7 @@ function compactSpecForDisk(doc: Record<string, unknown>): Record<string, unknow
   }
   const out = { ...doc };
   if (out.wraps) out.wraps = compactWraps(out.wraps);
-  const sh = out.storyAccord;
+  const sh = out.storyAnchor;
   if (sh && typeof sh === "object") {
     const next: Record<string, unknown> = { ...(sh as Record<string, unknown>) };
     for (const [k, frag] of Object.entries(next)) {
@@ -903,7 +903,7 @@ function compactSpecForDisk(doc: Record<string, unknown>): Record<string, unknow
         };
       }
     }
-    out.storyAccord = next;
+    out.storyAnchor = next;
   }
   return out;
 }
@@ -1150,9 +1150,9 @@ function PrimitivesEditor({
   );
 }
 
-function useAccordStoryContext(): AccordStoryContext {
+function useAnchorStoryContext(): AnchorStoryContext {
   const api = useStorybookApi();
-  const [ctx, setCtx] = React.useState<AccordStoryContext>({
+  const [ctx, setCtx] = React.useState<AnchorStoryContext>({
     storyId: null,
     storyName: null,
     componentTitle: null,
@@ -1285,15 +1285,15 @@ function CreateSchemaPrompt({ leafTitle, onCreated }: { leafTitle: string; onCre
   );
 }
 
-function AccordPanel() {
+function AnchorPanel() {
   const [schemas, setSchemas] = React.useState<SchemaListItem[]>([]);
   const [filename, setFilename] = React.useState("");
   const [baseCore, setBaseCore] = React.useState<SpecData | null>(null);
-  const [storyAccordMap, setStoryAccordMap] = React.useState<Record<string, unknown>>({});
+  const [storyAnchorMap, setStoryAnchorMap] = React.useState<Record<string, unknown>>({});
   const [spec, setSpec] = React.useState<SpecData | null>(null);
   const [status, setStatus] = React.useState<{ text: string; ok: boolean } | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const accordCtx = useAccordStoryContext();
+  const anchorCtx = useAnchorStoryContext();
 
   React.useEffect(() => {
     fetch(devApi("/api/schemas")).then(r => r.json()).then((list: SchemaListItem[]) => {
@@ -1302,11 +1302,11 @@ function AccordPanel() {
   }, []);
 
   React.useEffect(() => {
-    const matched = matchSchemaForTitle(schemas, accordCtx.leafTitle);
+    const matched = matchSchemaForTitle(schemas, anchorCtx.leafTitle);
     if (matched && matched.filename !== filename) {
       setFilename(matched.filename);
     }
-  }, [accordCtx.leafTitle, schemas, filename]);
+  }, [anchorCtx.leafTitle, schemas, filename]);
 
   const load = React.useCallback(async () => {
     if (!filename) return;
@@ -1315,15 +1315,15 @@ function AccordPanel() {
       const r = await fetch(devApi(`/api/schema/${encodeURIComponent(filename)}`));
       if (!r.ok) throw new Error(await r.text());
       const raw = (await r.json()) as Record<string, unknown>;
-      const shRaw = raw.storyAccord;
+      const shRaw = raw.storyAnchor;
       const map = isPlainObject(shRaw) ? { ...shRaw } : {};
-      const { storyAccord: _sh, accordNarrative: _legacyNarrative, ...rawBase } = raw;
+      const { storyAnchor: _sh, anchorNarrative: _legacyNarrative, ...rawBase } = raw;
       const normalized = normalizeSpecBaseFromRaw(rawBase);
-      setStoryAccordMap(map);
+      setStoryAnchorMap(map);
       setBaseCore(normalized);
     } catch (e) {
       setBaseCore(null);
-      setStoryAccordMap({});
+      setStoryAnchorMap({});
       setSpec(null);
       setStatus({ text: `Load failed: ${String(e)}`, ok: false });
     }
@@ -1337,11 +1337,11 @@ function AccordPanel() {
       setSpec(null);
       return;
     }
-    if (!accordCtx.isStory || !accordCtx.storyId) {
+    if (!anchorCtx.isStory || !anchorCtx.storyId) {
       setSpec(null);
       return;
     }
-    const frag = storyAccordMap[accordCtx.storyId];
+    const frag = storyAnchorMap[anchorCtx.storyId];
     const merged = deepMergeSpecData(baseCore, frag ?? {});
     setSpec({
       ...merged,
@@ -1351,7 +1351,7 @@ function AccordPanel() {
         primitives: normalizePrimitives((merged.wraps?.primitives ?? []) as WrapPrimitiveInput[]),
       },
     });
-  }, [baseCore, storyAccordMap, accordCtx.storyId, accordCtx.isStory]);
+  }, [baseCore, storyAnchorMap, anchorCtx.storyId, anchorCtx.isStory]);
 
   function update<K extends keyof SpecData>(key: K, val: SpecData[K]) {
     if (!spec) return;
@@ -1360,7 +1360,7 @@ function AccordPanel() {
 
   async function save() {
     if (!spec || !filename || !baseCore) return;
-    if (!accordCtx.isStory || !accordCtx.storyId) {
+    if (!anchorCtx.isStory || !anchorCtx.storyId) {
       setStatus({ text: "Please select a specific Story variant from the sidebar before saving (group root / canvas overview cannot map to a single storyId).", ok: false });
       return;
     }
@@ -1373,12 +1373,12 @@ function AccordPanel() {
           primitives: normalizePrimitives(spec.wraps.primitives as WrapPrimitiveInput[]),
         },
       };
-      const patch = extractAccordPatch(pruned, baseCore);
-      const newMap = { ...storyAccordMap };
-      if (!patch) delete newMap[accordCtx.storyId];
-      else newMap[accordCtx.storyId] = patch;
+      const patch = extractAnchorPatch(pruned, baseCore);
+      const newMap = { ...storyAnchorMap };
+      if (!patch) delete newMap[anchorCtx.storyId];
+      else newMap[anchorCtx.storyId] = patch;
       const doc: Record<string, unknown> = { ...(baseCore as unknown as Record<string, unknown>) };
-      if (Object.keys(newMap).length > 0) doc.storyAccord = newMap;
+      if (Object.keys(newMap).length > 0) doc.storyAnchor = newMap;
       const r = await fetch(devApi("/api/save-schema"), {
         method: "POST", headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ filename, jsonText: JSON.stringify(compactSpecForDisk(doc), null, 2) }),
@@ -1396,9 +1396,9 @@ function AccordPanel() {
       if (!b.ok || !b.fileWritten) throw new Error(b.error ?? "Not written to disk");
       const parts: string[] = [`Written to disk: ${b.path ?? filename}`];
       if (b.syncOk === false && b.syncError) {
-        parts.push(`⚠️ sync:accord failed (spec is saved, please run npm run sync:accord manually in terminal):\n${b.syncError}`);
+        parts.push(`⚠️ sync:anchor failed (spec is saved, please run npm run sync:anchor manually in terminal):\n${b.syncError}`);
       } else if (b.syncOk !== false) {
-        parts.push("sync:accord executed.");
+        parts.push("sync:anchor executed.");
       }
       if (b.audit && b.audit.passed === false) parts.push(`⚠️ Audit: ${b.audit.output}`);
       const ok = b.syncOk !== false && (b.audit == null || b.audit.passed !== false);
@@ -1407,12 +1407,12 @@ function AccordPanel() {
     } catch (e) { setStatus({ text: `Save failed: ${String(e)}`, ok: false }); }
   }
 
-  const matched = matchSchemaForTitle(schemas, accordCtx.leafTitle);
+  const matched = matchSchemaForTitle(schemas, anchorCtx.leafTitle);
 
-  if (!matched && accordCtx.leafTitle) {
+  if (!matched && anchorCtx.leafTitle) {
     return (
       <CreateSchemaPrompt
-        leafTitle={accordCtx.leafTitle}
+        leafTitle={anchorCtx.leafTitle}
         onCreated={(fn) => {
           setFilename(fn);
           fetch(devApi("/api/schemas")).then(r => r.json()).then((list: SchemaListItem[]) => setSchemas(list)).catch(() => {});
@@ -1425,10 +1425,10 @@ function AccordPanel() {
     return <div style={{ ...HS.wrap, alignItems: "center", justifyContent: "center", color: "var(--mgr-text-tertiary)" }}>加载中…</div>;
   }
 
-  if (matched && (!accordCtx.isStory || !accordCtx.storyId)) {
+  if (matched && (!anchorCtx.isStory || !anchorCtx.storyId)) {
     return (
       <div style={{ ...HS.wrap, alignItems: "center", justifyContent: "center", color: "var(--mgr-text-tertiary)", gap: 10, padding: 24, textAlign: "center" as const, maxWidth: 360 }}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--mgr-text-secondary)" }}>{accordCtx.leafTitle}</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: "var(--mgr-text-secondary)" }}>{anchorCtx.leafTitle}</div>
         <div style={{ fontSize: 12, lineHeight: 1.55 }}>
           <strong>Spec.json</strong> 面板按 <strong>Story 变体</strong> 写入：请在左侧树展开本组件，点选一条具体 Story（不要停在分组根或仅画布预览）。
         </div>
@@ -1453,14 +1453,14 @@ function AccordPanel() {
           }}>{filename}</span>
           <div style={{ flex: 1 }} />
         </div>
-        {accordCtx.storyId ? (
+        {anchorCtx.storyId ? (
           <div style={{ fontSize: 11, color: "var(--mgr-text-muted)", lineHeight: 1.4, display: "flex", alignItems: "center", gap: 4 }}>
             <span>当前变体:</span>
             <span style={{
               fontWeight: 600, color: "var(--mgr-text)",
               padding: "1px 6px", borderRadius: 3,
               background: "var(--mgr-bg-subtle)",
-            }}>{accordCtx.storyName ?? accordCtx.storyId}</span>
+            }}>{anchorCtx.storyName ?? anchorCtx.storyId}</span>
           </div>
         ) : null}
       </div>
@@ -1468,7 +1468,7 @@ function AccordPanel() {
       <div style={{ ...HS.body, flex: 1, minHeight: 0, overflow: "auto" }}>
         <CollapsibleSection
           title="Spec · 业务意图与依赖"
-          hint="与当前 Story 变体绑定：保存后写入 storyAccord[storyId]，与顶层 spec 深度合并，再经 sync 进入 .cursorrules；各变体互不影响。常用：Intent、schema 指令、首选 import。"
+          hint="与当前 Story 变体绑定：保存后写入 storyAnchor[storyId]，与顶层 spec 深度合并，再经 sync 进入 .cursorrules；各变体互不影响。常用：Intent、schema 指令、首选 import。"
           defaultOpen={true}
         >
           <div style={HS.field}>
@@ -1515,7 +1515,7 @@ function AccordPanel() {
 
         <CollapsibleSection
           title="Spec · 禁止项、纠错与 Few-shot"
-          hint="与 accord-audit、`.cursorrules` 对齐：原生标签替代关系、可判定违规→修复话术、可直接复制的最小 JSX；建议由熟悉业务语义的同学维护。"
+          hint="与 anchor-audit、`.cursorrules` 对齐：原生标签替代关系、可判定违规→修复话术、可直接复制的最小 JSX；建议由熟悉业务语义的同学维护。"
           defaultOpen={false}
         >
           <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
@@ -1846,15 +1846,15 @@ addons.setConfig({
   },
 });
 
-addons.register("design-accord", () => {
-  addons.add("design-accord/sidebar-top", {
+addons.register("design-anchor", () => {
+  addons.add("design-anchor/sidebar-top", {
     type: types.experimental_SIDEBAR_TOP,
     render: () => <SidebarTop />,
   });
 
-  addons.add("design-accord/accord-panel", {
+  addons.add("design-anchor/anchor-panel", {
     type: types.PANEL,
     title: "Spec.json",
-    render: ({ active }) => active ? <AccordPanel /> : null,
+    render: ({ active }) => active ? <AnchorPanel /> : null,
   });
 });

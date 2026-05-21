@@ -3,7 +3,7 @@ import "../src/styles/globals.css";
 import * as React from "react";
 import type { Preview } from "@storybook/react";
 
-const DARK_KEY = "accord-dark-mode";
+const DARK_KEY = "anchor-dark-mode";
 
 function DarkModeSync({ children }: { children: React.ReactNode }) {
   React.useEffect(() => {

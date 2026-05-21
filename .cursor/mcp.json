@@ -1,10 +1,10 @@
 {
   "mcpServers": {
-    "accord": {
+    "anchor": {
       "command": "node",
       "args": [
-        "/Users/gus/Documents/DesignAccord/bin/accord-mcp.mjs",
-        "./.accord"
+        "/Users/gus/Documents/Design-anchor/bin/anchor-mcp.mjs",
+        "./.anchor"
       ]
     }
   }

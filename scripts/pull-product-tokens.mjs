@@ -3,14 +3,14 @@
  * Pull the production/upstream tokens.json into this repo's canonical path, then run sync:tokens.
  *
  * Usage (run from repo root or a kit root containing src/design-tokens):
- *   ACCORD_TOKENS_URL=https://your-cdn.example.com/design/tokens.json npm run sync:tokens:pull
+ *   ANCHOR_TOKENS_URL=https://your-cdn.example.com/design/tokens.json npm run sync:tokens:pull
  *   node scripts/pull-product-tokens.mjs --url=https://...
  *
  * Optional auth (do not commit secrets; use CI secrets):
- *   ACCORD_TOKENS_AUTH_HEADER='Bearer xxx'
+ *   ANCHOR_TOKENS_AUTH_HEADER='Bearer xxx'
  *
- * Optional root override (consumer .accord sub-project):
- *   node scripts/pull-product-tokens.mjs --url=... --root=/path/to/.accord
+ * Optional root override (consumer .anchor sub-project):
+ *   node scripts/pull-product-tokens.mjs --url=... --root=/path/to/.anchor
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -30,15 +30,15 @@ function argValue(name) {
   return hit.slice(pre.length);
 }
 
-const url = argValue("--url") ?? process.env.ACCORD_TOKENS_URL;
+const url = argValue("--url") ?? process.env.ANCHOR_TOKENS_URL;
 const repoRoot = path.resolve(argValue("--root") ?? process.cwd());
 const tokensPath = path.join(repoRoot, "src/design-tokens/tokens.json");
-const auth = process.env.ACCORD_TOKENS_AUTH_HEADER;
+const auth = process.env.ANCHOR_TOKENS_AUTH_HEADER;
 
 if (!url || !String(url).trim()) {
   console.error(
-    "Missing token URL: set ACCORD_TOKENS_URL env var or pass --url=https://...\n" +
-      "Example: ACCORD_TOKENS_URL=https://api.example.com/v1/tokens.json npm run sync:tokens:pull",
+    "Missing token URL: set ANCHOR_TOKENS_URL env var or pass --url=https://...\n" +
+      "Example: ANCHOR_TOKENS_URL=https://api.example.com/v1/tokens.json npm run sync:tokens:pull",
   );
   process.exit(1);
 }

@@ -68,10 +68,10 @@ export function SchemaEditor({ defaultFilename = "data-table.spec.json" }: Schem
       const parts: string[] = [`Written to disk: ${body.path ?? filename}`];
       if (body.syncOk === false && body.syncError) {
         parts.push(
-          `⚠️ sync:accord failed (spec saved to disk, please manually run npm run sync:accord in your terminal):\n${body.syncError}`,
+          `⚠️ sync:anchor failed (spec saved to disk, please manually run npm run sync:anchor in your terminal):\n${body.syncError}`,
         );
       } else if (body.syncOk !== false) {
-        parts.push("sync:accord executed.");
+        parts.push("sync:anchor executed.");
       }
       if (body.audit && body.audit.passed === false) parts.push(`⚠️ Audit: ${body.audit.output}`);
       setStatus(parts.join("\n"));
@@ -84,11 +84,11 @@ export function SchemaEditor({ defaultFilename = "data-table.spec.json" }: Schem
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-4 p-8">
       <header className="space-y-1 border-b border-zinc-700 pb-4">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">DesignAccord · Spec</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-50">Design-anchor · Spec</h1>
         <p className="text-sm text-zinc-400">
           Edit <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">*.spec.json</code> directly here (source of truth is the file on disk, not rewritten by cloud models); after saving, automatically syncs
           Tailwind artifacts, <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">.cursorrules</code> and{" "}
-          <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">ACCORD_RULES.md</code>.
+          <code className="rounded bg-zinc-800 px-1 py-0.5 text-xs text-zinc-200">ANCHOR_RULES.md</code>.
           The Storybook "Spec" panel on the right provides split-pane editing (including sub-component display name, Intent, directives, etc.); Props / styleLock and other fields can also be maintained in this JSON.
         </p>
       </header>

@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import dialogSrc from "./dialog.tsx?raw";
 import { Button } from "./button";
@@ -19,7 +19,7 @@ const meta = {
   title: "Starter/Dialog",
   parameters: {
     layout: "fullscreen",
-    accordTokenCompliance: storyAccordCompliance({
+    anchorTokenCompliance: storyAnchorCompliance({
       ignoreArgNames: ["defaultOpen"],
     }),
   },

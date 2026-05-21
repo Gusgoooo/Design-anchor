@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react";
 import * as React from "react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./switch.tsx?raw";
 import { Switch } from "./switch";
@@ -19,7 +19,7 @@ type SwitchArgs = {
 const meta = {
   title: "Starter/Switch",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children", "id"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children", "id"] }),
   },
   args: {
     checked: false,

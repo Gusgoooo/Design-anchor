@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * AST-level compliance audit: forbidden native HTML tags + arbitrary-value Tailwind in className (e.g. m-[13px]).
- * Run: npm run accord:audit
+ * Run: npm run anchor:audit
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -15,7 +15,7 @@ const root = getRepoRoot();
 const ARBITRARY_TW_RE = /\b[a-z./%-]+-\[[^\]]+\]/gi;
 
 function readAuditConfig() {
-  const p = path.join(root, "src/accord/linter/audit-config.json");
+  const p = path.join(root, "src/anchor/linter/audit-config.json");
   if (!fs.existsSync(p)) {
     return { scanRoots: ["src"], excludePathSubstrings: [], reportForbiddenHtmlFromSpecs: true, flagArbitraryTailwind: true };
   }
@@ -130,7 +130,7 @@ if (cfg.reportForbiddenHtmlFromSpecs) {
     for (const f of s.forbidden ?? []) {
       forbiddenTags.add(String(f.htmlTag).toLowerCase());
     }
-    for (const frag of Object.values(s.storyAccord ?? {})) {
+    for (const frag of Object.values(s.storyAnchor ?? {})) {
       if (!frag || typeof frag !== "object") continue;
       for (const f of frag.forbidden ?? []) {
         forbiddenTags.add(String(f.htmlTag).toLowerCase());
@@ -149,11 +149,11 @@ for (const file of files) {
 }
 
 if (all.length) {
-  console.error(`accord-audit failed: ${all.length} issue(s)\n`);
+  console.error(`anchor-audit failed: ${all.length} issue(s)\n`);
   for (const d of all) {
     console.error(`${path.relative(root, d.file)}:${d.line}\n  ${d.message}\n`);
   }
   process.exit(1);
 }
 
-console.log(`accord-audit passed (scanned ${files.length} .tsx files)`);
+console.log(`anchor-audit passed (scanned ${files.length} .tsx files)`);

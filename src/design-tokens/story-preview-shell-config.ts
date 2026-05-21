@@ -10,7 +10,7 @@ export function radiusTokenOptions(): string[] {
   );
 }
 
-export function storyAccordCompliance(opts: {
+export function storyAnchorCompliance(opts: {
   extraTokenIds?: string[];
   ignoreArgNames?: string[];
 }) {

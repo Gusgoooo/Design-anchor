@@ -1,10 +1,10 @@
 <p align="center">
-  <img src="https://img.shields.io/npm/v/design-accord?style=flat-square&color=0969da" alt="npm version" />
-  <img src="https://img.shields.io/npm/l/design-accord?style=flat-square" alt="license" />
+  <img src="https://img.shields.io/npm/v/design-anchor?style=flat-square&color=0969da" alt="npm version" />
+  <img src="https://img.shields.io/npm/l/design-anchor?style=flat-square" alt="license" />
   <img src="https://img.shields.io/badge/AI--first-Cursor%20%7C%20Copilot%20%7C%20Claude-blueviolet?style=flat-square" alt="AI-first" />
 </p>
 
-<h1 align="center">DesignAccord</h1>
+<h1 align="center">Design-anchor</h1>
 
 <p align="center"><strong>Protocol is Design</strong></p>
 
@@ -32,9 +32,9 @@ This isn't a one-off mistake — it's a **systematic failure mode of AI coding**
 | **design.md / system prompts** | Soft constraints. Works for one-shot generation — "make it look like Airbnb". But on the 50th edit, AI forgets. No enforcement, no audit, no pipeline. |
 | **Manual code review** | Doesn't scale. You hired AI to move fast — now you're reviewing spacing values? |
 
-### What DesignAccord does differently
+### What Design-anchor does differently
 
-DesignAccord is a **governance pipeline** that makes design drift structurally impossible:
+Design-anchor is a **governance pipeline** that makes design drift structurally impossible:
 
 ```
 Design Prompt → Extract Seed Tokens → Map to 100+ Semantic Tokens
@@ -44,7 +44,7 @@ Design Prompt → Extract Seed Tokens → Map to 100+ Semantic Tokens
 
 **After one setup**, every subsequent AI generation is constrained to your design system. The same button always has the same radius. The same spacing always uses the same scale. Not because the AI "remembers" — because it physically cannot deviate.
 
-> **design.md tells AI "please be consistent". DesignAccord tells AI "you can only use these exact values, and I will check after every edit."**
+> **design.md tells AI "please be consistent". Design-anchor tells AI "you can only use these exact values, and I will check after every edit."**
 
 This is the missing enforcement layer for design.md — and it's most effective for **B2B / enterprise products** where visual consistency directly impacts trust and usability.
 
@@ -55,11 +55,11 @@ This is the missing enforcement layer for design.md — and it's most effective 
 | | Feature | Description |
 |---|---|---|
 | **1** | Protocol-Driven | spec.json is the single source of truth. Component behavior, style constraints, and AI prompts all derive from protocol |
-| **2** | One Command Pipeline | `npx accord start` — from zero to component library + Storybook + AI rules in one command |
+| **2** | One Command Pipeline | `npx anchor start` — from zero to component library + Storybook + AI rules in one command |
 | **3** | AI Governance Built-in | Auto-generates rules for Cursor, Claude Code, Windsurf, Copilot, and any AI tool |
 | **4** | Token Pipeline | 10 seed values → 175+ CSS variables → Tailwind v4 `@theme` mapping |
-| **5** | Component = Compliance | Every component carries audit rules; `accord audit` detects violations instantly |
-| **6** | Govern Mode | `accord govern` — zero-intrusion governance for existing projects (rules only, no source changes) |
+| **5** | Component = Compliance | Every component carries audit rules; `anchor audit` detects violations instantly |
+| **6** | Govern Mode | `anchor govern` — zero-intrusion governance for existing projects (rules only, no source changes) |
 
 ---
 
@@ -77,16 +77,16 @@ This is the missing enforcement layer for design.md — and it's most effective 
 
 ```bash
 # 1. Install
-npm install design-accord
+npm install design-anchor
 
 # 2. Initialize + Launch
-npx accord start
+npx anchor start
 
 # 3. Done — Storybook portal opens, AI rules are configured for all tools
 ```
 
-After `accord start`:
-- `.accord/` — Component library + Storybook + Token system
+After `anchor start`:
+- `.anchor/` — Component library + Storybook + Token system
 - `.cursor/rules/` — AI coding governance rules (auto-applied)
 - `CLAUDE.md` — Claude Code governance + workflow
 - `.windsurfrules` — Windsurf governance rules
@@ -98,15 +98,15 @@ After `accord start`:
 ## CLI
 
 ```
-accord start [dir]     One-click launch (init + install + open Portal)
-accord init  [dir]     Initialize component library
-accord govern          Govern mode: inject AI rules only, no components (for existing projects)
-accord theme <file>    Extract tokens from a Design Prompt file
-accord dev   [dir]     Start Storybook Portal
-accord sync  [dir]     Regenerate rules + Tailwind config from spec.json
-accord audit [dir]     Run compliance audit
-accord upgrade [dir]   Upgrade kit (preserves your modifications)
-accord mcp   [dir]     Start MCP Server (Cursor Agent integration)
+anchor start [dir]     One-click launch (init + install + open Portal)
+anchor init  [dir]     Initialize component library
+anchor govern          Govern mode: inject AI rules only, no components (for existing projects)
+anchor theme <file>    Extract tokens from a Design Prompt file
+anchor dev   [dir]     Start Storybook Portal
+anchor sync  [dir]     Regenerate rules + Tailwind config from spec.json
+anchor audit [dir]     Run compliance audit
+anchor upgrade [dir]   Upgrade kit (preserves your modifications)
+anchor mcp   [dir]     Start MCP Server (Cursor Agent integration)
 ```
 
 ---
@@ -121,7 +121,7 @@ spec.json (Design Protocol)
     ├──► Tailwind v4 @theme (utility classes)
     ├──► AI rules (Cursor + Claude Code + Windsurf + Copilot)
     ├──► MCP Server (real-time AI context)
-    └──► accord audit (compliance check)
+    └──► anchor audit (compliance check)
 ```
 
 One source. Multiple outputs. Zero drift.
@@ -130,19 +130,19 @@ One source. Multiple outputs. Zero drift.
 
 ## Why not just design.md?
 
-| | design.md | DesignAccord |
+| | design.md | Design-anchor |
 |---|---|---|
 | **Nature** | Natural language doc for AI to "try to follow" | Executable JSON protocol + automation pipeline |
-| **Enforcement** | AI "suggests" compliance — often ignored on edit #50 | `accord audit` enforces and reports violations |
+| **Enforcement** | AI "suggests" compliance — often ignored on edit #50 | `anchor audit` enforces and reports violations |
 | **Components** | Describes "you should have a Button" | Provides Button source + spec + import path + style lock |
-| **Maintenance** | Manual updates, easily outdated | `accord sync` auto-regenerates rules from spec.json |
+| **Maintenance** | Manual updates, easily outdated | `anchor sync` auto-regenerates rules from spec.json |
 | **Scene Routing** | "Please use our components" (AI doesn't know which) | Scene → Component lookup table — AI checks before writing |
-| **Validation** | None | `accord audit` produces a compliance report |
+| **Validation** | None | `anchor audit` produces a compliance report |
 | **Tokens** | "Primary color is #1677ff" (AI still writes `#1677ff` inline) | Seed → 175+ CSS vars → Tailwind mapping. Change seed, everything updates. |
-| **Multi-tool** | Copy-paste to each tool's config | One `accord govern` generates rules for all AI tools |
+| **Multi-tool** | Copy-paste to each tool's config | One `anchor govern` generates rules for all AI tools |
 
-> **design.md is the vision. DesignAccord is the enforcement.**
-> Use both together — design.md for aesthetic intent, DesignAccord for structural compliance.
+> **design.md is the vision. Design-anchor is the enforcement.**
+> Use both together — design.md for aesthetic intent, Design-anchor for structural compliance.
 
 ---
 
@@ -150,7 +150,7 @@ One source. Multiple outputs. Zero drift.
 
 ### Seed → Map Pipeline
 
-DesignAccord uses a **two-layer token architecture** inspired by Ant Design's token system:
+Design-anchor uses a **two-layer token architecture** inspired by Ant Design's token system:
 
 ```jsonc
 // tokens.json — you only edit the seed layer
@@ -216,7 +216,7 @@ Tokens are mapped via Tailwind's `@theme inline` directive, enabling native util
 Every component has a `.spec.json` file — the **single source of truth** for AI coding rules:
 
 ```jsonc
-// src/accord/schema/components/button.spec.json
+// src/anchor/schema/components/button.spec.json
 {
   "name": "Button",
   "description": "Primary action trigger with multiple variants and sizes",
@@ -238,13 +238,13 @@ Every component has a `.spec.json` file — the **single source of truth** for A
 }
 ```
 
-These specs auto-sync to AI rules via `accord sync`, ensuring all AI tools always have the latest component API.
+These specs auto-sync to AI rules via `anchor sync`, ensuring all AI tools always have the latest component API.
 
 ---
 
 ## Components
 
-DesignAccord includes 23 production-ready components, each with a `.spec.json`, Storybook stories, and full token integration:
+Design-anchor includes 23 production-ready components, each with a `.spec.json`, Storybook stories, and full token integration:
 
 | Component | Key Features | Spec |
 |-----------|-------------|------|
@@ -277,26 +277,26 @@ DesignAccord includes 23 production-ready components, each with a `.spec.json`, 
 
 ## Multi-tool AI Governance
 
-DesignAccord generates governance files for **every major AI coding tool** — not just Cursor:
+Design-anchor generates governance files for **every major AI coding tool** — not just Cursor:
 
 | Tool | Config File | Automation |
 |------|------------|-----------|
-| Cursor | `.cursor/rules/*.mdc` + `.cursor/hooks.json` | Auto-runs `accord audit` after file save |
+| Cursor | `.cursor/rules/*.mdc` + `.cursor/hooks.json` | Auto-runs `anchor audit` after file save |
 | Claude Code | `CLAUDE.md` | Inline workflow instructions |
 | Windsurf | `.windsurfrules` | Inline governance rules |
 | GitHub Copilot | `.github/copilot-instructions.md` | Inline governance rules |
 | Generic (Cline, Continue, Aider) | `.cursorrules` + `AGENTS.md` | Reads project-root rule files |
 
-One command (`accord govern` or `accord init`) configures all tools simultaneously.
+One command (`anchor govern` or `anchor init`) configures all tools simultaneously.
 
 ---
 
 ## MCP Integration
 
-DesignAccord includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server for deep AI integration:
+Design-anchor includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server for deep AI integration:
 
 ```bash
-npx accord mcp
+npx anchor mcp
 ```
 
 The MCP server exposes:
@@ -320,7 +320,7 @@ emit-design-tokens-css.mjs ──► design-tokens.generated.css
 *.spec.json (23 component specs)
     │
     ├──► sync-from-schema ──► .cursorrules + CLAUDE.md + .windsurfrules (AI rules)
-    ├──► accord-audit ──► compliance report
+    ├──► anchor-audit ──► compliance report
     └──► Storybook Portal ──► visual editing + controls
 ```
 
@@ -357,16 +357,16 @@ tokens.json ──(sync:tokens)──► design-tokens.generated.css ──► T
 
 ## Upgrade Strategy
 
-DesignAccord follows the [shadcn/ui](https://ui.shadcn.com/) philosophy — component code lives in **your codebase**, not hidden in `node_modules`:
+Design-anchor follows the [shadcn/ui](https://ui.shadcn.com/) philosophy — component code lives in **your codebase**, not hidden in `node_modules`:
 
 ```bash
 # First install
-npm install design-accord
-npx accord init
+npm install design-anchor
+npx anchor init
 
 # Subsequent upgrades: auto-adds new components, preserves your modifications
-npm update design-accord
-npx accord upgrade
+npm update design-anchor
+npx anchor upgrade
 ```
 
 The upgrade system uses **content hashing** to detect modifications:
@@ -382,7 +382,7 @@ The upgrade system uses **content hashing** to detect modifications:
 2. Create a feature branch (`git checkout -b feature/amazing`)
 3. Run type check (`npm run typecheck`)
 4. Run token sync (`npm run sync:tokens`)
-5. Run compliance audit (`npm run accord:audit`)
+5. Run compliance audit (`npm run anchor:audit`)
 6. Commit your changes
 7. Push and create a Pull Request
 
@@ -398,7 +398,7 @@ Welcome to co-build or discuss: [q623814363@gmail.com](mailto:q623814363@gmail.c
 
 ## Links
 
-- GitHub: [https://github.com/Gusgoooo/DesignAccord](https://github.com/Gusgoooo/DesignAccord)
+- GitHub: [https://github.com/Gusgoooo/Design-anchor](https://github.com/Gusgoooo/Design-anchor)
 
 ---
 

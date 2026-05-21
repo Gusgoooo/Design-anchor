@@ -12,7 +12,7 @@ const PKG_ROOT = resolve(__dirname, "..");
 const [, , cmd, ...rest] = process.argv;
 
 /** 消费者项目中的组件库根目录：隐藏目录，与业务 `src/` 分离；治理文件在 `.cursor/` */
-const DEFAULT_ACCORD_DIR = ".accord";
+const DEFAULT_ANCHOR_DIR = ".anchor";
 
 const PORTAL_PATH = "/?path=/docs/designtoken--docs";
 const DEFAULT_PORT = 6006;
@@ -33,7 +33,7 @@ const KIT_STATUS_FILE = ".storybook/kit-status.json";
  *   琥珀 #f59e0b  = MODIFIED 用户已在本地修改过（hash 与 kit 基准不同）
  *   无圆点        = UNCHANGED 与 kit 基准一致，或非 kit 管理文件
  *
- * 升级策略（accord upgrade）：
+ * 升级策略（anchor upgrade）：
  *   1. 新增路径（kit 有、本地无） → 直接拷贝
  *   2. 未修改路径（本地 hash = kitHash）→ 覆盖为新版
  *   3. 已修改路径（本地 hash ≠ kitHash）→ 跳过，打印日志
@@ -48,24 +48,24 @@ const REFERENCE_POLICY = {
 };
 
 const HELP = `
-accord — AI coding governance CLI
+anchor — AI coding governance CLI
 
 说明:
-  默认在**当前项目根**下创建隐藏目录 ${DEFAULT_ACCORD_DIR}/（组件库 + Storybook），
-  并在 .cursor/ 写入规则与 MCP；不在业务树里创建 accord-ui visible folders。
-  业务应用代码仍放在项目自有的 src/；组件库仅在 ${DEFAULT_ACCORD_DIR}/ 内维护。
+  默认在**当前项目根**下创建隐藏目录 ${DEFAULT_ANCHOR_DIR}/（组件库 + Storybook），
+  并在 .cursor/ 写入规则与 MCP；不在业务树里创建 anchor-ui visible folders。
+  业务应用代码仍放在项目自有的 src/；组件库仅在 ${DEFAULT_ANCHOR_DIR}/ 内维护。
 
 用法:
-  accord start [目标目录]    一键启动（init + install + 打开 Portal）— 设计师推荐
-  accord init  [目标目录]    初始化组件库（默认 ./${DEFAULT_ACCORD_DIR}）
-  accord govern              治理模式：仅注入 AI 规则文件，不拷贝组件/CSS（适合已有项目）
-  accord theme  <文件>       从 Design Prompt 提取 Token，写入 tokens.json 并生成主题规则
-  accord upgrade [目标目录]  升级 kit：新增组件直接加入、未修改覆盖、已修改跳过
-  accord dev   [目标目录]    启动 Storybook 并自动打开 Portal 页面
-  accord mcp   [目标目录]    启动 MCP Server（供 Cursor Agent 使用）
-  accord sync  [目标目录]    同步 schema → Tailwind + .cursorrules + 规则镜像
-  accord audit [目标目录]    运行合规审计（检测禁止标签 + 任意值 Tailwind）
-  accord help                显示帮助
+  anchor start [目标目录]    一键启动（init + install + 打开 Portal）— 设计师推荐
+  anchor init  [目标目录]    初始化组件库（默认 ./${DEFAULT_ANCHOR_DIR}）
+  anchor govern              治理模式：仅注入 AI 规则文件，不拷贝组件/CSS（适合已有项目）
+  anchor theme  <文件>       从 Design Prompt 提取 Token，写入 tokens.json 并生成主题规则
+  anchor upgrade [目标目录]  升级 kit：新增组件直接加入、未修改覆盖、已修改跳过
+  anchor dev   [目标目录]    启动 Storybook 并自动打开 Portal 页面
+  anchor mcp   [目标目录]    启动 MCP Server（供 Cursor Agent 使用）
+  anchor sync  [目标目录]    同步 schema → Tailwind + .cursorrules + 规则镜像
+  anchor audit [目标目录]    运行合规审计（检测禁止标签 + 任意值 Tailwind）
+  anchor help                显示帮助
 `.trim();
 
 switch (cmd) {
@@ -159,7 +159,7 @@ function buildManifest(target, kitVersion) {
     files[rel] = { kitHash: fileHash(local), status: "unchanged" };
   }
   return {
-    kitPackage: "design-accord",
+    kitPackage: "design-anchor",
     kitVersion,
     syncedAt: new Date().toISOString(),
     referencePolicy: REFERENCE_POLICY,
@@ -206,13 +206,13 @@ function writeKitStatus(target, manifest) {
 /* ─── init ─── */
 
 function doInit(targetArg) {
-  const target = resolve(process.cwd(), targetArg || DEFAULT_ACCORD_DIR);
+  const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
   console.log(`\n📦 初始化组件库到 ${target}\n`);
 
   if (existsSync(join(target, "package.json"))) {
-    console.log("⚠️  目标目录已存在 package.json，跳过 scaffold（使用 accord dev 启动）");
+    console.log("⚠️  目标目录已存在 package.json，跳过 scaffold（使用 anchor dev 启动）");
     const projectRoot = resolve(target, "..");
-    writeAccordConsumerDocs(projectRoot, target);
+    writeAnchorConsumerDocs(projectRoot, target);
     generateCursorRule(projectRoot, target);
     return;
   }
@@ -228,7 +228,7 @@ function doInit(targetArg) {
     "vite-plugin-schema-api.mjs",
     "tsconfig.json",
     "tailwind.config.ts",
-    "tailwind.accord.generated.ts",
+    "tailwind.anchor.generated.ts",
   ];
 
   for (const rel of toCopy) {
@@ -239,14 +239,14 @@ function doInit(targetArg) {
     console.log(`  ✅ ${rel}`);
   }
 
-  // Copy accord schema directory if it exists
-  const schemaDir = join(PKG_ROOT, "src/accord");
+  // Copy anchor schema directory if it exists
+  const schemaDir = join(PKG_ROOT, "src/anchor");
   if (existsSync(schemaDir)) {
-    cpSync(schemaDir, join(target, "src/accord"), { recursive: true });
-    console.log("  ✅ src/accord");
+    cpSync(schemaDir, join(target, "src/anchor"), { recursive: true });
+    console.log("  ✅ src/anchor");
   }
 
-  // Design Portal (Schema visual editor) is kept only in the DesignAccord product repo；init 出的消费者项目不包含，避免在项目 A 里「强行塞」一套独立编辑产品。
+  // Design Portal (Schema visual editor) is kept only in the Design-anchor product repo；init 出的消费者项目不包含，避免在项目 A 里「强行塞」一套独立编辑产品。
 
   // 拷贝 scripts
   const scriptsDir = join(PKG_ROOT, "scripts");
@@ -259,15 +259,15 @@ function doInit(targetArg) {
   const parentPkg = readPkgJson(PKG_ROOT);
   const { dependencies, peerDependencies, devDependencies } = buildScaffoldPackageJson(parentPkg);
   const pkg = {
-    name: "accord-local",
+    name: "anchor-local",
     version: "0.1.0",
     private: true,
     type: "module",
     main: "index.ts",
     scripts: {
       "sync:tokens": parentPkg.scripts?.["sync:tokens"] || "node scripts/emit-design-tokens-css.mjs",
-      "sync:accord": parentPkg.scripts?.["sync:accord"] || "npm run sync:tokens && node scripts/sync-from-schema.mjs",
-      "accord:audit": parentPkg.scripts?.["accord:audit"] || "node scripts/accord-audit.mjs",
+      "sync:anchor": parentPkg.scripts?.["sync:anchor"] || "npm run sync:tokens && node scripts/sync-from-schema.mjs",
+      "anchor:audit": parentPkg.scripts?.["anchor:audit"] || "node scripts/anchor-audit.mjs",
       storybook: "storybook dev -p 6006",
       "build-storybook": "storybook build",
       typecheck: "tsc --noEmit",
@@ -297,21 +297,21 @@ function doInit(targetArg) {
   generateAgentsMd(projectRoot, target);
   installCursorHooks(projectRoot);
   installSelfcheckRule(projectRoot);
-  writeAccordConsumerDocs(projectRoot, target);
+  writeAnchorConsumerDocs(projectRoot, target);
 
   console.log("\n📦 scaffold 完成！\n");
   console.log("后续步骤：");
-  console.log(`  cd ${targetArg || DEFAULT_ACCORD_DIR}`);
+  console.log(`  cd ${targetArg || DEFAULT_ANCHOR_DIR}`);
   console.log("  npm install");
-  console.log("  accord dev .");
+  console.log("  anchor dev .");
   console.log("");
   console.log("🤖 Cursor 集成已自动配置：");
-  console.log("  • .cursor/rules/accord.mdc       — 组件库约束（alwaysApply）");
-  console.log("  • .cursor/rules/accord-selfcheck.mdc — 改完代码后的自检清单");
+  console.log("  • .cursor/rules/anchor.mdc       — 组件库约束（alwaysApply）");
+  console.log("  • .cursor/rules/anchor-selfcheck.mdc — 改完代码后的自检清单");
   console.log("  • .cursor/mcp.json                — MCP Server");
-  console.log("  • .cursor/hooks.json              — 保存 .tsx 后自动跑 accord audit");
-  console.log("  • ACCORD_BOUNDARIES.md            — Directory boundary guide (app src vs .accord)");
-  console.log("  • ACCORD_INTEGRATION.md           — @design 别名与 Vite 示例");
+  console.log("  • .cursor/hooks.json              — 保存 .tsx 后自动跑 anchor audit");
+  console.log("  • ANCHOR_BOUNDARIES.md            — Directory boundary guide (app src vs .anchor)");
+  console.log("  • ANCHOR_INTEGRATION.md           — @design 别名与 Vite 示例");
   console.log("  重新打开 Cursor 后 Hooks 与规则生效。\n");
 }
 
@@ -342,18 +342,18 @@ function buildScaffoldPackageJson(parentPkg) {
 }
 
 /** 项目根：边界说明 + import 别名集成（立刻可做的「一页纸」） */
-function writeAccordConsumerDocs(projectRoot, libTarget) {
+function writeAnchorConsumerDocs(projectRoot, libTarget) {
   const relLib = "./" + relative(projectRoot, libTarget).split(sep).join("/");
   const boundariesSrc = join(PKG_ROOT, "docs", "BOUNDARIES.md");
-  const boundariesDst = join(projectRoot, "ACCORD_BOUNDARIES.md");
+  const boundariesDst = join(projectRoot, "ANCHOR_BOUNDARIES.md");
   if (existsSync(boundariesSrc)) {
     cpSync(boundariesSrc, boundariesDst);
-    console.log("  ✅ ACCORD_BOUNDARIES.md（项目根）");
+    console.log("  ✅ ANCHOR_BOUNDARIES.md（项目根）");
   }
 
-  const integration = `# DesignAccord Integration (import aliases)
+  const integration = `# Design-anchor Integration (import aliases)
 
-组件库物理路径：\`${relLib}/\`（一般为 \`./.accord/\`）。业务代码请放在项目自有的 \`src/\`，详见同目录 **ACCORD_BOUNDARIES.md**。
+组件库物理路径：\`${relLib}/\`（一般为 \`./.anchor/\`）。业务代码请放在项目自有的 \`src/\`，详见同目录 **ANCHOR_BOUNDARIES.md**。
 
 ## 推荐：TypeScript \`paths\` — \`@design\`
 
@@ -375,7 +375,7 @@ function writeAccordConsumerDocs(projectRoot, libTarget) {
 import { DataTable, Button } from "@design";
 \`\`\`
 
-> If your project already maps \`@\` to \`src/\`, do not reuse the same prefix for \`@design\`; keep \`@design\` pointing only to the DesignAccord barrel.
+> If your project already maps \`@\` to \`src/\`, do not reuse the same prefix for \`@design\`; keep \`@design\` pointing only to the Design-anchor barrel.
 
 ## Vite / Rspack 等：\`resolve.alias\`
 
@@ -402,10 +402,10 @@ import { Button } from "${relLib}/index.ts";
 （具体相对路径以文件位置为准。）
 
 ---
-*由 \`accord init\` 生成；修改别名后无需改本文件，以业务侧 tsconfig / Vite 为准。*
+*由 \`anchor init\` 生成；修改别名后无需改本文件，以业务侧 tsconfig / Vite 为准。*
 `;
-  writeFileSync(join(projectRoot, "ACCORD_INTEGRATION.md"), integration);
-  console.log("  ✅ ACCORD_INTEGRATION.md（项目根）");
+  writeFileSync(join(projectRoot, "ANCHOR_INTEGRATION.md"), integration);
+  console.log("  ✅ ANCHOR_INTEGRATION.md（项目根）");
 }
 
 function readPkgJson(dir) {
@@ -421,8 +421,8 @@ function generateIndex(target) {
   if (!existsSync(compsDir)) return;
 
   const lines = [
-    "// Auto-generated — 组件库统一入口（位于项目根隐藏目录 .accord/）",
-    '// App code: import { ... } from "./.accord" or configure a TS path alias',
+    "// Auto-generated — 组件库统一入口（位于项目根隐藏目录 .anchor/）",
+    '// App code: import { ... } from "./.anchor" or configure a TS path alias',
     "",
   ];
 
@@ -522,7 +522,7 @@ function generateCursorRule(projectRoot, libTarget) {
   const rulesDir = join(projectRoot, ".cursor/rules");
   mkdirSync(rulesDir, { recursive: true });
 
-  const specDir = join(libTarget, "src/accord/schema/components");
+  const specDir = join(libTarget, "src/anchor/schema/components");
   let specSummary = "";
   if (existsSync(specDir)) {
     const files = readdirSync(specDir).filter(f => f.endsWith(".spec.json"));
@@ -537,35 +537,35 @@ function generateCursorRule(projectRoot, libTarget) {
   const sceneRouting = buildSceneRouting(specDir);
 
   const rule = `---
-description: DesignAccord component governance rules — AI must follow these constraints
+description: Design-anchor component governance rules — AI must follow these constraints
 alwaysApply: true
 ---
 
-# DesignAccord Component Governance
+# Design-anchor Component Governance
 
-This project uses the DesignAccord component library (at \`${relLib}\`, typically the hidden \`./.accord\` directory). All UI development must follow these rules.
+This project uses the Design-anchor component library (at \`${relLib}\`, typically the hidden \`./.anchor\` directory). All UI development must follow these rules.
 
 ## Directory Conventions
 
 - **Application / business pages**: Write in your project's own \`src/\` (or your project's original app directory). **Do NOT** write business pages, routes, or feature code inside \`${relLib}\`.
-- **Component library & Design Tokens**: Maintained only in \`${relLib}\`; DesignAccord injects capabilities via \`${relLib}\` and \`.cursor/\`, it does not replace your project's own folder structure.
+- **Component library & Design Tokens**: Maintained only in \`${relLib}\`; Design-anchor injects capabilities via \`${relLib}\` and \`.cursor/\`, it does not replace your project's own folder structure.
 
 ${sceneRouting}
 
 ## 组件引用规则
 
 1. **禁止使用原生 HTML 标签**：\`<button>\`、\`<input>\`、\`<table>\` 等，必须使用业务组件
-2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`ACCORD_INTEGRATION.md\`）；否则从 \`${relLib}/src/components/starter/\` 导入
+2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`ANCHOR_INTEGRATION.md\`）；否则从 \`${relLib}/src/components/starter/\` 导入
 3. **禁止手写间距**：不允许 \`m-[13px]\`、\`p-[7px]\` 等任意值 Tailwind 类
 4. **颜色仅用语义类**：\`bg-primary\`、\`text-muted-foreground\` 等，禁止硬编码色值
 
 ## 可用组件
 
-${specSummary || "（运行 accord sync 后自动生成）"}
+${specSummary || "（运行 anchor sync 后自动生成）"}
 
 ## 组件规范（JSON，非独立「Schema 编辑器」产品）
 
-规范文件在 \`${relLib}/src/accord/schema/components/*.spec.json\`。在 IDE 里直接改 JSON 即可；改完后在 \`${relLib}\` 下执行 \`npm run sync:accord\`（或 \`accord sync .\`）生成 \`.cursorrules\` 与 Tailwind 生成物。
+规范文件在 \`${relLib}/src/anchor/schema/components/*.spec.json\`。在 IDE 里直接改 JSON 即可；改完后在 \`${relLib}\` 下执行 \`npm run sync:anchor\`（或 \`anchor sync .\`）生成 \`.cursorrules\` 与 Tailwind 生成物。
 
 ## MCP 工具（若已配置 .cursor/mcp.json）
 
@@ -579,8 +579,8 @@ ${specSummary || "（运行 accord sync 后自动生成）"}
 3. 组件行为以 schema JSON 为唯一数据源
 `;
 
-  writeFileSync(join(rulesDir, "accord.mdc"), rule);
-  console.log("  ✅ .cursor/rules/accord.mdc");
+  writeFileSync(join(rulesDir, "anchor.mdc"), rule);
+  console.log("  ✅ .cursor/rules/anchor.mdc");
 }
 
 function generateAgentsMd(projectRoot, libTarget) {
@@ -597,8 +597,8 @@ function generateAgentsMd(projectRoot, libTarget) {
    - 仅用于 Storybook 配置、schema 同步、Portal 适配。
    - 非组件实现代码。
 
-3. **上游 npm 包** → \`node_modules/design-accord/\` **只读**
-   - 通过 \`accord upgrade\` 同步变更到 \`${relLib}/\`。
+3. **上游 npm 包** → \`node_modules/design-anchor/\` **只读**
+   - 通过 \`anchor upgrade\` 同步变更到 \`${relLib}/\`。
    - 禁止直接修改 \`node_modules\` 内文件。
 
 ## AI 编码契约
@@ -606,8 +606,8 @@ function generateAgentsMd(projectRoot, libTarget) {
 - **Import 来源**：优先 \`@design\`（指向 \`${relLib}/index.ts\`）；禁止从 \`node_modules\` 深路径引用 kit 组件。
 - **颜色**：仅使用 Design Token 语义类（\`bg-primary\`、\`text-muted-foreground\`），禁止硬编码色值。
 - **间距**：禁止任意值 Tailwind（\`m-[13px]\`），使用 schema 声明的语义 props。
-- **组件规范**：以 \`${relLib}/src/accord/schema/components/*.spec.json\` 为唯一数据源。
-- **修改后**：运行 \`npm run sync:accord\` 同步 .cursorrules 与 Tailwind 扩展。
+- **组件规范**：以 \`${relLib}/src/anchor/schema/components/*.spec.json\` 为唯一数据源。
+- **修改后**：运行 \`npm run sync:anchor\` 同步 .cursorrules 与 Tailwind 扩展。
 `;
   writeFileSync(join(projectRoot, "AGENTS.md"), content);
   console.log("  ✅ AGENTS.md（项目根）");
@@ -623,9 +623,9 @@ function generateCursorMcp(projectRoot, libTarget) {
   }
 
   const mcpServers = existing.mcpServers || {};
-  mcpServers["accord"] = {
+  mcpServers["anchor"] = {
     command: "node",
-    args: [join(PKG_ROOT, "bin/accord-mcp.mjs"), relLib],
+    args: [join(PKG_ROOT, "bin/anchor-mcp.mjs"), relLib],
   };
 
   mkdirSync(join(projectRoot, ".cursor"), { recursive: true });
@@ -670,16 +670,16 @@ function installCursorHooks(projectRoot) {
   } else {
     writeFileSync(dstJson, JSON.stringify(incoming, null, 2) + "\n");
   }
-  console.log("  ✅ .cursor/hooks（afterFileEdit → accord audit）");
+  console.log("  ✅ .cursor/hooks（afterFileEdit → anchor audit）");
 }
 
 function installSelfcheckRule(projectRoot) {
-  const src = join(PKG_ROOT, ".cursor/rules/accord-selfcheck.mdc");
+  const src = join(PKG_ROOT, ".cursor/rules/anchor-selfcheck.mdc");
   const dstDir = join(projectRoot, ".cursor/rules");
   if (!existsSync(src)) return;
   mkdirSync(dstDir, { recursive: true });
-  cpSync(src, join(dstDir, "accord-selfcheck.mdc"));
-  console.log("  ✅ .cursor/rules/accord-selfcheck.mdc");
+  cpSync(src, join(dstDir, "anchor-selfcheck.mdc"));
+  console.log("  ✅ .cursor/rules/anchor-selfcheck.mdc");
 }
 
 /* ─── govern（轻量治理模式） ─── */
@@ -689,14 +689,14 @@ function doGovern() {
 
   console.log(`
 ╔══════════════════════════════════════════╗
-║       DesignAccord Govern — Governance Mode          ║
+║       Design-anchor Govern — Governance Mode          ║
 ║  仅注入 AI 规则，不拷贝组件/CSS/Storybook ║
 ╚══════════════════════════════════════════╝
 `);
   console.log(`  📂 项目根: ${projectRoot}\n`);
 
   // 收集 spec 概要（从 npm 包内读取）
-  const specDir = join(PKG_ROOT, "src/accord/schema/components");
+  const specDir = join(PKG_ROOT, "src/anchor/schema/components");
   let specSummary = "";
   let specDetails = "";
   if (existsSync(specDir)) {
@@ -722,20 +722,20 @@ function doGovern() {
     }
   }
 
-  // 1. 生成 .cursor/rules/accord.mdc（治理版：no .accord path references）
+  // 1. 生成 .cursor/rules/anchor.mdc（治理版：no .anchor path references）
   const rulesDir = join(projectRoot, ".cursor/rules");
   mkdirSync(rulesDir, { recursive: true });
 
   const sceneRouting = buildSceneRouting(specDir);
 
   const governRule = `---
-description: DesignAccord AI coding governance rules — for existing projects
+description: Design-anchor AI coding governance rules — for existing projects
 alwaysApply: true
 ---
 
-# DesignAccord AI Coding Governance
+# Design-anchor AI Coding Governance
 
-This project uses DesignAccord governance mode（\`accord govern\`），AI 编码必须遵守以下规范。
+This project uses Design-anchor governance mode（\`anchor govern\`），AI 编码必须遵守以下规范。
 
 ${sceneRouting}
 
@@ -748,7 +748,7 @@ ${sceneRouting}
 
 ## 参考组件规范
 
-The following component specs are from the DesignAccord component library，AI 应参考这些模式：
+The following component specs are from the Design-anchor component library，AI 应参考这些模式：
 
 ${specSummary || "（无可用规范）"}
 
@@ -764,14 +764,14 @@ ${specDetails || "（无详细约束）"}
 4. 不引入与项目现有设计系统风格不一致的第三方 UI 库
 `;
 
-  writeFileSync(join(rulesDir, "accord.mdc"), governRule);
-  console.log("  ✅ .cursor/rules/accord.mdc（AI 治理规则）");
+  writeFileSync(join(rulesDir, "anchor.mdc"), governRule);
+  console.log("  ✅ .cursor/rules/anchor.mdc（AI 治理规则）");
 
   // 2. 安装 selfcheck 规则
-  const selfcheckSrc = join(PKG_ROOT, ".cursor/rules/accord-selfcheck.mdc");
+  const selfcheckSrc = join(PKG_ROOT, ".cursor/rules/anchor-selfcheck.mdc");
   if (existsSync(selfcheckSrc)) {
-    cpSync(selfcheckSrc, join(rulesDir, "accord-selfcheck.mdc"));
-    console.log("  ✅ .cursor/rules/accord-selfcheck.mdc（自检清单）");
+    cpSync(selfcheckSrc, join(rulesDir, "anchor-selfcheck.mdc"));
+    console.log("  ✅ .cursor/rules/anchor-selfcheck.mdc（自检清单）");
   }
 
   // 3. 生成 AGENTS.md（治理版）
@@ -779,7 +779,7 @@ ${specDetails || "（无详细约束）"}
 
 ## 治理模式说明
 
-This project uses DesignAccord **governance mode**（govern）——仅注入 AI 编码规则，不包含独立组件库目录。
+This project uses Design-anchor **governance mode**（govern）——仅注入 AI 编码规则，不包含独立组件库目录。
 项目保持原有结构不变，AI 编码通过规则文件引导一致性。
 
 ## AI 编码契约
@@ -810,9 +810,9 @@ This project uses DesignAccord **governance mode**（govern）——仅注入 AI
   console.log("  ✅ AGENTS.md（AI 编码边界）");
 
   // 4. 生成 .cursorrules（简洁版，兼容非 Cursor IDE）
-  const cursorrules = `# DesignAccord AI Govern Rules
+  const cursorrules = `# Design-anchor AI Govern Rules
 
-You are working in a project governed by DesignAccord design rules.
+You are working in a project governed by Design-anchor design rules.
 
 ## Key Constraints
 - Reuse existing UI components; do not recreate what already exists
@@ -835,8 +835,8 @@ You are working in a project governed by DesignAccord design rules.
   writeFileSync(join(projectRoot, ".cursorrules"), cursorrules);
   console.log("  ✅ .cursorrules（IDE 通用规则）");
 
-  // 5. 可选：配置 MCP（如果 accord-mcp.mjs 存在）
-  const mcpEntry = join(PKG_ROOT, "bin", "accord-mcp.mjs");
+  // 5. 可选：配置 MCP（如果 anchor-mcp.mjs 存在）
+  const mcpEntry = join(PKG_ROOT, "bin", "anchor-mcp.mjs");
   if (existsSync(mcpEntry)) {
     const mcpPath = join(projectRoot, ".cursor/mcp.json");
     let existing = {};
@@ -844,7 +844,7 @@ You are working in a project governed by DesignAccord design rules.
       try { existing = JSON.parse(readFileSync(mcpPath, "utf8")); } catch {}
     }
     const mcpServers = existing.mcpServers || {};
-    mcpServers["accord"] = {
+    mcpServers["anchor"] = {
       command: "node",
       args: [mcpEntry, projectRoot],
     };
@@ -857,14 +857,14 @@ You are working in a project governed by DesignAccord design rules.
 ✅ 治理模式初始化完成！
 
 生成的文件：
-  • .cursor/rules/accord.mdc       — AI 编码治理规则（alwaysApply）
-  • .cursor/rules/accord-selfcheck.mdc — 改完代码后的自检清单
+  • .cursor/rules/anchor.mdc       — AI 编码治理规则（alwaysApply）
+  • .cursor/rules/anchor-selfcheck.mdc — 改完代码后的自检清单
   • .cursorrules                     — IDE 通用规则（兼容 Cursor/Copilot/Claude）
   • AGENTS.md                        — AI 编码边界说明
 
 与 init 模式的区别：
   • 不拷贝组件源码、CSS、Storybook
-  • 不创建 .accord/ 目录
+  • 不创建 .anchor/ 目录
   • 不修改 package.json 或安装依赖
   • 仅通过规则文件约束 AI 行为
 
@@ -1129,8 +1129,8 @@ function extractTokensFromPrompt(text) {
 function doTheme(promptFile) {
   if (!promptFile) {
     console.error("❌ 请指定 Design Prompt 文件路径\n");
-    console.log("  用法: accord theme <prompt-file.md>\n");
-    console.log("  示例: accord theme airbnb-design.md");
+    console.log("  用法: anchor theme <prompt-file.md>\n");
+    console.log("  示例: anchor theme airbnb-design.md");
     process.exit(1);
   }
 
@@ -1144,7 +1144,7 @@ function doTheme(promptFile) {
 
   console.log(`
 ╔══════════════════════════════════════════╗
-║      DesignAccord Theme — Theme Extraction Mode        ║
+║      Design-anchor Theme — Theme Extraction Mode        ║
 ║  从 Design Prompt 提取 Token 注入流水线   ║
 ╚══════════════════════════════════════════╝
 `);
@@ -1167,15 +1167,15 @@ function doTheme(promptFile) {
 
   // 2. 找到 tokens.json 并合并
   const projectRoot = process.cwd();
-  const accordDir = join(projectRoot, DEFAULT_ACCORD_DIR);
-  const tokensPath = existsSync(join(accordDir, "src/design-tokens/tokens.json"))
-    ? join(accordDir, "src/design-tokens/tokens.json")
+  const anchorDir = join(projectRoot, DEFAULT_ANCHOR_DIR);
+  const tokensPath = existsSync(join(anchorDir, "src/design-tokens/tokens.json"))
+    ? join(anchorDir, "src/design-tokens/tokens.json")
     : existsSync(join(projectRoot, "src/design-tokens/tokens.json"))
       ? join(projectRoot, "src/design-tokens/tokens.json")
       : null;
 
   if (!tokensPath) {
-    console.log("  ⚠️  未找到 tokens.json，请先运行 accord init 或 accord start\n");
+    console.log("  ⚠️  未找到 tokens.json，请先运行 anchor init 或 anchor start\n");
     console.log("  将提取结果输出为 JSON 供手动合并：\n");
     console.log(JSON.stringify({ seed: extracted.seed, seedDark: extracted.seedDark, fixedAliases: extracted.fixedAliases }, null, 2));
     process.exit(1);
@@ -1245,9 +1245,9 @@ AI 在实现页面时应参考该文件的：
 - 布局原则与响应式断点
 - Do's and Don'ts 中的视觉规则
 
-## Component Source (DesignAccord)
+## Component Source (Design-anchor)
 
-All UI components must use the DesignAccord component library（见 accord.mdc 中的场景→组件速查表）。
+All UI components must use the Design-anchor component library（见 anchor.mdc 中的场景→组件速查表）。
 Token 值（颜色、间距、圆角、字重）已从 prompt 提取写入 tokens.json，
 通过 Tailwind 语义类（\`bg-primary\`, \`text-destructive\`, \`rounded-md\` 等）引用。
 
@@ -1259,7 +1259,7 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 
 - ❌ 从 Design Prompt 中手抄 hex 色值到代码（必须用 Tailwind token 类）
 - ❌ 从 Design Prompt 中手抄 px 间距到代码（必须用 spacing scale）
-- ❌ Ignoring DesignAccord components而按 prompt 描述从零构建组件
+- ❌ Ignoring Design-anchor components而按 prompt 描述从零构建组件
 - ❌ 在代码中写 \`style={{ color: '#ff385c' }}\` 等内联样式
 
 ## 正确做法
@@ -1267,15 +1267,15 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 - ✅ 用 \`bg-primary\` 代替 \`bg-[#ff385c]\`
 - ✅ 用 \`text-foreground\` 代替 \`text-[#222222]\`
 - ✅ 用 \`rounded-md\` 代替 \`rounded-[14px]\`
-- ✅ Using DesignAccord Button 组件代替按 prompt 手写按钮
+- ✅ Using Design-anchor Button 组件代替按 prompt 手写按钮
 `;
 
-  writeFileSync(join(rulesDir, "accord-theme.mdc"), themeRule);
-  console.log("  ✅ .cursor/rules/accord-theme.mdc 已生成");
+  writeFileSync(join(rulesDir, "anchor-theme.mdc"), themeRule);
+  console.log("  ✅ .cursor/rules/anchor-theme.mdc 已生成");
 
   // 5. 保存原始 prompt
-  const promptDst = existsSync(accordDir)
-    ? join(accordDir, "design-prompt.md")
+  const promptDst = existsSync(anchorDir)
+    ? join(anchorDir, "design-prompt.md")
     : join(projectRoot, "design-prompt.md");
   writeFileSync(promptDst, promptText);
   console.log(`  ✅ ${relative(projectRoot, promptDst)} 已保存`);
@@ -1284,8 +1284,8 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 ✅ 主题提取完成！
 
 下一步：
-  • npx accord dev    — 在 Storybook 中预览新主题
-  • 打开 Cursor，AI 将使用提取后的 token + DesignAccord components
+  • npx anchor dev    — 在 Storybook 中预览新主题
+  • 打开 Cursor，AI 将使用提取后的 token + Design-anchor components
   • 视觉氛围细节参考 design-prompt.md
 `);
 }
@@ -1293,10 +1293,10 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 /* ─── upgrade ─── */
 
 function doUpgrade(targetArg) {
-  const target = resolve(process.cwd(), targetArg || DEFAULT_ACCORD_DIR);
+  const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
   if (!existsSync(join(target, "package.json"))) {
-    console.error(`❌ 目标目录不存在，请先运行: accord init`);
+    console.error(`❌ 目标目录不存在，请先运行: anchor init`);
     process.exit(1);
   }
 
@@ -1347,7 +1347,7 @@ function doUpgrade(targetArg) {
   }
 
   const manifest = {
-    kitPackage: "design-accord",
+    kitPackage: "design-anchor",
     kitVersion,
     syncedAt: new Date().toISOString(),
     referencePolicy: REFERENCE_POLICY,
@@ -1369,7 +1369,7 @@ function doUpgrade(targetArg) {
 /* ─── start（设计师一键启动） ─── */
 
 function doStart(targetArg) {
-  const target = resolve(process.cwd(), targetArg || DEFAULT_ACCORD_DIR);
+  const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
   doInit(targetArg);
 
@@ -1393,7 +1393,7 @@ function clearStorybookManagerCache(target) {
   const dirs = [
     join("node_modules", ".cache", "storybook"),
     join("node_modules", ".vite"),
-    join("node_modules", ".vite-storybook-accord"),
+    join("node_modules", ".vite-storybook-anchor"),
   ];
   for (const rel of dirs) {
     const p = join(target, rel);
@@ -1435,10 +1435,10 @@ function openUrl(url) {
 }
 
 function doDev(targetArg) {
-  const target = resolve(process.cwd(), targetArg || DEFAULT_ACCORD_DIR);
+  const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
   if (!existsSync(join(target, ".storybook"))) {
-    console.error(`❌ 未找到配置，请先运行: accord init ${targetArg || DEFAULT_ACCORD_DIR}`);
+    console.error(`❌ 未找到配置，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
 
@@ -1447,7 +1447,7 @@ function doDev(targetArg) {
 
   console.log(`
 ╔══════════════════════════════════════════╗
-║         DesignAccord Design Portal          ║
+║         Design-anchor Design Portal          ║
 ║     AI 组件治理平台 · 设计师工作台        ║
 ╚══════════════════════════════════════════╝
 `);
@@ -1490,16 +1490,16 @@ function doDev(targetArg) {
 /* ─── mcp ─── */
 
 function doMcp(targetArg) {
-  const target = resolve(process.cwd(), targetArg || DEFAULT_ACCORD_DIR);
+  const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
   if (!existsSync(join(target, "src/design-tokens/tokens.json"))) {
-    console.error(`❌ 未找到 tokens.json，请先运行: accord init ${targetArg || DEFAULT_ACCORD_DIR}`);
+    console.error(`❌ 未找到 tokens.json，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
 
   console.log(`\n🔌 启动 MCP Server → ${target}\n`);
 
-  const mcpEntry = join(PKG_ROOT, "bin", "accord-mcp.mjs");
+  const mcpEntry = join(PKG_ROOT, "bin", "anchor-mcp.mjs");
   if (!existsSync(mcpEntry)) {
     console.error("❌ MCP Server 尚未实现，即将支持");
     process.exit(1);
@@ -1515,10 +1515,10 @@ function doMcp(targetArg) {
 /* ─── sync ─── */
 
 function doSync(targetArg) {
-  const target = resolve(process.cwd(), targetArg || DEFAULT_ACCORD_DIR);
+  const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
-  if (!existsSync(join(target, "src/accord/schema/components"))) {
-    console.error(`❌ 未找到 schema 目录，请先运行: accord init ${targetArg || DEFAULT_ACCORD_DIR}`);
+  if (!existsSync(join(target, "src/anchor/schema/components"))) {
+    console.error(`❌ 未找到 schema 目录，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
 
@@ -1546,17 +1546,17 @@ function doSync(targetArg) {
 /* ─── audit ─── */
 
 function doAudit(targetArg) {
-  const target = resolve(process.cwd(), targetArg || DEFAULT_ACCORD_DIR);
+  const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
-  if (!existsSync(join(target, "src/accord"))) {
-    console.error(`❌ ❌ Directory not found，请先运行: accord init ${targetArg || DEFAULT_ACCORD_DIR}`);
+  if (!existsSync(join(target, "src/anchor"))) {
+    console.error(`❌ ❌ Directory not found，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
 
   console.log(`\n🔍 合规审计 → ${target}\n`);
 
-  const auditScript = join(PKG_ROOT, "scripts/accord-audit.mjs");
-  const localAudit = join(target, "scripts/accord-audit.mjs");
+  const auditScript = join(PKG_ROOT, "scripts/anchor-audit.mjs");
+  const localAudit = join(target, "scripts/anchor-audit.mjs");
   const script = existsSync(localAudit) ? localAudit : auditScript;
 
   try {

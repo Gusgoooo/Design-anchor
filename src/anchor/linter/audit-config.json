@@ -1,11 +1,11 @@
 {
-  "$comment": "Read by accord-audit.mjs; paths are matched as absolute path substrings relative to repo root",
+  "$comment": "Read by anchor-audit.mjs; paths are matched as absolute path substrings relative to repo root",
   "scanRoots": ["src"],
   "excludePathSubstrings": [
     "/node_modules/",
     "/components/ui/",
     "/components/starter/",
-    "/accord/schema/",
+    "/anchor/schema/",
     "/design-portal/",
     "/design-tokens/",
     "/stories/",

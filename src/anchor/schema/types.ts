@@ -1,5 +1,5 @@
 /**
- * DesignAccord "brain" -- the universal ComponentSpec type system for all components.
+ * Design-anchor "brain" -- the universal ComponentSpec type system for all components.
  * JSON Spec (`components/*.spec.json`) and TS share the same shape; in JSON `styleLock.blacklist[].pattern` only supports **strings** (regex literals cannot be serialized).
  */
 
@@ -55,7 +55,7 @@ export interface PropSemanticSpec {
   defaultValue?: string | number | boolean;
 }
 
-/** Native HTML tags forbidden in the corresponding business semantic context (drives "Forbidden" and accord-audit) */
+/** Native HTML tags forbidden in the corresponding business semantic context (drives "Forbidden" and anchor-audit) */
 export interface ForbiddenPattern {
   /** e.g. table, button */
   htmlTag: string;
@@ -118,7 +118,7 @@ export interface ComponentSpecMeta {
   extendsSpecId?: string;
 }
 
-/** Short usage examples for AI / designers (not used by linter; `npm run sync:accord` writes to .cursorrules few-shot) */
+/** Short usage examples for AI / designers (not used by linter; `npm run sync:anchor` writes to .cursorrules few-shot) */
 export interface ComponentExample {
   title: string;
   description?: string;
@@ -156,14 +156,14 @@ export interface ComponentSpec {
   meta?: ComponentSpecMeta;
   /**
    * Optional override layer for **each Story variant** in the Storybook sidebar (key = `getCurrentStoryData().id`, e.g. `datatable--playground`).
-   * Deep-merged with top-level fields for Accord panel editing; undeclared variants inherit the top-level "component baseline".
+   * Deep-merged with top-level fields for Anchor panel editing; undeclared variants inherit the top-level "component baseline".
    * Code-side JSON imports can still read only the top level; the variant layer mainly enters .cursorrules / collaboration prompts.
    */
-  storyAccord?: Record<string, Partial<Omit<ComponentSpec, "storyAccord">>>;
+  storyAnchor?: Record<string, Partial<Omit<ComponentSpec, "storyAnchor">>>;
   /** Usage examples (optional; for documentation generation and automated prompts) */
   examples?: ComponentExample[];
   /**
-   * Aggregated by Portal / sync into `tailwind.accord.generated.ts`, then referenced by root `tailwind.config.ts`.
+   * Aggregated by Portal / sync into `tailwind.anchor.generated.ts`, then referenced by root `tailwind.config.ts`.
    * (The planned "update tailwind.config" is implemented in this repo as: update the generated file + config already imports it.)
    */
   tailwindExtend?: {

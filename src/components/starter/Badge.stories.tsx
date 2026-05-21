@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./badge.tsx?raw";
 import { Badge } from "./badge";
@@ -11,7 +11,7 @@ type Args = { variant: string; [k: string]: unknown };
 const meta: Meta<Args> = {
   title: "Starter/Badge",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["variant", "children"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["variant", "children"] }),
   },
   args: { variant: "default", ...audit.args },
   argTypes: {

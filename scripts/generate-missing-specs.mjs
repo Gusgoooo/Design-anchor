@@ -7,7 +7,7 @@ import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 
 const STARTER_DIR = "src/components/starter";
-const SPEC_DIR = "src/accord/schema/components";
+const SPEC_DIR = "src/anchor/schema/components";
 
 const SKIP_FILES = ["ComponentGallery.tsx", "kitchen-sink-data-table.tsx", "composite-data-table.tsx"];
 

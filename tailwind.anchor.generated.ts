@@ -1,6 +1,6 @@
 /* eslint-disable */
-// AUTO-GENERATED — 运行 npm run sync:accord 重新生成；请勿手改。
-export const accordTailwindExtend = {
+// AUTO-GENERATED — 运行 npm run sync:anchor 重新生成；请勿手改。
+export const anchorTailwindExtend = {
   "spacing": {
     "business-table-cell-y-compact": "0.5rem",
     "business-table-cell-y-default": "0.75rem",
@@ -11,7 +11,7 @@ export const accordTailwindExtend = {
 } as const;
 
 /** 来自 schema enumMap / baselineTokens，供 Tailwind JIT 拣选 */
-export const accordSafelist: string[] = [
+export const anchorSafelist: string[] = [
   "[&>svg:not([class*=",
   "[&_img]:object-cover",
   "[&_img]:size-full",

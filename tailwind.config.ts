@@ -1,26 +1,26 @@
 import type { Config } from "tailwindcss";
 import tailwindcssAnimate from "tailwindcss-animate";
-import { accordSafelist, accordTailwindExtend } from "./tailwind.accord.generated";
+import { anchorSafelist, anchorTailwindExtend } from "./tailwind.anchor.generated";
 
 const extend: Record<string, Record<string, string>> = {};
-if (Object.keys(accordTailwindExtend.spacing).length) {
-  extend.spacing = { ...accordTailwindExtend.spacing };
+if (Object.keys(anchorTailwindExtend.spacing).length) {
+  extend.spacing = { ...anchorTailwindExtend.spacing };
 }
-if (Object.keys(accordTailwindExtend.colors).length) {
-  extend.colors = { ...accordTailwindExtend.colors };
+if (Object.keys(anchorTailwindExtend.colors).length) {
+  extend.colors = { ...anchorTailwindExtend.colors };
 }
-if (Object.keys(accordTailwindExtend.borderRadius).length) {
-  extend.borderRadius = { ...accordTailwindExtend.borderRadius };
+if (Object.keys(anchorTailwindExtend.borderRadius).length) {
+  extend.borderRadius = { ...anchorTailwindExtend.borderRadius };
 }
 
 export default {
   content: [
     "./src/**/*.{ts,tsx}",
     "./src/design-portal/**/*.{html,ts,tsx}",
-    "./src/accord/schema/**/*.json",
+    "./src/anchor/schema/**/*.json",
     "./.storybook/**/*.{ts,tsx}",
   ],
-  safelist: accordSafelist,
+  safelist: anchorSafelist,
   theme: {
     extend,
   },

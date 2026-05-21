@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import { cn } from "@/lib/utils";
 import componentSrc from "./table.tsx?raw";
@@ -12,7 +12,7 @@ type Args = { [k: string]: string };
 const meta = {
   title: "Starter/Table",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({}),
+    anchorTokenCompliance: storyAnchorCompliance({}),
   },
   args: { ...audit.args },
   argTypes: {

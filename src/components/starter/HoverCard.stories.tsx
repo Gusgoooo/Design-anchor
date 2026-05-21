@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./hover-card.tsx?raw";
 import * as Comp from "./hover-card";
@@ -11,7 +11,7 @@ type Args = { [k: string]: string };
 const meta = {
   title: "Starter/HoverCard",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({}),
+    anchorTokenCompliance: storyAnchorCompliance({}),
   },
   args: { ...audit.args },
   argTypes: { ...audit.argTypes } as Meta<Args>["argTypes"],

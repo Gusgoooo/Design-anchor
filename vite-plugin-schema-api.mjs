@@ -36,7 +36,7 @@ function execSyncCaptured(cmd, opts) {
  * Prevents Portal or malicious requests from writing to arbitrary repo locations.
  */
 const WRITE_WHITELIST_PREFIXES = [
-  "src/accord/schema/",
+  "src/anchor/schema/",
   "src/design-tokens/",
   "src/components/starter/",
 ];
@@ -47,15 +47,15 @@ function isWriteAllowed(repoRoot, absPath) {
 }
 
 /**
- * Dev server middleware: reads/writes src/accord/schema/components/*.spec.json, executes sync:accord after saving.
+ * Dev server middleware: reads/writes src/anchor/schema/components/*.spec.json, executes sync:anchor after saving.
  * Shared by standalone Portal and Storybook.
  */
 export function schemaApiPlugin(repoRoot) {
-  const specDir = path.join(repoRoot, "src/accord/schema/components");
+  const specDir = path.join(repoRoot, "src/anchor/schema/components");
   const tokensPath = path.join(repoRoot, "src/design-tokens/tokens.json");
 
   return {
-    name: "accord-schema-api",
+    name: "anchor-schema-api",
     /** Try to run before static asset handling to prevent /api/* from being incorrectly consumed */
     enforce: "pre",
     configureServer(server) {
@@ -283,10 +283,10 @@ export function schemaApiPlugin(repoRoot) {
               writeFileWithFsync(file, pretty);
               const relPath = path.relative(repoRoot, file).split(path.sep).join("/");
 
-              const accordSync = execSyncCaptured("npm run sync:accord", { cwd: repoRoot });
+              const anchorSync = execSyncCaptured("npm run sync:anchor", { cwd: repoRoot });
               let auditResult = null;
-              if (accordSync.ok) {
-                const audit = execSyncCaptured("npm run accord:audit", {
+              if (anchorSync.ok) {
+                const audit = execSyncCaptured("npm run anchor:audit", {
                   cwd: repoRoot,
                   timeout: 120000,
                 });
@@ -301,8 +301,8 @@ export function schemaApiPlugin(repoRoot) {
                   ok: true,
                   fileWritten: true,
                   path: relPath,
-                  syncOk: accordSync.ok,
-                  syncError: accordSync.ok ? null : accordSync.stderr || accordSync.stdout || null,
+                  syncOk: anchorSync.ok,
+                  syncError: anchorSync.ok ? null : anchorSync.stderr || anchorSync.stdout || null,
                   audit: auditResult,
                 }),
               );
@@ -446,7 +446,7 @@ export function schemaApiPlugin(repoRoot) {
               if (!fs.existsSync(storyPath)) {
                 const story = [
                   `import type { Meta, StoryObj } from "@storybook/react";`,
-                  `import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";`,
+                  `import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";`,
                   `import { autoClassControls } from "@/design-tokens/tw-class-audit";`,
                   `import componentSrc from "./${compName}.tsx?raw";`,
                   `import { ${pascal} } from "./${compName}";`,
@@ -456,7 +456,7 @@ export function schemaApiPlugin(repoRoot) {
                   `const meta = {`,
                   `  title: "${pascal}",`,
                   `  component: ${pascal},`,
-                  `  parameters: { accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["children"] }) },`,
+                  `  parameters: { anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children"] }) },`,
                   `  args: { ...audit.args },`,
                   `  argTypes: { ...audit.argTypes },`,
                   `} satisfies Meta<typeof ${pascal}>;`,

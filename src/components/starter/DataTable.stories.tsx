@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./composite-data-table.tsx?raw";
 import { DataTable, type ColumnDef, type DataTableProps } from "./DataTable";
@@ -45,7 +45,7 @@ const meta = {
   title: "Starter/Table",
   component: DataTable,
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({
+    anchorTokenCompliance: storyAnchorCompliance({
       ignoreArgNames: ["columns", "data", "density", "variant", "columnBandIndex"],
     }),
   },

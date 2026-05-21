@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { storyAccordCompliance } from "@/design-tokens/story-preview-shell";
+import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";
 import { autoClassControls, spreadAutoPreviewProps, type ClassOverrideArgs } from "@/design-tokens/tw-class-audit";
 import componentSrc from "./progress.tsx?raw";
 import { Progress } from "./progress";
@@ -13,7 +13,7 @@ type Args = { value: number; [k: string]: unknown };
 const meta: Meta<Args> = {
   title: "Starter/Progress",
   parameters: {
-    accordTokenCompliance: storyAccordCompliance({ ignoreArgNames: ["value", "children"] }),
+    anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["value", "children"] }),
   },
   args: { value: 60, ...audit.args },
   argTypes: {

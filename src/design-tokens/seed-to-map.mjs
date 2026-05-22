@@ -576,7 +576,21 @@ function mirrorPaddingMarginFromSpacingVars(vars) {
 // Custom: genShadcnAliasTokens (maps antd map tokens → shadcn CSS variable names)
 // ---------------------------------------------------------------------------
 
-function genShadcnAliasTokens(colorMap) {
+/**
+ * Maps Antd map tokens → shadcn CSS variable names.
+ *
+ * Independent gray seeds (graySecondary / grayMuted / grayMutedForeground /
+ * grayAccent / grayBorder / grayInput) act as user overrides on each
+ * semantic slot. When the user leaves a seed empty the Antd derivation
+ * (opacity ladder on colorTextBase) wins, so the system stays cohesive
+ * by default but every gray slot can be tuned independently when a
+ * design calls for distinct gray levels.
+ */
+function genShadcnAliasTokens(colorMap, seed) {
+  const pick = (key, fallback) => {
+    const v = seed?.[key];
+    return v != null && v !== "" ? v : fallback;
+  };
   return {
     background: colorMap.colorBgBase,
     foreground: colorMap.colorText,
@@ -586,16 +600,16 @@ function genShadcnAliasTokens(colorMap) {
     "popover-foreground": colorMap.colorText,
     primary: colorMap.colorPrimary,
     "primary-foreground": contrastForeground(colorMap.colorPrimary),
-    secondary: colorMap.colorFillSecondary,
+    secondary: pick("graySecondary", colorMap.colorFillSecondary),
     "secondary-foreground": colorMap.colorText,
-    muted: colorMap.colorBgLayout,
-    "muted-foreground": colorMap.colorTextTertiary,
-    accent: colorMap.colorFillSecondary,
+    muted: pick("grayMuted", colorMap.colorBgLayout),
+    "muted-foreground": pick("grayMutedForeground", colorMap.colorTextTertiary),
+    accent: pick("grayAccent", colorMap.colorFillSecondary),
     "accent-foreground": colorMap.colorText,
     destructive: colorMap.colorError,
     "destructive-foreground": contrastForeground(colorMap.colorError),
-    border: colorMap.colorBorderSecondary,
-    input: colorMap.colorBorder,
+    border: pick("grayBorder", colorMap.colorBorderSecondary),
+    input: pick("grayInput", colorMap.colorBorder),
     ring: colorMap.colorPrimary,
   };
 }
@@ -782,7 +796,7 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   mirrorPaddingMarginFromSpacingVars(vars);
 
   // --- Alias layer: shadcn semantic colors ---
-  const shadcnAliases = genShadcnAliasTokens(colorMap);
+  const shadcnAliases = genShadcnAliasTokens(colorMap, seed);
   for (const [k, v] of Object.entries(shadcnAliases)) {
     vars[k] = v;
   }

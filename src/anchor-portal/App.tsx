@@ -5,7 +5,7 @@ import { DarkModeProvider } from "./theme/DarkModeProvider";
 import { useRoute } from "./router";
 import { TopNav } from "./TopNav";
 import { Sidebar } from "./sidebar/SidebarTop";
-import { StorySessionProvider } from "./usePreviewState";
+import { StorySessionProvider, useStorySession, mergeParameters } from "./usePreviewState";
 import { Canvas } from "./canvas/Canvas";
 import { ControlsPanel } from "./controls/ControlsPanel";
 import { SpecPanel } from "./spec-editor/SpecPanel";
@@ -54,6 +54,15 @@ function ComponentsArea({
   currentStoryId: string | null;
   hasStoryRoute: boolean;
 }) {
+  const { session } = useStorySession();
+  // Fullscreen layout (used by every AI/* demo) takes the entire main
+  // area — the bottom Controls/Spec panel is dropped because the AI
+  // components portal floating UI to document.body which would overlap
+  // any sibling panel anyway.
+  const isFullscreen =
+    hasStoryRoute && session ? mergeParameters(session).layout === "fullscreen" : false;
+  const showBottomPanel = hasStoryRoute && !isFullscreen;
+
   return (
     <div className="h-full w-full bg-muted/30 p-4 dark:bg-background/40">
       <div className="flex h-full gap-4">
@@ -64,7 +73,7 @@ function ComponentsArea({
           <Sidebar currentStoryId={currentStoryId} />
         </div>
         <div className="min-w-0 flex-1 overflow-hidden rounded-2xl bg-background ring-1 ring-border">
-          {hasStoryRoute ? (
+          {showBottomPanel ? (
             <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
               <Panel id="canvas" defaultSize="62%" minSize="20%" className="flex flex-col bg-background">
                 <Canvas />

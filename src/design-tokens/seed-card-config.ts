@@ -90,6 +90,18 @@ export const SEED_GROUPS: SeedGroup[] = [
     derived: { prefixes: ["border-radius"] },
   },
   {
+    title: "Gray Overrides",
+    seeds: [
+      { key: "graySecondary", label: "graySecondary", source: "seed", editor: "color" },
+      { key: "grayMuted", label: "grayMuted", source: "seed", editor: "color" },
+      { key: "grayMutedForeground", label: "grayMutedForeground", source: "seed", editor: "color" },
+      { key: "grayAccent", label: "grayAccent", source: "seed", editor: "color" },
+      { key: "grayBorder", label: "grayBorder", source: "seed", editor: "color" },
+      { key: "grayInput", label: "grayInput", source: "seed", editor: "color" },
+    ],
+    derived: {},
+  },
+  {
     title: "Semantic Mapping",
     seeds: [],
     derived: {

@@ -376,11 +376,12 @@ function genRadius(radiusBase) {
 // ---------------------------------------------------------------------------
 
 function genCommonMapToken(seed) {
-  const { motionUnit, motionBase, borderRadius, lineWidth } = seed;
+  const { borderRadius, lineWidth } = seed;
+  // Motion durations are no longer user-editable seeds — fixed system constants.
   return {
-    motionDurationFast: `${(motionBase + motionUnit).toFixed(1)}s`,
-    motionDurationMid: `${(motionBase + motionUnit * 2).toFixed(1)}s`,
-    motionDurationSlow: `${(motionBase + motionUnit * 3).toFixed(1)}s`,
+    motionDurationFast: "0.1s",
+    motionDurationMid: "0.2s",
+    motionDurationSlow: "0.3s",
     lineWidthBold: lineWidth + 1,
     ...genRadius(borderRadius),
   };
@@ -615,14 +616,13 @@ function genSidebarAliasTokens(colorMap) {
 // Custom: genZIndexTokens
 // ---------------------------------------------------------------------------
 
-function genZIndexTokens(seed) {
-  const base = seed.zIndexBase ?? 0;
-  const popup = seed.zIndexPopupBase ?? 1000;
+function genZIndexTokens() {
+  // Z-Index is no longer user-editable — fixed system constants.
   return {
-    "z-base": base,
-    "z-dropdown": popup,
-    "z-modal": popup + 300,
-    "z-tooltip": popup + 70,
+    "z-base": 0,
+    "z-dropdown": 1000,
+    "z-modal": 1300,
+    "z-tooltip": 1070,
   };
 }
 
@@ -798,8 +798,8 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
     vars[shadowNames[k] || k] = v;
   }
 
-  // --- Alias layer: z-index ---
-  const zTokens = genZIndexTokens(seed);
+  // --- Alias layer: z-index (fixed system constants) ---
+  const zTokens = genZIndexTokens();
   for (const [k, v] of Object.entries(zTokens)) {
     vars[k] = v;
   }
@@ -813,28 +813,27 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
       : customSeeds[lightKey] || "";
   }
 
-  // --- Alias layer: fixed aliases (opacity, font-weight, ring, etc.) ---
-  if (fixedAliases.opacityTransparent != null) vars["opacity-transparent"] = fixedAliases.opacityTransparent;
-  if (fixedAliases.opacitySubtle != null) vars["opacity-subtle"] = fixedAliases.opacitySubtle;
-  if (fixedAliases.opacityDisabled != null) vars["opacity-disabled"] = fixedAliases.opacityDisabled;
-  if (fixedAliases.opacityMuted != null) vars["opacity-muted"] = fixedAliases.opacityMuted;
-  if (fixedAliases.opacityOpaque != null) vars["opacity-opaque"] = fixedAliases.opacityOpaque;
-  if (fixedAliases.fontWeightMedium != null) vars["font-weight-medium"] = fixedAliases.fontWeightMedium;
-  if (fixedAliases.fontWeightSemibold != null) vars["font-weight-semibold"] = fixedAliases.fontWeightSemibold;
-  if (fixedAliases.ringWidth != null) vars["ring-width"] = fixedAliases.ringWidth;
-  if (fixedAliases.ringOffset != null) vars["ring-offset"] = fixedAliases.ringOffset;
-  if (fixedAliases.paddingXXXS != null) {
-    const v =
-      typeof fixedAliases.paddingXXXS === "number"
-        ? `${fixedAliases.paddingXXXS}px`
-        : `${fixedAliases.paddingXXXS}`;
-    vars["spacing-0.5"] = v;
-    vars["padding-0.5"] = v;
-    vars["margin-0.5"] = v;
-  }
-  if (fixedAliases.motionDuration150 != null) vars["motion-duration-150"] = fixedAliases.motionDuration150;
-  if (fixedAliases.motionDurationLong != null) vars["motion-duration-long"] = fixedAliases.motionDurationLong;
-  if (fixedAliases.motionDurationWhole != null) vars["motion-duration-whole"] = fixedAliases.motionDurationWhole;
+  // --- Alias layer: fixed system constants (no longer user-editable) ---
+  // opacity / fontWeight / ring / paddingXXXS / motion-duration extras
+  vars["opacity-transparent"] = 0;
+  vars["opacity-subtle"] = 0.4;
+  vars["opacity-disabled"] = 0.5;
+  vars["opacity-muted"] = 0.7;
+  vars["opacity-opaque"] = 1;
+  vars["font-weight-medium"] = 500;
+  vars["font-weight-semibold"] = 600;
+  vars["ring-width"] = "2px";
+  vars["ring-offset"] = "2px";
+  // paddingXXXS — applies to spacing/padding/margin -0.5
+  vars["spacing-0.5"] = "2px";
+  vars["padding-0.5"] = "2px";
+  vars["margin-0.5"] = "2px";
+  vars["motion-duration-150"] = "0.15s";
+  vars["motion-duration-long"] = "0.5s";
+  vars["motion-duration-whole"] = "1s";
+
+  // Suppress unused-import warning since fixedAliases is now no-op
+  void fixedAliases;
 
   // Border width (kept for compatibility)
   vars["border-width-hairline"] = `${seed.lineWidth}px`;

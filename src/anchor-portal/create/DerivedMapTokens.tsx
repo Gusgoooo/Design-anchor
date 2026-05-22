@@ -1,5 +1,5 @@
 import * as React from "react";
-import { ChevronRight } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   type DerivedFilter,
@@ -17,7 +17,6 @@ export function DerivedMapTokens({
 }: {
   group: SeedGroup;
   resolvedVars: Record<string, string>;
-  /** keys (in mapOverrides[currentBranch]) that the user has explicitly set. */
   overriddenKeys: Set<string>;
   onSetOverride: (id: string, value: string) => void;
   onClearOverride: (id: string) => void;
@@ -37,29 +36,32 @@ export function DerivedMapTokens({
   const overriddenInGroup = matchedIds.filter((id) => overriddenKeys.has(id)).length;
 
   return (
-    <div className="border-t border-border">
+    <div className="border-t border-border/80">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-2 px-3 py-1.5 text-[11px] text-muted-foreground transition-colors hover:bg-muted/30"
+        className={cn(
+          "flex w-full items-center gap-1.5 rounded-b-[10px] px-2.5 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted/30",
+          open && "bg-muted/30",
+        )}
       >
-        <ChevronRight
-          size={11}
-          className={cn("transition-transform duration-150", open && "rotate-90")}
+        <ChevronDown
+          size={10}
+          className={cn("transition-transform duration-150", open && "rotate-180")}
         />
-        <span className="uppercase tracking-wider">Derived</span>
+        <span>Derived</span>
         <span className="ml-auto inline-flex items-center gap-1.5 tabular-nums">
           {overriddenInGroup > 0 ? (
-            <span className="rounded-sm bg-primary/15 px-1.5 py-px text-[10px] font-medium text-primary">
+            <span className="rounded-sm bg-primary/15 px-1 py-px text-[9px] font-medium text-primary">
               {overriddenInGroup}
             </span>
           ) : null}
-          <span>{matchedIds.length}</span>
+          <span className="text-muted-foreground/70">{matchedIds.length}</span>
         </span>
       </button>
 
       {open ? (
-        <div>
+        <div className="border-t border-border/40 bg-muted/10">
           {group.derivedSubGroups ? (
             group.derivedSubGroups.map((sg) => {
               const ids = matchedIds.filter((id) => sg.match(id));
@@ -111,15 +113,15 @@ function SubGroup({
 }) {
   const [open, setOpen] = React.useState(true);
   return (
-    <div className="border-t border-border/40">
+    <div className="border-t border-border/30 first:border-t-0">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-1.5 px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 transition-colors hover:bg-muted/20"
+        className="flex w-full items-center gap-1.5 bg-muted/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 transition-colors hover:bg-muted/40"
       >
-        <ChevronRight
+        <ChevronDown
           size={10}
-          className={cn("transition-transform duration-150", open && "rotate-90")}
+          className={cn("transition-transform duration-150", open && "rotate-180")}
         />
         {title}
         <span className="ml-auto tabular-nums">{ids.length}</span>

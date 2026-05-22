@@ -46,13 +46,8 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
 
   function seedIsDirty(source: "seed" | "customSeeds" | "fixedAliases", key: string): boolean {
     if (source === "seed") {
-      const branch = darkMode ? "seedDark" : "seed";
       const a = darkMode ? persisted.seedDark?.[key] : persisted.seed[key];
       const b = darkMode ? doc.seedDark?.[key] : doc.seed[key];
-      if (branch === "seedDark") {
-        // dark "dirty" if seedDark differs OR has been added relative to baseline
-        return JSON.stringify(a) !== JSON.stringify(b);
-      }
       return JSON.stringify(a) !== JSON.stringify(b);
     }
     if (source === "customSeeds") {
@@ -70,55 +65,68 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
 
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-2.5">
+      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-3">
         <div className="min-w-0">
-          <h2 className="text-sm font-semibold tracking-tight text-foreground">DesignToken</h2>
-          <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-            {loading ? "Loading…" : saveApiAvailable ? "Live · saves to tokens.json" : "Read-only · dev server offline"}
+          <h2 className="text-[13px] font-semibold tracking-tight text-foreground">DesignToken</h2>
+          <p className="mt-0.5 truncate text-[10px] text-muted-foreground">
+            {loading
+              ? "Loading…"
+              : saveApiAvailable
+              ? "Live · saves to tokens.json"
+              : "Read-only · dev server offline"}
           </p>
         </div>
-        <div className="flex shrink-0 items-center gap-1">
-          <button
-            type="button"
-            onClick={() => setDarkMode(!darkMode)}
-            title={darkMode ? "Switch to light" : "Switch to dark"}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-          >
-            {darkMode ? <Sun size={14} /> : <Moon size={14} />}
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setDarkMode(!darkMode)}
+          title={darkMode ? "Switch to light" : "Switch to dark"}
+          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          {darkMode ? <Sun size={13} /> : <Moon size={13} />}
+        </button>
       </header>
 
-      <div className="flex-1 overflow-y-auto pb-2">
-        {SEED_GROUPS.map((group, i) => (
-          <section key={group.title} className={cn("border-b border-border", i === 0 && "border-t-0")}>
-            <header className="bg-muted/40 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-              {group.title}
-            </header>
-            {group.seeds.map((seed) => {
-              const value = readSeedValue(doc, seed.source, seed.key, darkMode);
-              return (
-                <SeedRow
-                  key={`${group.title}::${seed.key}`}
-                  seed={seed}
-                  value={value}
-                  isDirty={seedIsDirty(seed.source, seed.key)}
-                  onChange={(v) => applySeedChange(seed.source, seed.key, v)}
+      <div className="flex-1 overflow-y-auto px-3 py-3">
+        <div className="space-y-3">
+          {SEED_GROUPS.map((group) => (
+            <section key={group.title}>
+              <h3 className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                {group.title}
+              </h3>
+              <div className="overflow-hidden rounded-[10px] ring-1 ring-border bg-card">
+                {group.seeds.map((seed, idx) => {
+                  const value = readSeedValue(doc, seed.source, seed.key, darkMode);
+                  return (
+                    <SeedRow
+                      key={`${group.title}::${seed.key}`}
+                      seed={seed}
+                      value={value}
+                      isDirty={seedIsDirty(seed.source, seed.key)}
+                      isFirst={idx === 0}
+                      isLast={idx === group.seeds.length - 1 && !hasDerived(group, resolvedVars)}
+                      onChange={(v) => applySeedChange(seed.source, seed.key, v)}
+                    />
+                  );
+                })}
+                {group.seeds.length === 0 ? (
+                  <div className="px-3 py-2 text-[11px] italic text-muted-foreground">
+                    No editable seeds — only derived tokens below.
+                  </div>
+                ) : null}
+                <DerivedMapTokens
+                  group={group}
+                  resolvedVars={resolvedVars}
+                  overriddenKeys={overriddenKeys}
+                  onSetOverride={(id, v) => setMapOverride(id, v)}
+                  onClearOverride={(id) => clearMapOverride(id)}
                 />
-              );
-            })}
-            <DerivedMapTokens
-              group={group}
-              resolvedVars={resolvedVars}
-              overriddenKeys={overriddenKeys}
-              onSetOverride={(id, v) => setMapOverride(id, v)}
-              onClearOverride={(id) => clearMapOverride(id)}
-            />
-          </section>
-        ))}
+              </div>
+            </section>
+          ))}
+        </div>
 
         {status ? (
-          <div className="mx-3 mt-3 rounded-md border border-border bg-muted/30 px-2.5 py-2 text-[11px] leading-snug text-foreground/80">
+          <div className="mt-3 rounded-md border border-border bg-muted/30 px-2.5 py-2 text-[11px] leading-snug text-foreground/80">
             {status}
           </div>
         ) : null}
@@ -155,4 +163,18 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
       </footer>
     </div>
   );
+}
+
+function hasDerived(
+  group: { derived: { prefixes?: string[]; exactIds?: string[] } },
+  resolvedVars: Record<string, string>,
+): boolean {
+  const { prefixes = [], exactIds = [] } = group.derived;
+  if (exactIds.length > 0 && exactIds.some((id) => id in resolvedVars)) return true;
+  if (prefixes.length > 0) {
+    for (const id of Object.keys(resolvedVars)) {
+      if (prefixes.some((p) => id.startsWith(p))) return true;
+    }
+  }
+  return false;
 }

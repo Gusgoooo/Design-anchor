@@ -147,49 +147,9 @@ export const SEED_GROUPS: SeedGroup[] = [
     derived: { prefixes: ["elevation"] },
   },
   {
-    title: "Motion",
-    seeds: [
-      { key: "motionUnit", label: "motionUnit", source: "seed", editor: "length" },
-      { key: "motionBase", label: "motionBase", source: "seed", editor: "length" },
-    ],
-    derived: { prefixes: ["motion-duration"] },
-  },
-  {
     title: "Border",
     seeds: [{ key: "lineWidth", label: "lineWidth", source: "seed", editor: "length" }],
-    derived: { prefixes: ["line-width", "border-width", "ring-width", "ring-offset"] },
-  },
-  {
-    title: "Opacity",
-    seeds: [],
-    derived: { prefixes: ["opacity"] },
-  },
-  {
-    title: "Z-Index",
-    seeds: [
-      { key: "zIndexBase", label: "zIndexBase", source: "seed", editor: "generic" },
-      { key: "zIndexPopupBase", label: "zIndexPopupBase", source: "seed", editor: "generic" },
-    ],
-    derived: { prefixes: ["z-"] },
-  },
-  {
-    title: "Fixed Aliases",
-    seeds: [
-      { key: "opacityTransparent", label: "opacityTransparent", source: "fixedAliases", editor: "generic" },
-      { key: "opacitySubtle", label: "opacitySubtle", source: "fixedAliases", editor: "generic" },
-      { key: "opacityDisabled", label: "opacityDisabled", source: "fixedAliases", editor: "generic" },
-      { key: "opacityMuted", label: "opacityMuted", source: "fixedAliases", editor: "generic" },
-      { key: "opacityOpaque", label: "opacityOpaque", source: "fixedAliases", editor: "generic" },
-      { key: "fontWeightMedium", label: "fontWeightMedium", source: "fixedAliases", editor: "generic" },
-      { key: "fontWeightSemibold", label: "fontWeightSemibold", source: "fixedAliases", editor: "generic" },
-      { key: "ringWidth", label: "ringWidth", source: "fixedAliases", editor: "length" },
-      { key: "ringOffset", label: "ringOffset", source: "fixedAliases", editor: "length" },
-      { key: "paddingXXXS", label: "paddingXXXS", source: "fixedAliases", editor: "length" },
-      { key: "motionDuration150", label: "motionDuration150", source: "fixedAliases", editor: "generic" },
-      { key: "motionDurationLong", label: "motionDurationLong", source: "fixedAliases", editor: "generic" },
-      { key: "motionDurationWhole", label: "motionDurationWhole", source: "fixedAliases", editor: "generic" },
-    ],
-    derived: {},
+    derived: { prefixes: ["line-width", "border-width"] },
   },
 ];
 

@@ -36,10 +36,10 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* Border radius — direct values */
-  --radius-sm: 0px;
-  --radius-md: 0px;
-  --radius-lg: 0px;
-  --radius-xl: 04px;
+  --radius-sm: 4px;
+  --radius-md: 4px;
+  --radius-lg: 4px;
+  --radius-xl: 8px;
 
   /* Shadows — var() refs; dark mode uses different shadow intensities */
   --shadow-sm: var(--elevation-sm);
@@ -189,12 +189,12 @@
   --line-height: 1.6667;
   --line-height-sm: 1.8000;
   --line-height-lg: 1.5714;
-  --border-radius: 0px;
-  --border-radius-xs: 0px;
-  --border-radius-sm: 0px;
-  --border-radius-lg: 0px;
-  --border-radius-outer: 0px;
-  --border-radius-xl: 04px;
+  --border-radius: 4px;
+  --border-radius-xs: 1px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 4px;
+  --border-radius-outer: 4px;
+  --border-radius-xl: 8px;
   --motion-duration-fast: 0.1s;
   --motion-duration-mid: 0.2s;
   --motion-duration-slow: 0.3s;
@@ -359,12 +359,12 @@
   --line-height: 1.6667;
   --line-height-sm: 1.8000;
   --line-height-lg: 1.5714;
-  --border-radius: 0px;
-  --border-radius-xs: 0px;
-  --border-radius-sm: 0px;
-  --border-radius-lg: 0px;
-  --border-radius-outer: 0px;
-  --border-radius-xl: 04px;
+  --border-radius: 4px;
+  --border-radius-xs: 1px;
+  --border-radius-sm: 4px;
+  --border-radius-lg: 4px;
+  --border-radius-outer: 4px;
+  --border-radius-xl: 8px;
   --motion-duration-fast: 0.1s;
   --motion-duration-mid: 0.2s;
   --motion-duration-slow: 0.3s;

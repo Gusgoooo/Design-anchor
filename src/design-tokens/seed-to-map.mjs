@@ -657,7 +657,33 @@ function genZIndexTokens() {
  * @param {object} options.fixedAliases – opacity, fontWeight, ring etc.
  * @returns {Record<string, string|number>} flat map of CSS variable name → value
  */
-export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAliases = {} } = {}) {
+/**
+ * Coerce a numeric seed to a Number. Strips any css unit suffix
+ * (px / em / rem / %) and falls back to `fallback` when the value
+ * isn't a finite number. Defensive against the Customizer length
+ * editor writing "4px" as a string into a slot that downstream math
+ * expects to be 4.
+ */
+function toNumericSeed(value, fallback) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  if (value == null || value === "") return fallback;
+  const n = parseFloat(String(value));
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Returns a copy of `seed` with all numeric-typed seeds coerced. */
+function normalizeSeed(seed) {
+  return {
+    ...seed,
+    fontSize: toNumericSeed(seed.fontSize, 14),
+    borderRadius: toNumericSeed(seed.borderRadius, 8),
+    sizeUnit: toNumericSeed(seed.sizeUnit, 4),
+    sizeStep: toNumericSeed(seed.sizeStep, 4),
+  };
+}
+
+export function deriveSeedToMap(rawSeed, { dark = false, customSeeds = {}, fixedAliases = {} } = {}) {
+  const seed = normalizeSeed(rawSeed);
   const vars = {};
 
   // --- Map layer: antd algorithms ---

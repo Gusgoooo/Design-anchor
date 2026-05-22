@@ -389,13 +389,10 @@ export function UIElements() {
             <Checkbox />
           </div>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center gap-2">
           <AlertDialog>
             <AlertDialogTrigger asChild>
-              <Button variant="outline">
-                <span className="hidden md:flex">Alert Dialog</span>
-                <span className="flex md:hidden">Dialog</span>
-              </Button>
+              <Button variant="outline">Dialog</Button>
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
@@ -411,7 +408,7 @@ export function UIElements() {
             </AlertDialogContent>
           </AlertDialog>
           <ButtonGroup>
-            <Button variant="outline">Button Group</Button>
+            <Button variant="outline">Group</Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" size="icon">

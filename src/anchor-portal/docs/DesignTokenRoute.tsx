@@ -1,15 +1,16 @@
 import * as React from "react";
-import { DesignTokenPage } from "@/design-tokens/DesignTokenPage";
+import { CustomizerLayout } from "../create/CustomizerLayout";
 
 /**
- * Hosts the existing DesignTokenPage inside the portal's canvas area.
- * The page itself manages its own dark mode + sticky header, so the
- * wrapper just provides a full-height scroll surface.
+ * Hosts the Create-style token customizer (left panel = seed editor with
+ * collapsible derived tokens, right panel = live component preview board).
+ * Replaces the older DesignTokenPage; that file remains as a deep-link
+ * target for the JSON modal but is no longer reachable from this route.
  */
 export function DesignTokenRoute() {
   return (
-    <div className="h-full w-full overflow-y-auto bg-background">
-      <DesignTokenPage />
+    <div className="h-full w-full">
+      <CustomizerLayout />
     </div>
   );
 }

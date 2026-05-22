@@ -1,21 +1,23 @@
 import * as React from "react";
 import { Loader2, MousePointerClick } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "../i18n/LocaleProvider";
 import { useRoute } from "../router";
 import { useStorySession, mergeParameters } from "../usePreviewState";
 import { PreviewFrame } from "./PreviewFrame";
 import { PatternsRoute } from "../docs/PatternsRoute";
 
 export function Canvas() {
+  const { t } = useLocale();
   const route = useRoute();
   const { session, loading, error, registry } = useStorySession();
 
   if (route.kind === "components") return <WelcomeScreen registryCount={registry?.length ?? 0} />;
   if (route.kind === "patterns") return <PatternsRoute />;
 
-  if (loading) return <CenterMessage icon={<Loader2 size={16} className="animate-spin" />} text="Loading story…" />;
+  if (loading) return <CenterMessage icon={<Loader2 size={16} className="animate-spin" />} text={t({ en: "Loading story…", zh: "Story 加载中…" })} />;
   if (error) return <CenterMessage icon={null} text={error} variant="error" />;
-  if (!session) return <CenterMessage icon={null} text="Story not found in registry." variant="error" />;
+  if (!session) return <CenterMessage icon={null} text={t({ en: "Story not found in registry.", zh: "registry 里没有找到这个 story。" })} variant="error" />;
 
   // Fullscreen stories should fit the Canvas card exactly — no canvas
   // scrollbar, the component is in charge of its own height. Centered /
@@ -45,15 +47,22 @@ export function Canvas() {
 }
 
 function WelcomeScreen({ registryCount }: { registryCount: number }) {
+  const { t } = useLocale();
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4 px-8 text-center">
       <MousePointerClick size={28} className="text-muted-foreground" />
       <div>
-        <p className="text-base font-medium text-foreground">Welcome to Design-anchor</p>
+        <p className="text-base font-medium text-foreground">{t({ en: "Welcome to Design-anchor", zh: "欢迎使用 Design-anchor" })}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           {registryCount > 0
-            ? `Select a story from the sidebar to preview. ${registryCount} components are available.`
-            : "Add a *.demo.tsx file under src/components/ to get started."}
+            ? t({
+                en: `Select a story from the sidebar to preview. ${registryCount} components are available.`,
+                zh: `从左侧选一个 story 预览。当前共 ${registryCount} 个组件可用。`,
+              })
+            : t({
+                en: "Add a *.demo.tsx file under src/components/ to get started.",
+                zh: "在 src/components/ 下加一个 *.demo.tsx 文件就能开始了。",
+              })}
         </p>
       </div>
     </div>

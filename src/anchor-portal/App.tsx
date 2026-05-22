@@ -2,6 +2,7 @@ import * as React from "react";
 import { Group, Panel, Separator } from "react-resizable-panels";
 import { FileText, Sliders } from "lucide-react";
 import { DarkModeProvider } from "./theme/DarkModeProvider";
+import { LocaleProvider, useLocale } from "./i18n/LocaleProvider";
 import { useRoute } from "./router";
 import { TopNav } from "./TopNav";
 import { Sidebar } from "./sidebar/SidebarTop";
@@ -14,9 +15,11 @@ import { DesignTokenRoute } from "./docs/DesignTokenRoute";
 
 export default function App() {
   return (
-    <DarkModeProvider>
-      <AppShell />
-    </DarkModeProvider>
+    <LocaleProvider>
+      <DarkModeProvider>
+        <AppShell />
+      </DarkModeProvider>
+    </LocaleProvider>
   );
 }
 
@@ -96,11 +99,22 @@ type TabKey = "controls" | "spec";
 
 function PanelTabs() {
   const [tab, setTab] = React.useState<TabKey>("controls");
+  const { t } = useLocale();
   return (
     <div className="flex h-full flex-col bg-background">
       <div className="flex shrink-0 items-center gap-1 border-b border-border bg-muted/30 px-2">
-        <TabButton active={tab === "controls"} onClick={() => setTab("controls")} icon={<Sliders size={13} />} label="Controls" />
-        <TabButton active={tab === "spec"} onClick={() => setTab("spec")} icon={<FileText size={13} />} label="Spec.json" />
+        <TabButton
+          active={tab === "controls"}
+          onClick={() => setTab("controls")}
+          icon={<Sliders size={13} />}
+          label={t({ en: "Controls", zh: "参数" })}
+        />
+        <TabButton
+          active={tab === "spec"}
+          onClick={() => setTab("spec")}
+          icon={<FileText size={13} />}
+          label="Spec.json"
+        />
       </div>
       <div className="flex-1 overflow-hidden">
         {tab === "controls" ? <ControlsPanel /> : <SpecPanel />}

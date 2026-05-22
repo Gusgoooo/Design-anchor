@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Check, ChevronRight, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "../i18n/LocaleProvider";
 import { SECTIONS, type DocsSection } from "./sections";
 
 /**
@@ -15,12 +16,12 @@ import { SECTIONS, type DocsSection } from "./sections";
  * usage / installation / MCP / governance docs.
  */
 
-const NAV_GROUPS: { title: string; sectionIds: string[] }[] = [
-  { title: "Get started", sectionIds: ["introduction", "quickstart"] },
-  { title: "Token system", sectionIds: ["token-system"] },
-  { title: "Tooling", sectionIds: ["cli", "mcp-server", "auditing"] },
-  { title: "AI integration", sectionIds: ["ai-integration"] },
-  { title: "Reference", sectionIds: ["spec-json", "faq"] },
+const NAV_GROUPS: { title: { en: string; zh: string }; sectionIds: string[] }[] = [
+  { title: { en: "Get started", zh: "上手" }, sectionIds: ["introduction", "quickstart"] },
+  { title: { en: "Token system", zh: "Token 体系" }, sectionIds: ["token-system"] },
+  { title: { en: "Tooling", zh: "工具链" }, sectionIds: ["cli", "mcp-server", "auditing"] },
+  { title: { en: "AI integration", zh: "AI 接入" }, sectionIds: ["ai-integration"] },
+  { title: { en: "Reference", zh: "参考" }, sectionIds: ["spec-json", "faq"] },
 ];
 
 export function DocsRoute() {
@@ -60,13 +61,14 @@ function LeftNav({
   activeId: string;
   onSelect: (id: string) => void;
 }) {
+  const { t } = useLocale();
   return (
     <aside className="overflow-y-auto border-r border-border px-4 py-10">
       <div className="space-y-6">
         {NAV_GROUPS.map((group) => (
-          <div key={group.title}>
+          <div key={group.title.en}>
             <div className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-              {group.title}
+              {t(group.title)}
             </div>
             <nav className="flex flex-col gap-0.5">
               {group.sectionIds.map((id) => {
@@ -85,7 +87,7 @@ function LeftNav({
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                     )}
                   >
-                    {s.title}
+                    {t(s.title)}
                   </button>
                 );
               })}
@@ -100,10 +102,11 @@ function LeftNav({
 /* ── Section header (title + description + copy-page) ─────────────────── */
 
 function SectionHeader({ section }: { section: DocsSection }) {
+  const { t } = useLocale();
   const [copied, setCopied] = React.useState(false);
   async function copyAll() {
     try {
-      await navigator.clipboard.writeText(section.markdown.trim());
+      await navigator.clipboard.writeText(t(section.markdown).trim());
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -113,19 +116,19 @@ function SectionHeader({ section }: { section: DocsSection }) {
   return (
     <div className="mb-8 flex items-start justify-between gap-4">
       <div className="min-w-0 flex-1">
-        <h1 className="text-3xl font-semibold tracking-tight text-foreground">{section.title}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-foreground">{t(section.title)}</h1>
         {section.description ? (
-          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{section.description}</p>
+          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(section.description)}</p>
         ) : null}
       </div>
       <button
         type="button"
         onClick={copyAll}
         className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        title="Copy this page as markdown"
+        title={t({ en: "Copy this page as markdown", zh: "复制本页 markdown" })}
       >
         {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
-        {copied ? "Copied" : "Copy Page"}
+        {copied ? t({ en: "Copied", zh: "已复制" }) : t({ en: "Copy Page", zh: "复制" })}
       </button>
     </div>
   );
@@ -169,10 +172,11 @@ const headingComponents = {
 };
 
 function SectionBody({ section }: { section: DocsSection }) {
+  const { t } = useLocale();
   return (
     <article className={PROSE_CLASSES}>
       <ReactMarkdown remarkPlugins={[remarkGfm]} components={headingComponents}>
-        {section.markdown.trim()}
+        {t(section.markdown).trim()}
       </ReactMarkdown>
     </article>
   );
@@ -187,6 +191,7 @@ function SectionFooter({
   activeId: string;
   onSelect: (id: string) => void;
 }) {
+  const { t } = useLocale();
   const idx = SECTIONS.findIndex((s) => s.id === activeId);
   const prev = idx > 0 ? SECTIONS[idx - 1] : null;
   const next = idx < SECTIONS.length - 1 ? SECTIONS[idx + 1] : null;
@@ -198,10 +203,10 @@ function SectionFooter({
           onClick={() => onSelect(prev.id)}
           className="group flex flex-col items-start gap-0.5 rounded-md border border-border bg-background px-3 py-2 text-left transition-colors hover:bg-muted"
         >
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Previous</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t({ en: "Previous", zh: "上一节" })}</span>
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
             <ChevronRight size={14} className="rotate-180 text-muted-foreground" />
-            {prev.title}
+            {t(prev.title)}
           </span>
         </button>
       ) : <span />}
@@ -211,9 +216,9 @@ function SectionFooter({
           onClick={() => onSelect(next.id)}
           className="group ml-auto flex flex-col items-end gap-0.5 rounded-md border border-border bg-background px-3 py-2 text-right transition-colors hover:bg-muted"
         >
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Next</span>
+          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t({ en: "Next", zh: "下一节" })}</span>
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
-            {next.title}
+            {t(next.title)}
             <ChevronRight size={14} className="text-muted-foreground" />
           </span>
         </button>
@@ -255,7 +260,9 @@ function RightToc({
   section: DocsSection;
   contentRef: React.RefObject<HTMLDivElement | null>;
 }) {
-  const entries = React.useMemo(() => extractToc(section.markdown), [section.markdown]);
+  const { t } = useLocale();
+  const md = t(section.markdown);
+  const entries = React.useMemo(() => extractToc(md), [md]);
   const [activeHash, setActiveHash] = React.useState<string | null>(null);
 
   // Track which heading is currently in view.
@@ -290,7 +297,7 @@ function RightToc({
   return (
     <aside className="overflow-y-auto border-l border-border px-4 py-10">
       <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-        On this page
+        {t({ en: "On this page", zh: "本节目录" })}
       </div>
       <nav className="mt-3 flex flex-col gap-1">
         {entries.map((e) => {

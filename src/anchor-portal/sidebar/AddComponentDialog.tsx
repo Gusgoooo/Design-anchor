@@ -1,6 +1,7 @@
 import * as React from "react";
 import { FolderInput, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "../i18n/LocaleProvider";
 
 type Props = {
   open: boolean;
@@ -22,6 +23,7 @@ type ImportResult = {
  * filesystem work; this dialog is just the input.
  */
 export function AddComponentDialog({ open, onClose }: Props) {
+  const { t } = useLocale();
   const dialogRef = React.useRef<HTMLDialogElement>(null);
   const [path, setPath] = React.useState("");
   const [busy, setBusy] = React.useState(false);
@@ -92,12 +94,12 @@ export function AddComponentDialog({ open, onClose }: Props) {
     >
       <div className="flex flex-col" onClick={(e) => e.stopPropagation()}>
         <header className="flex items-center justify-between border-b border-border px-5 py-3">
-          <h2 className="text-sm font-semibold text-foreground">Add Component</h2>
+          <h2 className="text-sm font-semibold text-foreground">{t({ en: "Add Component", zh: "添加组件" })}</h2>
           <button
             type="button"
             onClick={close}
             className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Close"
+            aria-label={t({ en: "Close", zh: "关闭" })}
           >
             <X size={14} />
           </button>
@@ -106,12 +108,12 @@ export function AddComponentDialog({ open, onClose }: Props) {
         <div className="flex flex-col gap-3 px-5 py-4">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <FolderInput size={14} />
-            Import .tsx file or folder
+            {t({ en: "Import .tsx file or folder", zh: "导入 .tsx 文件或文件夹" })}
           </div>
 
           <label className="flex flex-col gap-1.5">
             <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
-              Local path
+              {t({ en: "Local path", zh: "本地路径" })}
             </span>
             <input
               type="text"
@@ -129,10 +131,10 @@ export function AddComponentDialog({ open, onClose }: Props) {
               className="h-9 rounded-md border border-border bg-background px-3 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-foreground/30 focus:outline-none"
             />
             <span className="text-[11px] leading-snug text-muted-foreground">
-              Absolute path. <code className="font-mono">~</code> is expanded to <code className="font-mono">$HOME</code>. A folder
-              imports every direct-child <code className="font-mono">.tsx</code> (skipping
-              <code className="font-mono"> *.demo.tsx</code>). Files are copied to <code className="font-mono">src/components/base/</code>;
-              a matching <code className="font-mono">*.demo.tsx</code> is auto-generated if one doesn&apos;t exist.
+              {t({
+                en: "Absolute path. ~ expands to $HOME. A folder imports every direct-child .tsx (skipping *.demo.tsx). Files copy to src/components/base/; a matching *.demo.tsx is auto-generated if missing.",
+                zh: "绝对路径。~ 会扩展为 $HOME。指向文件夹时会导入其下所有 .tsx（跳过 *.demo.tsx）。文件会复制到 src/components/base/；如果没有同名 *.demo.tsx 会自动生成一个。",
+              })}
             </span>
           </label>
 
@@ -145,14 +147,20 @@ export function AddComponentDialog({ open, onClose }: Props) {
           {success ? (
             <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-xs text-emerald-700 dark:text-emerald-300">
               <div className="font-medium">
-                Imported {success.imported?.length ?? 0} {success.kind === "folder" ? "files" : "file"}.
+                {t({
+                  en: `Imported ${success.imported?.length ?? 0} ${success.kind === "folder" ? "files" : "file"}.`,
+                  zh: `已导入 ${success.imported?.length ?? 0} ${success.kind === "folder" ? "个文件" : "个文件"}。`,
+                })}
               </div>
               {success.errors && success.errors.length > 0 ? (
                 <div className="mt-1">
-                  Skipped {success.errors.length} with errors. Reloading…
+                  {t({
+                    en: `Skipped ${success.errors.length} with errors. Reloading…`,
+                    zh: `跳过 ${success.errors.length} 个（含报错）。重新加载中…`,
+                  })}
                 </div>
               ) : (
-                <div className="mt-1">Reloading…</div>
+                <div className="mt-1">{t({ en: "Reloading…", zh: "重新加载中…" })}</div>
               )}
             </div>
           ) : null}
@@ -164,18 +172,18 @@ export function AddComponentDialog({ open, onClose }: Props) {
             onClick={close}
             className="rounded-md border border-border bg-background px-4 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
           >
-            Cancel
+            {t({ en: "Cancel", zh: "取消" })}
           </button>
           <button
             type="button"
             disabled={!path.trim() || busy}
             onClick={() => void submit()}
             className={cn(
-              "rounded-md bg-foreground px-4 py-1.5 text-xs font-medium text-background transition-opacity",
+              "rounded-md bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90",
               "disabled:cursor-not-allowed disabled:opacity-50",
             )}
           >
-            {busy ? "Importing…" : "Import"}
+            {busy ? t({ en: "Importing…", zh: "导入中…" }) : t({ en: "Import", zh: "导入" })}
           </button>
         </footer>
       </div>

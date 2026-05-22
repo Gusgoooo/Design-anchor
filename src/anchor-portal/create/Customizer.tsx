@@ -1,12 +1,14 @@
 import * as React from "react";
 import { Check, RotateCcw, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { SEED_GROUPS } from "@/design-tokens/seed-card-config";
+import { useLocale } from "../i18n/LocaleProvider";
+import { SEED_GROUPS, SEED_GROUP_TITLE_ZH } from "@/design-tokens/seed-card-config";
 import { readSeedValue, type TokenDraft } from "./useTokenDraft";
 import { SeedRow } from "./SeedCard";
 import { DerivedMapTokens } from "./DerivedMapTokens";
 
 export function Customizer({ draft }: { draft: TokenDraft }) {
+  const { t, locale } = useLocale();
   const {
     draft: doc,
     persisted,
@@ -68,7 +70,7 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
           {SEED_GROUPS.map((group) => (
             <section key={group.title}>
               <h3 className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
-                {group.title}
+                {locale === "zh" ? SEED_GROUP_TITLE_ZH[group.title] ?? group.title : group.title}
               </h3>
               <div className="overflow-hidden rounded-[10px] ring-1 ring-border bg-card">
                 {group.seeds.map((seed, idx) => {
@@ -112,9 +114,9 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
           className={cn(
             "inline-flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40",
           )}
-          title="Discard pending changes"
+          title={t({ en: "Discard pending changes", zh: "撤销待保存改动" })}
         >
-          <RotateCcw size={12} /> Discard
+          <RotateCcw size={12} /> {t({ en: "Discard", zh: "撤销" })}
         </button>
         <button
           type="button"
@@ -125,7 +127,7 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
           )}
         >
           {saving ? <Check size={12} className="animate-pulse" /> : <Save size={12} />}
-          <span>{saving ? "Saving…" : "Save & Sync"}</span>
+          <span>{saving ? t({ en: "Saving…", zh: "保存中…" }) : t({ en: "Save & Sync", zh: "保存并同步" })}</span>
           {isDirty ? (
             <span className="inline-flex h-4 min-w-[18px] items-center justify-center rounded-full bg-primary-foreground/20 px-1.5 text-[10px] font-semibold tabular-nums">
               {dirtyCount}

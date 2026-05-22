@@ -1,5 +1,6 @@
 import * as React from "react";
 import { Plus, Search, X } from "lucide-react";
+import { useLocale } from "../i18n/LocaleProvider";
 import { useRegistry } from "../story-registry";
 import { SidebarTree } from "./SidebarTree";
 import { AddComponentDialog } from "./AddComponentDialog";
@@ -9,13 +10,8 @@ type Props = {
   currentStoryId: string | null;
 };
 
-/**
- * Sidebar shown on the Components tab. Used to host a DesignToken button
- * — that lives in the top nav now, so this header is just:
- *   • Add Component button
- *   • Search input (filters the tree)
- */
 export function Sidebar({ currentStoryId }: Props) {
+  const { t } = useLocale();
   const registry = useRegistry();
   const [addOpen, setAddOpen] = React.useState(false);
   const [query, setQuery] = React.useState("");
@@ -26,9 +22,9 @@ export function Sidebar({ currentStoryId }: Props) {
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-[13px] font-medium text-background transition-opacity hover:opacity-90"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
         >
-          <Plus size={13} /> Add Component
+          <Plus size={13} /> {t({ en: "Add Component", zh: "添加组件" })}
         </button>
 
         <div className="relative">
@@ -40,7 +36,7 @@ export function Sidebar({ currentStoryId }: Props) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search components"
+            placeholder={t({ en: "Search components", zh: "搜索组件" })}
             className="h-7 w-full rounded-md border border-border bg-background pl-7 pr-7 text-[12px] text-foreground placeholder:text-muted-foreground/70 focus:border-foreground/30 focus:outline-none"
           />
           {query ? (
@@ -48,7 +44,7 @@ export function Sidebar({ currentStoryId }: Props) {
               type="button"
               onClick={() => setQuery("")}
               className="absolute right-1.5 top-1/2 -translate-y-1/2 inline-flex h-4 w-4 items-center justify-center rounded text-muted-foreground hover:bg-muted hover:text-foreground"
-              title="Clear search"
+              title={t({ en: "Clear search", zh: "清空搜索" })}
             >
               <X size={10} />
             </button>
@@ -59,7 +55,7 @@ export function Sidebar({ currentStoryId }: Props) {
       <div className="flex-1 overflow-y-auto overflow-x-hidden">
         {registry == null ? (
           <div className="px-3 py-6 text-center text-xs text-muted-foreground">
-            Scanning <code className="font-mono">*.demo.tsx</code>…
+            {t({ en: "Scanning", zh: "扫描" })} <code className="font-mono">*.demo.tsx</code>…
           </div>
         ) : (
           <SidebarTree entries={registry} currentStoryId={currentStoryId} searchQuery={query} />

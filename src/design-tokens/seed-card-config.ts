@@ -152,6 +152,23 @@ export const SEED_GROUPS: SeedGroup[] = [
   },
 ];
 
+/** Localized group titles (Chinese). Falls back to the English title key when missing. */
+export const SEED_GROUP_TITLE_ZH: Record<string, string> = {
+  "Brand · Primary": "品牌主色",
+  "Success": "成功色",
+  "Warning": "警告色",
+  "Error": "错误色",
+  "Info": "信息色",
+  "Link": "链接色",
+  "Surfaces": "表面",
+  "Radius": "圆角",
+  "Sidebar": "侧边栏",
+  "Charts": "图表",
+  "Typography": "字号",
+  "Spacing": "间距",
+  "Shadow": "阴影",
+};
+
 export function matchesDerivedFilter(id: string, filter: DerivedFilter): boolean {
   if (filter.exactIds?.includes(id)) return true;
   if (filter.prefixes?.some((p) => id.startsWith(p))) return true;

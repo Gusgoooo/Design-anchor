@@ -289,6 +289,10 @@ function genFontSizes(base) {
 }
 
 function genFontMapToken(fontSize) {
+  // Coerce string inputs (the Customizer length editor may write "12"
+  // instead of 12). All downstream math assumes Number.
+  fontSize = Number(fontSize);
+  if (!Number.isFinite(fontSize)) fontSize = 14;
   const pairs = genFontSizes(fontSize);
   const sizes = pairs.map((p) => p.size);
   const lhs = pairs.map((p) => p.lineHeight);

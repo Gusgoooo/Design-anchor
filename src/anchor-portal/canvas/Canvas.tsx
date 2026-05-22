@@ -1,7 +1,8 @@
 import * as React from "react";
 import { Loader2, MousePointerClick } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useRoute } from "../router";
-import { useStorySession } from "../usePreviewState";
+import { useStorySession, mergeParameters } from "../usePreviewState";
 import { PreviewFrame } from "./PreviewFrame";
 import { PatternsRoute } from "../docs/PatternsRoute";
 
@@ -16,6 +17,13 @@ export function Canvas() {
   if (error) return <CenterMessage icon={null} text={error} variant="error" />;
   if (!session) return <CenterMessage icon={null} text="Story not found in registry." variant="error" />;
 
+  // Fullscreen stories should fit the Canvas card exactly — no canvas
+  // scrollbar, the component is in charge of its own height. Centered /
+  // padded stories may exceed the canvas naturally, so they get
+  // overflow-auto for graceful scroll.
+  const layout = mergeParameters(session).layout ?? "centered";
+  const isFullscreen = layout === "fullscreen";
+
   // transform creates a new containing block, so any `position: fixed`
   // element inside a story (e.g. AssistantModal's `fixed end-4 bottom-4`
   // anchor) resolves to the canvas card instead of the viewport. The
@@ -25,7 +33,10 @@ export function Canvas() {
   // unaffected since they escape to document.body.
   return (
     <div
-      className="relative h-full w-full overflow-auto bg-background"
+      className={cn(
+        "relative h-full w-full bg-background",
+        isFullscreen ? "overflow-hidden" : "overflow-auto",
+      )}
       style={{ transform: "translateZ(0)" }}
     >
       <PreviewFrame session={session} />

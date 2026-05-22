@@ -102,7 +102,6 @@ export type TokenDraft = {
   dirtyKeys: Set<string>;
   isDirty: boolean;
   darkMode: boolean;
-  setDarkMode(value: boolean): void;
   /** Light: writes to seed. Dark: writes to seedDark. */
   setSeed(key: string, value: string | number): void;
   setCustomSeed(key: string, value: string): void;
@@ -118,14 +117,20 @@ export type TokenDraft = {
   resolvedVars: Record<string, string>;
 };
 
-export function useTokenDraft(initialDarkMode: boolean): TokenDraft {
+/**
+ * @param darkMode — controlled. Comes from the portal-wide DarkModeProvider
+ *                   so the top-nav toggle is the single source of truth.
+ *                   Switching it flips which side of the seed (seed vs
+ *                   seedDark) is being edited AND which side of resolvedVars
+ *                   the preview renders.
+ */
+export function useTokenDraft(darkMode: boolean): TokenDraft {
   const [persisted, setPersisted] = React.useState<TokensDocV2>(() => cloneDoc(tokensFallback as TokensDocV2));
   const [draft, setDraft] = React.useState<TokensDocV2>(() => cloneDoc(tokensFallback as TokensDocV2));
   const [loading, setLoading] = React.useState(true);
   const [loadError, setLoadError] = React.useState<string | null>(null);
   const [status, setStatus] = React.useState<string | null>(null);
   const [saveApiAvailable, setSaveApiAvailable] = React.useState(false);
-  const [darkMode, setDarkMode] = React.useState(initialDarkMode);
 
   const reload = React.useCallback(async () => {
     setLoading(true);
@@ -284,7 +289,6 @@ export function useTokenDraft(initialDarkMode: boolean): TokenDraft {
     dirtyKeys,
     isDirty,
     darkMode,
-    setDarkMode,
     setSeed,
     setCustomSeed,
     setFixedAlias,

@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Check, Moon, RotateCcw, Save, Sun } from "lucide-react";
+import { Check, RotateCcw, Save } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { SEED_GROUPS } from "@/design-tokens/seed-card-config";
 import { readSeedValue, type TokenDraft } from "./useTokenDraft";
@@ -13,7 +13,6 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
     dirtyKeys,
     isDirty,
     darkMode,
-    setDarkMode,
     setSeed,
     setCustomSeed,
     setFixedAlias,
@@ -22,7 +21,6 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
     discardDraft,
     saveAndSync,
     status,
-    loading,
     saveApiAvailable,
     resolvedVars,
   } = draft;
@@ -65,27 +63,6 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
 
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
-      <header className="flex shrink-0 items-center justify-between gap-2 border-b border-border px-3 py-3">
-        <div className="min-w-0">
-          <h2 className="text-[13px] font-semibold tracking-tight text-foreground">DesignToken</h2>
-          <p className="mt-0.5 truncate text-[10px] text-muted-foreground">
-            {loading
-              ? "Loading…"
-              : saveApiAvailable
-              ? "Live · saves to tokens.json"
-              : "Read-only · dev server offline"}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={() => setDarkMode(!darkMode)}
-          title={darkMode ? "Switch to light" : "Switch to dark"}
-          className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          {darkMode ? <Sun size={13} /> : <Moon size={13} />}
-        </button>
-      </header>
-
       <div className="flex-1 overflow-y-auto px-3 py-3">
         <div className="space-y-3">
           {SEED_GROUPS.map((group) => (

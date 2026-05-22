@@ -22,7 +22,19 @@ export function Canvas() {
         title={session.story.componentTitle}
         storyName={session.story.storyName}
       />
-      <div className="flex-1 overflow-auto bg-background">
+      {/*
+        transform creates a new containing block, so any
+        `position: fixed` element inside a story (e.g. AssistantModal's
+        `fixed end-4 bottom-4` anchor, AssistantSidebar's right-edge
+        overlay) resolves to the canvas area instead of the viewport.
+        This is what keeps the bottom Controls/Spec panel uncovered.
+        Radix Portal-rendered dialogs/popovers are unaffected since
+        they escape to document.body.
+      */}
+      <div
+        className="relative flex-1 overflow-auto bg-background"
+        style={{ transform: "translateZ(0)" }}
+      >
         <PreviewFrame session={session} />
       </div>
     </div>

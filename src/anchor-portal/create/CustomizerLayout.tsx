@@ -1,40 +1,36 @@
-import * as React from "react";
-import { Group, Panel, Separator } from "react-resizable-panels";
 import { useTheme } from "../theme/DarkModeProvider";
 import { useTokenDraft } from "./useTokenDraft";
 import { Customizer } from "./Customizer";
 import { PreviewBoard } from "./PreviewBoard";
 
-const SEP_H = "w-px bg-border hover:bg-foreground/30 data-[dragging]:bg-foreground/40 transition-colors";
+const SIDEBAR_WIDTH_PX = 360;
 
 /**
  * Top-level shell for the Create-style token customizer.
- * Left: compact seed editor (Customizer)
- * Right: live preview board styled with current draft tokens (PreviewBoard)
+ * Two floating rounded-rect panels on a muted page background:
+ *   • Left: fixed-width Customizer (seed editor)
+ *   • Right: PreviewBoard (live preview, scroll-x)
  *
- * Dark mode is shared with the global portal theme so toggling here also
- * flips the chrome (sidebar / panel tabs).
+ * Dark mode flows one-way from the portal-wide DarkModeProvider into
+ * useTokenDraft; the top-nav toggle is the single source of truth.
  */
 export function CustomizerLayout() {
-  const { dark, setDark } = useTheme();
+  const { dark } = useTheme();
   const draft = useTokenDraft(dark);
 
-  // Keep portal-wide dark mode in sync with the customizer's local toggle.
-  React.useEffect(() => {
-    if (draft.darkMode !== dark) setDark(draft.darkMode);
-  }, [draft.darkMode, dark, setDark]);
-
   return (
-    <div className="h-full w-full">
-      <Group id="anchor-customizer-h" orientation="horizontal" className="flex h-full w-full">
-        <Panel id="customizer" defaultSize="28%" minSize="22%" maxSize="42%" className="flex flex-col bg-background">
+    <div className="h-full w-full bg-muted/30 p-4 dark:bg-background/40">
+      <div className="flex h-full gap-4">
+        <div
+          className="flex shrink-0 flex-col overflow-hidden rounded-2xl bg-background ring-1 ring-border"
+          style={{ width: SIDEBAR_WIDTH_PX }}
+        >
           <Customizer draft={draft} />
-        </Panel>
-        <Separator className={SEP_H} />
-        <Panel id="preview" defaultSize="72%" minSize="40%" className="flex flex-col">
+        </div>
+        <div className="min-w-0 flex-1 overflow-hidden rounded-2xl ring-1 ring-border">
           <PreviewBoard vars={draft.resolvedVars} darkMode={draft.darkMode} />
-        </Panel>
-      </Group>
+        </div>
+      </div>
     </div>
   );
 }

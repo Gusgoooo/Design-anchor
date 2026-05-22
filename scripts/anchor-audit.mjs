@@ -12,7 +12,48 @@ import { loadSpecs, getRepoRoot } from "./lib/load-specs.mjs";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = getRepoRoot();
 
-const ARBITRARY_TW_RE = /\b[a-z./%-]+-\[[^\]]+\]/gi;
+const ARBITRARY_TW_RE = /\b([a-z./%-]+)-\[([^\]]+)\]/gi;
+
+/**
+ * Tailwind utility prefixes that MUST use design tokens, not arbitrary
+ * values. These are the "design system contract" — colors, the spacing
+ * grid, radius scale, type scale. Hardcoded literals here cause visual
+ * drift across the product.
+ */
+const TOKEN_REQUIRED_PREFIXES = new Set([
+  // colors
+  "bg", "text", "border", "ring", "fill", "stroke",
+  "from", "to", "via", "outline", "accent", "caret", "decoration",
+  "divide", "placeholder", "shadow",
+  // spacing — padding
+  "p", "px", "py", "pt", "pb", "pl", "pr",
+  // spacing — margin
+  "m", "mx", "my", "mt", "mb", "ml", "mr",
+  // spacing — gap / space
+  "gap", "gap-x", "gap-y", "space-x", "space-y",
+  // radius
+  "rounded", "rounded-t", "rounded-r", "rounded-b", "rounded-l",
+  "rounded-tl", "rounded-tr", "rounded-bl", "rounded-br",
+  "rounded-s", "rounded-e", "rounded-ss", "rounded-se", "rounded-es", "rounded-ee",
+]);
+
+/**
+ * Prefixes intentionally NOT in the must-be-token list: w / h / min-w /
+ * max-w / min-h / max-h, top / right / bottom / left / inset,
+ * translate-x / translate-y, grid-cols / grid-rows / col-span / row-span,
+ * aspect, z. These are layout / positioning / sizing — one-off literal
+ * values are acceptable because they're not part of the design grid.
+ *
+ * Also exempt: any arbitrary value whose body starts with `var(--` —
+ * that IS using a token, just via CSS variable syntax.
+ */
+function isTokenViolation(prefix, value) {
+  // Stripping the leading negative sign so `-mx-[4px]` is still caught.
+  const p = prefix.replace(/^-/, "");
+  if (!TOKEN_REQUIRED_PREFIXES.has(p)) return false;
+  if (/^var\(--/.test(value.trim())) return false;
+  return true;
+}
 
 function readAuditConfig() {
   const p = path.join(root, "src/anchor/linter/audit-config.json");
@@ -107,10 +148,12 @@ function auditFile(filePath, sourceText, forbiddenTags, flagArbitrary) {
         ARBITRARY_TW_RE.lastIndex = 0;
         let m;
         while ((m = ARBITRARY_TW_RE.exec(text)) !== null) {
+          const [match, prefix, value] = m;
+          if (!isTokenViolation(prefix, value)) continue;
           diags.push({
             file: filePath,
             line: posLine(pos),
-            message: `Detected arbitrary-value Tailwind class \`${m[0]}\`: use schema semantic props or tailwindExtend tokens instead of magic numbers.`,
+            message: `Arbitrary-value token class \`${match}\`: ${prefix}-* must use a design token (semantic name or var(--…)). Layout/positioning utilities (w-[…], top-[…], grid-cols-[…], aspect-[…], etc.) are allowed.`,
           });
         }
       }

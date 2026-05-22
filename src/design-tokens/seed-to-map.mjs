@@ -326,17 +326,22 @@ function genFontMapToken(fontSize) {
 // ---------------------------------------------------------------------------
 
 function genSizeMapToken(seed) {
-  const { sizeUnit, sizeStep } = seed;
+  // sizeStep was removed from the user-editable seed surface — with the
+  // full Tailwind-compatible spacing scale now always emitted, sizeStep
+  // had no visible effect. Hardcoded to 4 (the antd default) for the
+  // few legacy size-* tokens that still reference it.
+  const SIZE_STEP = 4;
+  const { sizeUnit } = seed;
   return {
-    sizeXXL: sizeUnit * (sizeStep + 8),
-    sizeXL: sizeUnit * (sizeStep + 4),
-    sizeLG: sizeUnit * (sizeStep + 2),
-    sizeMD: sizeUnit * (sizeStep + 1),
-    sizeMS: sizeUnit * sizeStep,
-    size: sizeUnit * sizeStep,
-    sizeSM: sizeUnit * (sizeStep - 1),
-    sizeXS: sizeUnit * (sizeStep - 2),
-    sizeXXS: sizeUnit * (sizeStep - 3),
+    sizeXXL: sizeUnit * (SIZE_STEP + 8),
+    sizeXL: sizeUnit * (SIZE_STEP + 4),
+    sizeLG: sizeUnit * (SIZE_STEP + 2),
+    sizeMD: sizeUnit * (SIZE_STEP + 1),
+    sizeMS: sizeUnit * SIZE_STEP,
+    size: sizeUnit * SIZE_STEP,
+    sizeSM: sizeUnit * (SIZE_STEP - 1),
+    sizeXS: sizeUnit * (SIZE_STEP - 2),
+    sizeXXS: sizeUnit * (SIZE_STEP - 3),
   };
 }
 
@@ -695,7 +700,6 @@ function normalizeSeed(seed) {
     fontSize: toNumericSeed(seed.fontSize, 14),
     borderRadius: toNumericSeed(seed.borderRadius, 8),
     sizeUnit: toNumericSeed(seed.sizeUnit, 4),
-    sizeStep: toNumericSeed(seed.sizeStep, 4),
   };
 }
 

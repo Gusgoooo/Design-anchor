@@ -142,7 +142,6 @@ export const SEED_GROUPS: SeedGroup[] = [
     title: "Spacing",
     seeds: [
       { key: "sizeUnit", label: "sizeUnit", source: "seed", editor: "length" },
-      { key: "sizeStep", label: "sizeStep", source: "seed", editor: "length" },
     ],
     derived: { prefixes: ["spacing-"] },
   },

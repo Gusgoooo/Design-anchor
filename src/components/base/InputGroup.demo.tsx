@@ -5,7 +5,13 @@ import componentSrc from "./input-group.tsx?raw";
 import * as Comp from "./input-group";
 
 const audit = autoClassControls(componentSrc, {
-  hidePrefixes: ["shadow", "rounded", "border"],
+  // shadow / rounded / border / pX / pt / pb / pl / pr / py / mr / ml are
+  // all inside scoped descendant selectors in input-group.tsx (e.g.
+  // `has-[>[data-align=block-start]]:[&>input]:pb-3`). Overriding them
+  // via the root className doesn't replace the scoped class — it just
+  // adds an extra root-level rule that does nothing visible. Hide them
+  // from the panel to avoid confusion.
+  hidePrefixes: ["shadow", "rounded", "border", "p", "px", "py", "pt", "pb", "pl", "pr", "mr", "ml"],
 });
 
 type Args = { [k: string]: string };

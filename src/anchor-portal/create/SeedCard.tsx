@@ -21,6 +21,7 @@ function chooseEditorKind(declared: EditorKind, value: string) {
 export function SeedRow({
   seed,
   value,
+  derivedFallback,
   isDirty,
   isFirst,
   isLast,
@@ -28,14 +29,21 @@ export function SeedRow({
 }: {
   seed: SeedDef;
   value: string;
+  /** When `value` is empty and the seed declares a derivedKey, this is
+   *  the auto-computed value rendered as a greyed "(auto)" placeholder
+   *  so the user can see what the system currently produces before
+   *  deciding to override it. */
+  derivedFallback?: string;
   isDirty: boolean;
   isFirst?: boolean;
   isLast?: boolean;
   onChange: (next: string) => void;
 }) {
   const [open, setOpen] = React.useState(false);
-  const color = isColorValue(value);
-  const editorKind = chooseEditorKind(seed.editor, value);
+  const hasValue = value !== "" && value != null;
+  const effective = hasValue ? value : derivedFallback ?? "";
+  const color = isColorValue(effective);
+  const editorKind = chooseEditorKind(seed.editor, effective);
 
   return (
     <div className={cn(!isFirst && "border-t border-border/60")}>
@@ -55,7 +63,7 @@ export function SeedRow({
             "h-5 w-5 shrink-0 rounded-md border border-border/80 shadow-inner",
             !color && "bg-muted",
           )}
-          style={color ? { background: value } : undefined}
+          style={color ? { background: effective } : undefined}
         />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5">
@@ -66,11 +74,14 @@ export function SeedRow({
           </span>
         </span>
         <span
-          className="shrink-0 truncate font-mono text-[11px] tabular-nums text-muted-foreground"
-          style={{ maxWidth: 120 }}
-          title={value}
+          className={cn(
+            "shrink-0 truncate font-mono text-[11px] tabular-nums",
+            hasValue ? "text-muted-foreground" : "italic text-muted-foreground/50",
+          )}
+          style={{ maxWidth: 140 }}
+          title={hasValue ? value : `${derivedFallback ?? "—"} (auto)`}
         >
-          {value || "—"}
+          {hasValue ? value : effective ? `${effective} · auto` : "—"}
         </span>
         <ChevronDown
           size={12}
@@ -87,7 +98,7 @@ export function SeedRow({
             isLast && "rounded-b-[10px]",
           )}
         >
-          <TokenValueEditor kind={editorKind} value={value} onChange={onChange} compact />
+          <TokenValueEditor kind={editorKind} value={effective} onChange={onChange} compact />
         </div>
       ) : null}
     </div>

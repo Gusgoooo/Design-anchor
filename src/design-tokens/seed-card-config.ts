@@ -19,6 +19,14 @@ export type SeedDef = {
   label: string;
   source: SeedSource;
   editor: EditorKind;
+  /**
+   * Optional: name of the derived CSS variable this seed acts as an
+   * override for. When the seed value is empty the SeedRow displays
+   * `resolvedVars[derivedKey]` (the auto-computed default) as a greyed
+   * "(auto)" placeholder, so the user can see what the system is
+   * currently rendering before deciding to override it.
+   */
+  derivedKey?: string;
 };
 
 export type DerivedFilter = {
@@ -90,14 +98,18 @@ export const SEED_GROUPS: SeedGroup[] = [
     derived: { prefixes: ["border-radius"] },
   },
   {
+    // Antd's "中性色" concept — six gray-scale slots that drive the
+    // shadcn semantic palette. Default values come from the Antd
+    // algorithm (opacity ladder on colorTextBase / colorBgBase); fill
+    // any seed to override that specific slot independently.
     title: "Gray Overrides",
     seeds: [
-      { key: "graySecondary", label: "graySecondary", source: "seed", editor: "color" },
-      { key: "grayMuted", label: "grayMuted", source: "seed", editor: "color" },
-      { key: "grayMutedForeground", label: "grayMutedForeground", source: "seed", editor: "color" },
-      { key: "grayAccent", label: "grayAccent", source: "seed", editor: "color" },
-      { key: "grayBorder", label: "grayBorder", source: "seed", editor: "color" },
-      { key: "grayInput", label: "grayInput", source: "seed", editor: "color" },
+      { key: "graySecondary", label: "graySecondary", source: "seed", editor: "color", derivedKey: "secondary" },
+      { key: "grayMuted", label: "grayMuted", source: "seed", editor: "color", derivedKey: "muted" },
+      { key: "grayMutedForeground", label: "grayMutedForeground", source: "seed", editor: "color", derivedKey: "muted-foreground" },
+      { key: "grayAccent", label: "grayAccent", source: "seed", editor: "color", derivedKey: "accent" },
+      { key: "grayBorder", label: "grayBorder", source: "seed", editor: "color", derivedKey: "border" },
+      { key: "grayInput", label: "grayInput", source: "seed", editor: "color", derivedKey: "input" },
     ],
     derived: {},
   },

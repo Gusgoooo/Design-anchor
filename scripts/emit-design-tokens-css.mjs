@@ -232,7 +232,14 @@ function buildThemeBlock(vars) {
   }
 
   lines.push("");
-  lines.push("  /* Spacing — finite numeric steps derived from size scale / sizeUnit (aligns with p-4, gap-2, etc.) */");
+  lines.push("  /* Spacing base unit — gives Tailwind a calc fallback for any h-N /");
+  lines.push("     p-N / gap-N / etc. that doesn't have an explicit --spacing-N stop. */");
+  // Use the sizeUnit (4px default) as the base so the entire grid scales
+  // with the seed. Explicit --spacing-N stops below still win when present.
+  const baseSpacing = vars.__sizeUnit ?? "4px";
+  lines.push(`  --spacing: ${baseSpacing};`);
+  lines.push("");
+  lines.push("  /* Spacing — finite numeric stops emitted by the antd-derived scale. */");
   const spacingKeys = sortSpacingThemeKeys(
     Object.keys(vars).filter((k) => k.startsWith("spacing-")),
   );

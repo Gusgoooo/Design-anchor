@@ -51,7 +51,11 @@
   --font-weight-medium: 500;
   --font-weight-semibold: 600;
 
-  /* Spacing — finite numeric steps derived from size scale / sizeUnit (aligns with p-4, gap-2, etc.) */
+  /* Spacing base unit — gives Tailwind a calc fallback for any h-N /
+     p-N / gap-N / etc. that doesn't have an explicit --spacing-N stop. */
+  --spacing: 4px;
+
+  /* Spacing — finite numeric stops emitted by the antd-derived scale. */
   --spacing-0: 0;
   --spacing-px: 1px;
   --spacing-0\.5: 2px;

@@ -1,405 +1,247 @@
 <p align="center">
   <img src="https://img.shields.io/npm/v/design-anchor?style=flat-square&color=0969da" alt="npm version" />
   <img src="https://img.shields.io/npm/l/design-anchor?style=flat-square" alt="license" />
-  <img src="https://img.shields.io/badge/AI--first-Cursor%20%7C%20Copilot%20%7C%20Claude-blueviolet?style=flat-square" alt="AI-first" />
+  <img src="https://img.shields.io/badge/AI--first-Cursor%20%7C%20Claude%20%7C%20Copilot-blueviolet?style=flat-square" alt="AI-first" />
 </p>
 
 <h1 align="center">Design-anchor</h1>
 
-<p align="center"><strong>Protocol is Design</strong></p>
+<p align="center"><strong>Anchor your design system. Govern AI-generated UI.</strong></p>
 
 <p align="center">
+  <a href="#english">English</a> ·
   <a href="./README.zh-CN.md">简体中文</a>
 </p>
 
 ---
 
-## The Problem: AI Makes Beautiful UI — Once
+<a id="english"></a>
 
-AI coding tools generate UI fast. But over time, your product drifts into visual chaos:
+## What is Design-anchor?
 
-- **The same button** appears with 3 different border radii across 3 pages
-- **The same "gray"** is `gray-100` in one place, `gray-200` in another, `#e5e7eb` in a third
-- **The same spacing** is `p-4` here, `p-[15px]` there, `py-3.5` somewhere else
+A **token-driven design system + AI governance pipeline** that makes it structurally hard for AI coding tools (Cursor / Claude Code / Copilot / Qoder) to drift away from your design language.
 
-This isn't a one-off mistake — it's a **systematic failure mode of AI coding**. Every new conversation, every new prompt, the AI loses context of what it did before. The drift compounds. After a few weeks of AI-assisted development, your enterprise product looks like it was built by 10 different teams.
+Drop it into any React + Tailwind project with one command. You get:
 
-### Why existing solutions fail
+- **60+ shadcn-aligned base components** (`@/components/base/*`)
+- A live visual **token customizer** — edit ~14 design seeds, see 200+ derived CSS variables update instantly
+- A **spec.json contract** per component (forbidden tags, baseline classes, blacklist patterns, AI prompt fragment)
+- Generated AI rules read by Cursor / Claude Code / Copilot / Windsurf out of the box
+- An **MCP server** that exposes the schema + audit + token surface to any MCP-aware agent
 
-| Approach | Why it breaks |
-|----------|--------------|
-| **Atomic component libraries** (shadcn, Radix, etc.) | No semantic guidance. AI doesn't know *when* to use which component or *how* to style it consistently. It still writes arbitrary values. |
-| **design.md / system prompts** | Soft constraints. Works for one-shot generation — "make it look like Airbnb". But on the 50th edit, AI forgets. No enforcement, no audit, no pipeline. |
-| **Manual code review** | Doesn't scale. You hired AI to move fast — now you're reviewing spacing values? |
+## The problem it solves
 
-### What Design-anchor does differently
+AI coding tools generate beautiful UI in isolation, but lose context across conversations:
 
-Design-anchor is a **governance pipeline** that makes design drift structurally impossible:
+- The same button rendered with 3 different border radii across 3 pages
+- The same gray is `gray-100` here, `#e5e7eb` there, `gray-200` in a third place
+- Spacing drifts from `p-4` to `p-[15px]` to `py-3.5`
+
+After a few weeks of AI-assisted work, an enterprise product starts to look like it was built by 10 different teams. Figma libraries and `design.md` prompts don't fix it — soft constraints get forgotten on the 50th edit.
+
+Design-anchor's pipeline is **enforced**, not "documented":
 
 ```
-Design Prompt → Extract Seed Tokens → Map to 100+ Semantic Tokens
-     → Modify Base Components → Lock Styles via spec.json
-     → Auto-audit every AI edit → Enforce via IDE rules
+~14 seeds  →  200+ derived CSS variables  →  component className
+                              ↓                          ↓
+                  @theme inline maps to Tailwind   AST audit blocks drift
 ```
 
-**After one setup**, every subsequent AI generation is constrained to your design system. The same button always has the same radius. The same spacing always uses the same scale. Not because the AI "remembers" — because it physically cannot deviate.
+Change any seed, every component re-skins. Try to hand-write `bg-[#0204a3]` in business code, audit rejects it.
 
-> **design.md tells AI "please be consistent". Design-anchor tells AI "you can only use these exact values, and I will check after every edit."**
-
-This is the missing enforcement layer for design.md — and it's most effective for **B2B / enterprise products** where visual consistency directly impacts trust and usability.
-
----
-
-## Core Features
-
-| | Feature | Description |
-|---|---|---|
-| **1** | Protocol-Driven | spec.json is the single source of truth. Component behavior, style constraints, and AI prompts all derive from protocol |
-| **2** | One Command Pipeline | `npx anchor start` — from zero to component library + Storybook + AI rules in one command |
-| **3** | AI Governance Built-in | Auto-generates rules for Cursor, Claude Code, Windsurf, Copilot, and any AI tool |
-| **4** | Token Pipeline | 10 seed values → 175+ CSS variables → Tailwind v4 `@theme` mapping |
-| **5** | Component = Compliance | Every component carries audit rules; `anchor audit` detects violations instantly |
-| **6** | Govern Mode | `anchor govern` — zero-intrusion governance for existing projects (rules only, no source changes) |
-
----
-
-## Who is it for?
-
-**Product teams building with AI** — You need design consistency enforced at the pipeline level, not policed in code review.
-
-**AI-native developers** — Using Cursor / Copilot / Claude Code daily. You need AI output to follow a unified design language instead of drifting with every session.
-
-**Startups without a dedicated design team** — No full-time designer, but your enterprise product needs to look like one person designed it. Let protocol replace manual review.
-
----
-
-## Quick Start
+## Quick start
 
 ```bash
-# 1. Install
-npm install design-anchor
-
-# 2. Initialize + Launch
 npx anchor start
-
-# 3. Done — Storybook portal opens, AI rules are configured for all tools
 ```
 
-After `anchor start`:
-- `.anchor/` — Component library + Storybook + Token system
-- `.cursor/rules/` — AI coding governance rules (auto-applied)
-- `CLAUDE.md` — Claude Code governance + workflow
-- `.windsurfrules` — Windsurf governance rules
-- `.github/copilot-instructions.md` — GitHub Copilot instructions
-- `AGENTS.md` — AI coding boundary contract
+This is the all-in-one. It will:
 
----
+1. **`init`** — scaffold `.anchor/` (a complete component library sub-project) at your repo root
+2. **`install`** — `npm install` inside `.anchor/` so the portal can run
+3. **`dev`** — open the Portal at <http://localhost:6006>
 
-## CLI
+Open the printed URL. Three tabs:
 
-```
-anchor start [dir]     One-click launch (init + install + open Portal)
-anchor init  [dir]     Initialize component library
-anchor govern          Govern mode: inject AI rules only, no components (for existing projects)
-anchor theme <file>    Extract tokens from a Design Prompt file
-anchor dev   [dir]     Start Storybook Portal
-anchor sync  [dir]     Regenerate rules + Tailwind config from spec.json
-anchor audit [dir]     Run compliance audit
-anchor upgrade [dir]   Upgrade kit (preserves your modifications)
-anchor mcp   [dir]     Start MCP Server (Cursor Agent integration)
-```
+| Tab | What it does |
+|---|---|
+| **Docs** | Full bilingual usage docs (introduction / quickstart / token system / CLI / MCP / auditing / AI integration / spec format / FAQ) |
+| **Design Token** | Visual customizer — left panel = seed editor, right panel = live component preview |
+| **Components** | Browse the 60+ base components with live controls + spec.json editor |
 
----
+Top-right of the portal: 🌐 EN/中文 toggle and a 🌙/☀️ dark-mode toggle.
 
-## How the Pipeline Works
+## Image-reference workflow
 
-```
-spec.json (Design Protocol)
-    │
-    ├──► Components (23 production-ready, Radix + CVA)
-    ├──► Token CSS (175+ variables, light/dark)
-    ├──► Tailwind v4 @theme (utility classes)
-    ├──► AI rules (Cursor + Claude Code + Windsurf + Copilot)
-    ├──► MCP Server (real-time AI context)
-    └──► anchor audit (compliance check)
-```
+When you (or an AI agent) hand a screenshot / mockup / reference image to the system and ask it to build a page, Design-anchor enforces a **two-path choice**:
 
-One source. Multiple outputs. Zero drift.
-
----
-
-## Why not just design.md?
-
-| | design.md | Design-anchor |
+| Path | What happens | Use it when |
 |---|---|---|
-| **Nature** | Natural language doc for AI to "try to follow" | Executable JSON protocol + automation pipeline |
-| **Enforcement** | AI "suggests" compliance — often ignored on edit #50 | `anchor audit` enforces and reports violations |
-| **Components** | Describes "you should have a Button" | Provides Button source + spec + import path + style lock |
-| **Maintenance** | Manual updates, easily outdated | `anchor sync` auto-regenerates rules from spec.json |
-| **Scene Routing** | "Please use our components" (AI doesn't know which) | Scene → Component lookup table — AI checks before writing |
-| **Validation** | None | `anchor audit` produces a compliance report |
-| **Tokens** | "Primary color is #1677ff" (AI still writes `#1677ff` inline) | Seed → 175+ CSS vars → Tailwind mapping. Change seed, everything updates. |
-| **Multi-tool** | Copy-paste to each tool's config | One `anchor govern` generates rules for all AI tools |
+| **A. Extract & override** | Agent reads the image, proposes a diff against `tokens.json` (primary color / radius / fonts / spacing), runs `anchor sync` after you confirm. Every component re-skins to match the reference. | The reference is a brand redesign or you want the product to *look like* the image. |
+| **B. Follow existing tokens** | Tokens stay untouched. Agent composes the new layout from existing `@design` components. Colors / radii / spacing stay consistent with the rest of the product; only arrangement is new. | The reference is just a layout hint, not a brand change. |
 
-> **design.md is the vision. Design-anchor is the enforcement.**
-> Use both together — design.md for aesthetic intent, Design-anchor for structural compliance.
+**Default is Path B** when the user is silent or ambiguous — Path A changes shared tokens that affect *every page*, so it should be an explicit choice.
 
----
+What's never allowed: silently inventing colors / radii / spacing from a screenshot. A hardcoded `bg-[#0204a3]` in business code is rejected by `anchor audit` regardless of how it got there.
 
-## Design Token System
+The rule lives in `.cursor/rules/anchor-selfcheck.mdc` and is mirrored in `src/anchor/rules/AGENTS_IMAGE_REFERENCE.md`.
 
-### Seed → Map Pipeline
+## What lands in your project
 
-Design-anchor uses a **two-layer token architecture** inspired by Ant Design's token system:
+```
+your-project/
+├── .anchor/                       ← Design-anchor subtree (gitignored or vendored)
+│   ├── src/components/base/      60+ ready-to-use React + Tailwind components
+│   ├── src/anchor/schema/        per-component spec.json contracts
+│   ├── src/design-tokens/        tokens.json + seed-to-map algorithm
+│   └── package.json              own deps (Vite + React + Radix + Tailwind v4)
+├── .cursorrules                   AI-readable design contract (auto-regenerated)
+├── .cursor/rules/anchor.mdc       Cursor-specific rule file
+├── .cursor/rules/anchor-selfcheck.mdc  post-edit checklist + image-reference rule
+├── CLAUDE.md                      Claude Code project instructions
+├── .github/copilot-instructions.md  Copilot Chat rules
+└── ANCHOR_INTEGRATION.md          one-page consumer guide
+```
 
-```jsonc
-// tokens.json — you only edit the seed layer
+## Use components in your app
+
+Add a TypeScript path alias `@design` → `.anchor/src/components/base`:
+
+```ts
+// tsconfig.json
 {
-  "version": 2,
-  "seed": {
-    "colorPrimary": "#1677ff",    // → derives 10-level color scale + semantic aliases
-    "colorSuccess": "#52c41a",    // → success-bg, success-border, success-text, ...
-    "fontSize": 14,               // → 7-level type scale tokens
-    "borderRadius": 6,            // → xs/sm/md/lg/xl radius scale
-    "sizeUnit": 4,                // → spacing-* scale
-    "sizeStep": 4,                // → paired with sizeUnit for spacing derivation
-    "motionUnit": 0.1             // → fast/mid/slow motion duration tokens
-  },
-  "seedDark": {
-    "colorBgBase": "#000000",     // → auto-derives dark mode palette
-    "colorTextBase": "#ffffff"
-  },
-  "fixedAliases": {
-    "opacityDisabled": 0.5,       // → disabled:opacity-disabled
-    "fontWeightMedium": 500,      // → font-medium
-    "fontWeightSemibold": 600     // → font-semibold
+  "compilerOptions": {
+    "paths": {
+      "@design": [".anchor/src/components/base"]
+    }
   }
 }
 ```
 
-Run `npm run sync:tokens` to generate a single CSS file with three sections:
+Then in your business code:
 
-### Tailwind v4 `@theme` Mapping
+```tsx
+import { Button } from "@design";
 
-Tokens are mapped via Tailwind's `@theme inline` directive, enabling native utility classes:
-
-```css
-@theme inline {
-  --color-primary: var(--primary);
-  --color-destructive: var(--error);
-  --radius-sm: var(--border-radius-sm);
-  --spacing-sm: 8px;
-  --spacing-base: 12px;
-  --font-size-sm: 14px;
-  --font-weight-medium: 500;
-  --animate-duration-fast: var(--motion-duration-fast);
-  /* ~60 Tailwind-mapped tokens */
+export function CTA() {
+  return <Button>Save changes</Button>;
 }
 ```
 
-### Token Usage in Components
+## CLI
 
-| Category | Tailwind Class | Example |
-|----------|---------------|---------|
-| Color | `bg-primary`, `text-destructive` | `<Button className="bg-primary">` |
-| Spacing | `p-sm`, `gap-base`, `mt-xs` | `<Card className="p-lg">` |
-| Radius | `rounded-md`, `rounded-lg` | `<Badge className="rounded-full">` |
-| Typography | `text-sm`, `font-medium` | `<Label className="text-sm font-medium">` |
-| Shadow | `shadow-sm`, `shadow-md` | `<Card className="shadow-sm">` |
-| Motion | `duration-fast`, `duration-slow` | `<Progress className="duration-slow">` |
-| Opacity | `opacity-disabled`, `opacity-muted` | `<Input className="disabled:opacity-disabled">` |
+```
+anchor start [dir]      One-click: init + npm install + open Portal
+anchor init  [dir]      Scaffold .anchor/ only (no install, no dev)
+anchor dev   [dir]      Start the Portal against an existing .anchor/
+anchor sync  [dir]      Regenerate .cursorrules / Tailwind tokens / rules
+anchor audit [dir]      AST-scan for forbidden tags + token violations
+anchor upgrade [dir]    Pull the latest .anchor/ template (preserves your edits)
+anchor mcp [dir]        Start the MCP server on stdio
+anchor add <Component>  Import a component + scaffold its spec + demo
+```
 
----
+## Token system in 60 seconds
 
-## Component Spec System
+```
+seed (tokens.json)         ← you edit these (~14 keys)
+  ↓
+seed-to-map.mjs            ← Antd algorithm + custom mappings
+  ↓
+200+ CSS variables         ← --color-primary, --spacing-N, --radius-md, …
+  ↓
+@theme inline block        ← Tailwind v4 utilities resolve here
+  ↓
+component className        ← bg-primary, rounded-md, p-4 …
+```
 
-Every component has a `.spec.json` file — the **single source of truth** for AI coding rules:
+The seed surface (14 user-tunable keys):
+
+| Category | Seeds | Drives |
+|---|---|---|
+| Brand | colorPrimary / Success / Warning / Error / Info / Link | All semantic color slots |
+| Surface | colorBgBase / colorTextBase | 30+ derived neutrals (ink ladder, fills, borders) |
+| Typography | fontSize | `text-xs` through `text-3xl` |
+| Shape | borderRadius | `rounded-sm/md/lg/xl` ladder |
+| Spacing | sizeUnit | Full Tailwind `p-N` / `gap-N` scale |
+| Charts | chart1 – chart5 (`customSeeds`) | Chart palette |
+
+Dark mode: any seed can have a `seedDark` override. Per-slot semantic tokens (e.g. `muted`, `accent`, `border`) can be individually overridden via the customizer's **Surfaces > Derived > Semantic** subgroup; overrides land in `mapOverrides.light` / `.dark`.
+
+## MCP server
+
+Wire it into Cursor:
 
 ```jsonc
-// src/anchor/schema/components/button.spec.json
+// .cursor/mcp.json
 {
-  "name": "Button",
-  "description": "Primary action trigger with multiple variants and sizes",
-  "props": {
-    "variant": {
-      "type": "enum",
-      "values": ["default", "destructive", "outline", "secondary", "ghost", "link"],
-      "default": "default"
-    },
-    "size": {
-      "type": "enum",
-      "values": ["default", "sm", "lg", "icon"],
-      "default": "default"
+  "mcpServers": {
+    "design-anchor": {
+      "command": "npx",
+      "args": ["anchor", "mcp", "."]
     }
-  },
-  "styleLock": ["font-family", "line-height"],
-  "forbiddenPatterns": ["inline color hex", "arbitrary spacing"],
-  "aiPrompt": "Use semantic variant names. Never hardcode colors or spacing."
+  }
 }
 ```
 
-These specs auto-sync to AI rules via `anchor sync`, ensuring all AI tools always have the latest component API.
+Same shape works for Claude Code (`.mcp.json`), Continue, Cline, Zed, Qoder, etc. 13 tools exposed: `list_components` / `read_component` / `create_component` / `list_tokens` / `update_token` / `list_schemas` / `read_schema` / `update_schema` / `run_audit` / `run_sync_rules` / `get_cursorrules` / `read_file` / `write_file`.
 
----
+## What `anchor audit` flags
 
-## Components
+- **Forbidden native tags** declared in `spec.json` (e.g. raw `<button>` when Button is declared)
+- **Arbitrary-value Tailwind on token-sensitive prefixes**:
+  - Flag: `bg / text / border / ring / fill / stroke / from / to / via / shadow / p / m / gap / rounded` — these must be tokens or `var(--…)`
+  - Allow: `w / h / top / left / grid-cols / aspect / z` and friends — one-off layout pixels are fine
 
-Design-anchor includes 23 production-ready components, each with a `.spec.json`, Storybook stories, and full token integration:
+So `bg-[#0204a3]` and `p-[13px]` are rejected; `w-[280px]` and `max-w-[480px]` pass.
 
-| Component | Key Features | Spec |
-|-----------|-------------|------|
-| **Alert** | 4 variants (default/error/success/warning), icon support | `alert.spec.json` |
-| **Avatar** | Image + fallback, configurable sizes | `avatar.spec.json` |
-| **Badge** | 5 variants, semantic colors | `badge.spec.json` |
-| **Button** | 6 variants, 4 sizes, `asChild` composition | `button.spec.json` |
-| **Card** | Header/Content/Footer composition | `card.spec.json` |
-| **Checkbox** | Radix primitive, accessible | `checkbox.spec.json` |
-| **Data Table** | Sort, filter, paginate, density modes | `data-table.spec.json` |
-| **Dialog** | Modal + overlay, keyboard dismiss | `dialog.spec.json` |
-| **Dropdown Menu** | Nested menus, keyboard navigation | `dropdown-menu.spec.json` |
-| **Input** | Multiple types, disabled/error states | `input.spec.json` |
-| **Label** | Associated disabled styling, semantic pairing | `label.spec.json` |
-| **Popover** | Floating content + arrow | `popover.spec.json` |
-| **Progress** | Animated value bar, token-driven duration | `progress.spec.json` |
-| **Radio Group** | Radix grouping, accessible | `radio-group.spec.json` |
-| **Scroll Area** | Custom scrollbar theming | `scroll-area.spec.json` |
-| **Select** | Native select + token styling | `select.spec.json` |
-| **Separator** | Horizontal/vertical + semantic spacing | `separator.spec.json` |
-| **Skeleton** | Loading placeholder + animation | `skeleton.spec.json` |
-| **Slider** | Range input, track/thumb theming | `slider.spec.json` |
-| **Switch** | Toggle control, disabled opacity token | `switch.spec.json` |
-| **Table** | Full table composition, sticky header | – |
-| **Tabs** | List/Trigger/Content + active state | `tabs.spec.json` |
-| **Textarea** | Min-height token, disabled opacity | `textarea.spec.json` |
-| **Tooltip** | Delay animation + motion tokens | `tooltip.spec.json` |
-
----
-
-## Multi-tool AI Governance
-
-Design-anchor generates governance files for **every major AI coding tool** — not just Cursor:
-
-| Tool | Config File | Automation |
-|------|------------|-----------|
-| Cursor | `.cursor/rules/*.mdc` + `.cursor/hooks.json` | Auto-runs `anchor audit` after file save |
-| Claude Code | `CLAUDE.md` | Inline workflow instructions |
-| Windsurf | `.windsurfrules` | Inline governance rules |
-| GitHub Copilot | `.github/copilot-instructions.md` | Inline governance rules |
-| Generic (Cline, Continue, Aider) | `.cursorrules` + `AGENTS.md` | Reads project-root rule files |
-
-One command (`anchor govern` or `anchor init`) configures all tools simultaneously.
-
----
-
-## MCP Integration
-
-Design-anchor includes a built-in [Model Context Protocol](https://modelcontextprotocol.io/) server for deep AI integration:
-
-```bash
-npx anchor mcp
-```
-
-The MCP server exposes:
-- **Component specs** — full schema data for each component
-- **Token registry** — all derived token values and categories
-- **Audit results** — real-time compliance status
-
----
-
-## Architecture
+## Project layout
 
 ```
-tokens.json (seed layer)
-    │
-    ▼
-emit-design-tokens-css.mjs ──► design-tokens.generated.css
-    │                              ├── @theme inline { ... }    ← Tailwind utilities
-    │                              ├── :root { ... }            ← CSS variables
-    │                              └── .dark { ... }            ← Dark mode overrides
-    ▼
-*.spec.json (23 component specs)
-    │
-    ├──► sync-from-schema ──► .cursorrules + CLAUDE.md + .windsurfrules (AI rules)
-    ├──► anchor-audit ──► compliance report
-    └──► Storybook Portal ──► visual editing + controls
+.
+├── bin/                        CLI entrypoints (anchor, anchor-mcp, postinstall)
+├── scripts/                    Build helpers (sync-tokens, sync-from-schema, audit)
+├── src/
+│   ├── anchor/                 Governance: schema specs, linter config, rule generators
+│   ├── anchor-portal/          The portal app (Vite + React)
+│   │   ├── canvas/             Story preview frame
+│   │   ├── controls/           Auto-generated args panel
+│   │   ├── create/             Token customizer (Design Token tab)
+│   │   ├── docs/               Docs tab (bilingual sections)
+│   │   ├── i18n/               LocaleProvider + Bilingual hook
+│   │   ├── sidebar/            Components tab sidebar
+│   │   ├── spec-editor/        Spec.json editor
+│   │   └── theme/              Dark-mode provider
+│   ├── components/base/        60+ shadcn-aligned components (the library)
+│   ├── design-tokens/          tokens.json + seed-to-map.mjs + DesignTokenShowcase
+│   ├── lib/                    cn() utility
+│   └── styles/                 globals.css + generated design-tokens.generated.css
+├── docs/                       Architecture notes / progress
+└── vendor/design-system-template/   Upstream shadcn snapshot for reference
 ```
 
-### Token Flow: One Hop, Zero Drift
+## Tech stack
 
-```
-tokens.json ──(sync:tokens)──► design-tokens.generated.css ──► Tailwind v4 + Components
-     │                                                              │
-     └── Single file, three sections:                               │
-         @theme (Tailwind mapping)                                  │
-         :root  (non-Tailwind vars)                                 │
-         .dark  (dark mode overrides)                               │
-                                                                    ▼
-                                                          AI reads governance rules
-                                                         (auto-generated from specs)
-```
+- **React 19** + **Vite 7** (portal)
+- **Tailwind v4** with `@theme inline` for token wiring
+- **Radix UI** primitives for accessible component bases
+- **shadcn/ui** patterns for component composition
+- **Antd 5** color algorithm for token derivation
+- **react-markdown + remark-gfm** for docs rendering
+- **MCP** stdio JSON-RPC for AI agent integration
 
----
+## Roadmap
 
-## Tech Stack
-
-| Layer | Technology |
-|-------|-----------|
-| Components | [Radix UI](https://www.radix-ui.com/) primitives + [CVA](https://cva.style/) variants |
-| Styling | [Tailwind CSS v4](https://tailwindcss.com/) + `@theme inline` token mapping |
-| Token Engine | Ant Design algorithm ([`@ant-design/colors`](https://github.com/ant-design/ant-design-colors)) |
-| Build | [Vite 6](https://vite.dev/) + custom Schema API plugin |
-| Storybook | [Storybook 8](https://storybook.js.org/) + React + Vite |
-| Color Science | [OKLCH](https://oklch.com/) perceptual color space via [Culori](https://culorijs.org/) |
-| Type Safety | [TypeScript 5](https://www.typescriptlang.org/) strict mode |
-| AI Protocol | [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) |
-
----
-
-## Upgrade Strategy
-
-Design-anchor follows the [shadcn/ui](https://ui.shadcn.com/) philosophy — component code lives in **your codebase**, not hidden in `node_modules`:
-
-```bash
-# First install
-npm install design-anchor
-npx anchor init
-
-# Subsequent upgrades: auto-adds new components, preserves your modifications
-npm update design-anchor
-npx anchor upgrade
-```
-
-The upgrade system uses **content hashing** to detect modifications:
-- **Unmodified components** → overwritten with latest version
-- **Modified components** → preserved, marked in Storybook sidebar
-- **New components** → added automatically
-
----
+- AI-assisted token extraction from uploaded screenshots (Path A above, automated)
+- Cross-project preset library (load shadcn Indigo / AntD Default with one click)
+- Component preview composition library beyond the 8 cards currently in the customizer
+- Visual diff between two token snapshots
+- VS Code extension (in addition to MCP)
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing`)
-3. Run type check (`npm run typecheck`)
-4. Run token sync (`npm run sync:tokens`)
-5. Run compliance audit (`npm run anchor:audit`)
-6. Commit your changes
-7. Push and create a Pull Request
-
----
+Issues and PRs welcome. The product is intentionally small and opinionated — design changes should keep the `seed → derived → CSS variable → component className` pipeline intact.
 
 ## License
 
-[MIT](LICENSE) &copy; 2026 [Gusgoooo](https://github.com/Gusgoooo)
-
-## Contact
-
-Welcome to co-build or discuss: [q623814363@gmail.com](mailto:q623814363@gmail.com)
-
-## Links
-
-- GitHub: [https://github.com/Gusgoooo/Design-anchor](https://github.com/Gusgoooo/Design-anchor)
-
----
-
-<p align="center"><em>Protocol is Design — Define design with protocols. Let the pipeline enforce execution.</em></p>
+MIT.

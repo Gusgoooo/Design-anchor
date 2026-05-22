@@ -20,10 +20,8 @@ export default function App() {
   );
 }
 
-// Separator sits in the gap between the two rounded panels; gets thicker
-// on hover and during drag so it's clearly grabbable.
-const SEP_V_FLOATING =
-  "my-1 h-2 rounded-full bg-transparent hover:bg-foreground/15 data-[dragging]:bg-foreground/25 transition-colors";
+// Horizontal divider inside the single rounded right-side container.
+const SEP_V = "h-px bg-border hover:bg-foreground/30 data-[dragging]:bg-foreground/40 transition-colors";
 
 /** Shared with the Design Token customizer so both pages line up. */
 const SIDEBAR_WIDTH_PX = 360;
@@ -72,29 +70,19 @@ function ComponentsArea({
         >
           <Sidebar currentStoryId={currentStoryId} />
         </div>
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="min-w-0 flex-1 overflow-hidden rounded-2xl bg-background ring-1 ring-border">
           {showBottomPanel ? (
             <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
-              <Panel
-                id="canvas"
-                defaultSize="62%"
-                minSize="20%"
-                className="flex flex-col overflow-hidden rounded-2xl bg-background ring-1 ring-border"
-              >
+              <Panel id="canvas" defaultSize="62%" minSize="20%" className="flex flex-col bg-background">
                 <Canvas />
               </Panel>
-              <Separator className={SEP_V_FLOATING} />
-              <Panel
-                id="panel"
-                defaultSize="38%"
-                minSize="12%"
-                className="flex flex-col overflow-hidden rounded-2xl bg-background ring-1 ring-border"
-              >
+              <Separator className={SEP_V} />
+              <Panel id="panel" defaultSize="38%" minSize="12%" className="flex flex-col">
                 <PanelTabs />
               </Panel>
             </Group>
           ) : (
-            <div className="flex h-full w-full flex-col overflow-hidden rounded-2xl bg-background ring-1 ring-border">
+            <div className="flex h-full w-full flex-col bg-background">
               <Canvas />
             </div>
           )}

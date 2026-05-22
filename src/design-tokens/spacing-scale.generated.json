@@ -11,10 +11,36 @@
     "4": "16px",
     "5": "20px",
     "6": "24px",
+    "7": "28px",
     "8": "32px",
+    "9": "36px",
+    "10": "40px",
+    "11": "44px",
     "12": "48px",
+    "14": "56px",
+    "16": "64px",
+    "20": "80px",
+    "24": "96px",
+    "28": "112px",
+    "32": "128px",
+    "36": "144px",
+    "40": "160px",
+    "41": "164px",
+    "42": "168px",
+    "44": "176px",
+    "48": "192px",
+    "52": "208px",
+    "56": "224px",
+    "60": "240px",
+    "64": "256px",
+    "72": "288px",
+    "80": "320px",
+    "96": "384px",
     "px": "1px",
-    "0.5": "2px"
+    "0.5": "2px",
+    "1.5": "6px",
+    "2.5": "10px",
+    "3.5": "14px"
   },
   "stepLabels": [
     {
@@ -38,14 +64,29 @@
       "en": "XS · 4px"
     },
     {
+      "suffix": "1.5",
+      "zh": "Compact · 6px",
+      "en": "SM · 6px"
+    },
+    {
       "suffix": "2",
       "zh": "Compact · 8px",
       "en": "SM · 8px"
     },
     {
+      "suffix": "2.5",
+      "zh": "Dense · 10px",
+      "en": "MD · 10px"
+    },
+    {
       "suffix": "3",
       "zh": "Dense · 12px",
       "en": "MD · 12px"
+    },
+    {
+      "suffix": "3.5",
+      "zh": "Small · 14px",
+      "en": "LG · 14px"
     },
     {
       "suffix": "4",
@@ -63,14 +104,129 @@
       "en": "2XL · 24px"
     },
     {
+      "suffix": "7",
+      "zh": "Relaxed · 28px",
+      "en": "3XL · 28px"
+    },
+    {
       "suffix": "8",
       "zh": "Large · 32px",
       "en": "4XL · 32px"
     },
     {
+      "suffix": "9",
+      "zh": "Section · 36px",
+      "en": "5XL · 36px"
+    },
+    {
+      "suffix": "10",
+      "zh": "Large section · 40px",
+      "en": "6XL · 40px"
+    },
+    {
+      "suffix": "11",
+      "zh": "Extra-large · 44px",
+      "en": "7XL · 44px"
+    },
+    {
       "suffix": "12",
       "zh": "Huge · 48px",
       "en": "8XL · 48px"
+    },
+    {
+      "suffix": "14",
+      "zh": "Full-width · 56px",
+      "en": "10XL · 56px"
+    },
+    {
+      "suffix": "16",
+      "zh": "Maximum · 64px",
+      "en": "12XL · 64px"
+    },
+    {
+      "suffix": "20",
+      "zh": "Step 20 · 80px",
+      "en": "Step 20 · 80px"
+    },
+    {
+      "suffix": "24",
+      "zh": "Step 24 · 96px",
+      "en": "Step 24 · 96px"
+    },
+    {
+      "suffix": "28",
+      "zh": "Step 28 · 112px",
+      "en": "Step 28 · 112px"
+    },
+    {
+      "suffix": "32",
+      "zh": "Step 32 · 128px",
+      "en": "Step 32 · 128px"
+    },
+    {
+      "suffix": "36",
+      "zh": "Step 36 · 144px",
+      "en": "Step 36 · 144px"
+    },
+    {
+      "suffix": "40",
+      "zh": "Step 40 · 160px",
+      "en": "Step 40 · 160px"
+    },
+    {
+      "suffix": "41",
+      "zh": "Step 41 · 164px",
+      "en": "Step 41 · 164px"
+    },
+    {
+      "suffix": "42",
+      "zh": "Step 42 · 168px",
+      "en": "Step 42 · 168px"
+    },
+    {
+      "suffix": "44",
+      "zh": "Step 44 · 176px",
+      "en": "Step 44 · 176px"
+    },
+    {
+      "suffix": "48",
+      "zh": "Step 48 · 192px",
+      "en": "Step 48 · 192px"
+    },
+    {
+      "suffix": "52",
+      "zh": "Step 52 · 208px",
+      "en": "Step 52 · 208px"
+    },
+    {
+      "suffix": "56",
+      "zh": "Step 56 · 224px",
+      "en": "Step 56 · 224px"
+    },
+    {
+      "suffix": "60",
+      "zh": "Step 60 · 240px",
+      "en": "Step 60 · 240px"
+    },
+    {
+      "suffix": "64",
+      "zh": "Step 64 · 256px",
+      "en": "Step 64 · 256px"
+    },
+    {
+      "suffix": "72",
+      "zh": "Step 72 · 288px",
+      "en": "Step 72 · 288px"
+    },
+    {
+      "suffix": "80",
+      "zh": "Step 80 · 320px",
+      "en": "Step 80 · 320px"
+    },
+    {
+      "suffix": "96",
+      "zh": "Step 96 · 384px",
+      "en": "Step 96 · 384px"
     }
   ]
 }

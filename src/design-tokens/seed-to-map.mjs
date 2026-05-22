@@ -451,9 +451,32 @@ const SPACING_STEP_ZH = [
   "Maximum",
 ];
 
-/** Consistent with `genUnifiedSpacingScaleTokens` output key suffixes, for emit sorting */
+/**
+ * Tailwind v4 compatible spacing scale.
+ *
+ * We always emit the full standard scale (0, px, 0.5, 1..12, 14, 16, 20,
+ * 24, 28, 32, 36, 40, 44, 48, 52, 56, 60, 64, 72, 80, 96). Each stop
+ * resolves to `N * sizeUnit` so the whole grid scales with the seed.
+ *
+ * Why every stop (not just the antd-derived subset): base components
+ * (Input / Button / InputGroup / etc.) use h-7 / h-9 / h-11 directly.
+ * If the matching --spacing-N isn't in @theme, the utility silently
+ * fails to generate and the element loses its height constraint —
+ * making InputGroup grow to whatever the parent flex layout gives it.
+ * Emitting the full scale removes that failure mode and keeps the
+ * grid completely seed-driven.
+ *
+ * The antd-derived sizeMap is still merged in so any custom suffix the
+ * algorithm produces (e.g. fractional steps) stays addressable too.
+ */
+const STANDARD_SPACING_STOPS = [
+  "0", "px", "0.5", "1", "1.5", "2", "2.5", "3", "3.5", "4", "5", "6", "7",
+  "8", "9", "10", "11", "12", "14", "16", "20", "24", "28", "32", "36", "40",
+  "44", "48", "52", "56", "60", "64", "72", "80", "96",
+];
+
 function deriveSpacingScaleSuffixes(sizeUnit, sizeMap) {
-  const suffixes = new Set(["0", "px", "0.5"]);
+  const suffixes = new Set(STANDARD_SPACING_STOPS);
   for (const v of Object.values(sizeMap)) {
     const px = Number(v);
     if (!Number.isFinite(px) || px <= 0) continue;

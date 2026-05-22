@@ -5,7 +5,7 @@ import { DarkModeProvider } from "./theme/DarkModeProvider";
 import { useRoute } from "./router";
 import { TopNav } from "./TopNav";
 import { Sidebar } from "./sidebar/SidebarTop";
-import { StorySessionProvider, useStorySession } from "./usePreviewState";
+import { StorySessionProvider } from "./usePreviewState";
 import { Canvas } from "./canvas/Canvas";
 import { ControlsPanel } from "./controls/ControlsPanel";
 import { SpecPanel } from "./spec-editor/SpecPanel";
@@ -57,15 +57,11 @@ function ComponentsArea({
   currentStoryId: string | null;
   hasStoryRoute: boolean;
 }) {
-  const { session } = useStorySession();
-  // AI/* demos portal floating UI to document.body (AssistantModal anchor,
-  // sidebar overlays, etc.) which can't be contained — those would float
-  // over the bottom Controls/Spec panel. Drop the panel only for those.
-  // Other fullscreen-layout stories (Dialog / Sheet / Drawer / Calendar
-  // …) use Radix Portal which already escapes properly, so they keep
-  // the panel.
-  const isAiStory = !!session && session.story.componentTitle.startsWith("AI/");
-  const showBottomPanel = hasStoryRoute && !isAiStory;
+  // Every story route shows the bottom Controls/Spec panel — AI demos
+  // included. AI's position:fixed overlays stay contained to the Canvas
+  // card (own rounded container with overflow-hidden + a translateZ(0)
+  // containing block in canvas/Canvas.tsx).
+  const showBottomPanel = hasStoryRoute;
 
   return (
     <div className="h-full w-full bg-muted/30 p-4 dark:bg-background/40">

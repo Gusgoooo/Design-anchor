@@ -73,13 +73,11 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
               <div className="overflow-hidden rounded-[10px] ring-1 ring-border bg-card">
                 {group.seeds.map((seed, idx) => {
                   const value = readSeedValue(doc, seed.source, seed.key, darkMode);
-                  const derivedFallback = seed.derivedKey ? resolvedVars[seed.derivedKey] : undefined;
                   return (
                     <SeedRow
                       key={`${group.title}::${seed.key}`}
                       seed={seed}
                       value={value}
-                      derivedFallback={derivedFallback}
                       isDirty={seedIsDirty(seed.source, seed.key)}
                       isFirst={idx === 0}
                       isLast={idx === group.seeds.length - 1 && !hasDerived(group, resolvedVars)}

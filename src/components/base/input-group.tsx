@@ -14,14 +14,21 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="input-group"
       role="group"
       className={cn(
-        "group/input-group border-input dark:bg-input/30 shadow-xs relative flex w-full min-h-9 items-stretch overflow-hidden rounded-md border outline-none transition-[color,box-shadow]",
-        "has-[>textarea]:h-auto has-[>textarea]:min-h-0",
+        // Fixed h-9 (with items-center) instead of min-h-9 + items-stretch.
+        // The previous min+stretch combo let parent flex layouts (FieldGroup
+        // siblings with flex-1, Card content gap, etc.) inflate the
+        // InputGroup past 36px while the inner input stayed top-aligned —
+        // visible as empty space at the bottom of the box.
+        "group/input-group border-input dark:bg-input/30 shadow-xs relative flex w-full h-9 items-center overflow-hidden rounded-md border outline-none transition-[color,box-shadow]",
 
-        // Variants based on alignment.
+        // Block-stacking variants and textarea relax the fixed height.
+        "has-[>textarea]:h-auto has-[>textarea]:items-stretch",
+        "has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-start]]:items-stretch has-[>[data-align=block-start]]:[&>input]:pb-3",
+        "has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-end]]:items-stretch has-[>[data-align=block-end]]:[&>input]:pt-3",
+
+        // Inline padding so the input doesn't kiss the addon border.
         "has-[>[data-align=inline-start]]:[&>input]:pl-2",
         "has-[>[data-align=inline-end]]:[&>input]:pr-2",
-        "has-[>[data-align=block-start]]:h-auto has-[>[data-align=block-start]]:flex-col has-[>[data-align=block-start]]:[&>input]:pb-3",
-        "has-[>[data-align=block-end]]:h-auto has-[>[data-align=block-end]]:flex-col has-[>[data-align=block-end]]:[&>input]:pt-3",
 
         // Focus state.
         "has-[[data-slot=input-group-control]:focus-visible]:ring-ring has-[[data-slot=input-group-control]:focus-visible]:ring-1",

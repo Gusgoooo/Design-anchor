@@ -44,7 +44,21 @@
       }
     ]
   },
-  "aiPrompt": "Use Avatar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Avatar from @/components/base for user / profile representations. Always pair AvatarImage with AvatarFallback — the fallback renders while the image loads and if it fails. Fallback should be initials (1–2 chars) or an icon, never long text. Avoid stacking `bg-*` arbitrary colors; the Radix Avatar primitive handles fallback styling.",
+  "examples": [
+    {
+      "title": "Image with text fallback",
+      "snippet": "<Avatar>\n  <AvatarImage src={user.avatarUrl} alt={user.name} />\n  <AvatarFallback>{user.initials}</AvatarFallback>\n</Avatar>"
+    },
+    {
+      "title": "Fallback only — initials",
+      "snippet": "<Avatar>\n  <AvatarFallback>SC</AvatarFallback>\n</Avatar>"
+    },
+    {
+      "title": "Stacked avatar group",
+      "snippet": "<div className=\"flex -space-x-2\">\n  {team.map((u) => (\n    <Avatar key={u.id} className=\"ring-2 ring-background\">\n      <AvatarImage src={u.avatarUrl} />\n      <AvatarFallback>{u.initials}</AvatarFallback>\n    </Avatar>\n  ))}\n</div>"
+    }
+  ],
   "meta": {
     "tags": [
       "avatar",

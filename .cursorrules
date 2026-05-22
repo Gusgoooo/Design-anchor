@@ -246,22 +246,123 @@
 - **Upstream module**: `@/components/base/accordion`
 - **Sub-components (Spec)**: `Accordion`, `AccordionItem`, `AccordionHeader`, `AccordionTrigger`, `AccordionContent`
 - **Intent**: Collapsible content panels for FAQ, settings groups, and progressive disclosure.
-- **Spec directive**: Use Accordion from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Accordion from @/components/base for progressive disclosure (FAQ, settings groups, expandable lists). Always wrap items in <Accordion type="single" collapsible> or type="multiple". Each item needs AccordionItem + AccordionTrigger + AccordionContent. Don't replace with raw <details>/<summary> — those break consistent transition timing and focus management.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **FAQ — single-open collapsible**
+  ```tsx
+  <Accordion type="single" collapsible>
+    <AccordionItem value="q1">
+      <AccordionTrigger>Is it accessible?</AccordionTrigger>
+      <AccordionContent>Yes. Follows WAI-ARIA disclosure pattern.</AccordionContent>
+    </AccordionItem>
+    <AccordionItem value="q2">
+      <AccordionTrigger>Is it animated?</AccordionTrigger>
+      <AccordionContent>Yes, smooth height transition.</AccordionContent>
+    </AccordionItem>
+  </Accordion>
+  ```
+  - **Multi-open settings groups**
+  ```tsx
+  <Accordion type="multiple" defaultValue={["general"]}>
+    <AccordionItem value="general">
+      <AccordionTrigger>General</AccordionTrigger>
+      <AccordionContent>...</AccordionContent>
+    </AccordionItem>
+    <AccordionItem value="advanced">
+      <AccordionTrigger>Advanced</AccordionTrigger>
+      <AccordionContent>...</AccordionContent>
+    </AccordionItem>
+  </Accordion>
+  ```
 ### AlertDialog
 - **Upstream module**: `@/components/base/alert-dialog`
 - **Sub-components (Spec)**: `AlertDialog`, `AlertDialogPortal`, `AlertDialogOverlay`, `AlertDialogTrigger`, `AlertDialogContent`, `AlertDialogHeader`, `AlertDialogFooter`, `AlertDialogTitle`, `AlertDialogDescription`, `AlertDialogAction`, `AlertDialogCancel`
 - **Intent**: Blocking confirmation dialog for irreversible actions (delete, submit). User must respond before continuing.
-- **Spec directive**: Use AlertDialog from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use AlertDialog from @/components/base for blocking confirmation of irreversible actions (delete / discard / submit). Required structure: AlertDialog > AlertDialogTrigger (asChild Button) + AlertDialogContent > AlertDialogHeader (Title + Description) + AlertDialogFooter (Cancel + Action). Use Dialog (not AlertDialog) for non-blocking form modals. Action button should be destructive variant when the operation is destructive.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Destructive — delete confirmation**
+  ```tsx
+  <AlertDialog>
+    <AlertDialogTrigger asChild>
+      <Button variant="destructive">Delete account</Button>
+    </AlertDialogTrigger>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Delete this account?</AlertDialogTitle>
+        <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Cancel</AlertDialogCancel>
+        <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+  ```
+  - **Controlled open**
+  ```tsx
+  <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>Unsaved changes</AlertDialogTitle>
+        <AlertDialogDescription>Discard your edits?</AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>Keep editing</AlertDialogCancel>
+        <AlertDialogAction>Discard</AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+  ```
 ### Alert
 - **Upstream module**: `@/components/base/alert`
 - **Sub-components (Spec)**: `Alert`, `AlertTitle`, `AlertDescription`
 - **Intent**: Displays important status feedback (success, warning, error) with optional title and description.
-- **Spec directive**: Use Alert from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Alert from @/components/base for inline status feedback (success info, warnings, errors). Compose with AlertTitle + AlertDescription. Use variant="destructive" for errors. For blocking/confirm prompts use AlertDialog instead. Do not build banners with raw <div className="border bg-red-100">.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Info alert with title + description**
+  ```tsx
+  <Alert>
+    <AlertTitle>Heads up!</AlertTitle>
+    <AlertDescription>You can change your preferences in Settings.</AlertDescription>
+  </Alert>
+  ```
+  - **Destructive — failed action**
+  ```tsx
+  <Alert variant="destructive">
+    <AlertTitle>Save failed</AlertTitle>
+    <AlertDescription>Check your network and try again.</AlertDescription>
+  </Alert>
+  ```
+  - **Title-only short notice**
+  ```tsx
+  <Alert>
+    <AlertTitle>Draft saved.</AlertTitle>
+  </Alert>
+  ```
 ### AspectRatio
 - **Upstream module**: `@/components/base/aspect-ratio`
 - **Sub-components (Spec)**: `AspectRatio`
 - **Intent**: Fixed aspect-ratio container for images, videos, maps, and other media that must maintain proportions.
-- **Spec directive**: Use AspectRatio from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use AspectRatio from @/components/base whenever an image / video / iframe / chart needs to keep its proportions while the container resizes. Pass `ratio` as a number (width ÷ height). Don't reach for `aspect-[16/9]` arbitrary Tailwind on a raw div — it works but loses the design-system anchor.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **16:9 video / hero image**
+  ```tsx
+  <AspectRatio ratio={16 / 9}>
+    <img src={src} alt="" className="h-full w-full rounded-md object-cover" />
+  </AspectRatio>
+  ```
+  - **1:1 square thumbnail**
+  ```tsx
+  <AspectRatio ratio={1}>
+    <img src={avatar} alt="" className="h-full w-full object-cover" />
+  </AspectRatio>
+  ```
+  - **4:3 embedded iframe**
+  ```tsx
+  <AspectRatio ratio={4 / 3}>
+    <iframe src={url} className="h-full w-full rounded-md border" />
+  </AspectRatio>
+  ```
 ### AssistantModal
 - **Upstream module**: `@/components/base/ai/assistant-modal`
 - **Sub-components (Spec)**: `AssistantModal`
@@ -426,32 +527,183 @@
 - **Upstream module**: `@/components/base/avatar`
 - **Sub-components (Spec)**: `Avatar`, `AvatarImage`, `AvatarFallback`
 - **Intent**: User avatar with image loading and text fallback. Used in user lists, comments, and navigation bars.
-- **Spec directive**: Use Avatar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Avatar from @/components/base for user / profile representations. Always pair AvatarImage with AvatarFallback — the fallback renders while the image loads and if it fails. Fallback should be initials (1–2 chars) or an icon, never long text. Avoid stacking `bg-*` arbitrary colors; the Radix Avatar primitive handles fallback styling.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Image with text fallback**
+  ```tsx
+  <Avatar>
+    <AvatarImage src={user.avatarUrl} alt={user.name} />
+    <AvatarFallback>{user.initials}</AvatarFallback>
+  </Avatar>
+  ```
+  - **Fallback only — initials**
+  ```tsx
+  <Avatar>
+    <AvatarFallback>SC</AvatarFallback>
+  </Avatar>
+  ```
+  - **Stacked avatar group**
+  ```tsx
+  <div className="flex -space-x-2">
+    {team.map((u) => (
+      <Avatar key={u.id} className="ring-2 ring-background">
+        <AvatarImage src={u.avatarUrl} />
+        <AvatarFallback>{u.initials}</AvatarFallback>
+      </Avatar>
+    ))}
+  </div>
+  ```
 ### Badge
 - **Upstream module**: `@/components/base/badge`
 - **Sub-components (Spec)**: `Badge`
 - **Intent**: Unified entry for status marks, labels, and count bubbles. Do not hand-build span+bg alternatives.
-- **Spec directive**: Use Badge from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Badge from @/components/base for status labels, count chips, and inline tags. Pick variant by intent: default=primary highlight, secondary=neutral marker, destructive=error/warning state, outline=quiet emphasis. Don't hand-roll `<span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded">` — it bypasses the variant contract and ages into visual drift.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Status variants**
+  ```tsx
+  <div className="flex gap-2">
+    <Badge>Active</Badge>
+    <Badge variant="secondary">Draft</Badge>
+    <Badge variant="destructive">Expired</Badge>
+    <Badge variant="outline">Optional</Badge>
+  </div>
+  ```
+  - **Count bubble next to a label**
+  ```tsx
+  <span className="inline-flex items-center gap-2">
+    Notifications
+    <Badge variant="secondary">12</Badge>
+  </span>
+  ```
+  - **Inline tags in a list item**
+  ```tsx
+  <Item>
+    <ItemContent>
+      <ItemTitle>Q4 roadmap</ItemTitle>
+      <ItemDescription>
+        <Badge variant="outline">draft</Badge> <Badge>in review</Badge>
+      </ItemDescription>
+    </ItemContent>
+  </Item>
+  ```
 ### Breadcrumb
 - **Upstream module**: `@/components/base/breadcrumb`
 - **Sub-components (Spec)**: `Breadcrumb`, `BreadcrumbList`, `BreadcrumbItem`, `BreadcrumbLink`, `BreadcrumbPage`, `BreadcrumbSeparator`, `BreadcrumbEllipsis`
 - **Intent**: Hierarchical breadcrumb navigation showing current page position in site structure with back navigation.
-- **Spec directive**: Use Breadcrumb from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Breadcrumb from @/components/base for showing the current location inside a navigable hierarchy. Structure: Breadcrumb > BreadcrumbList > (BreadcrumbItem > BreadcrumbLink/Page) [+ BreadcrumbSeparator between each]. The current page should be a BreadcrumbPage (no link). Use BreadcrumbEllipsis when the path is long enough to need collapsing. Skip for single-level pages — breadcrumbs add noise when there's no hierarchy.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Standard 3-level breadcrumb**
+  ```tsx
+  <Breadcrumb>
+    <BreadcrumbList>
+      <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+      <BreadcrumbSeparator />
+      <BreadcrumbItem><BreadcrumbLink href="/components">Components</BreadcrumbLink></BreadcrumbItem>
+      <BreadcrumbSeparator />
+      <BreadcrumbItem><BreadcrumbPage>Button</BreadcrumbPage></BreadcrumbItem>
+    </BreadcrumbList>
+  </Breadcrumb>
+  ```
+  - **Collapsed path with ellipsis**
+  ```tsx
+  <Breadcrumb>
+    <BreadcrumbList>
+      <BreadcrumbItem><BreadcrumbLink href="/">Home</BreadcrumbLink></BreadcrumbItem>
+      <BreadcrumbSeparator />
+      <BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem>
+      <BreadcrumbSeparator />
+      <BreadcrumbItem><BreadcrumbPage>Settings</BreadcrumbPage></BreadcrumbItem>
+    </BreadcrumbList>
+  </Breadcrumb>
+  ```
 ### ButtonGroup
 - **Upstream module**: `@/components/base/button-group`
 - **Sub-components (Spec)**: `ButtonGroup`, `ButtonGroupSeparator`, `ButtonGroupText`
 - **Intent**: Button group container that visually combines related action buttons (toolbars, segmented controls).
-- **Spec directive**: Use ButtonGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ButtonGroup from @/components/base to visually glue related buttons together (toolbars, segmented controls, split actions). Children should be Buttons of the same size + variant. Internal corners flatten automatically — don't manually `rounded-none` the buttons. Use ButtonGroupSeparator between visually distinct subgroups; ButtonGroupText for inline non-clickable labels.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Toolbar — 3-button group**
+  ```tsx
+  <ButtonGroup>
+    <Button variant="outline"><BoldIcon /></Button>
+    <Button variant="outline"><ItalicIcon /></Button>
+    <Button variant="outline"><UnderlineIcon /></Button>
+  </ButtonGroup>
+  ```
+  - **Split action — label + dropdown**
+  ```tsx
+  <ButtonGroup>
+    <Button>Save</Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="default" size="icon"><ChevronDownIcon /></Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>Save as draft</DropdownMenuItem>
+        <DropdownMenuItem>Save and publish</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  </ButtonGroup>
+  ```
 ### Button
 - **Upstream module**: `@/components/base/button`
 - **Sub-components (Spec)**: `Button`
 - **Intent**: Unified clickable action entry for primary, secondary, and link navigation actions. Raw <button> with manual spacing and brand colors is forbidden.
-- **Spec directive**: Must use @/components/base/button. Use variant prop for visual style，Use size prop for dimensions. Do not stack Tailwind overrides on JSX. Colors must use design token semantic classes only.
+- **Spec directive**: Always use Button from @/components/base/button — never raw <button>. Pick variant by intent: default=primary CTA, secondary=neutral action, outline=secondary CTA on a busy surface, ghost=low-emphasis (toolbar / row action), link=inline text action, destructive=delete/cancel. Pick size by context: default=most use, sm=table rows / tight toolbars, lg=hero CTAs, icon=icon-only square. Use asChild to render as another element (e.g., a Next.js Link) while keeping all Button styles. Don't stack `className="bg-blue-500 text-white px-3"` — that bypasses variant + size and causes drift.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Primary CTA**
+  ```tsx
+  <Button onClick={onSubmit}>Save changes</Button>
+  ```
+  - **Variants side-by-side**
+  ```tsx
+  <div className="flex gap-2">
+    <Button>Default</Button>
+    <Button variant="secondary">Secondary</Button>
+    <Button variant="outline">Outline</Button>
+    <Button variant="ghost">Ghost</Button>
+    <Button variant="destructive">Delete</Button>
+  </div>
+  ```
+  - **Icon-only button**
+  ```tsx
+  <Button variant="ghost" size="icon" aria-label="Settings">
+    <SettingsIcon />
+  </Button>
+  ```
+  - **asChild — render as a Link**
+  ```tsx
+  <Button asChild variant="outline">
+    <a href="/docs">Read docs</a>
+  </Button>
+  ```
 ### Calendar
 - **Upstream module**: `@/components/base/calendar`
 - **Sub-components (Spec)**: `Calendar`, `CalendarDayButton`
 - **Intent**: Date picker calendar panel. Core rendering layer for date range selectors.
-- **Spec directive**: Use Calendar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Calendar from @/components/base for picking a date or date range (single dates, ranges, multi-date). Inline placement only — for popover-style date inputs, wrap Calendar in a Popover. Pass `mode="single" | "range" | "multiple"`. Use `selected` + `onSelect` for controlled state. Don't replace with a raw <input type="date"> in product UIs — that loses cross-browser style consistency.
+- **Few-shot examples** (prefer mimicking structure & imports):
+  - **Single-date picker**
+  ```tsx
+  const [date, setDate] = React.useState<Date | undefined>();
+  <Calendar mode="single" selected={date} onSelect={setDate} />
+  ```
+  - **Date-range picker**
+  ```tsx
+  const [range, setRange] = React.useState<DateRange | undefined>();
+  <Calendar mode="range" selected={range} onSelect={setRange} numberOfMonths={2} />
+  ```
+  - **Wrapped inside a Popover**
+  ```tsx
+  <Popover>
+    <PopoverTrigger asChild>
+      <Button variant="outline">{date ? format(date, "PPP") : "Pick a date"}</Button>
+    </PopoverTrigger>
+    <PopoverContent className="w-auto p-0" align="start">
+      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+    </PopoverContent>
+  </Popover>
+  ```
 ### Card
 - **Upstream module**: `@/components/base/card`
 - **Sub-components (Spec)**: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`

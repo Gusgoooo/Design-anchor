@@ -79,7 +79,21 @@
       }
     ]
   },
-  "aiPrompt": "Use Badge from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Badge from @/components/base for status labels, count chips, and inline tags. Pick variant by intent: default=primary highlight, secondary=neutral marker, destructive=error/warning state, outline=quiet emphasis. Don't hand-roll `<span className=\"px-2 py-0.5 bg-blue-100 text-blue-700 rounded\">` — it bypasses the variant contract and ages into visual drift.",
+  "examples": [
+    {
+      "title": "Status variants",
+      "snippet": "<div className=\"flex gap-2\">\n  <Badge>Active</Badge>\n  <Badge variant=\"secondary\">Draft</Badge>\n  <Badge variant=\"destructive\">Expired</Badge>\n  <Badge variant=\"outline\">Optional</Badge>\n</div>"
+    },
+    {
+      "title": "Count bubble next to a label",
+      "snippet": "<span className=\"inline-flex items-center gap-2\">\n  Notifications\n  <Badge variant=\"secondary\">12</Badge>\n</span>"
+    },
+    {
+      "title": "Inline tags in a list item",
+      "snippet": "<Item>\n  <ItemContent>\n    <ItemTitle>Q4 roadmap</ItemTitle>\n    <ItemDescription>\n      <Badge variant=\"outline\">draft</Badge> <Badge>in review</Badge>\n    </ItemDescription>\n  </ItemContent>\n</Item>"
+    }
+  ],
   "forbidden": [],
   "corrections": [],
   "referencePriority": [

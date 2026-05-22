@@ -40,7 +40,17 @@
       }
     ]
   },
-  "aiPrompt": "Use Breadcrumb from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Breadcrumb from @/components/base for showing the current location inside a navigable hierarchy. Structure: Breadcrumb > BreadcrumbList > (BreadcrumbItem > BreadcrumbLink/Page) [+ BreadcrumbSeparator between each]. The current page should be a BreadcrumbPage (no link). Use BreadcrumbEllipsis when the path is long enough to need collapsing. Skip for single-level pages — breadcrumbs add noise when there's no hierarchy.",
+  "examples": [
+    {
+      "title": "Standard 3-level breadcrumb",
+      "snippet": "<Breadcrumb>\n  <BreadcrumbList>\n    <BreadcrumbItem><BreadcrumbLink href=\"/\">Home</BreadcrumbLink></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbLink href=\"/components\">Components</BreadcrumbLink></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbPage>Button</BreadcrumbPage></BreadcrumbItem>\n  </BreadcrumbList>\n</Breadcrumb>"
+    },
+    {
+      "title": "Collapsed path with ellipsis",
+      "snippet": "<Breadcrumb>\n  <BreadcrumbList>\n    <BreadcrumbItem><BreadcrumbLink href=\"/\">Home</BreadcrumbLink></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbEllipsis /></BreadcrumbItem>\n    <BreadcrumbSeparator />\n    <BreadcrumbItem><BreadcrumbPage>Settings</BreadcrumbPage></BreadcrumbItem>\n  </BreadcrumbList>\n</Breadcrumb>"
+    }
+  ],
   "meta": {
     "tags": [
       "breadcrumb",

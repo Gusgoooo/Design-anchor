@@ -52,7 +52,17 @@
       }
     ]
   },
-  "aiPrompt": "Use AlertDialog from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use AlertDialog from @/components/base for blocking confirmation of irreversible actions (delete / discard / submit). Required structure: AlertDialog > AlertDialogTrigger (asChild Button) + AlertDialogContent > AlertDialogHeader (Title + Description) + AlertDialogFooter (Cancel + Action). Use Dialog (not AlertDialog) for non-blocking form modals. Action button should be destructive variant when the operation is destructive.",
+  "examples": [
+    {
+      "title": "Destructive — delete confirmation",
+      "snippet": "<AlertDialog>\n  <AlertDialogTrigger asChild>\n    <Button variant=\"destructive\">Delete account</Button>\n  </AlertDialogTrigger>\n  <AlertDialogContent>\n    <AlertDialogHeader>\n      <AlertDialogTitle>Delete this account?</AlertDialogTitle>\n      <AlertDialogDescription>This cannot be undone.</AlertDialogDescription>\n    </AlertDialogHeader>\n    <AlertDialogFooter>\n      <AlertDialogCancel>Cancel</AlertDialogCancel>\n      <AlertDialogAction onClick={onDelete}>Delete</AlertDialogAction>\n    </AlertDialogFooter>\n  </AlertDialogContent>\n</AlertDialog>"
+    },
+    {
+      "title": "Controlled open",
+      "snippet": "<AlertDialog open={open} onOpenChange={setOpen}>\n  <AlertDialogContent>\n    <AlertDialogHeader>\n      <AlertDialogTitle>Unsaved changes</AlertDialogTitle>\n      <AlertDialogDescription>Discard your edits?</AlertDialogDescription>\n    </AlertDialogHeader>\n    <AlertDialogFooter>\n      <AlertDialogCancel>Keep editing</AlertDialogCancel>\n      <AlertDialogAction>Discard</AlertDialogAction>\n    </AlertDialogFooter>\n  </AlertDialogContent>\n</AlertDialog>"
+    }
+  ],
   "meta": {
     "tags": [
       "alert-dialog",

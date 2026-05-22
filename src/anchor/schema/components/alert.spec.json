@@ -59,7 +59,21 @@
       }
     ]
   },
-  "aiPrompt": "Use Alert from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Alert from @/components/base for inline status feedback (success info, warnings, errors). Compose with AlertTitle + AlertDescription. Use variant=\"destructive\" for errors. For blocking/confirm prompts use AlertDialog instead. Do not build banners with raw <div className=\"border bg-red-100\">.",
+  "examples": [
+    {
+      "title": "Info alert with title + description",
+      "snippet": "<Alert>\n  <AlertTitle>Heads up!</AlertTitle>\n  <AlertDescription>You can change your preferences in Settings.</AlertDescription>\n</Alert>"
+    },
+    {
+      "title": "Destructive — failed action",
+      "snippet": "<Alert variant=\"destructive\">\n  <AlertTitle>Save failed</AlertTitle>\n  <AlertDescription>Check your network and try again.</AlertDescription>\n</Alert>"
+    },
+    {
+      "title": "Title-only short notice",
+      "snippet": "<Alert>\n  <AlertTitle>Draft saved.</AlertTitle>\n</Alert>"
+    }
+  ],
   "meta": {
     "tags": [
       "alert",

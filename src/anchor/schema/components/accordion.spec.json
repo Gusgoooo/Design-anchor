@@ -32,7 +32,17 @@
       }
     ]
   },
-  "aiPrompt": "Use Accordion from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Accordion from @/components/base for progressive disclosure (FAQ, settings groups, expandable lists). Always wrap items in <Accordion type=\"single\" collapsible> or type=\"multiple\". Each item needs AccordionItem + AccordionTrigger + AccordionContent. Don't replace with raw <details>/<summary> — those break consistent transition timing and focus management.",
+  "examples": [
+    {
+      "title": "FAQ — single-open collapsible",
+      "snippet": "<Accordion type=\"single\" collapsible>\n  <AccordionItem value=\"q1\">\n    <AccordionTrigger>Is it accessible?</AccordionTrigger>\n    <AccordionContent>Yes. Follows WAI-ARIA disclosure pattern.</AccordionContent>\n  </AccordionItem>\n  <AccordionItem value=\"q2\">\n    <AccordionTrigger>Is it animated?</AccordionTrigger>\n    <AccordionContent>Yes, smooth height transition.</AccordionContent>\n  </AccordionItem>\n</Accordion>"
+    },
+    {
+      "title": "Multi-open settings groups",
+      "snippet": "<Accordion type=\"multiple\" defaultValue={[\"general\"]}>\n  <AccordionItem value=\"general\">\n    <AccordionTrigger>General</AccordionTrigger>\n    <AccordionContent>...</AccordionContent>\n  </AccordionItem>\n  <AccordionItem value=\"advanced\">\n    <AccordionTrigger>Advanced</AccordionTrigger>\n    <AccordionContent>...</AccordionContent>\n  </AccordionItem>\n</Accordion>"
+    }
+  ],
   "meta": {
     "tags": [
       "accordion",

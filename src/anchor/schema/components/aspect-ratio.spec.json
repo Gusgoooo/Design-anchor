@@ -26,7 +26,21 @@
       }
     ]
   },
-  "aiPrompt": "Use AspectRatio from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use AspectRatio from @/components/base whenever an image / video / iframe / chart needs to keep its proportions while the container resizes. Pass `ratio` as a number (width ÷ height). Don't reach for `aspect-[16/9]` arbitrary Tailwind on a raw div — it works but loses the design-system anchor.",
+  "examples": [
+    {
+      "title": "16:9 video / hero image",
+      "snippet": "<AspectRatio ratio={16 / 9}>\n  <img src={src} alt=\"\" className=\"h-full w-full rounded-md object-cover\" />\n</AspectRatio>"
+    },
+    {
+      "title": "1:1 square thumbnail",
+      "snippet": "<AspectRatio ratio={1}>\n  <img src={avatar} alt=\"\" className=\"h-full w-full object-cover\" />\n</AspectRatio>"
+    },
+    {
+      "title": "4:3 embedded iframe",
+      "snippet": "<AspectRatio ratio={4 / 3}>\n  <iframe src={url} className=\"h-full w-full rounded-md border\" />\n</AspectRatio>"
+    }
+  ],
   "meta": {
     "tags": [
       "aspect-ratio",

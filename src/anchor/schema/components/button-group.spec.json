@@ -39,7 +39,17 @@
       }
     ]
   },
-  "aiPrompt": "Use ButtonGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ButtonGroup from @/components/base to visually glue related buttons together (toolbars, segmented controls, split actions). Children should be Buttons of the same size + variant. Internal corners flatten automatically — don't manually `rounded-none` the buttons. Use ButtonGroupSeparator between visually distinct subgroups; ButtonGroupText for inline non-clickable labels.",
+  "examples": [
+    {
+      "title": "Toolbar — 3-button group",
+      "snippet": "<ButtonGroup>\n  <Button variant=\"outline\"><BoldIcon /></Button>\n  <Button variant=\"outline\"><ItalicIcon /></Button>\n  <Button variant=\"outline\"><UnderlineIcon /></Button>\n</ButtonGroup>"
+    },
+    {
+      "title": "Split action — label + dropdown",
+      "snippet": "<ButtonGroup>\n  <Button>Save</Button>\n  <DropdownMenu>\n    <DropdownMenuTrigger asChild>\n      <Button variant=\"default\" size=\"icon\"><ChevronDownIcon /></Button>\n    </DropdownMenuTrigger>\n    <DropdownMenuContent align=\"end\">\n      <DropdownMenuItem>Save as draft</DropdownMenuItem>\n      <DropdownMenuItem>Save and publish</DropdownMenuItem>\n    </DropdownMenuContent>\n  </DropdownMenu>\n</ButtonGroup>"
+    }
+  ],
   "meta": {
     "tags": [
       "button-group",

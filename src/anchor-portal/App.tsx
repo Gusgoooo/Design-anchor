@@ -23,6 +23,9 @@ const SEP_V = "h-px bg-border hover:bg-foreground/30 data-[dragging]:bg-foregrou
 function AppShell() {
   const route = useRoute();
   const currentStoryId = route.kind === "story" ? route.storyId : null;
+  // Docs routes (DesignToken / Patterns) render their own full-width content
+  // and have no editable args — skip the bottom Controls/Spec panel entirely.
+  const showBottomPanel = route.kind === "story" || route.kind === "welcome";
 
   return (
     <StorySessionProvider storyId={currentStoryId}>
@@ -34,15 +37,21 @@ function AppShell() {
           </Panel>
           <Separator className={SEP_H} />
           <Panel id="main" defaultSize="80%" minSize="40%" className="flex flex-col">
-            <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
-              <Panel id="canvas" defaultSize="62%" minSize="20%" className="flex flex-col bg-background">
+            {showBottomPanel ? (
+              <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
+                <Panel id="canvas" defaultSize="62%" minSize="20%" className="flex flex-col bg-background">
+                  <Canvas />
+                </Panel>
+                <Separator className={SEP_V} />
+                <Panel id="panel" defaultSize="38%" minSize="12%" className="flex flex-col">
+                  <PanelTabs />
+                </Panel>
+              </Group>
+            ) : (
+              <div className="flex h-full w-full flex-col bg-background">
                 <Canvas />
-              </Panel>
-              <Separator className={SEP_V} />
-              <Panel id="panel" defaultSize="38%" minSize="12%" className="flex flex-col">
-                <PanelTabs />
-              </Panel>
-            </Group>
+              </div>
+            )}
           </Panel>
         </Group>
       </div>

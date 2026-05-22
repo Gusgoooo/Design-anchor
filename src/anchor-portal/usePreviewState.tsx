@@ -13,8 +13,17 @@ export type StorySession = {
   meta: Meta;
   storyObj: StoryObj;
   defaultArgs: Record<string, unknown>;
+  /** Committed args — what the preview renders with. */
   args: Record<string, unknown>;
-  setArg: (key: string, value: unknown) => void;
+  /** Pending edits from the Controls panel; only flows into `args` on applyDraft(). */
+  draftArgs: Record<string, unknown>;
+  /** True when draftArgs diverges from args. */
+  isDirty: boolean;
+  /** Per-key set of arg names that differ from applied. */
+  dirtyKeys: Set<string>;
+  setDraftArg: (key: string, value: unknown) => void;
+  applyDraft: () => void;
+  discardDraft: () => void;
   resetArgs: () => void;
 };
 
@@ -70,12 +79,14 @@ export function StorySessionProvider({
   );
 
   const [loader, setLoader] = React.useState<LoaderState>(EMPTY_LOADER);
-  const [args, setArgs] = React.useState<Record<string, unknown>>({});
+  const [appliedArgs, setAppliedArgs] = React.useState<Record<string, unknown>>({});
+  const [draftArgs, setDraftArgs] = React.useState<Record<string, unknown>>({});
 
   React.useEffect(() => {
     if (!story) {
       setLoader(EMPTY_LOADER);
-      setArgs({});
+      setAppliedArgs({});
+      setDraftArgs({});
       return;
     }
     if (loader.storyId === story.id && loader.meta) return;
@@ -99,7 +110,8 @@ export function StorySessionProvider({
           loading: false,
           error: null,
         });
-        setArgs(merged);
+        setAppliedArgs(merged);
+        setDraftArgs(merged);
       })
       .catch((err) => {
         if (cancelled) return;
@@ -111,20 +123,39 @@ export function StorySessionProvider({
           loading: false,
           error: String(err),
         });
-        setArgs({});
+        setAppliedArgs({});
+        setDraftArgs({});
       });
     return () => {
       cancelled = true;
     };
   }, [story, loader.storyId, loader.meta]);
 
-  const setArg = React.useCallback((key: string, value: unknown) => {
-    setArgs((prev) => ({ ...prev, [key]: value }));
+  const setDraftArg = React.useCallback((key: string, value: unknown) => {
+    setDraftArgs((prev) => ({ ...prev, [key]: value }));
   }, []);
 
+  const applyDraft = React.useCallback(() => {
+    setAppliedArgs(draftArgs);
+  }, [draftArgs]);
+
+  const discardDraft = React.useCallback(() => {
+    setDraftArgs(appliedArgs);
+  }, [appliedArgs]);
+
   const resetArgs = React.useCallback(() => {
-    setArgs(loader.defaultArgs);
+    setAppliedArgs(loader.defaultArgs);
+    setDraftArgs(loader.defaultArgs);
   }, [loader.defaultArgs]);
+
+  const dirtyKeys = React.useMemo(() => {
+    const keys = new Set<string>();
+    const all = new Set([...Object.keys(draftArgs), ...Object.keys(appliedArgs)]);
+    for (const k of all) {
+      if (!shallowEq(draftArgs[k], appliedArgs[k])) keys.add(k);
+    }
+    return keys;
+  }, [draftArgs, appliedArgs]);
 
   const session = React.useMemo<StorySession | null>(() => {
     if (!story || !loader.meta || !loader.storyObj) return null;
@@ -133,11 +164,28 @@ export function StorySessionProvider({
       meta: loader.meta,
       storyObj: loader.storyObj,
       defaultArgs: loader.defaultArgs,
-      args,
-      setArg,
+      args: appliedArgs,
+      draftArgs,
+      isDirty: dirtyKeys.size > 0,
+      dirtyKeys,
+      setDraftArg,
+      applyDraft,
+      discardDraft,
       resetArgs,
     };
-  }, [story, loader.meta, loader.storyObj, loader.defaultArgs, args, setArg, resetArgs]);
+  }, [
+    story,
+    loader.meta,
+    loader.storyObj,
+    loader.defaultArgs,
+    appliedArgs,
+    draftArgs,
+    dirtyKeys,
+    setDraftArg,
+    applyDraft,
+    discardDraft,
+    resetArgs,
+  ]);
 
   const value = React.useMemo<SessionCtxValue>(
     () => ({ registry, story, session, loading: loader.loading, error: loader.error }),
@@ -164,4 +212,18 @@ export function buildStoryContext(session: StorySession): StoryContext {
     parameters: mergeParameters(session),
     globals: {},
   };
+}
+
+/** Cheap equality for arg values: handles primitives, NaN, simple arrays/objects by JSON. */
+function shallowEq(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true;
+  if (typeof a !== typeof b) return false;
+  if (a && b && typeof a === "object") {
+    try {
+      return JSON.stringify(a) === JSON.stringify(b);
+    } catch {
+      return false;
+    }
+  }
+  return false;
 }

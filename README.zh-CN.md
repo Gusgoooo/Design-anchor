@@ -52,7 +52,7 @@ Design-anchor 的管线是 **强制**，不是「文档」：
 ## 快速上手
 
 ```bash
-npx anchor start
+npx design-anchor start
 ```
 
 这是 all-in-one 命令，会自动：

@@ -1386,7 +1386,7 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 ✅ 主题提取完成！
 
 下一步：
-  • npx anchor dev    — 在 Storybook 中预览新主题
+  • npx design-anchor dev    — 在 Storybook 中预览新主题
   • 打开 Cursor，AI 将使用提取后的 token + Design-anchor components
   • 视觉氛围细节参考 design-prompt.md
 `);

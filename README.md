@@ -52,7 +52,7 @@ Change any seed, every component re-skins. Try to hand-write `bg-[#0204a3]` in b
 ## Quick start
 
 ```bash
-npx anchor start
+npx design-anchor start
 ```
 
 This is the all-in-one. It will:

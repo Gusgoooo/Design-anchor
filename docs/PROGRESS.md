@@ -13,7 +13,7 @@
 | 产品名 | **Design-anchor** |
 | 仓库 | `~/Documents/Design-anchor/` |
 | npm 包名 | `design-anchor` |
-| CLI 命令 | `npx anchor` |
+| CLI 命令 | `npx design-anchor` |
 | 来源 | https://github.com/Gusgoooo/DesignAccord.git（已重命名为 Design-anchor） |
 
 ## 启动开发环境
@@ -23,7 +23,7 @@ cd ~/Documents/Design-anchor
 claude --permission-mode bypassPermissions   # 免确认 Claude 会话
 # 然后在 Claude 内或另一个终端：
 npm run dev                                  # 启动 anchor-portal（Vite + 自研 SPA）
-# 或： npx anchor dev .                      # CLI 入口
+# 或： npx design-anchor dev .                      # CLI 入口
 # 默认 6006 端口；端口被占会自动找下一个
 ```
 

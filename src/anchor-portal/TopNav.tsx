@@ -5,7 +5,7 @@ import { useTheme } from "./theme/DarkModeProvider";
 import { useLocale, type Bilingual } from "./i18n/LocaleProvider";
 import { navigateTo, tabForRoute, useRoute, type TopTab } from "./router";
 
-const BASH_COMMAND = "npx anchor start";
+const BASH_COMMAND = "npx design-anchor start";
 
 const TABS: { id: TopTab; label: Bilingual; onClick: () => void }[] = [
   { id: "docs", label: { en: "Docs", zh: "文档" }, onClick: () => navigateTo({ kind: "docs" }) },

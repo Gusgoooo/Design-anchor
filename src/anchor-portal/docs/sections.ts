@@ -112,7 +112,7 @@ AI 编码工具单次生成 UI 时表现很好，但跨对话就丢失上下文�
 In any project directory:
 
 \`\`\`bash
-npx anchor start
+npx design-anchor start
 \`\`\`
 
 This is the all-in-one. It will:
@@ -177,7 +177,7 @@ export function CTA() {
 任意项目目录下执行：
 
 \`\`\`bash
-npx anchor start
+npx design-anchor start
 \`\`\`
 
 这是 all-in-one 命令，会自动：
@@ -340,7 +340,7 @@ Customizer 里 "Save & Sync" 按钮做的事：
 ## Commands
 
 \`\`\`bash
-npx anchor <command> [args]
+npx design-anchor <command> [args]
 \`\`\`
 
 | Command | Behaviour |
@@ -360,13 +360,13 @@ npx anchor <command> [args]
 
 \`\`\`bash
 $EDITOR .anchor/src/design-tokens/tokens.json
-npx anchor sync
+npx design-anchor sync
 \`\`\`
 
 ### Audit before commit
 
 \`\`\`bash
-npx anchor audit
+npx design-anchor audit
 \`\`\`
 
 Add to a pre-commit hook via husky / lefthook so AI-generated drift fails CI.
@@ -374,7 +374,7 @@ Add to a pre-commit hook via husky / lefthook so AI-generated drift fails CI.
 ### Re-init after pulling template updates
 
 \`\`\`bash
-npx anchor upgrade
+npx design-anchor upgrade
 \`\`\`
 
 ## Environment
@@ -382,7 +382,7 @@ npx anchor upgrade
 The CLI looks for \`.anchor/\` in the current working directory by default. Pass a path as the last argument to point elsewhere:
 
 \`\`\`bash
-npx anchor dev ./apps/web
+npx design-anchor dev ./apps/web
 \`\`\`
 
 The Portal starts on port 6006 by default. If the port is taken, it tries 6007, 6008, etc.
@@ -391,7 +391,7 @@ The Portal starts on port 6006 by default. If the port is taken, it tries 6007, 
 ## 命令
 
 \`\`\`bash
-npx anchor <command> [args]
+npx design-anchor <command> [args]
 \`\`\`
 
 | 命令 | 行为 |
@@ -411,13 +411,13 @@ npx anchor <command> [args]
 
 \`\`\`bash
 $EDITOR .anchor/src/design-tokens/tokens.json
-npx anchor sync
+npx design-anchor sync
 \`\`\`
 
 ### 提交前 audit
 
 \`\`\`bash
-npx anchor audit
+npx design-anchor audit
 \`\`\`
 
 通过 husky / lefthook 挂到 pre-commit hook 里，让 AI 漂移在 CI 阶段就 fail。
@@ -425,7 +425,7 @@ npx anchor audit
 ### 模板更新后重新 init
 
 \`\`\`bash
-npx anchor upgrade
+npx design-anchor upgrade
 \`\`\`
 
 ## 环境
@@ -433,7 +433,7 @@ npx anchor upgrade
 CLI 默认在当前目录找 \`.anchor/\`。要指向别处，把路径作为最后一个参数：
 
 \`\`\`bash
-npx anchor dev ./apps/web
+npx design-anchor dev ./apps/web
 \`\`\`
 
 Portal 默认 6006 端口。占用了就自动顺延 6007、6008 等。
@@ -510,17 +510,17 @@ In your project, add to \`.mcp.json\`:
 }
 \`\`\`
 
-Or globally: \`claude mcp add design-anchor npx anchor mcp .\`
+Or globally: \`claude mcp add design-anchor npx design-anchor mcp .\`
 
 ## Wire it into other MCP clients
 
-The server speaks the standard MCP stdio JSON-RPC. Any client (Continue, Cline, Zed, Qoder) that supports MCP config can point at \`npx anchor mcp .\` the same way.
+The server speaks the standard MCP stdio JSON-RPC. Any client (Continue, Cline, Zed, Qoder) that supports MCP config can point at \`npx design-anchor mcp .\` the same way.
 
 ## Verify it's running
 
 \`\`\`bash
 # In one terminal — start the server in stdio mode
-npx anchor mcp .
+npx design-anchor mcp .
 \`\`\`
 
 It blocks on stdin waiting for JSON-RPC messages. From an agent, the first thing you'll see is a \`tools/list\` response with the 13 tools above.
@@ -585,17 +585,17 @@ MCP（Model Context Protocol）让 AI agent 能调用结构化工具。Design-an
 }
 \`\`\`
 
-或者全局加：\`claude mcp add design-anchor npx anchor mcp .\`
+或者全局加：\`claude mcp add design-anchor npx design-anchor mcp .\`
 
 ## 接入其它 MCP 客户端
 
-Server 走标准 MCP stdio JSON-RPC。任何支持 MCP 配置的客户端（Continue、Cline、Zed、Qoder）按同样套路指向 \`npx anchor mcp .\` 就行。
+Server 走标准 MCP stdio JSON-RPC。任何支持 MCP 配置的客户端（Continue、Cline、Zed、Qoder）按同样套路指向 \`npx design-anchor mcp .\` 就行。
 
 ## 验证 server 在跑
 
 \`\`\`bash
 # 一个 terminal 里以 stdio 模式启动
-npx anchor mcp .
+npx design-anchor mcp .
 \`\`\`
 
 它会阻塞在 stdin 等 JSON-RPC 消息。Agent 接进来第一件事就是收到 \`tools/list\` 响应，里面就是上面那 13 个工具。
@@ -671,14 +671,14 @@ Edit \`src/anchor/linter/audit-config.json\`:
 
 \`\`\`yaml
 # .github/workflows/ci.yml
-- run: npx anchor audit
+- run: npx design-anchor audit
 \`\`\`
 
 Fails the build on any violation. Add as a pre-commit hook for tighter feedback:
 
 \`\`\`bash
 # .husky/pre-commit
-npx anchor audit
+npx design-anchor audit
 \`\`\`
 `,
       zh: `
@@ -740,14 +740,14 @@ Audit 把前缀分两类：
 
 \`\`\`yaml
 # .github/workflows/ci.yml
-- run: npx anchor audit
+- run: npx design-anchor audit
 \`\`\`
 
 任何违规直接 fail build。挂 pre-commit hook 反馈更快：
 
 \`\`\`bash
 # .husky/pre-commit
-npx anchor audit
+npx design-anchor audit
 \`\`\`
 `,
     },
@@ -966,7 +966,7 @@ Every component has a sibling \`*.spec.json\` in \`.anchor/src/anchor/schema/com
 
 Open the Components tab → pick any component → switch to **Spec.json** tab in the bottom panel → edit → Save. The MCP \`update_schema\` tool exposes the same operation to agents.
 
-After editing, run \`npx anchor sync\` to regenerate \`.cursorrules\` (or let the portal's auto-sync handle it).
+After editing, run \`npx design-anchor sync\` to regenerate \`.cursorrules\` (or let the portal's auto-sync handle it).
 `,
       zh: `
 ## 为什么要 spec
@@ -1030,7 +1030,7 @@ After editing, run \`npx anchor sync\` to regenerate \`.cursorrules\` (or let th
 
 Components tab → 选任意组件 → 下方面板切到 **Spec.json** → 改 → 保存。MCP \`update_schema\` 工具对 agent 暴露同样的操作。
 
-改完跑 \`npx anchor sync\` 重新生成 \`.cursorrules\`（或者让 portal 的 auto-sync 处理）。
+改完跑 \`npx design-anchor sync\` 重新生成 \`.cursorrules\`（或者让 portal 的 auto-sync 处理）。
 `,
     },
   },
@@ -1061,7 +1061,7 @@ The auto-controls scan the component source for Tailwind classes and offer overr
 Yes. Two ways:
 
 1. **Portal UI**: Components tab → "Add Component" → paste local path. The component is copied into \`.anchor/src/components/base/\` and a starter demo is scaffolded.
-2. **CLI**: \`npx anchor add MyComponent\`
+2. **CLI**: \`npx design-anchor add MyComponent\`
 
 Then write a \`spec.json\` in \`.anchor/src/anchor/schema/components/\` to declare its contract.
 
@@ -1080,7 +1080,7 @@ Everything is local. Tokens are in \`.anchor/src/design-tokens/tokens.json\`. Co
 ## How do I update Design-anchor?
 
 \`\`\`bash
-npx anchor upgrade
+npx design-anchor upgrade
 \`\`\`
 
 Updates the \`.anchor/\` template files in place. Your seeds, custom components, and spec edits are preserved.
@@ -1102,7 +1102,7 @@ auto-controls 扫组件源码里的 Tailwind class 生成 override 入口。但�
 可以，两种方式：
 
 1. **Portal UI**：Components tab → "Add Component" → 贴本地路径。组件复制到 \`.anchor/src/components/base/\`，自动 scaffold 一个 starter demo。
-2. **CLI**：\`npx anchor add MyComponent\`
+2. **CLI**：\`npx design-anchor add MyComponent\`
 
 然后在 \`.anchor/src/anchor/schema/components/\` 写一份 \`spec.json\` 声明它的契约。
 
@@ -1121,7 +1121,7 @@ Customizer 里打开 **Surfaces > Derived > Semantic** 子组，点任一行（�
 ## 怎么升级 Design-anchor？
 
 \`\`\`bash
-npx anchor upgrade
+npx design-anchor upgrade
 \`\`\`
 
 原地更新 \`.anchor/\` 模板文件，你的 seeds、自定义组件、spec 改动都保留。

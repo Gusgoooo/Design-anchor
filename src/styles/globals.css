@@ -12,6 +12,41 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Match webkit scrollbars to the active color scheme so dark mode
+     doesn't show OS-default light scrollbars on overflow containers. */
+  html {
+    color-scheme: light;
+  }
+  html.dark {
+    color-scheme: dark;
+  }
+  /* Webkit fallback (most desktop browsers). */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.32);
+    background-clip: content-box;
+  }
+  html.dark ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.22);
+    background-clip: content-box;
+  }
+  html.dark ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.36);
+    background-clip: content-box;
+  }
 }
 
 /* react-colorful：防止色选器在 dialog 等受限容器中被压缩 */

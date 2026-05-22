@@ -85,11 +85,6 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
                     />
                   );
                 })}
-                {group.seeds.length === 0 ? (
-                  <div className="px-3 py-2 text-[11px] italic text-muted-foreground">
-                    No editable seeds — only derived tokens below.
-                  </div>
-                ) : null}
                 <DerivedMapTokens
                   group={group}
                   resolvedVars={resolvedVars}

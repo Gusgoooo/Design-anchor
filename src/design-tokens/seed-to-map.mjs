@@ -380,13 +380,14 @@ function genRadius(radiusBase) {
 // ---------------------------------------------------------------------------
 
 function genCommonMapToken(seed) {
-  const { borderRadius, lineWidth } = seed;
-  // Motion durations are no longer user-editable seeds — fixed system constants.
+  const { borderRadius } = seed;
+  // Motion durations & line widths are no longer user-editable seeds —
+  // fixed system constants.
   return {
     motionDurationFast: "0.1s",
     motionDurationMid: "0.2s",
     motionDurationSlow: "0.3s",
-    lineWidthBold: lineWidth + 1,
+    lineWidthBold: 2,
     ...genRadius(borderRadius),
   };
 }
@@ -772,8 +773,8 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   vars["motion-duration-mid"] = commonMap.motionDurationMid;
   vars["motion-duration-slow"] = commonMap.motionDurationSlow;
 
-  // Line width
-  vars["line-width"] = `${seed.lineWidth}px`;
+  // Line width (fixed system constants — no longer derived from seed)
+  vars["line-width"] = "1px";
   vars["line-width-bold"] = `${commonMap.lineWidthBold}px`;
 
   // --- Alias layer: Tailwind-aligned spacing（`spacing-{n}` + mirror → padding-/margin-）---
@@ -839,13 +840,19 @@ export function deriveSeedToMap(seed, { dark = false, customSeeds = {}, fixedAli
   // Suppress unused-import warning since fixedAliases is now no-op
   void fixedAliases;
 
-  // Border width (kept for compatibility)
-  vars["border-width-hairline"] = `${seed.lineWidth}px`;
+  // Border width (kept for compatibility; fixed system constants)
+  vars["border-width-hairline"] = "1px";
   vars["border-width-0"] = "0";
 
-  // Font family
-  if (seed.fontFamily) vars["font-family"] = seed.fontFamily;
-  if (seed.fontFamilyCode) vars["font-family-code"] = seed.fontFamilyCode;
+  // Font family — fixed system constants, no longer user-editable seeds.
+  // English defaults to Inter; CJK falls back to PingFang / YaHei (the
+  // OS-installed system Chinese fonts) so mixed text renders cleanly.
+  vars["font-family"] =
+    "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', " +
+    "Roboto, 'Helvetica Neue', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', " +
+    "'微软雅黑', Arial, sans-serif";
+  vars["font-family-code"] =
+    "ui-monospace, 'SF Mono', Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace";
 
   // Elevation "none" alias
   vars["elevation-none"] = "none";

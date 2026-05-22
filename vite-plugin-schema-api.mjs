@@ -495,6 +495,142 @@ export function schemaApiPlugin(repoRoot) {
           return;
         }
 
+        // POST /api/import-component-path  — accepts { path } where path is
+        // an absolute (or ~-prefixed) file or folder on the dev machine.
+        // For a .tsx file: copies it into src/components/base/ and
+        // auto-generates a *.demo.tsx if missing.
+        // For a folder: imports every direct-child .tsx file (skipping
+        // *.demo.tsx and *.stories.tsx).
+        if (req.method === "POST" && url === "/api/import-component-path") {
+          const chunks = [];
+          req.on("data", (c) => chunks.push(c));
+          req.on("end", () => {
+            try {
+              const raw = Buffer.concat(chunks).toString("utf8");
+              const body = raw ? JSON.parse(raw) : {};
+              let sourcePath = String(body?.path ?? "").trim();
+              if (!sourcePath) {
+                res.statusCode = 400;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ ok: false, error: "path is required" }));
+                return;
+              }
+              // Expand ~ to $HOME for ergonomics.
+              if (sourcePath.startsWith("~")) {
+                sourcePath = path.join(process.env.HOME || "", sourcePath.slice(1));
+              }
+              if (!path.isAbsolute(sourcePath)) {
+                sourcePath = path.resolve(repoRoot, sourcePath);
+              }
+              if (!fs.existsSync(sourcePath)) {
+                res.statusCode = 404;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ ok: false, error: `Path not found: ${sourcePath}` }));
+                return;
+              }
+
+              const stat = fs.statSync(sourcePath);
+              const filesToImport = [];
+              if (stat.isFile()) {
+                if (!sourcePath.endsWith(".tsx")) {
+                  res.statusCode = 400;
+                  res.setHeader("Content-Type", "application/json");
+                  res.end(JSON.stringify({ ok: false, error: "File must end with .tsx" }));
+                  return;
+                }
+                filesToImport.push(sourcePath);
+              } else if (stat.isDirectory()) {
+                for (const entry of fs.readdirSync(sourcePath)) {
+                  if (!entry.endsWith(".tsx")) continue;
+                  if (entry.includes(".demo.") || entry.includes(".stories.")) continue;
+                  filesToImport.push(path.join(sourcePath, entry));
+                }
+                if (filesToImport.length === 0) {
+                  res.statusCode = 400;
+                  res.setHeader("Content-Type", "application/json");
+                  res.end(JSON.stringify({ ok: false, error: "No .tsx files found in folder" }));
+                  return;
+                }
+              } else {
+                res.statusCode = 400;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ ok: false, error: "Path is neither a file nor folder" }));
+                return;
+              }
+
+              const baseDir = path.join(repoRoot, "src/components/base");
+              if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+
+              const imported = [];
+              const errors = [];
+              for (const src of filesToImport) {
+                try {
+                  const filename = path.basename(src);
+                  const compName = filename.replace(/\.tsx$/, "");
+                  const dest = path.join(baseDir, filename);
+                  if (!isWriteAllowed(repoRoot, dest)) {
+                    errors.push({ file: filename, error: "forbidden destination" });
+                    continue;
+                  }
+                  const content = fs.readFileSync(src);
+                  writeFileWithFsync(dest, content);
+
+                  const pascal = compName.replace(/(^|-)(\w)/g, (_, _2, c) => c.toUpperCase());
+                  const demoPath = path.join(baseDir, pascal + ".demo.tsx");
+                  if (!fs.existsSync(demoPath)) {
+                    const demo = [
+                      `import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";`,
+                      `import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";`,
+                      `import { autoClassControls } from "@/design-tokens/tw-class-audit";`,
+                      `import componentSrc from "./${compName}.tsx?raw";`,
+                      `import { ${pascal} } from "./${compName}";`,
+                      ``,
+                      `const audit = autoClassControls(componentSrc);`,
+                      ``,
+                      `const meta = {`,
+                      `  title: "${pascal}",`,
+                      `  component: ${pascal},`,
+                      `  parameters: { anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children"] }) },`,
+                      `  args: { ...audit.args },`,
+                      `  argTypes: { ...audit.argTypes },`,
+                      `} satisfies Meta<typeof ${pascal}>;`,
+                      ``,
+                      `export default meta;`,
+                      `type Story = StoryObj<typeof meta>;`,
+                      ``,
+                      `export const Default: Story = {`,
+                      `  render: (args) => (`,
+                      `    <${pascal} className={audit.buildClassName(args as unknown as Record<string, string>)}>`,
+                      `      Sample content`,
+                      `    </${pascal}>`,
+                      `  ),`,
+                      `};`,
+                      ``,
+                    ].join("\n");
+                    writeFileWithFsync(demoPath, demo);
+                  }
+                  imported.push(dest.replace(repoRoot + "/", ""));
+                } catch (e) {
+                  errors.push({ file: path.basename(src), error: String(e) });
+                }
+              }
+
+              res.setHeader("Content-Type", "application/json; charset=utf-8");
+              res.end(JSON.stringify({
+                ok: imported.length > 0,
+                imported,
+                errors,
+                kind: stat.isDirectory() ? "folder" : "file",
+              }));
+            } catch (e) {
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({ ok: false, error: String(e) }));
+            }
+          });
+          return;
+        }
+
         next();
       });
     },

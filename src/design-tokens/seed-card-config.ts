@@ -85,6 +85,11 @@ export const SEED_GROUPS: SeedGroup[] = [
     ],
   },
   {
+    title: "Radius",
+    seeds: [{ key: "borderRadius", label: "borderRadius", source: "seed", editor: "length" }],
+    derived: { prefixes: ["border-radius"] },
+  },
+  {
     title: "Semantic Mapping",
     seeds: [],
     derived: {
@@ -117,15 +122,12 @@ export const SEED_GROUPS: SeedGroup[] = [
     title: "Typography",
     seeds: [
       { key: "fontSize", label: "fontSize", source: "seed", editor: "length" },
-      { key: "fontFamily", label: "fontFamily", source: "seed", editor: "generic" },
-      { key: "fontFamilyCode", label: "fontFamilyCode", source: "seed", editor: "generic" },
     ],
-    derived: { prefixes: ["font-size", "line-height", "font-weight", "font-family"] },
+    derived: { prefixes: ["font-size", "line-height", "font-weight"] },
     derivedSubGroups: [
       { title: "Font Size", match: (id) => id.startsWith("font-size") },
       { title: "Line Height", match: (id) => id.startsWith("line-height") },
       { title: "Font Weight", match: (id) => id.startsWith("font-weight") },
-      { title: "Font Family", match: (id) => id.startsWith("font-family") },
     ],
   },
   {
@@ -137,19 +139,9 @@ export const SEED_GROUPS: SeedGroup[] = [
     derived: { prefixes: ["spacing-"] },
   },
   {
-    title: "Radius",
-    seeds: [{ key: "borderRadius", label: "borderRadius", source: "seed", editor: "length" }],
-    derived: { prefixes: ["border-radius"] },
-  },
-  {
     title: "Shadow",
     seeds: [],
     derived: { prefixes: ["elevation"] },
-  },
-  {
-    title: "Border",
-    seeds: [{ key: "lineWidth", label: "lineWidth", source: "seed", editor: "length" }],
-    derived: { prefixes: ["line-width", "border-width"] },
   },
 ];
 

@@ -90,18 +90,25 @@ The rule lives in `.cursor/rules/anchor-selfcheck.mdc` and is mirrored in `src/a
 
 ```
 your-project/
-├── .anchor/                       ← Design-anchor subtree (gitignored or vendored)
-│   ├── src/components/base/      60+ ready-to-use React + Tailwind components
-│   ├── src/anchor/schema/        per-component spec.json contracts
-│   ├── src/design-tokens/        tokens.json + seed-to-map algorithm
-│   └── package.json              own deps (Vite + React + Radix + Tailwind v4)
-├── .cursorrules                   AI-readable design contract (auto-regenerated)
-├── .cursor/rules/anchor.mdc       Cursor-specific rule file
+├── .anchor/                            ← Design-anchor subtree (gitignored or vendored)
+│   ├── src/components/base/           60+ ready-to-use React + Tailwind components
+│   ├── src/anchor/schema/             per-component spec.json contracts
+│   ├── src/design-tokens/             tokens.json + seed-to-map algorithm
+│   └── package.json                   own deps (Vite + React + Radix + Tailwind v4)
+├── CLAUDE.md                           Claude Code CLI / Claude Desktop rules
+├── .cursor/rules/anchor.mdc            Cursor-specific rule (alwaysApply)
 ├── .cursor/rules/anchor-selfcheck.mdc  post-edit checklist + image-reference rule
-├── CLAUDE.md                      Claude Code project instructions
-├── .github/copilot-instructions.md  Copilot Chat rules
-└── ANCHOR_INTEGRATION.md          one-page consumer guide
+├── .github/copilot-instructions.md     GitHub Copilot Chat rules
+├── AGENTS.md                           generic AI coding contract (3 hard rules)
+├── .mcp.json                           MCP config for Claude Code / Cline / Zed
+├── .cursor/mcp.json                    MCP config for Cursor
+├── .cursor/hooks.json                  Cursor hook: audit on save
+├── .cursorrules                        legacy/fallback rule format
+├── ANCHOR_BOUNDARIES.md                directory boundary guide
+└── ANCHOR_INTEGRATION.md               @design alias + Vite example
 ```
+
+Each AI tool reads its own file. Cursor reads `.cursor/rules/*.mdc`; Claude Code reads `CLAUDE.md`; Copilot reads `.github/copilot-instructions.md`. The rule body is the same across all three — same scene routing table, same component list, same hard rules — just packaged for whichever tool is open.
 
 ## Use components in your app
 

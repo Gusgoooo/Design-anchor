@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "anchor": {
+      "command": "node",
+      "args": [
+        "./bin/anchor-mcp.mjs",
+        "."
+      ]
+    }
+  }
+}

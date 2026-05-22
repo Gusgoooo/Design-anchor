@@ -290,10 +290,13 @@ function doInit(targetArg) {
   writeKitStatus(target, manifest);
   console.log("  ✅ .design-kit-manifest.json + .anchor-portal/kit-status.json");
 
-  // 生成 Cursor 集成文件（写到用户项目根目录）
+  // 生成 AI 集成文件（写到用户项目根目录）
   const projectRoot = resolve(target, "..");
-  generateCursorRule(projectRoot, target);
-  generateCursorMcp(projectRoot, target);
+  generateCursorRule(projectRoot, target);          // Cursor → .cursor/rules/anchor.mdc
+  generateClaudeMd(projectRoot, target);            // Claude Code / Desktop → CLAUDE.md
+  generateCopilotInstructions(projectRoot, target); // Copilot Chat → .github/copilot-instructions.md
+  generateCursorMcp(projectRoot, target);           // Cursor MCP → .cursor/mcp.json
+  generateRootMcp(projectRoot, target);             // Claude Code / Cline / Zed MCP → .mcp.json
   generateAgentsMd(projectRoot, target);
   installCursorHooks(projectRoot);
   installSelfcheckRule(projectRoot);
@@ -305,14 +308,18 @@ function doInit(targetArg) {
   console.log("  npm install");
   console.log("  anchor dev .");
   console.log("");
-  console.log("🤖 Cursor 集成已自动配置：");
-  console.log("  • .cursor/rules/anchor.mdc       — 组件库约束（alwaysApply）");
+  console.log("🤖 AI 集成已自动配置：");
+  console.log("  • CLAUDE.md                          — Claude Code / Claude Desktop");
+  console.log("  • .cursor/rules/anchor.mdc           — Cursor（alwaysApply）");
   console.log("  • .cursor/rules/anchor-selfcheck.mdc — 改完代码后的自检清单");
-  console.log("  • .cursor/mcp.json                — MCP Server");
-  console.log("  • .cursor/hooks.json              — 保存 .tsx 后自动跑 anchor audit");
-  console.log("  • ANCHOR_BOUNDARIES.md            — Directory boundary guide (app src vs .anchor)");
-  console.log("  • ANCHOR_INTEGRATION.md           — @design 别名与 Vite 示例");
-  console.log("  重新打开 Cursor 后 Hooks 与规则生效。\n");
+  console.log("  • .github/copilot-instructions.md    — GitHub Copilot Chat");
+  console.log("  • AGENTS.md                          — 通用 AI 边界与契约");
+  console.log("  • .mcp.json                          — Claude Code / Cline / Zed MCP");
+  console.log("  • .cursor/mcp.json                   — Cursor MCP");
+  console.log("  • .cursor/hooks.json                 — 保存 .tsx 后自动跑 anchor audit");
+  console.log("  • ANCHOR_BOUNDARIES.md               — Directory boundary guide");
+  console.log("  • ANCHOR_INTEGRATION.md              — @design 别名与 Vite 示例");
+  console.log("  重新打开 IDE 后规则生效。\n");
 }
 
 /**
@@ -519,15 +526,14 @@ function buildSceneRouting(specDir) {
 
 /* ─── Cursor 集成 ─── */
 
-function generateCursorRule(projectRoot, libTarget) {
+/** 收集规则正文需要的所有动态片段（spec 列表 + 场景路由表 + 相对路径）。 */
+function collectRuleSections(projectRoot, libTarget) {
   const relLib = "./" + relative(projectRoot, libTarget).split(sep).join("/");
-  const rulesDir = join(projectRoot, ".cursor/rules");
-  mkdirSync(rulesDir, { recursive: true });
-
   const specDir = join(libTarget, "src/anchor/schema/components");
+
   let specSummary = "";
   if (existsSync(specDir)) {
-    const files = readdirSync(specDir).filter(f => f.endsWith(".spec.json"));
+    const files = readdirSync(specDir).filter((f) => f.endsWith(".spec.json"));
     for (const f of files) {
       try {
         const s = JSON.parse(readFileSync(join(specDir, f), "utf8"));
@@ -537,26 +543,25 @@ function generateCursorRule(projectRoot, libTarget) {
   }
 
   const sceneRouting = buildSceneRouting(specDir);
+  return { relLib, specSummary, sceneRouting };
+}
 
-  const rule = `---
-description: Design-anchor component governance rules — AI must follow these constraints
-alwaysApply: true
----
-
-# Design-anchor Component Governance
+/** 多 IDE 共享的规则正文（不含 frontmatter，留给各 IDE 包装）。 */
+function buildAnchorRuleBody({ relLib, specSummary, sceneRouting }) {
+  return `# Design-anchor Component Governance
 
 This project uses the Design-anchor component library (at \`${relLib}\`, typically the hidden \`./.anchor\` directory). All UI development must follow these rules.
 
 ## Directory Conventions
 
 - **Application / business pages**: Write in your project's own \`src/\` (or your project's original app directory). **Do NOT** write business pages, routes, or feature code inside \`${relLib}\`.
-- **Component library & Design Tokens**: Maintained only in \`${relLib}\`; Design-anchor injects capabilities via \`${relLib}\` and \`.cursor/\`, it does not replace your project's own folder structure.
+- **Component library & Design Tokens**: Maintained only in \`${relLib}\`; Design-anchor injects capabilities via \`${relLib}\` and the rule files at the project root, it does not replace your project's own folder structure.
 
 ${sceneRouting}
 
 ## 组件引用规则
 
-1. **禁止使用原生 HTML 标签**：\`<button>\`、\`<input>\`、\`<table>\` 等，必须使用业务组件
+1. **禁止使用原生 HTML 标签**：\`<button>\`、\`<input>\`、\`<table>\` 等，必须使用组件库组件
 2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`ANCHOR_INTEGRATION.md\`）；否则从 \`${relLib}/src/components/base/\` 导入
 3. **禁止手写间距**：不允许 \`m-[13px]\`、\`p-[7px]\` 等任意值 Tailwind 类
 4. **颜色仅用语义类**：\`bg-primary\`、\`text-muted-foreground\` 等，禁止硬编码色值
@@ -565,13 +570,13 @@ ${sceneRouting}
 
 ${specSummary || "（运行 anchor sync 后自动生成）"}
 
-## 组件规范（JSON，非独立「Schema 编辑器」产品）
+## 组件规范（JSON）
 
-规范文件在 \`${relLib}/src/anchor/schema/components/*.spec.json\`。在 IDE 里直接改 JSON 即可；改完后在 \`${relLib}\` 下执行 \`npm run sync:anchor\`（或 \`anchor sync .\`）生成 \`.cursorrules\` 与 Tailwind 生成物。
+规范文件在 \`${relLib}/src/anchor/schema/components/*.spec.json\`。在 IDE 里直接改 JSON 即可；改完后在 \`${relLib}\` 下执行 \`npm run sync:anchor\`（或 \`anchor sync .\`）生成规则镜像与 Tailwind 生成物。
 
-## MCP 工具（若已配置 .cursor/mcp.json）
+## MCP 工具（若已配置 .mcp.json / .cursor/mcp.json）
 
-按需使用，例如：\`list_components\`、\`read_component\`、\`create_component\`、\`list_tokens\`、\`update_token\`、\`run_audit\`、\`sync_rules\`；规范相关也可用 \`read_schema\` / \`update_schema\`（与手写 JSON 等价）。
+按需使用：\`list_components\`、\`read_component\`、\`create_component\`、\`list_tokens\`、\`update_token\`、\`run_audit\`、\`run_sync_rules\`、\`read_schema\`、\`update_schema\`、\`get_cursorrules\`、\`read_file\`、\`write_file\`。
 
 ## AI 核心契约
 
@@ -580,9 +585,69 @@ ${specSummary || "（运行 anchor sync 后自动生成）"}
 2. 仅通过 Design Token 引用颜色/间距，禁止硬编码
 3. 组件行为以 schema JSON 为唯一数据源
 `;
+}
+
+function generateCursorRule(projectRoot, libTarget) {
+  const sections = collectRuleSections(projectRoot, libTarget);
+  const rulesDir = join(projectRoot, ".cursor/rules");
+  mkdirSync(rulesDir, { recursive: true });
+
+  const rule = `---
+description: Design-anchor component governance rules — AI must follow these constraints
+alwaysApply: true
+---
+
+${buildAnchorRuleBody(sections)}`;
 
   writeFileSync(join(rulesDir, "anchor.mdc"), rule);
-  console.log("  ✅ .cursor/rules/anchor.mdc");
+  console.log("  ✅ .cursor/rules/anchor.mdc（Cursor）");
+}
+
+/** Claude Code CLI / Claude Desktop 读 CLAUDE.md（项目根 + 父目录）。 */
+function generateClaudeMd(projectRoot, libTarget) {
+  const sections = collectRuleSections(projectRoot, libTarget);
+  const content = `<!--
+  Design-anchor governance rules for Claude Code CLI / Claude Desktop.
+  Auto-regenerated by \`anchor init\` / \`anchor sync\`. Edit
+  ${relative(projectRoot, libTarget).split(sep).join("/")}/src/anchor/schema/components/*.spec.json
+  then re-run sync to refresh this file.
+-->
+
+${buildAnchorRuleBody(sections)}`;
+  writeFileSync(join(projectRoot, "CLAUDE.md"), content);
+  console.log("  ✅ CLAUDE.md（Claude Code / Claude Desktop）");
+}
+
+/** GitHub Copilot Chat 读 .github/copilot-instructions.md。 */
+function generateCopilotInstructions(projectRoot, libTarget) {
+  const sections = collectRuleSections(projectRoot, libTarget);
+  const dir = join(projectRoot, ".github");
+  mkdirSync(dir, { recursive: true });
+  const content = `<!--
+  Design-anchor governance rules for GitHub Copilot Chat.
+  Auto-regenerated by \`anchor init\` / \`anchor sync\`.
+-->
+
+${buildAnchorRuleBody(sections)}`;
+  writeFileSync(join(dir, "copilot-instructions.md"), content);
+  console.log("  ✅ .github/copilot-instructions.md（Copilot Chat）");
+}
+
+/** Claude Code / Claude Desktop / Cline / Zed 读项目根 .mcp.json。 */
+function generateRootMcp(projectRoot, libTarget) {
+  const relLib = "./" + relative(projectRoot, libTarget).split(sep).join("/");
+  const mcpPath = join(projectRoot, ".mcp.json");
+  let existing = {};
+  if (existsSync(mcpPath)) {
+    try { existing = JSON.parse(readFileSync(mcpPath, "utf8")); } catch {}
+  }
+  const mcpServers = existing.mcpServers || {};
+  mcpServers["anchor"] = {
+    command: "node",
+    args: [join(PKG_ROOT, "bin/anchor-mcp.mjs"), relLib],
+  };
+  writeFileSync(mcpPath, JSON.stringify({ mcpServers }, null, 2) + "\n");
+  console.log("  ✅ .mcp.json（Claude Code / Cline / Zed / 其他 MCP 客户端）");
 }
 
 function generateAgentsMd(projectRoot, libTarget) {
@@ -730,12 +795,7 @@ function doGovern() {
 
   const sceneRouting = buildSceneRouting(specDir);
 
-  const governRule = `---
-description: Design-anchor AI coding governance rules — for existing projects
-alwaysApply: true
----
-
-# Design-anchor AI Coding Governance
+  const governBody = `# Design-anchor AI Coding Governance
 
 This project uses Design-anchor governance mode（\`anchor govern\`），AI 编码必须遵守以下规范。
 
@@ -766,8 +826,36 @@ ${specDetails || "（无详细约束）"}
 4. 不引入与项目现有设计系统风格不一致的第三方 UI 库
 `;
 
-  writeFileSync(join(rulesDir, "anchor.mdc"), governRule);
-  console.log("  ✅ .cursor/rules/anchor.mdc（AI 治理规则）");
+  const cursorGovern = `---
+description: Design-anchor AI coding governance rules — for existing projects
+alwaysApply: true
+---
+
+${governBody}`;
+  writeFileSync(join(rulesDir, "anchor.mdc"), cursorGovern);
+  console.log("  ✅ .cursor/rules/anchor.mdc（Cursor）");
+
+  // Claude Code / Claude Desktop
+  const claudeHeader = `<!--
+  Design-anchor governance rules (govern mode) for Claude Code CLI / Claude Desktop.
+  Auto-regenerated by \`anchor govern\`.
+-->
+
+`;
+  writeFileSync(join(projectRoot, "CLAUDE.md"), claudeHeader + governBody);
+  console.log("  ✅ CLAUDE.md（Claude Code / Claude Desktop）");
+
+  // GitHub Copilot Chat
+  const copilotDir = join(projectRoot, ".github");
+  mkdirSync(copilotDir, { recursive: true });
+  const copilotHeader = `<!--
+  Design-anchor governance rules (govern mode) for GitHub Copilot Chat.
+  Auto-regenerated by \`anchor govern\`.
+-->
+
+`;
+  writeFileSync(join(copilotDir, "copilot-instructions.md"), copilotHeader + governBody);
+  console.log("  ✅ .github/copilot-instructions.md（Copilot Chat）");
 
   // 2. 安装 selfcheck 规则
   const selfcheckSrc = join(PKG_ROOT, ".cursor/rules/anchor-selfcheck.mdc");
@@ -837,35 +925,47 @@ You are working in a project governed by Design-anchor design rules.
   writeFileSync(join(projectRoot, ".cursorrules"), cursorrules);
   console.log("  ✅ .cursorrules（IDE 通用规则）");
 
-  // 5. 可选：配置 MCP（如果 anchor-mcp.mjs 存在）
+  // 5. 配置 MCP（Cursor + Claude Code / Cline / Zed 等）
   const mcpEntry = join(PKG_ROOT, "bin", "anchor-mcp.mjs");
   if (existsSync(mcpEntry)) {
-    const mcpPath = join(projectRoot, ".cursor/mcp.json");
-    let existing = {};
-    if (existsSync(mcpPath)) {
-      try { existing = JSON.parse(readFileSync(mcpPath, "utf8")); } catch {}
+    // Cursor: .cursor/mcp.json
+    const cursorMcpPath = join(projectRoot, ".cursor/mcp.json");
+    let cursorMcp = {};
+    if (existsSync(cursorMcpPath)) {
+      try { cursorMcp = JSON.parse(readFileSync(cursorMcpPath, "utf8")); } catch {}
     }
-    const mcpServers = existing.mcpServers || {};
-    mcpServers["anchor"] = {
-      command: "node",
-      args: [mcpEntry, projectRoot],
-    };
+    const cursorServers = cursorMcp.mcpServers || {};
+    cursorServers["anchor"] = { command: "node", args: [mcpEntry, projectRoot] };
     mkdirSync(join(projectRoot, ".cursor"), { recursive: true });
-    writeFileSync(mcpPath, JSON.stringify({ mcpServers }, null, 2) + "\n");
-    console.log("  ✅ .cursor/mcp.json（MCP Server）");
+    writeFileSync(cursorMcpPath, JSON.stringify({ mcpServers: cursorServers }, null, 2) + "\n");
+    console.log("  ✅ .cursor/mcp.json（Cursor MCP）");
+
+    // Claude Code / Cline / Zed: .mcp.json at project root
+    const rootMcpPath = join(projectRoot, ".mcp.json");
+    let rootMcp = {};
+    if (existsSync(rootMcpPath)) {
+      try { rootMcp = JSON.parse(readFileSync(rootMcpPath, "utf8")); } catch {}
+    }
+    const rootServers = rootMcp.mcpServers || {};
+    rootServers["anchor"] = { command: "node", args: [mcpEntry, projectRoot] };
+    writeFileSync(rootMcpPath, JSON.stringify({ mcpServers: rootServers }, null, 2) + "\n");
+    console.log("  ✅ .mcp.json（Claude Code / Cline / Zed MCP）");
   }
 
   console.log(`
 ✅ 治理模式初始化完成！
 
-生成的文件：
-  • .cursor/rules/anchor.mdc       — AI 编码治理规则（alwaysApply）
+生成的 AI 规则文件：
+  • CLAUDE.md                          — Claude Code / Claude Desktop
+  • .cursor/rules/anchor.mdc           — Cursor（alwaysApply）
   • .cursor/rules/anchor-selfcheck.mdc — 改完代码后的自检清单
-  • .cursorrules                     — IDE 通用规则（兼容 Cursor/Copilot/Claude）
-  • AGENTS.md                        — AI 编码边界说明
+  • .github/copilot-instructions.md    — GitHub Copilot Chat
+  • AGENTS.md                          — 通用 AI 编码边界
+  • .cursorrules                       — IDE 通用兜底
+  • .mcp.json + .cursor/mcp.json       — MCP Server
 
 与 init 模式的区别：
-  • 不拷贝组件源码、CSS、Storybook
+  • 不拷贝组件源码、CSS、Portal
   • 不创建 .anchor/ 目录
   • 不修改 package.json 或安装依赖
   • 仅通过规则文件约束 AI 行为

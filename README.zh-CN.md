@@ -90,18 +90,25 @@ Portal 右上角：🌐 EN/中文 切换 + 🌙/☀️ 暗色切换。
 
 ```
 your-project/
-├── .anchor/                       ← Design-anchor 子目录（可 gitignore 也可 vendor）
-│   ├── src/components/base/      60+ 个开箱即用的 React + Tailwind 组件
-│   ├── src/anchor/schema/        每个组件的 spec.json 契约
-│   ├── src/design-tokens/        tokens.json + seed-to-map 算法
-│   └── package.json              独立 deps（Vite + React + Radix + Tailwind v4）
-├── .cursorrules                   给 AI 读的设计契约（自动重新生成）
-├── .cursor/rules/anchor.mdc       Cursor 专属 rule 文件
+├── .anchor/                            ← Design-anchor 子目录（可 gitignore 可 vendor）
+│   ├── src/components/base/           60+ 开箱即用 React + Tailwind 组件
+│   ├── src/anchor/schema/             每个组件的 spec.json 契约
+│   ├── src/design-tokens/             tokens.json + seed-to-map 算法
+│   └── package.json                   独立 deps（Vite + React + Radix + Tailwind v4）
+├── CLAUDE.md                           Claude Code CLI / Claude Desktop 规则
+├── .cursor/rules/anchor.mdc            Cursor 专属规则（alwaysApply）
 ├── .cursor/rules/anchor-selfcheck.mdc  编辑后 checklist + 图片参考规则
-├── CLAUDE.md                      Claude Code 项目指令
-├── .github/copilot-instructions.md  Copilot Chat 规则
-└── ANCHOR_INTEGRATION.md          一页纸接入指南
+├── .github/copilot-instructions.md     GitHub Copilot Chat 规则
+├── AGENTS.md                           通用 AI 编码契约（三条硬规则）
+├── .mcp.json                           Claude Code / Cline / Zed MCP 配置
+├── .cursor/mcp.json                    Cursor MCP 配置
+├── .cursor/hooks.json                  Cursor hook：保存后跑 audit
+├── .cursorrules                        老格式兜底（部分 IDE 还在读）
+├── ANCHOR_BOUNDARIES.md                目录边界说明
+└── ANCHOR_INTEGRATION.md               @design 别名 + Vite 示例
 ```
+
+每个 AI 工具读自己的文件：Cursor 读 `.cursor/rules/*.mdc`，Claude Code 读 `CLAUDE.md`，Copilot 读 `.github/copilot-instructions.md`。三个文件的正文是一样的 —— 同样的场景路由表、同样的组件清单、同样的硬规则 —— 只是按不同工具的协议封装。
 
 ## 在你自己的应用里用组件
 

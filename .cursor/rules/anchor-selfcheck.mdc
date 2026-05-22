@@ -1,14 +1,15 @@
 ---
-description: DesignAccord self-check — Agent proactively verifies component library compliance after modifying UI code
+description: Design-anchor self-check — Agent proactively verifies component library compliance after modifying UI code
 alwaysApply: true
 ---
 
-# DesignAccord Self-Check (execute before each round of modifications ends)
+# Design-anchor Self-Check (execute before each round of modifications ends)
 
-0. **Directory**: Business pages and routes should be written in the **project's own** `src/` (or app directory); component library and tokens should only be modified within the project root's **`.accord/`** (hidden directory). Do not put business features inside `.accord/`.
-1. **Imports**: In business code, prefer `import { … } from "@design"` (if paths are configured per `ACCORD_INTEGRATION.md`); otherwise import `BusinessButton`, `BusinessInput`, `BusinessCheckbox`, `BusinessBadge`, `DataTable`, etc. from `@/components/business/` or the `.accord` barrel — do not use raw base components or hand-write native controls.
-2. **Forbidden tags**: Check whether `<button>`, `<input>`, `<table>`, or other tags declared as `forbidden` in specs are used in business scenarios; if so, replace them with the corresponding Business components.
-3. **Styling**: Avoid stacking arbitrary-value Tailwind like `m-[…]`, `p-[…]` on business JSX; prefer component semantic props (e.g. `density`, `variant`, `size`) for density and appearance.
-4. **Wrap-up**: If the user has configured a DesignAccord Cursor Hook, the audit runs automatically on save; otherwise proactively suggest running `accord audit` or MCP `run_audit` and fix issues based on the output.
+0. **Directory**: Business pages and routes go in the **project's own** `src/` (or app directory). The component library and tokens live only inside `./.anchor/` (the hidden Design-anchor directory). Do not put business features inside `.anchor/`.
+1. **Imports**: In business code, prefer `import { … } from "@design"` (alias configured per `ANCHOR_INTEGRATION.md`); otherwise import from `./.anchor/src/components/base/`. Do not hand-write native controls when a base component exists.
+2. **Forbidden tags**: Check whether `<button>`, `<input>`, `<table>`, or any tag declared as `forbidden` in `*.spec.json` is used in business JSX; replace with the corresponding base component.
+3. **Token-sensitive styling**: Avoid arbitrary-value Tailwind on prefixes `bg / text / border / ring / fill / stroke / from / to / via / shadow / p / m / gap / rounded`. Use semantic classes (`bg-primary`, `p-4`) or `var(--token)`. One-off layout (`w / h / top / left / grid-cols / aspect / z`) is fine with `[value]`.
+4. **Image reference**: If the user provided a screenshot/mockup, you should have already chosen Path A (extract tokens) or Path B (follow existing tokens). Never silently invent hex values from the image. See `src/anchor/rules/AGENTS_IMAGE_REFERENCE.md`.
+5. **Wrap-up**: If a Design-anchor Cursor Hook is configured, audit runs on save automatically. Otherwise proactively run `anchor audit` (or MCP `run_audit`) and fix issues based on the output.
 
-If the user explicitly requests an exception or the spec does not yet cover the scenario, briefly explain the deviation in your reply and suggest updating `*.spec.json` and `sync:accord` accordingly.
+If the user explicitly requests an exception or the spec does not yet cover the scenario, briefly explain the deviation in your reply and suggest updating `*.spec.json` and running `sync:anchor`.

@@ -36,10 +36,10 @@
   --color-sidebar-ring: var(--sidebar-ring);
 
   /* Border radius — direct values */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
-  --radius-xl: 12px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
 
   /* Shadows — var() refs; dark mode uses different shadow intensities */
   --shadow-sm: var(--elevation-sm);
@@ -106,15 +106,15 @@
 }
 
 :root {
-  --color-primary-bg: #ccd0e3;
-  --color-primary-bg-hover: #8b96d6;
-  --color-primary-border: #636fc9;
-  --color-primary-border-hover: #3e49bd;
-  --color-primary-hover: #1e25b0;
-  --color-primary-active: #02007d;
-  --color-primary-text-hover: #1e25b0;
-  --color-primary-text: #0204a3;
-  --color-primary-text-active: #02007d;
+  --color-primary-bg: #f0f3ff;
+  --color-primary-bg-hover: #f0f2ff;
+  --color-primary-border: #f0f1ff;
+  --color-primary-border-hover: #cfd3ff;
+  --color-primary-hover: #a6aaff;
+  --color-primary-active: #615fd9;
+  --color-primary-text-hover: #a6aaff;
+  --color-primary-text: #7d7fff;
+  --color-primary-text-active: #615fd9;
   --color-success: #10b981;
   --color-success-bg: #e1faed;
   --color-success-bg-hover: #adedcf;
@@ -189,12 +189,12 @@
   --line-height: 1.6667;
   --line-height-sm: 1.8000;
   --line-height-lg: 1.5714;
-  --border-radius: 6px;
+  --border-radius: 10px;
   --border-radius-xs: 2px;
-  --border-radius-sm: 4px;
-  --border-radius-lg: 8px;
-  --border-radius-outer: 4px;
-  --border-radius-xl: 12px;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-outer: 6px;
+  --border-radius-xl: 16px;
   --motion-duration-fast: 0.1s;
   --motion-duration-mid: 0.2s;
   --motion-duration-slow: 0.3s;
@@ -228,7 +228,7 @@
   --card-foreground: rgba(10, 10, 10, 0.88);
   --popover: #ffffff;
   --popover-foreground: rgba(10, 10, 10, 0.88);
-  --primary: #0204a3;
+  --primary: #7d7fff;
   --primary-foreground: #fff;
   --secondary: rgba(10, 10, 10, 0.06);
   --secondary-foreground: rgba(10, 10, 10, 0.88);
@@ -240,15 +240,15 @@
   --destructive-foreground: #fff;
   --border: #f0f0f0;
   --input: #d9d9d9;
-  --ring: #0204a3;
+  --ring: #7d7fff;
   --sidebar: #ffffff;
   --sidebar-foreground: rgba(10, 10, 10, 0.88);
-  --sidebar-primary: #0204a3;
+  --sidebar-primary: #7d7fff;
   --sidebar-primary-foreground: #fff;
   --sidebar-accent: rgba(10, 10, 10, 0.06);
   --sidebar-accent-foreground: rgba(10, 10, 10, 0.88);
   --sidebar-border: #f0f0f0;
-  --sidebar-ring: #0204a3;
+  --sidebar-ring: #7d7fff;
   --elevation-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --elevation: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   --elevation-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
@@ -359,12 +359,12 @@
   --line-height: 1.6667;
   --line-height-sm: 1.8000;
   --line-height-lg: 1.5714;
-  --border-radius: 6px;
+  --border-radius: 10px;
   --border-radius-xs: 2px;
-  --border-radius-sm: 4px;
-  --border-radius-lg: 8px;
-  --border-radius-outer: 4px;
-  --border-radius-xl: 12px;
+  --border-radius-sm: 6px;
+  --border-radius-lg: 12px;
+  --border-radius-outer: 6px;
+  --border-radius-xl: 16px;
   --motion-duration-fast: 0.1s;
   --motion-duration-mid: 0.2s;
   --motion-duration-slow: 0.3s;

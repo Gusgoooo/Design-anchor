@@ -24,7 +24,7 @@ const meta: Meta<Args> = {
   decorators: [
     (Story) => (
       <MockRuntimeProvider>
-        <div style={{ height: "100vh", width: "100%" }}>
+        <div style={{ height: "100%", width: "100%" }}>
           <Story />
         </div>
       </MockRuntimeProvider>

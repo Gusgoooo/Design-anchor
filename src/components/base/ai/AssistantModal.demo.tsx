@@ -18,7 +18,7 @@ const meta: Meta<Args> = {
   decorators: [
     (Story) => (
       <MockRuntimeProvider>
-        <div style={{ height: "100vh", width: "100%", position: "relative" }}>
+        <div style={{ height: "100%", width: "100%", position: "relative" }}>
           <div className="flex items-center justify-center h-full text-muted-foreground">
             Click the bot icon in the bottom-right corner
           </div>

@@ -16,37 +16,19 @@ export function Canvas() {
   if (error) return <CenterMessage icon={null} text={error} variant="error" />;
   if (!session) return <CenterMessage icon={null} text="Story not found in registry." variant="error" />;
 
+  // transform creates a new containing block, so any `position: fixed`
+  // element inside a story (e.g. AssistantModal's `fixed end-4 bottom-4`
+  // anchor) resolves to the canvas card instead of the viewport. The
+  // outer rounded card's overflow-hidden then clips anything outside
+  // the card bounds — keeping AI overlays from leaking into the
+  // sibling Controls card. Radix Portal-rendered dialogs/popovers are
+  // unaffected since they escape to document.body.
   return (
-    <div className="flex h-full flex-col">
-      <CanvasToolbar
-        title={session.story.componentTitle}
-        storyName={session.story.storyName}
-      />
-      {/*
-        transform creates a new containing block, so any
-        `position: fixed` element inside a story (e.g. AssistantModal's
-        `fixed end-4 bottom-4` anchor, AssistantSidebar's right-edge
-        overlay) resolves to the canvas area instead of the viewport.
-        This is what keeps the bottom Controls/Spec panel uncovered.
-        Radix Portal-rendered dialogs/popovers are unaffected since
-        they escape to document.body.
-      */}
-      <div
-        className="relative flex-1 overflow-auto bg-background"
-        style={{ transform: "translateZ(0)" }}
-      >
-        <PreviewFrame session={session} />
-      </div>
-    </div>
-  );
-}
-
-function CanvasToolbar({ title, storyName }: { title: string; storyName: string }) {
-  return (
-    <div className="flex shrink-0 items-center gap-2 border-b border-border bg-muted/30 px-3 py-1.5 text-[12px]">
-      <span className="font-medium text-foreground">{title}</span>
-      <span className="text-muted-foreground">/</span>
-      <span className="text-muted-foreground">{storyName}</span>
+    <div
+      className="relative h-full w-full overflow-auto bg-background"
+      style={{ transform: "translateZ(0)" }}
+    >
+      <PreviewFrame session={session} />
     </div>
   );
 }

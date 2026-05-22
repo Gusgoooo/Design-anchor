@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Multi-line text input for longer text entry. Unified border, border-radius, and focus styles.",
   "wraps": {
-    "module": "@/components/starter/textarea",
+    "module": "@/components/base/textarea",
     "primitives": [
       "Textarea"
     ]
@@ -65,7 +65,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Textarea from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Textarea from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "textarea",

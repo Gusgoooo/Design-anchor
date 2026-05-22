@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Popover bubble for showing extra content or lightweight interactions near a trigger. Auto-closes on outside click.",
   "wraps": {
-    "module": "@/components/starter/popover",
+    "module": "@/components/base/popover",
     "primitives": [
       "Popover",
       "PopoverTrigger",
@@ -47,7 +47,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Popover from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Popover from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "popover",

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Text tooltip bubble showing helper text on hover. Must not contain interactive content.",
   "wraps": {
-    "module": "@/components/starter/tooltip",
+    "module": "@/components/base/tooltip",
     "primitives": [
       "TooltipProvider",
       "Tooltip",
@@ -50,7 +50,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Tooltip from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Tooltip from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "tooltip",

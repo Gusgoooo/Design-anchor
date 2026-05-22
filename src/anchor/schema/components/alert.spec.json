@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Displays important status feedback (success, warning, error) with optional title and description.",
   "wraps": {
-    "module": "@/components/starter/alert",
+    "module": "@/components/base/alert",
     "primitives": [
       "Alert",
       "AlertTitle",
@@ -59,7 +59,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Alert from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Alert from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "alert",

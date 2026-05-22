@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Modal dialog for user confirmation or input. Blocks background interaction, supports controlled and uncontrolled modes.",
   "wraps": {
-    "module": "@/components/starter/dialog",
+    "module": "@/components/base/dialog",
     "primitives": [
       "Dialog",
       "DialogTrigger",
@@ -73,7 +73,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Dialog from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Dialog from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "dialog",

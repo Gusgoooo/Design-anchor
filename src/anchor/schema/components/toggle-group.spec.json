@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Toggle button group — mutually exclusive or multi-select toggles (e.g., view modes: list/grid/board).",
   "wraps": {
-    "module": "@/components/starter/toggle-group",
+    "module": "@/components/base/toggle-group",
     "primitives": [
       "ToggleGroup",
       "ToggleGroupItem"
@@ -36,7 +36,7 @@
       }
     ]
   },
-  "aiPrompt": "Use ToggleGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ToggleGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "toggle-group",

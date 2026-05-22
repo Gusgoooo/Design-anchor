@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Markdown renderer for AI messages. Renders AI-returned Markdown as formatted HTML (headings, lists, code blocks, tables, links).",
   "wraps": {
-    "module": "@/components/starter/ai/markdown-text",
+    "module": "@/components/base/ai/markdown-text",
     "primitives": [
       "MarkdownText"
     ]
@@ -35,14 +35,14 @@
       }
     ]
   },
-  "aiPrompt": "Use MarkdownText from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use MarkdownText from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/markdown-text"
+    "@/components/base/ai/markdown-text"
   ],
   "examples": [
     {
       "title": "Standalone Usage (outside Thread)",
-      "snippet": "import { MarkdownText } from '@/components/starter/ai/markdown-text';\n\n<MarkdownText />"
+      "snippet": "import { MarkdownText } from '@/components/base/ai/markdown-text';\n\n<MarkdownText />"
     }
   ],
   "meta": {

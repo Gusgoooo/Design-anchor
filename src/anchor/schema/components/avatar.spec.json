@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "User avatar with image loading and text fallback. Used in user lists, comments, and navigation bars.",
   "wraps": {
-    "module": "@/components/starter/avatar",
+    "module": "@/components/base/avatar",
     "primitives": [
       "Avatar",
       "AvatarImage",
@@ -44,7 +44,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Avatar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Avatar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "avatar",

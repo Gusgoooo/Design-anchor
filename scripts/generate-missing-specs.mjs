@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Batch-generate initial spec.json for starter components that lack one.
+ * Batch-generate initial spec.json for base components that lack one.
  * Run: node scripts/generate-missing-specs.mjs
  */
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { join, basename } from "node:path";
 
-const STARTER_DIR = "src/components/starter";
+const BASE_DIR = "src/components/base";
 const SPEC_DIR = "src/anchor/schema/components";
 
 const SKIP_FILES = ["ComponentGallery.tsx", "kitchen-sink-data-table.tsx", "composite-data-table.tsx"];
@@ -202,7 +202,7 @@ function generateSpec(componentId, source) {
     version: "1.0.0",
     intent,
     wraps: {
-      module: `@/components/starter/${componentId}`,
+      module: `@/components/base/${componentId}`,
       primitives: primitives.length > 0 ? primitives : [componentName],
     },
     requiredProps: [
@@ -218,7 +218,7 @@ function generateSpec(componentId, source) {
       baselineTokens,
       blacklist,
     },
-    aiPrompt: `Import ${componentName} from @/components/starter/${componentId}; ${intent ? intent.split(".")[0] + "." : ""}`,
+    aiPrompt: `Import ${componentName} from @/components/base/${componentId}; ${intent ? intent.split(".")[0] + "." : ""}`,
     meta: {
       tags: [componentId, category],
       category,
@@ -239,7 +239,7 @@ const existingSpecs = new Set(
     .map(f => f.replace(".spec.json", ""))
 );
 
-const componentFiles = readdirSync(STARTER_DIR)
+const componentFiles = readdirSync(BASE_DIR)
   .filter(f => f.endsWith(".tsx") && !f.includes(".stories.") && !SKIP_FILES.includes(f));
 
 let generated = 0;
@@ -253,7 +253,7 @@ for (const file of componentFiles) {
   // Skip DataTable (already has data-table spec)
   if (id === "datatable" || id === "data-table") continue;
 
-  const source = readFileSync(join(STARTER_DIR, file), "utf8");
+  const source = readFileSync(join(BASE_DIR, file), "utf8");
   const spec = generateSpec(id, source);
   const outPath = join(SPEC_DIR, `${id}.spec.json`);
   writeFileSync(outPath, JSON.stringify(spec, null, 2) + "\n");

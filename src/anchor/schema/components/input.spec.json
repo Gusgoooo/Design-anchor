@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Unified text input entry for search, form fields, passwords, etc. Raw <input> with manual spacing and borders is forbidden.",
   "wraps": {
-    "module": "@/components/starter/input",
+    "module": "@/components/base/input",
     "primitives": [
       "Input"
     ]
@@ -77,24 +77,24 @@
       }
     ]
   },
-  "aiPrompt": "Must use @/components/starter/input. Do not stack Tailwind overrides on JSX.",
+  "aiPrompt": "Must use @/components/base/input. Do not stack Tailwind overrides on JSX.",
   "forbidden": [
     {
       "htmlTag": "input",
       "reason": "Raw <input> is forbidden to ensure consistent height, border, and focus styles",
-      "useInstead": "@/components/starter/input"
+      "useInstead": "@/components/base/input"
     }
   ],
   "corrections": [
     {
       "id": "no-raw-input",
       "violation": "Using raw native  <input>",
-      "fixPrompt": "Replace with  import { Input } from '@/components/starter/Input'. "
+      "fixPrompt": "Replace with  import { Input } from '@/components/base/Input'. "
     }
   ],
   "referencePriority": [
-    "@/components/starter/input",
-    "@/components/starter"
+    "@/components/base/input",
+    "@/components/base"
   ],
   "meta": {
     "tags": [

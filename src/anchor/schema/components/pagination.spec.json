@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Pagination controls providing page number jumps and previous/next page navigation.",
   "wraps": {
-    "module": "@/components/starter/pagination",
+    "module": "@/components/base/pagination",
     "primitives": [
       "Pagination",
       "PaginationContent",
@@ -37,7 +37,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Pagination from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Pagination from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "pagination",

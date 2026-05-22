@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Bottom/side drawer panel for mobile action sheets or auxiliary content display.",
   "wraps": {
-    "module": "@/components/starter/drawer",
+    "module": "@/components/base/drawer",
     "primitives": [
       "Drawer",
       "DrawerPortal",
@@ -50,7 +50,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Drawer from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Drawer from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "drawer",

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Base data table layer providing semantic HTML table/thead/tbody/tr/th/td with consistent styling.",
   "wraps": {
-    "module": "@/components/starter/table",
+    "module": "@/components/base/table",
     "primitives": [
       "Table",
       "TableHeader",
@@ -37,7 +37,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Table from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Table from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "table",

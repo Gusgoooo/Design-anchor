@@ -101,7 +101,7 @@ export function AddComponentDialog({ open, onClose }: Props) {
             {file ? <span className="font-semibold">{file.name}</span> : <span>Click to select .tsx file</span>}
           </button>
           <p className="text-[11px] leading-relaxed text-muted-foreground">
-            Files are added to <code className="font-mono">src/components/starter/</code>. A starter <code className="font-mono">*.demo.tsx</code>
+            Files are added to <code className="font-mono">src/components/base/</code>. An initial <code className="font-mono">*.demo.tsx</code>
             is generated automatically if one does not already exist.
           </p>
           {error ? (

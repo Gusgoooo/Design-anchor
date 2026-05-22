@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Unified clickable action entry for primary, secondary, and link navigation actions. Raw <button> with manual spacing and brand colors is forbidden.",
   "wraps": {
-    "module": "@/components/starter/button",
+    "module": "@/components/base/button",
     "primitives": [
       "Button"
     ]
@@ -134,24 +134,24 @@
       }
     ]
   },
-  "aiPrompt": "Must use @/components/starter/button. Use variant prop for visual style，Use size prop for dimensions. Do not stack Tailwind overrides on JSX. Colors must use design token semantic classes only.",
+  "aiPrompt": "Must use @/components/base/button. Use variant prop for visual style，Use size prop for dimensions. Do not stack Tailwind overrides on JSX. Colors must use design token semantic classes only.",
   "forbidden": [
     {
       "htmlTag": "button",
       "reason": "Raw <button> is forbidden to ensure consistent border-radius, spacing, and brand colors",
-      "useInstead": "@/components/starter/button"
+      "useInstead": "@/components/base/button"
     }
   ],
   "corrections": [
     {
       "id": "no-raw-button",
       "violation": "Using raw native  <button>",
-      "fixPrompt": "Replace with  import { Button } from '@/components/starter/Button', Use variant and size props for styling. "
+      "fixPrompt": "Replace with  import { Button } from '@/components/base/Button', Use variant and size props for styling. "
     }
   ],
   "referencePriority": [
-    "@/components/starter/button",
-    "@/components/starter"
+    "@/components/base/button",
+    "@/components/base"
   ],
   "meta": {
     "tags": [

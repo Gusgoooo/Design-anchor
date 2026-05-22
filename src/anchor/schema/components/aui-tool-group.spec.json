@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "AI tool call group container. Aggregates multiple ToolFallback items in a collapsible panel with call count and active state.",
   "wraps": {
-    "module": "@/components/starter/ai/tool-group",
+    "module": "@/components/base/ai/tool-group",
     "primitives": [
       "ToolGroup",
       "ToolGroupRoot",
@@ -89,9 +89,9 @@
       }
     ]
   },
-  "aiPrompt": "Use ToolGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ToolGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/tool-group"
+    "@/components/base/ai/tool-group"
   ],
   "examples": [
     {

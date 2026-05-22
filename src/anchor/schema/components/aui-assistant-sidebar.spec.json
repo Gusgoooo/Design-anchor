@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Sidebar AI assistant layout. Splits page into main content and AI conversation sidebar with a draggable divider. For workspace scenarios needing AI assistance.",
   "wraps": {
-    "module": "@/components/starter/ai/assistant-sidebar",
+    "module": "@/components/base/ai/assistant-sidebar",
     "primitives": [
       "AssistantSidebar"
     ]
@@ -41,9 +41,9 @@
       }
     ]
   },
-  "aiPrompt": "Use AssistantSidebar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use AssistantSidebar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/assistant-sidebar"
+    "@/components/base/ai/assistant-sidebar"
   ],
   "examples": [
     {

@@ -1,9 +1,9 @@
 import * as React from "react";
 import { converter, formatCss, parse } from "culori";
-import { Button } from "@/components/starter/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/starter/card";
-import { Input } from "@/components/starter/input";
-import { Label } from "@/components/starter/label";
+import { Button } from "@/components/base/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/base/card";
+import { Input } from "@/components/base/input";
+import { Label } from "@/components/base/label";
 import { cn } from "@/lib/utils";
 
 const toOklch = converter("oklch");
@@ -18,7 +18,7 @@ export type OklchColorEditorProps = {
   value: string;
   onChange: (nextCssColor: string) => void;
   disabled?: boolean;
-  /** panel: wrapped in starter Card; plain: spacing only, for embedding in compact layouts */
+  /** panel: wrapped in base Card; plain: spacing only, for embedding in compact layouts */
   variant?: "panel" | "plain";
 };
 
@@ -40,7 +40,7 @@ function rgbChannelsFromCss(value: string): { r: number; g: number; b: number; a
 const inputMonoClass = "font-mono tabular-nums";
 
 /**
- * OKLCH / sRGB editor: supports OKLCH, RGBA, and Hex+Alpha modes; form elements use starter `Input` / `Label` / `Button`, panel uses `Card`.
+ * OKLCH / sRGB editor: supports OKLCH, RGBA, and Hex+Alpha modes; form elements use base `Input` / `Label` / `Button`, panel uses `Card`.
  */
 export function OklchColorEditor({ label, value, onChange, disabled, variant = "panel" }: OklchColorEditorProps) {
   const uid = React.useId();

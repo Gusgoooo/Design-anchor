@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "General content container for grouped information display. Supports title, description, body, and footer actions.",
   "wraps": {
-    "module": "@/components/starter/card",
+    "module": "@/components/base/card",
     "primitives": [
       "Card",
       "CardHeader",
@@ -47,7 +47,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Card from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Card from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "card",

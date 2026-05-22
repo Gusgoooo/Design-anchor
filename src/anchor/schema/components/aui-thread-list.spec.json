@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "AI conversation history list showing multiple threads. Supports create, archive, and delete operations.",
   "wraps": {
-    "module": "@/components/starter/ai/thread-list",
+    "module": "@/components/base/ai/thread-list",
     "primitives": [
       "ThreadList"
     ]
@@ -35,9 +35,9 @@
       }
     ]
   },
-  "aiPrompt": "Use ThreadList from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ThreadList from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/thread-list"
+    "@/components/base/ai/thread-list"
   ],
   "examples": [
     {

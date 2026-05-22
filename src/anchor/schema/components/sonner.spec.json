@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Toast notifications (via sonner library) for lightweight action feedback (success/failure/info).",
   "wraps": {
-    "module": "@/components/starter/sonner",
+    "module": "@/components/base/sonner",
     "primitives": [
       "Toaster"
     ]
@@ -26,7 +26,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Sonner from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Sonner from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "sonner",

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Tab component for switching between views/panels in the same area. Supports controlled and uncontrolled modes.",
   "wraps": {
-    "module": "@/components/starter/tabs",
+    "module": "@/components/base/tabs",
     "primitives": [
       "Tabs",
       "TabsList",
@@ -81,7 +81,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Tabs from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Tabs from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "tabs",

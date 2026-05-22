@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "One-time password input (OTP/verification code) with fixed-digit segmented fields.",
   "wraps": {
-    "module": "@/components/starter/input-otp",
+    "module": "@/components/base/input-otp",
     "primitives": [
       "InputOTP",
       "InputOTPGroup",
@@ -33,7 +33,7 @@
       }
     ]
   },
-  "aiPrompt": "Use InputOtp from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use InputOtp from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "input-otp",

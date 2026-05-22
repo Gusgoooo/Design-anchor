@@ -140,31 +140,31 @@ const TOOLS = [
 
 function listComponents() {
   const result = [];
-  const dir = join(LIB_ROOT, "src/components/starter");
+  const dir = join(LIB_ROOT, "src/components/base");
   if (!existsSync(dir)) return result;
   for (const f of readdirSync(dir)) {
     if (f.endsWith(".tsx") && !f.includes(".stories.")) {
-      result.push({ name: f.replace(/\.tsx$/, ""), path: `src/components/starter/${f}` });
+      result.push({ name: f.replace(/\.tsx$/, ""), path: `src/components/base/${f}` });
     }
   }
   return result;
 }
 
 function readComponent(name) {
-  const file = join(LIB_ROOT, "src/components/starter", name.endsWith(".tsx") ? name : `${name}.tsx`);
+  const file = join(LIB_ROOT, "src/components/base", name.endsWith(".tsx") ? name : `${name}.tsx`);
   if (existsSync(file)) return readFileSync(file, "utf8");
   throw new Error(`Component ${name} does not exist`);
 }
 
 function createComponent(name, code, stories) {
-  const dir = join(LIB_ROOT, "src/components/starter");
+  const dir = join(LIB_ROOT, "src/components/base");
   mkdirSync(dir, { recursive: true });
   const lower = name.charAt(0).toLowerCase() + name.slice(1);
   writeFileSync(join(dir, `${lower}.tsx`), code);
   if (stories) {
     writeFileSync(join(dir, `${name}.stories.tsx`), stories);
   }
-  return { created: [`src/components/starter/${lower}.tsx`, stories ? `src/components/starter/${name}.stories.tsx` : null].filter(Boolean) };
+  return { created: [`src/components/base/${lower}.tsx`, stories ? `src/components/base/${name}.stories.tsx` : null].filter(Boolean) };
 }
 
 function listTokens() {

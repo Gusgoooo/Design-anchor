@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Dropdown select with unified border and interaction styles. For simple options; wrap externally for async/complex cases.",
   "wraps": {
-    "module": "@/components/starter/select",
+    "module": "@/components/base/select",
     "primitives": [
       "Select",
       "SelectGroup",
@@ -84,7 +84,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Select from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Select from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "select",

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Right-click context menu providing contextual actions for selected content.",
   "wraps": {
-    "module": "@/components/starter/context-menu",
+    "module": "@/components/base/context-menu",
     "primitives": [
       "ContextMenu",
       "ContextMenuTrigger",
@@ -56,7 +56,7 @@
       }
     ]
   },
-  "aiPrompt": "Use ContextMenu from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ContextMenu from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "context-menu",

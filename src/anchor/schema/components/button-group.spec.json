@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Button group container that visually combines related action buttons (toolbars, segmented controls).",
   "wraps": {
-    "module": "@/components/starter/button-group",
+    "module": "@/components/base/button-group",
     "primitives": [
       "ButtonGroup",
       "ButtonGroupSeparator",
@@ -39,7 +39,7 @@
       }
     ]
   },
-  "aiPrompt": "Use ButtonGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ButtonGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "button-group",

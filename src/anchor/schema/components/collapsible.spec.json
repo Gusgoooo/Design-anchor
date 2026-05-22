@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Single collapsible region. Lighter than Accordion — for standalone expand/collapse scenarios.",
   "wraps": {
-    "module": "@/components/starter/collapsible",
+    "module": "@/components/base/collapsible",
     "primitives": [
       "Collapsible",
       "CollapsibleTrigger",
@@ -28,7 +28,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Collapsible from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Collapsible from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "collapsible",

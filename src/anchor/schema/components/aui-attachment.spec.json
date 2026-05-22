@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Attachment display and upload for AI conversations. Includes message attachment previews, input attachment list, and add-attachment button.",
   "wraps": {
-    "module": "@/components/starter/ai/attachment",
+    "module": "@/components/base/ai/attachment",
     "primitives": [
       "UserMessageAttachments",
       "ComposerAttachments",
@@ -37,9 +37,9 @@
       }
     ]
   },
-  "aiPrompt": "Use Attachment from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Attachment from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/attachment"
+    "@/components/base/ai/attachment"
   ],
   "meta": {
     "tags": [

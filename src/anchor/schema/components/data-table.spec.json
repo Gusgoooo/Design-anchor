@@ -96,12 +96,12 @@
       }
     ]
   },
-  "aiPrompt": "Use DataTable from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use DataTable from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "forbidden": [
     {
       "htmlTag": "table",
       "reason": "Business lists must use DataTable to ensure consistent spacing and brand compliance",
-      "useInstead": "@/components/starter/data-table"
+      "useInstead": "@/components/base/data-table"
     }
   ],
   "corrections": [
@@ -117,8 +117,8 @@
     }
   ],
   "referencePriority": [
-    "@/components/starter/data-table",
-    "@/components/starter"
+    "@/components/base/data-table",
+    "@/components/base"
   ],
   "tailwindExtend": {
     "spacing": {

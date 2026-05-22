@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "AI reasoning/chain-of-thought display. Collapsible panel showing AI thinking process with outline/ghost/muted visual variants.",
   "wraps": {
-    "module": "@/components/starter/ai/reasoning",
+    "module": "@/components/base/ai/reasoning",
     "primitives": [
       "Reasoning",
       "ReasoningRoot",
@@ -81,9 +81,9 @@
       }
     ]
   },
-  "aiPrompt": "Use Reasoning from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Reasoning from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/reasoning"
+    "@/components/base/ai/reasoning"
   ],
   "examples": [
     {

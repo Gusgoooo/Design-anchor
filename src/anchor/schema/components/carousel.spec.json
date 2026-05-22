@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Carousel/slider container for product images, banners, and horizontal card scrolling.",
   "wraps": {
-    "module": "@/components/starter/carousel",
+    "module": "@/components/base/carousel",
     "primitives": [
       "Carousel",
       "CarouselContent",
@@ -32,7 +32,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Carousel from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Carousel from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "carousel",

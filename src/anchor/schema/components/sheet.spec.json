@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Slide-out panel (mobile drawer style, supports all 4 directions) for settings panels and detail views.",
   "wraps": {
-    "module": "@/components/starter/sheet",
+    "module": "@/components/base/sheet",
     "primitives": [
       "Sheet",
       "SheetPortal",
@@ -89,7 +89,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Sheet from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Sheet from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "sheet",

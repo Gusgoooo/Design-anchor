@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "AI model selector dropdown. Lets users switch the current conversation's AI model with icons, descriptions, and disabled states.",
   "wraps": {
-    "module": "@/components/starter/ai/model-selector",
+    "module": "@/components/base/ai/model-selector",
     "primitives": [
       "ModelSelector",
       "ModelSelectorRoot",
@@ -62,9 +62,9 @@
       }
     ]
   },
-  "aiPrompt": "Use ModelSelector from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ModelSelector from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/model-selector"
+    "@/components/base/ai/model-selector"
   ],
   "examples": [
     {

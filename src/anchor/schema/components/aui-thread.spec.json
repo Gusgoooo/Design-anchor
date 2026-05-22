@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "AI conversation thread container with message list, welcome screen, Composer input, and scroll control. Core assistant-ui component.",
   "wraps": {
-    "module": "@/components/starter/ai/thread",
+    "module": "@/components/base/ai/thread",
     "primitives": [
       "Thread"
     ]
@@ -43,12 +43,12 @@
       }
     ]
   },
-  "aiPrompt": "Use Thread from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Thread from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "forbidden": [
     {
       "htmlTag": "div",
       "reason": "Do not hand-build chat containers (div+input+message list) instead of using the Thread component",
-      "useInstead": "@/components/starter/ai/thread"
+      "useInstead": "@/components/base/ai/thread"
     }
   ],
   "corrections": [
@@ -59,7 +59,7 @@
     }
   ],
   "referencePriority": [
-    "@/components/starter/ai/thread"
+    "@/components/base/ai/thread"
   ],
   "examples": [
     {

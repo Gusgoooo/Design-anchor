@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Visual separator between content areas. Supports horizontal and vertical directions.",
   "wraps": {
-    "module": "@/components/starter/separator",
+    "module": "@/components/base/separator",
     "primitives": [
       "Separator"
     ]
@@ -42,7 +42,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Separator from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Separator from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "separator",

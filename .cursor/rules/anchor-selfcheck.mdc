@@ -6,7 +6,7 @@ alwaysApply: true
 # DesignAccord Self-Check (execute before each round of modifications ends)
 
 0. **Directory**: Business pages and routes should be written in the **project's own** `src/` (or app directory); component library and tokens should only be modified within the project root's **`.accord/`** (hidden directory). Do not put business features inside `.accord/`.
-1. **Imports**: In business code, prefer `import { … } from "@design"` (if paths are configured per `ACCORD_INTEGRATION.md`); otherwise import `BusinessButton`, `BusinessInput`, `BusinessCheckbox`, `BusinessBadge`, `DataTable`, etc. from `@/components/business/` or the `.accord` barrel — do not use raw starter components or hand-write native controls.
+1. **Imports**: In business code, prefer `import { … } from "@design"` (if paths are configured per `ACCORD_INTEGRATION.md`); otherwise import `BusinessButton`, `BusinessInput`, `BusinessCheckbox`, `BusinessBadge`, `DataTable`, etc. from `@/components/business/` or the `.accord` barrel — do not use raw base components or hand-write native controls.
 2. **Forbidden tags**: Check whether `<button>`, `<input>`, `<table>`, or other tags declared as `forbidden` in specs are used in business scenarios; if so, replace them with the corresponding Business components.
 3. **Styling**: Avoid stacking arbitrary-value Tailwind like `m-[…]`, `p-[…]` on business JSX; prefer component semantic props (e.g. `density`, `variant`, `size`) for density and appearance.
 4. **Wrap-up**: If the user has configured a DesignAccord Cursor Hook, the audit runs automatically on save; otherwise proactively suggest running `accord audit` or MCP `run_audit` and fix issues based on the output.

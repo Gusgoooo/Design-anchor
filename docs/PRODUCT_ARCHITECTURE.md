@@ -24,7 +24,7 @@ This document provides an end-to-end overview of **Design-anchor (design-anchor)
 
 1. Run `anchor start` (or `anchor init` + `npm install` + `anchor dev`) at the **project root**.
 2. The tool creates:
-   - **`.anchor/`** (hidden directory): Complete component library sub-project — Storybook, shadcn-based starter, Business wrappers, `src/anchor/schema`, `scripts`, generated Tailwind fragments.
+   - **`.anchor/`** (hidden directory): Complete component library sub-project — Storybook, shadcn-based base, Business wrappers, `src/anchor/schema`, `scripts`, generated Tailwind fragments.
    - **`.cursor/`**: `rules` (always-apply constraints), `mcp.json` (Design-anchor MCP), optional `hooks` (post-save audit).
    - **`CLAUDE.md`**, **`.windsurfrules`**, **`.github/copilot-instructions.md`**: Governance rules for other AI tools.
 3. Designers open the Portal in browser (Storybook launched by `anchor dev`), edit DesignToken, use the **Design-anchor** panel to edit the `*.spec.json` associated with the current Story and save.
@@ -85,7 +85,7 @@ To fill the gap between atomic components and composition/flow guidance, this re
          ▼                                        ▼
 ┌─────────────────┐                   ┌──────────────────────────┐
 │ Component TSX   │ ◄── import ──────  │ AI Agent + MCP           │
-│ starter/        │                   │ list/read/update schema │
+│ base/           │                   │ list/read/update schema │
 │ business/       │                   │ audit / sync_rules / …    │
 └─────────────────┘                   └──────────────────────────┘
          │
@@ -117,7 +117,7 @@ To fill the gap between atomic components and composition/flow guidance, this re
 
 ### 4.3 Why the Business Layer Exists
 
-- Starter (shadcn) provides **generic atoms**; business needs **semantic props** (e.g., `density`) + **forbidden arbitrary spacing/brand color overrides**.
+- Base (shadcn) provides **generic atoms**; business needs **semantic props** (e.g., `density`) + **forbidden arbitrary spacing/brand color overrides**.
 - **Same schema** generates both `.cursorrules` text AND drives **runtime** `mergeWithBusinessSpec` / `createBusinessComponent`, forming a "documentation constraint + code fallback" dual layer.
 
 ### 4.4 Why the Hidden `.anchor` Directory

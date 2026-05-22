@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Unified entry for status marks, labels, and count bubbles. Do not hand-build span+bg alternatives.",
   "wraps": {
-    "module": "@/components/starter/badge",
+    "module": "@/components/base/badge",
     "primitives": [
       "Badge"
     ]
@@ -79,12 +79,12 @@
       }
     ]
   },
-  "aiPrompt": "Use Badge from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Badge from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "forbidden": [],
   "corrections": [],
   "referencePriority": [
-    "@/components/starter/badge",
-    "@/components/starter"
+    "@/components/base/badge",
+    "@/components/base"
   ],
   "meta": {
     "tags": [

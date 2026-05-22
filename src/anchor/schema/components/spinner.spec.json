@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Loading spinner indicator for in-button, area, or full-screen loading states.",
   "wraps": {
-    "module": "@/components/starter/spinner",
+    "module": "@/components/base/spinner",
     "primitives": [
       "Spinner"
     ]
@@ -29,7 +29,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Spinner from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Spinner from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "spinner",

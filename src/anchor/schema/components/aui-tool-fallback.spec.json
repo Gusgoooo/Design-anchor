@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "AI tool call display. Shows a single tool invocation's name, status (running/complete/incomplete), arguments, and result.",
   "wraps": {
-    "module": "@/components/starter/ai/tool-fallback",
+    "module": "@/components/base/ai/tool-fallback",
     "primitives": [
       "ToolFallback",
       "ToolFallbackRoot",
@@ -75,9 +75,9 @@
       }
     ]
   },
-  "aiPrompt": "Use ToolFallback from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ToolFallback from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/tool-fallback"
+    "@/components/base/ai/tool-fallback"
   ],
   "examples": [
     {

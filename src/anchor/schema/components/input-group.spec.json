@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Input group container combining prefix/suffix (icons, text, buttons) with input as a visual unit.",
   "wraps": {
-    "module": "@/components/starter/input-group",
+    "module": "@/components/base/input-group",
     "primitives": [
       "InputGroup",
       "InputGroupAddon",
@@ -73,7 +73,7 @@
       }
     ]
   },
-  "aiPrompt": "Use InputGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use InputGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "input-group",

@@ -37,7 +37,7 @@
   "usageGuidelines": {
     "when": "When the page needs visual highlights / animation accents (Hero area, Landing Page, empty state, loading state, CTA area)",
     "howMany": "Use at most 1-2 decorative components per page to avoid performance issues or visual fatigue from excessive animation",
-    "priority": "Core interactive components still use @/components/starter/*; decorative components are only for non-functional visual enhancement",
+    "priority": "Core interactive components still use @/components/base/*; decorative components are only for non-functional visual enhancement",
     "tokens": "Decorative components should use project design token colors (e.g. hsl(var(--primary))); avoid hard-coded color values"
   }
 }

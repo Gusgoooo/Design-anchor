@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Custom scroll area container with constrained height and consistent scrollbar behavior.",
   "wraps": {
-    "module": "@/components/starter/scroll-area",
+    "module": "@/components/base/scroll-area",
     "primitives": [
       "ScrollArea",
       "ScrollBar",
@@ -36,7 +36,7 @@
       }
     ]
   },
-  "aiPrompt": "Use ScrollArea from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use ScrollArea from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "scroll",

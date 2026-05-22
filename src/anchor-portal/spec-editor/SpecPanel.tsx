@@ -499,7 +499,7 @@ export function SpecPanel() {
               <input value={spec.version} onChange={(e) => update("version", e.target.value)} className={IN} />
             </Field>
           </div>
-          <Subheading hint="module points to the starter/ui re-export; primitives are sub-components exported." topMargin>Wraps</Subheading>
+          <Subheading hint="module points to the base/ui re-export; primitives are sub-components exported." topMargin>Wraps</Subheading>
           <Field label="Module path" compact>
             <input value={spec.wraps.module} onChange={(e) => update("wraps", { ...spec.wraps, module: e.target.value })} className={IN} />
           </Field>
@@ -869,7 +869,7 @@ function CreateSchemaPrompt({
       componentName: leafTitle,
       version: "1.0.0",
       intent: "",
-      wraps: { module: `@/components/starter/${kebab}`, primitives: [leafTitle] },
+      wraps: { module: `@/components/base/${kebab}`, primitives: [leafTitle] },
       requiredProps: [],
       optionalProps: [],
       styleLock: { baselineTokens: [], blacklist: [] },

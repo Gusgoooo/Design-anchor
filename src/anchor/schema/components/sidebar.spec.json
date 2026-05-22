@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Application sidebar skeleton with header/content/footer/menu navigation layout.",
   "wraps": {
-    "module": "@/components/starter/sidebar",
+    "module": "@/components/base/sidebar",
     "primitives": [
       "Sidebar",
       "SidebarContent",
@@ -96,7 +96,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Sidebar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Sidebar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "sidebar",

@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Hierarchical breadcrumb navigation showing current page position in site structure with back navigation.",
   "wraps": {
-    "module": "@/components/starter/breadcrumb",
+    "module": "@/components/base/breadcrumb",
     "primitives": [
       "Breadcrumb",
       "BreadcrumbList",
@@ -40,7 +40,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Breadcrumb from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Breadcrumb from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "breadcrumb",

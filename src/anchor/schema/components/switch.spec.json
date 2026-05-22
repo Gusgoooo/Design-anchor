@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Toggle switch for boolean value changes (enable/disable features). Accessible checkbox with visual track.",
   "wraps": {
-    "module": "@/components/starter/switch",
+    "module": "@/components/base/switch",
     "primitives": [
       "Switch",
       "SwitchThumb"
@@ -67,7 +67,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Switch from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Switch from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "switch",

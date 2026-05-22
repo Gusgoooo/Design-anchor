@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Top navigation menu supporting simple link lists or complex dropdown panel navigation.",
   "wraps": {
-    "module": "@/components/starter/navigation-menu",
+    "module": "@/components/base/navigation-menu",
     "primitives": [
       "NavigationMenu",
       "NavigationMenuList",
@@ -41,7 +41,7 @@
       }
     ]
   },
-  "aiPrompt": "Use NavigationMenu from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use NavigationMenu from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "navigation-menu",

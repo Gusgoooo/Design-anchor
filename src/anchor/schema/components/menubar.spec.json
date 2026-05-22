@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Menu bar (desktop app-style top menu) with multiple dropdown menus side by side.",
   "wraps": {
-    "module": "@/components/starter/menubar",
+    "module": "@/components/base/menubar",
     "primitives": [
       "Menubar",
       "MenubarMenu",
@@ -55,7 +55,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Menubar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Menubar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "menubar",

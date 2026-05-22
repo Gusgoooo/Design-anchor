@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "List item layout providing icon/media + text + action button standard row structure.",
   "wraps": {
-    "module": "@/components/starter/item",
+    "module": "@/components/base/item",
     "primitives": [
       "Item",
       "ItemMedia",
@@ -66,7 +66,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Item from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Item from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "item",

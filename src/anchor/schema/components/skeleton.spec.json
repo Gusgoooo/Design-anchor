@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Skeleton loading placeholder showing expected layout shape during content loading. Reduces page jank.",
   "wraps": {
-    "module": "@/components/starter/skeleton",
+    "module": "@/components/base/skeleton",
     "primitives": [
       "Skeleton"
     ]
@@ -28,7 +28,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Skeleton from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Skeleton from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "skeleton",

@@ -22,8 +22,8 @@ export function closeContextMenu() {
   subscribers.forEach((fn) => fn(null));
 }
 
-/** Convert a registry glob key (`../components/starter/Button.demo.tsx`)
- *  into a repo-relative path (`src/components/starter/Button.demo.tsx`)
+/** Convert a registry glob key (`../components/base/Button.demo.tsx`)
+ *  into a repo-relative path (`src/components/base/Button.demo.tsx`)
  *  that the schema API's delete endpoint understands. */
 export function globPathToRepoPath(globKey: string): string {
   return globKey.replace(/^\.\.\//, "src/");

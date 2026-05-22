@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Form field container unifying label + input + description + error layout with accessibility bindings.",
   "wraps": {
-    "module": "@/components/starter/field",
+    "module": "@/components/base/field",
     "primitives": [
       "Field",
       "FieldLabel",
@@ -39,7 +39,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Field from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Field from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "field",

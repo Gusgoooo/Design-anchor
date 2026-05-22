@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Progress bar showing task completion percentage. Supports custom max value and accessibility attributes.",
   "wraps": {
-    "module": "@/components/starter/progress",
+    "module": "@/components/base/progress",
     "primitives": [
       "Progress",
       "ProgressIndicator"
@@ -47,7 +47,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Progress from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Progress from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "progress",

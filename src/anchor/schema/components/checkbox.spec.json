@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Unified check/uncheck entry for form agreements, multi-select filters, and batch selection. Raw <input type=checkbox> is forbidden.",
   "wraps": {
-    "module": "@/components/starter/checkbox",
+    "module": "@/components/base/checkbox",
     "primitives": [
       "Checkbox",
       "CheckboxIndicator"
@@ -69,12 +69,12 @@
       }
     ]
   },
-  "aiPrompt": "Must use @/components/starter/checkbox. Do not hand-write alternatives.",
+  "aiPrompt": "Must use @/components/base/checkbox. Do not hand-write alternatives.",
   "forbidden": [],
   "corrections": [],
   "referencePriority": [
-    "@/components/starter/checkbox",
-    "@/components/starter"
+    "@/components/base/checkbox",
+    "@/components/base"
   ],
   "meta": {
     "tags": [

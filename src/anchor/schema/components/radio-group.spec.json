@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Radio button group for selecting one option from mutually exclusive choices. Supports controlled and uncontrolled modes.",
   "wraps": {
-    "module": "@/components/starter/radio-group",
+    "module": "@/components/base/radio-group",
     "primitives": [
       "RadioGroup",
       "RadioGroupItem",
@@ -75,7 +75,7 @@
       }
     ]
   },
-  "aiPrompt": "Use RadioGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use RadioGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "radio",

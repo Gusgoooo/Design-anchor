@@ -9,30 +9,30 @@
 ## Import Priority
 - **Primary path**: each component uses its `referencePriority[0]` as the default import; do not switch between multiple paths arbitrarily.
 - Below are all paths that appear across registered components (first entry per spec is the primary path; others are fallbacks):
-  - @/components/starter/ai/assistant-modal
-  - @/components/starter/ai/assistant-sidebar
-  - @/components/starter/ai/attachment
-  - @/components/starter/ai/follow-up-suggestions
-  - @/components/starter/ai/markdown-text
-  - @/components/starter/ai/model-selector
-  - @/components/starter/ai/reasoning
-  - @/components/starter/ai/thread-list
-  - @/components/starter/ai/thread
-  - @/components/starter/ai/tool-fallback
-  - @/components/starter/ai/tool-group
-  - @/components/starter/ai/tooltip-icon-button
-  - @/components/starter/badge
-  - @/components/starter
-  - @/components/starter/button
-  - @/components/starter/checkbox
-  - @/components/starter/data-table
-  - @/components/starter/input
+  - @/components/base/ai/assistant-modal
+  - @/components/base/ai/assistant-sidebar
+  - @/components/base/ai/attachment
+  - @/components/base/ai/follow-up-suggestions
+  - @/components/base/ai/markdown-text
+  - @/components/base/ai/model-selector
+  - @/components/base/ai/reasoning
+  - @/components/base/ai/thread-list
+  - @/components/base/ai/thread
+  - @/components/base/ai/tool-fallback
+  - @/components/base/ai/tool-group
+  - @/components/base/ai/tooltip-icon-button
+  - @/components/base/badge
+  - @/components/base
+  - @/components/base/button
+  - @/components/base/checkbox
+  - @/components/base/data-table
+  - @/components/base/input
 
 ## Forbidden (native HTML)
-- Do not use <div> — Do not hand-build chat containers (div+input+message list) instead of using the Thread component; use instead: @/components/starter/ai/thread
-- Do not use <button> — Raw <button> is forbidden to ensure consistent border-radius, spacing, and brand colors; use instead: @/components/starter/button
-- Do not use <table> — Business lists must use DataTable to ensure consistent spacing and brand compliance; use instead: @/components/starter/data-table
-- Do not use <input> — Raw <input> is forbidden to ensure consistent height, border, and focus styles; use instead: @/components/starter/input
+- Do not use <div> — Do not hand-build chat containers (div+input+message list) instead of using the Thread component; use instead: @/components/base/ai/thread
+- Do not use <button> — Raw <button> is forbidden to ensure consistent border-radius, spacing, and brand colors; use instead: @/components/base/button
+- Do not use <table> — Business lists must use DataTable to ensure consistent spacing and brand compliance; use instead: @/components/base/data-table
+- Do not use <input> — Raw <input> is forbidden to ensure consistent height, border, and focus styles; use instead: @/components/base/input
 
 ## Style Lock (blocklist approach)
 - Do not add arbitrary-value spacing classes (e.g. `m-[13px]`, `p-[7px]`) to tables/buttons in business pages.
@@ -243,30 +243,30 @@
 
 ## Component Intent & Spec
 ### Accordion
-- **Upstream module**: `@/components/starter/accordion`
+- **Upstream module**: `@/components/base/accordion`
 - **Sub-components (Spec)**: `Accordion`, `AccordionItem`, `AccordionHeader`, `AccordionTrigger`, `AccordionContent`
 - **Intent**: Collapsible content panels for FAQ, settings groups, and progressive disclosure.
-- **Spec directive**: Use Accordion from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Accordion from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### AlertDialog
-- **Upstream module**: `@/components/starter/alert-dialog`
+- **Upstream module**: `@/components/base/alert-dialog`
 - **Sub-components (Spec)**: `AlertDialog`, `AlertDialogPortal`, `AlertDialogOverlay`, `AlertDialogTrigger`, `AlertDialogContent`, `AlertDialogHeader`, `AlertDialogFooter`, `AlertDialogTitle`, `AlertDialogDescription`, `AlertDialogAction`, `AlertDialogCancel`
 - **Intent**: Blocking confirmation dialog for irreversible actions (delete, submit). User must respond before continuing.
-- **Spec directive**: Use AlertDialog from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use AlertDialog from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Alert
-- **Upstream module**: `@/components/starter/alert`
+- **Upstream module**: `@/components/base/alert`
 - **Sub-components (Spec)**: `Alert`, `AlertTitle`, `AlertDescription`
 - **Intent**: Displays important status feedback (success, warning, error) with optional title and description.
-- **Spec directive**: Use Alert from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Alert from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### AspectRatio
-- **Upstream module**: `@/components/starter/aspect-ratio`
+- **Upstream module**: `@/components/base/aspect-ratio`
 - **Sub-components (Spec)**: `AspectRatio`
 - **Intent**: Fixed aspect-ratio container for images, videos, maps, and other media that must maintain proportions.
-- **Spec directive**: Use AspectRatio from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use AspectRatio from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### AssistantModal
-- **Upstream module**: `@/components/starter/ai/assistant-modal`
+- **Upstream module**: `@/components/base/ai/assistant-modal`
 - **Sub-components (Spec)**: `AssistantModal`
 - **Intent**: Floating AI assistant modal. Shows a trigger button (bottom-right) that opens a full Thread dialog. Use when embedding AI assistant on any page.
-- **Spec directive**: Use AssistantModal from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use AssistantModal from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Floating Corner Assistant**
   ```tsx
@@ -276,10 +276,10 @@
   </AssistantRuntimeProvider>
   ```
 ### AssistantSidebar
-- **Upstream module**: `@/components/starter/ai/assistant-sidebar`
+- **Upstream module**: `@/components/base/ai/assistant-sidebar`
 - **Sub-components (Spec)**: `AssistantSidebar`
 - **Intent**: Sidebar AI assistant layout. Splits page into main content and AI conversation sidebar with a draggable divider. For workspace scenarios needing AI assistance.
-- **Spec directive**: Use AssistantSidebar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use AssistantSidebar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Workspace Layout**
   ```tsx
@@ -290,32 +290,32 @@
   </AssistantRuntimeProvider>
   ```
 ### Attachment
-- **Upstream module**: `@/components/starter/ai/attachment`
+- **Upstream module**: `@/components/base/ai/attachment`
 - **Sub-components (Spec)**: `UserMessageAttachments`, `ComposerAttachments`, `ComposerAddAttachment`
 - **Intent**: Attachment display and upload for AI conversations. Includes message attachment previews, input attachment list, and add-attachment button.
-- **Spec directive**: Use Attachment from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Attachment from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### FollowUpSuggestions
-- **Upstream module**: `@/components/starter/ai/follow-up-suggestions`
+- **Upstream module**: `@/components/base/ai/follow-up-suggestions`
 - **Sub-components (Spec)**: `ThreadFollowupSuggestions`
 - **Intent**: Follow-up suggestion buttons after AI replies. Displays clickable next-question suggestions below assistant messages.
-- **Spec directive**: Use FollowUpSuggestions from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use FollowUpSuggestions from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### MarkdownText
-- **Upstream module**: `@/components/starter/ai/markdown-text`
+- **Upstream module**: `@/components/base/ai/markdown-text`
 - **Sub-components (Spec)**: `MarkdownText`
 - **Intent**: Markdown renderer for AI messages. Renders AI-returned Markdown as formatted HTML (headings, lists, code blocks, tables, links).
-- **Spec directive**: Use MarkdownText from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use MarkdownText from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Standalone Usage (outside Thread)**
   ```tsx
-  import { MarkdownText } from '@/components/starter/ai/markdown-text';
+  import { MarkdownText } from '@/components/base/ai/markdown-text';
   
   <MarkdownText />
   ```
 ### ModelSelector
-- **Upstream module**: `@/components/starter/ai/model-selector`
+- **Upstream module**: `@/components/base/ai/model-selector`
 - **Sub-components (Spec)**: `ModelSelector`, `ModelSelectorRoot`, `ModelSelectorTrigger`, `ModelSelectorContent`, `ModelSelectorItem`, `ModelSelectorValue`
 - **Intent**: AI model selector dropdown. Lets users switch the current conversation's AI model with icons, descriptions, and disabled states.
-- **Spec directive**: Use ModelSelector from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ModelSelector from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Simple Model Selector**
   ```tsx
@@ -337,10 +337,10 @@
   />
   ```
 ### Reasoning
-- **Upstream module**: `@/components/starter/ai/reasoning`
+- **Upstream module**: `@/components/base/ai/reasoning`
 - **Sub-components (Spec)**: `Reasoning`, `ReasoningRoot`, `ReasoningGroup`, `ReasoningTrigger`, `ReasoningContent`, `ReasoningText`, `ReasoningFade`
 - **Intent**: AI reasoning/chain-of-thought display. Collapsible panel showing AI thinking process with outline/ghost/muted visual variants.
-- **Spec directive**: Use Reasoning from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Reasoning from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Show Reasoning Process**
   ```tsx
@@ -352,10 +352,10 @@
   </ReasoningRoot>
   ```
 ### ThreadList
-- **Upstream module**: `@/components/starter/ai/thread-list`
+- **Upstream module**: `@/components/base/ai/thread-list`
 - **Sub-components (Spec)**: `ThreadList`
 - **Intent**: AI conversation history list showing multiple threads. Supports create, archive, and delete operations.
-- **Spec directive**: Use ThreadList from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ThreadList from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Sidebar + Thread List**
   ```tsx
@@ -369,10 +369,10 @@
   </div>
   ```
 ### Thread
-- **Upstream module**: `@/components/starter/ai/thread`
+- **Upstream module**: `@/components/base/ai/thread`
 - **Sub-components (Spec)**: `Thread`
 - **Intent**: AI conversation thread container with message list, welcome screen, Composer input, and scroll control. Core assistant-ui component.
-- **Spec directive**: Use Thread from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Thread from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Basic AI Conversation**
   ```tsx
@@ -381,10 +381,10 @@
   </AssistantRuntimeProvider>
   ```
 ### ToolFallback
-- **Upstream module**: `@/components/starter/ai/tool-fallback`
+- **Upstream module**: `@/components/base/ai/tool-fallback`
 - **Sub-components (Spec)**: `ToolFallback`, `ToolFallbackRoot`, `ToolFallbackTrigger`, `ToolFallbackContent`, `ToolFallbackArgs`, `ToolFallbackResult`, `ToolFallbackError`
 - **Intent**: AI tool call display. Shows a single tool invocation's name, status (running/complete/incomplete), arguments, and result.
-- **Spec directive**: Use ToolFallback from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ToolFallback from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Single Tool Call Display**
   ```tsx
@@ -396,10 +396,10 @@
   />
   ```
 ### ToolGroup
-- **Upstream module**: `@/components/starter/ai/tool-group`
+- **Upstream module**: `@/components/base/ai/tool-group`
 - **Sub-components (Spec)**: `ToolGroup`, `ToolGroupRoot`, `ToolGroupTrigger`, `ToolGroupContent`
 - **Intent**: AI tool call group container. Aggregates multiple ToolFallback items in a collapsible panel with call count and active state.
-- **Spec directive**: Use ToolGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ToolGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Grouped Tool Calls**
   ```tsx
@@ -411,10 +411,10 @@
   </ToolGroupRoot>
   ```
 ### TooltipIconButton
-- **Upstream module**: `@/components/starter/ai/tooltip-icon-button`
+- **Upstream module**: `@/components/base/ai/tooltip-icon-button`
 - **Sub-components (Spec)**: `TooltipIconButton`
 - **Intent**: Icon button with tooltip. For AI interface action buttons (copy, edit, retry) that show text on hover.
-- **Spec directive**: Use TooltipIconButton from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use TooltipIconButton from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 - **Few-shot examples** (prefer mimicking structure & imports):
   - **Copy Button**
   ```tsx
@@ -423,262 +423,262 @@
   </TooltipIconButton>
   ```
 ### Avatar
-- **Upstream module**: `@/components/starter/avatar`
+- **Upstream module**: `@/components/base/avatar`
 - **Sub-components (Spec)**: `Avatar`, `AvatarImage`, `AvatarFallback`
 - **Intent**: User avatar with image loading and text fallback. Used in user lists, comments, and navigation bars.
-- **Spec directive**: Use Avatar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Avatar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Badge
-- **Upstream module**: `@/components/starter/badge`
+- **Upstream module**: `@/components/base/badge`
 - **Sub-components (Spec)**: `Badge`
 - **Intent**: Unified entry for status marks, labels, and count bubbles. Do not hand-build span+bg alternatives.
-- **Spec directive**: Use Badge from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Badge from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Breadcrumb
-- **Upstream module**: `@/components/starter/breadcrumb`
+- **Upstream module**: `@/components/base/breadcrumb`
 - **Sub-components (Spec)**: `Breadcrumb`, `BreadcrumbList`, `BreadcrumbItem`, `BreadcrumbLink`, `BreadcrumbPage`, `BreadcrumbSeparator`, `BreadcrumbEllipsis`
 - **Intent**: Hierarchical breadcrumb navigation showing current page position in site structure with back navigation.
-- **Spec directive**: Use Breadcrumb from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Breadcrumb from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### ButtonGroup
-- **Upstream module**: `@/components/starter/button-group`
+- **Upstream module**: `@/components/base/button-group`
 - **Sub-components (Spec)**: `ButtonGroup`, `ButtonGroupSeparator`, `ButtonGroupText`
 - **Intent**: Button group container that visually combines related action buttons (toolbars, segmented controls).
-- **Spec directive**: Use ButtonGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ButtonGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Button
-- **Upstream module**: `@/components/starter/button`
+- **Upstream module**: `@/components/base/button`
 - **Sub-components (Spec)**: `Button`
 - **Intent**: Unified clickable action entry for primary, secondary, and link navigation actions. Raw <button> with manual spacing and brand colors is forbidden.
-- **Spec directive**: Must use @/components/starter/button. Use variant prop for visual style，Use size prop for dimensions. Do not stack Tailwind overrides on JSX. Colors must use design token semantic classes only.
+- **Spec directive**: Must use @/components/base/button. Use variant prop for visual style，Use size prop for dimensions. Do not stack Tailwind overrides on JSX. Colors must use design token semantic classes only.
 ### Calendar
-- **Upstream module**: `@/components/starter/calendar`
+- **Upstream module**: `@/components/base/calendar`
 - **Sub-components (Spec)**: `Calendar`, `CalendarDayButton`
 - **Intent**: Date picker calendar panel. Core rendering layer for date range selectors.
-- **Spec directive**: Use Calendar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Calendar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Card
-- **Upstream module**: `@/components/starter/card`
+- **Upstream module**: `@/components/base/card`
 - **Sub-components (Spec)**: `Card`, `CardHeader`, `CardTitle`, `CardDescription`, `CardContent`, `CardFooter`
 - **Intent**: General content container for grouped information display. Supports title, description, body, and footer actions.
-- **Spec directive**: Use Card from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Card from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Carousel
-- **Upstream module**: `@/components/starter/carousel`
+- **Upstream module**: `@/components/base/carousel`
 - **Sub-components (Spec)**: `Carousel`, `CarouselContent`, `CarouselItem`, `CarouselPrevious`, `CarouselNext`
 - **Intent**: Carousel/slider container for product images, banners, and horizontal card scrolling.
-- **Spec directive**: Use Carousel from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Carousel from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Checkbox
-- **Upstream module**: `@/components/starter/checkbox`
+- **Upstream module**: `@/components/base/checkbox`
 - **Sub-components (Spec)**: `Checkbox`, `CheckboxIndicator`
 - **Intent**: Unified check/uncheck entry for form agreements, multi-select filters, and batch selection. Raw <input type=checkbox> is forbidden.
-- **Spec directive**: Must use @/components/starter/checkbox. Do not hand-write alternatives.
+- **Spec directive**: Must use @/components/base/checkbox. Do not hand-write alternatives.
 ### Collapsible
-- **Upstream module**: `@/components/starter/collapsible`
+- **Upstream module**: `@/components/base/collapsible`
 - **Sub-components (Spec)**: `Collapsible`, `CollapsibleTrigger`, `CollapsibleContent`
 - **Intent**: Single collapsible region. Lighter than Accordion — for standalone expand/collapse scenarios.
-- **Spec directive**: Use Collapsible from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Collapsible from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Command
-- **Upstream module**: `@/components/starter/command`
+- **Upstream module**: `@/components/base/command`
 - **Sub-components (Spec)**: `Command`, `CommandDialog`, `CommandInput`, `CommandList`, `CommandEmpty`, `CommandGroup`, `CommandItem`, `CommandShortcut`, `CommandSeparator`
 - **Intent**: Command palette (VS Code Ctrl+K / Spotlight style) for global search and quick action entry.
-- **Spec directive**: Use Command from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Command from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### ContextMenu
-- **Upstream module**: `@/components/starter/context-menu`
+- **Upstream module**: `@/components/base/context-menu`
 - **Sub-components (Spec)**: `ContextMenu`, `ContextMenuTrigger`, `ContextMenuContent`, `ContextMenuItem`, `ContextMenuCheckboxItem`, `ContextMenuRadioItem`, `ContextMenuLabel`, `ContextMenuSeparator`, `ContextMenuShortcut`, `ContextMenuGroup`, `ContextMenuPortal`, `ContextMenuSub`, `ContextMenuSubContent`, `ContextMenuSubTrigger`, `ContextMenuRadioGroup`, `ContextMenuArrow`, `ContextMenuItemIndicator`
 - **Intent**: Right-click context menu providing contextual actions for selected content.
-- **Spec directive**: Use ContextMenu from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ContextMenu from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### DataTable
 - **Upstream module**: `@/components/ui/table`
 - **Sub-components (Spec)**: `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` (display name: Data Cell (TableCell))
 - **Intent**: Primary business data table: pagination, sorting, bulk actions converge here. Raw <table> with arbitrary spacing is forbidden.
-- **Spec directive**: Use DataTable from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use DataTable from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Dialog
-- **Upstream module**: `@/components/starter/dialog`
+- **Upstream module**: `@/components/base/dialog`
 - **Sub-components (Spec)**: `Dialog`, `DialogTrigger`, `DialogContent`, `DialogHeader`, `DialogFooter`, `DialogTitle`, `DialogDescription`, `DialogClose`
 - **Intent**: Modal dialog for user confirmation or input. Blocks background interaction, supports controlled and uncontrolled modes.
-- **Spec directive**: Use Dialog from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Dialog from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Drawer
-- **Upstream module**: `@/components/starter/drawer`
+- **Upstream module**: `@/components/base/drawer`
 - **Sub-components (Spec)**: `Drawer`, `DrawerPortal`, `DrawerOverlay`, `DrawerTrigger`, `DrawerClose`, `DrawerContent`, `DrawerHeader`, `DrawerFooter`, `DrawerTitle`, `DrawerDescription`
 - **Intent**: Bottom/side drawer panel for mobile action sheets or auxiliary content display.
-- **Spec directive**: Use Drawer from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Drawer from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### DropdownMenu
-- **Upstream module**: `@/components/starter/dropdown-menu`
+- **Upstream module**: `@/components/base/dropdown-menu`
 - **Sub-components (Spec)**: `DropdownMenu`, `DropdownMenuTrigger`, `DropdownMenuContent`, `DropdownMenuItem`, `DropdownMenuCheckboxItem`, `DropdownMenuRadioItem`, `DropdownMenuLabel`, `DropdownMenuSeparator`, `DropdownMenuShortcut`, `DropdownMenuGroup`, `DropdownMenuPortal`, `DropdownMenuSub`, `DropdownMenuSubContent`, `DropdownMenuSubTrigger`, `DropdownMenuRadioGroup`, `DropdownMenuArrow`, `DropdownMenuItemIndicator`
 - **Intent**: Dropdown menu for action lists below a trigger button. For 'more actions', bulk operations, etc.
-- **Spec directive**: Use DropdownMenu from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use DropdownMenu from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Empty
-- **Upstream module**: `@/components/starter/empty`
+- **Upstream module**: `@/components/base/empty`
 - **Sub-components (Spec)**: `Empty`, `EmptyHeader`, `EmptyTitle`, `EmptyDescription`, `EmptyContent`, `EmptyMedia`
 - **Intent**: Empty state placeholder for lists/pages with no data. Shows explanatory text and guidance actions.
-- **Spec directive**: Use Empty from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Empty from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Field
-- **Upstream module**: `@/components/starter/field`
+- **Upstream module**: `@/components/base/field`
 - **Sub-components (Spec)**: `Field`, `FieldLabel`, `FieldDescription`, `FieldError`, `FieldGroup`, `FieldLegend`, `FieldSeparator`, `FieldSet`, `FieldContent`, `FieldTitle`
 - **Intent**: Form field container unifying label + input + description + error layout with accessibility bindings.
-- **Spec directive**: Use Field from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Field from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### HoverCard
-- **Upstream module**: `@/components/starter/hover-card`
+- **Upstream module**: `@/components/base/hover-card`
 - **Sub-components (Spec)**: `HoverCard`, `HoverCardTrigger`, `HoverCardPortal`, `HoverCardArrow`, `HoverCardContent`
 - **Intent**: Hover card showing extra preview info (user profiles, link previews) on mouse hover.
-- **Spec directive**: Use HoverCard from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use HoverCard from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### InputGroup
-- **Upstream module**: `@/components/starter/input-group`
+- **Upstream module**: `@/components/base/input-group`
 - **Sub-components (Spec)**: `InputGroup`, `InputGroupAddon`, `InputGroupButton`, `InputGroupText`, `InputGroupInput`, `InputGroupTextarea`
 - **Intent**: Input group container combining prefix/suffix (icons, text, buttons) with input as a visual unit.
-- **Spec directive**: Use InputGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use InputGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### InputOtp
-- **Upstream module**: `@/components/starter/input-otp`
+- **Upstream module**: `@/components/base/input-otp`
 - **Sub-components (Spec)**: `InputOTP`, `InputOTPGroup`, `InputOTPSlot`, `InputOTPSeparator`
 - **Intent**: One-time password input (OTP/verification code) with fixed-digit segmented fields.
-- **Spec directive**: Use InputOtp from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use InputOtp from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Input
-- **Upstream module**: `@/components/starter/input`
+- **Upstream module**: `@/components/base/input`
 - **Sub-components (Spec)**: `Input`
 - **Intent**: Unified text input entry for search, form fields, passwords, etc. Raw <input> with manual spacing and borders is forbidden.
-- **Spec directive**: Must use @/components/starter/input. Do not stack Tailwind overrides on JSX.
+- **Spec directive**: Must use @/components/base/input. Do not stack Tailwind overrides on JSX.
 ### Item
-- **Upstream module**: `@/components/starter/item`
+- **Upstream module**: `@/components/base/item`
 - **Sub-components (Spec)**: `Item`, `ItemMedia`, `ItemContent`, `ItemActions`, `ItemGroup`, `ItemSeparator`, `ItemTitle`, `ItemDescription`, `ItemHeader`, `ItemFooter`
 - **Intent**: List item layout providing icon/media + text + action button standard row structure.
-- **Spec directive**: Use Item from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Item from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Kbd
-- **Upstream module**: `@/components/starter/kbd`
+- **Upstream module**: `@/components/base/kbd`
 - **Sub-components (Spec)**: `Kbd`, `KbdGroup`
 - **Intent**: Keyboard shortcut label displaying key combinations (e.g., Ctrl+S) with visual styling.
-- **Spec directive**: Use Kbd from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Kbd from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Label
-- **Upstream module**: `@/components/starter/label`
+- **Upstream module**: `@/components/base/label`
 - **Sub-components (Spec)**: `Label`
 - **Intent**: Form label paired with Input/Select controls. Provides consistent font styling and disabled state association.
-- **Spec directive**: Use Label from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Label from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Menubar
-- **Upstream module**: `@/components/starter/menubar`
+- **Upstream module**: `@/components/base/menubar`
 - **Sub-components (Spec)**: `Menubar`, `MenubarMenu`, `MenubarTrigger`, `MenubarContent`, `MenubarItem`, `MenubarSeparator`, `MenubarLabel`, `MenubarCheckboxItem`, `MenubarRadioGroup`, `MenubarRadioItem`, `MenubarPortal`, `MenubarSubContent`, `MenubarSubTrigger`, `MenubarGroup`, `MenubarSub`, `MenubarShortcut`, `MenubarArrow`, `MenubarItemIndicator`
 - **Intent**: Menu bar (desktop app-style top menu) with multiple dropdown menus side by side.
-- **Spec directive**: Use Menubar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Menubar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### NavigationMenu
-- **Upstream module**: `@/components/starter/navigation-menu`
+- **Upstream module**: `@/components/base/navigation-menu`
 - **Sub-components (Spec)**: `NavigationMenu`, `NavigationMenuList`, `NavigationMenuItem`, `NavigationMenuContent`, `NavigationMenuTrigger`, `NavigationMenuLink`, `NavigationMenuIndicator`, `NavigationMenuViewport`
 - **Intent**: Top navigation menu supporting simple link lists or complex dropdown panel navigation.
-- **Spec directive**: Use NavigationMenu from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use NavigationMenu from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Pagination
-- **Upstream module**: `@/components/starter/pagination`
+- **Upstream module**: `@/components/base/pagination`
 - **Sub-components (Spec)**: `Pagination`, `PaginationContent`, `PaginationEllipsis`, `PaginationItem`, `PaginationLink`, `PaginationNext`, `PaginationPrevious`
 - **Intent**: Pagination controls providing page number jumps and previous/next page navigation.
-- **Spec directive**: Use Pagination from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Pagination from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Popover
-- **Upstream module**: `@/components/starter/popover`
+- **Upstream module**: `@/components/base/popover`
 - **Sub-components (Spec)**: `Popover`, `PopoverTrigger`, `PopoverAnchor`, `PopoverPortal`, `PopoverClose`, `PopoverArrow`, `PopoverContent`
 - **Intent**: Popover bubble for showing extra content or lightweight interactions near a trigger. Auto-closes on outside click.
-- **Spec directive**: Use Popover from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Popover from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Progress
-- **Upstream module**: `@/components/starter/progress`
+- **Upstream module**: `@/components/base/progress`
 - **Sub-components (Spec)**: `Progress`, `ProgressIndicator`
 - **Intent**: Progress bar showing task completion percentage. Supports custom max value and accessibility attributes.
-- **Spec directive**: Use Progress from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Progress from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### RadioGroup
-- **Upstream module**: `@/components/starter/radio-group`
+- **Upstream module**: `@/components/base/radio-group`
 - **Sub-components (Spec)**: `RadioGroup`, `RadioGroupItem`, `RadioGroupIndicator`
 - **Intent**: Radio button group for selecting one option from mutually exclusive choices. Supports controlled and uncontrolled modes.
-- **Spec directive**: Use RadioGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use RadioGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Resizable
-- **Upstream module**: `@/components/starter/resizable`
+- **Upstream module**: `@/components/base/resizable`
 - **Sub-components (Spec)**: `ResizablePanelGroup`, `ResizablePanel`, `ResizableHandle`
 - **Intent**: Draggable resizable panel group for IDE-style multi-panel layouts.
-- **Spec directive**: Use Resizable from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Resizable from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### ScrollArea
-- **Upstream module**: `@/components/starter/scroll-area`
+- **Upstream module**: `@/components/base/scroll-area`
 - **Sub-components (Spec)**: `ScrollArea`, `ScrollBar`, `ScrollAreaViewport`, `ScrollAreaCorner`, `ScrollAreaThumb`, `ScrollAreaScrollbar`
 - **Intent**: Custom scroll area container with constrained height and consistent scrollbar behavior.
-- **Spec directive**: Use ScrollArea from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ScrollArea from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Select
-- **Upstream module**: `@/components/starter/select`
+- **Upstream module**: `@/components/base/select`
 - **Sub-components (Spec)**: `Select`, `SelectGroup`, `SelectValue`, `SelectTrigger`, `SelectContent`, `SelectLabel`, `SelectItem`, `SelectSeparator`, `SelectScrollUpButton`, `SelectScrollDownButton`, `SelectPortal`, `SelectIcon`, `SelectViewport`, `SelectItemText`, `SelectItemIndicator`, `SelectArrow`
 - **Intent**: Dropdown select with unified border and interaction styles. For simple options; wrap externally for async/complex cases.
-- **Spec directive**: Use Select from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Select from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Separator
-- **Upstream module**: `@/components/starter/separator`
+- **Upstream module**: `@/components/base/separator`
 - **Sub-components (Spec)**: `Separator`
 - **Intent**: Visual separator between content areas. Supports horizontal and vertical directions.
-- **Spec directive**: Use Separator from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Separator from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Sheet
-- **Upstream module**: `@/components/starter/sheet`
+- **Upstream module**: `@/components/base/sheet`
 - **Sub-components (Spec)**: `Sheet`, `SheetPortal`, `SheetOverlay`, `SheetTrigger`, `SheetClose`, `SheetContent`, `SheetHeader`, `SheetFooter`, `SheetTitle`, `SheetDescription`
 - **Intent**: Slide-out panel (mobile drawer style, supports all 4 directions) for settings panels and detail views.
-- **Spec directive**: Use Sheet from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Sheet from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Sidebar
-- **Upstream module**: `@/components/starter/sidebar`
+- **Upstream module**: `@/components/base/sidebar`
 - **Sub-components (Spec)**: `Sidebar`, `SidebarContent`, `SidebarFooter`, `SidebarGroup`, `SidebarGroupAction`, `SidebarGroupContent`, `SidebarGroupLabel`, `SidebarHeader`, `SidebarInput`, `SidebarInset`, `SidebarMenu`, `SidebarMenuAction`, `SidebarMenuBadge`, `SidebarMenuButton`, `SidebarMenuItem`, `SidebarMenuSkeleton`, `SidebarMenuSub`, `SidebarMenuSubButton`, `SidebarMenuSubItem`, `SidebarProvider`, `SidebarRail`, `SidebarSeparator`, `SidebarTrigger`
 - **Intent**: Application sidebar skeleton with header/content/footer/menu navigation layout.
-- **Spec directive**: Use Sidebar from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Sidebar from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Skeleton
-- **Upstream module**: `@/components/starter/skeleton`
+- **Upstream module**: `@/components/base/skeleton`
 - **Sub-components (Spec)**: `Skeleton`
 - **Intent**: Skeleton loading placeholder showing expected layout shape during content loading. Reduces page jank.
-- **Spec directive**: Use Skeleton from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Skeleton from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Slider
-- **Upstream module**: `@/components/starter/slider`
+- **Upstream module**: `@/components/base/slider`
 - **Sub-components (Spec)**: `Slider`, `SliderTrack`, `SliderRange`, `SliderThumb`
 - **Intent**: Slider control for selecting a value within a range. Based on native range input.
-- **Spec directive**: Use Slider from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Slider from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Sonner
-- **Upstream module**: `@/components/starter/sonner`
+- **Upstream module**: `@/components/base/sonner`
 - **Sub-components (Spec)**: `Toaster`
 - **Intent**: Toast notifications (via sonner library) for lightweight action feedback (success/failure/info).
-- **Spec directive**: Use Sonner from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Sonner from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Spinner
-- **Upstream module**: `@/components/starter/spinner`
+- **Upstream module**: `@/components/base/spinner`
 - **Sub-components (Spec)**: `Spinner`
 - **Intent**: Loading spinner indicator for in-button, area, or full-screen loading states.
-- **Spec directive**: Use Spinner from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Spinner from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Switch
-- **Upstream module**: `@/components/starter/switch`
+- **Upstream module**: `@/components/base/switch`
 - **Sub-components (Spec)**: `Switch`, `SwitchThumb`
 - **Intent**: Toggle switch for boolean value changes (enable/disable features). Accessible checkbox with visual track.
-- **Spec directive**: Use Switch from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Switch from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Table
-- **Upstream module**: `@/components/starter/table`
+- **Upstream module**: `@/components/base/table`
 - **Sub-components (Spec)**: `Table`, `TableHeader`, `TableBody`, `TableFooter`, `TableHead`, `TableRow`, `TableCell`, `TableCaption`
 - **Intent**: Base data table layer providing semantic HTML table/thead/tbody/tr/th/td with consistent styling.
-- **Spec directive**: Use Table from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Table from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Tabs
-- **Upstream module**: `@/components/starter/tabs`
+- **Upstream module**: `@/components/base/tabs`
 - **Sub-components (Spec)**: `Tabs`, `TabsList`, `TabsTrigger`, `TabsContent`
 - **Intent**: Tab component for switching between views/panels in the same area. Supports controlled and uncontrolled modes.
-- **Spec directive**: Use Tabs from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Tabs from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Textarea
-- **Upstream module**: `@/components/starter/textarea`
+- **Upstream module**: `@/components/base/textarea`
 - **Sub-components (Spec)**: `Textarea`
 - **Intent**: Multi-line text input for longer text entry. Unified border, border-radius, and focus styles.
-- **Spec directive**: Use Textarea from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Textarea from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### ToggleGroup
-- **Upstream module**: `@/components/starter/toggle-group`
+- **Upstream module**: `@/components/base/toggle-group`
 - **Sub-components (Spec)**: `ToggleGroup`, `ToggleGroupItem`
 - **Intent**: Toggle button group — mutually exclusive or multi-select toggles (e.g., view modes: list/grid/board).
-- **Spec directive**: Use ToggleGroup from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use ToggleGroup from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Toggle
-- **Upstream module**: `@/components/starter/toggle`
+- **Upstream module**: `@/components/base/toggle`
 - **Sub-components (Spec)**: `Toggle`
 - **Intent**: Toggle button (pressed/released state) for enabling/disabling features or view mode switching.
-- **Spec directive**: Use Toggle from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Toggle from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Tooltip
-- **Upstream module**: `@/components/starter/tooltip`
+- **Upstream module**: `@/components/base/tooltip`
 - **Sub-components (Spec)**: `TooltipProvider`, `Tooltip`, `TooltipTrigger`, `TooltipPortal`, `TooltipArrow`, `TooltipContent`
 - **Intent**: Text tooltip bubble showing helper text on hover. Must not contain interactive content.
-- **Spec directive**: Use Tooltip from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
+- **Spec directive**: Use Tooltip from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 
 ## Correction Directives
 - **no-manual-chat-ui**: if Violation: using raw tag or hand-built alternative → Replace with the proper component import and use semantic props for styling.
 - **no-raw-button-tooltip-combo**: if Violation: using raw tag or hand-built alternative → Replace with the proper component import and use semantic props for styling.
-- **no-raw-button**: if Using raw native  <button> → Replace with  import { Button } from '@/components/starter/Button', Use variant and size props for styling. 
+- **no-raw-button**: if Using raw native  <button> → Replace with  import { Button } from '@/components/base/Button', Use variant and size props for styling. 
 - **no-raw-table**: if Using raw native  <table> → Replace with the proper component import and use semantic props for styling.
 - **no-hacky-spacing**: if Violation: using raw tag or hand-built alternative → Replace with the proper component import and use semantic props for styling.
-- **no-raw-input**: if Using raw native  <input> → Replace with  import { Input } from '@/components/starter/Input'. 
+- **no-raw-input**: if Using raw native  <input> → Replace with  import { Input } from '@/components/base/Input'. 
 
 ## Decorative/Animation Component Libraries (page embellishments)
 
-The following third-party component libraries can be used as visual embellishments. Core interactions still use `@/components/starter/*`; decorative components are for non-functional visual enhancement only.
+The following third-party component libraries can be used as visual embellishments. Core interactions still use `@/components/base/*`; decorative components are for non-functional visual enhancement only.
 
 **Usage guidelines**:
 - When to use: When the page needs visual highlights / animation accents (Hero area, Landing Page, empty state, loading state, CTA area)
 - Quantity control: Use at most 1-2 decorative components per page to avoid performance issues or visual fatigue from excessive animation
-- Priority: Core interactive components still use @/components/starter/*; decorative components are only for non-functional visual enhancement
+- Priority: Core interactive components still use @/components/base/*; decorative components are only for non-functional visual enhancement
 - Color constraints: Decorative components should use project design token colors (e.g. hsl(var(--primary))); avoid hard-coded color values
 
 ### Magic UI

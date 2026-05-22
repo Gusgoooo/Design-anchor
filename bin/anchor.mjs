@@ -174,7 +174,7 @@ function buildManifest(target, kitVersion) {
 function buildKitStatus(manifest) {
   const components = {};
   for (const [rel, info] of Object.entries(manifest.files ?? {})) {
-    const m = rel.match(/^src\/components\/starter\/([^/]+)\.tsx$/);
+    const m = rel.match(/^src\/components\/base\/([^/]+)\.tsx$/);
     if (!m) continue;
     const fileName = m[1];
     if (fileName.includes(".demo") || fileName.includes(".stories")) continue;
@@ -426,15 +426,15 @@ function generateIndex(target) {
     "",
   ];
 
-  // starter 组件
-  const starterDir = join(compsDir, "starter");
-  if (existsSync(starterDir)) {
-    const files = readdirSyncSafe(starterDir).filter(
+  // base 组件
+  const baseDir = join(compsDir, "base");
+  if (existsSync(baseDir)) {
+    const files = readdirSyncSafe(baseDir).filter(
       (f) => f.endsWith(".tsx") && !f.includes(".demo.") && !f.includes(".stories."),
     );
     for (const f of files) {
       const mod = f.replace(/\.tsx$/, "");
-      lines.push(`export * from "./src/components/starter/${mod}";`);
+      lines.push(`export * from "./src/components/base/${mod}";`);
     }
   }
 
@@ -557,7 +557,7 @@ ${sceneRouting}
 ## 组件引用规则
 
 1. **禁止使用原生 HTML 标签**：\`<button>\`、\`<input>\`、\`<table>\` 等，必须使用业务组件
-2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`ANCHOR_INTEGRATION.md\`）；否则从 \`${relLib}/src/components/starter/\` 导入
+2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`ANCHOR_INTEGRATION.md\`）；否则从 \`${relLib}/src/components/base/\` 导入
 3. **禁止手写间距**：不允许 \`m-[13px]\`、\`p-[7px]\` 等任意值 Tailwind 类
 4. **颜色仅用语义类**：\`bg-primary\`、\`text-muted-foreground\` 等，禁止硬编码色值
 

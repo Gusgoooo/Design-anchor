@@ -38,7 +38,7 @@ function execSyncCaptured(cmd, opts) {
 const WRITE_WHITELIST_PREFIXES = [
   "src/anchor/schema/",
   "src/design-tokens/",
-  "src/components/starter/",
+  "src/components/base/",
 ];
 
 function isWriteAllowed(repoRoot, absPath) {
@@ -432,10 +432,10 @@ export function schemaApiPlugin(repoRoot) {
               }
 
               const compName = filename.replace(/\.tsx$/, "");
-              const starterDir = path.join(repoRoot, "src/components/starter");
-              if (!fs.existsSync(starterDir)) fs.mkdirSync(starterDir, { recursive: true });
+              const baseDir = path.join(repoRoot, "src/components/base");
+              if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
 
-              const compPath = path.join(starterDir, filename);
+              const compPath = path.join(baseDir, filename);
               if (!isWriteAllowed(repoRoot, compPath)) {
                 res.statusCode = 403;
                 res.setHeader("Content-Type", "application/json");
@@ -446,7 +446,7 @@ export function schemaApiPlugin(repoRoot) {
               writeFileWithFsync(compPath, Buffer.from(content, "binary"));
 
               const pascal = compName.replace(/(^|-)(\w)/g, (_, _2, c) => c.toUpperCase());
-              const demoPath = path.join(starterDir, pascal + ".demo.tsx");
+              const demoPath = path.join(baseDir, pascal + ".demo.tsx");
               if (!fs.existsSync(demoPath)) {
                 const demo = [
                   `import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";`,

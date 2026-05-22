@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Follow-up suggestion buttons after AI replies. Displays clickable next-question suggestions below assistant messages.",
   "wraps": {
-    "module": "@/components/starter/ai/follow-up-suggestions",
+    "module": "@/components/base/ai/follow-up-suggestions",
     "primitives": [
       "ThreadFollowupSuggestions"
     ]
@@ -38,9 +38,9 @@
       }
     ]
   },
-  "aiPrompt": "Use FollowUpSuggestions from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use FollowUpSuggestions from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "referencePriority": [
-    "@/components/starter/ai/follow-up-suggestions"
+    "@/components/base/ai/follow-up-suggestions"
   ],
   "meta": {
     "tags": [

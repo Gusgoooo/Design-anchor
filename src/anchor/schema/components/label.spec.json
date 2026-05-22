@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Form label paired with Input/Select controls. Provides consistent font styling and disabled state association.",
   "wraps": {
-    "module": "@/components/starter/label",
+    "module": "@/components/base/label",
     "primitives": [
       "Label"
     ]
@@ -39,7 +39,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Label from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Label from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "label",

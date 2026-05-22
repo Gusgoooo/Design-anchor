@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Command palette (VS Code Ctrl+K / Spotlight style) for global search and quick action entry.",
   "wraps": {
-    "module": "@/components/starter/command",
+    "module": "@/components/base/command",
     "primitives": [
       "Command",
       "CommandDialog",
@@ -47,7 +47,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Command from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Command from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "command",

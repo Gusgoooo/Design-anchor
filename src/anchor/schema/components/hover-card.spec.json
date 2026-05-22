@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Hover card showing extra preview info (user profiles, link previews) on mouse hover.",
   "wraps": {
-    "module": "@/components/starter/hover-card",
+    "module": "@/components/base/hover-card",
     "primitives": [
       "HoverCard",
       "HoverCardTrigger",
@@ -44,7 +44,7 @@
       }
     ]
   },
-  "aiPrompt": "Use HoverCard from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use HoverCard from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "hover-card",

@@ -11,18 +11,18 @@ import type { DemoModule, Meta, StoryObj } from "./argTypes-types";
 const demoLoaders = import.meta.glob<DemoModule>("../components/**/*.demo.tsx");
 
 export type StoryEntry = {
-  id: string;             // "starter-button--default"
+  id: string;             // "base-button--default"
   storyName: string;      // "Default"
   exportName: string;     // "Default" (matches the demo file export)
-  componentId: string;    // "starter-button"
-  componentTitle: string; // "Starter/Button"
-  filePath: string;       // glob key, e.g., "../components/starter/Button.demo.tsx"
+  componentId: string;    // "base-button"
+  componentTitle: string; // "Base/Button"
+  filePath: string;       // glob key, e.g., "../components/base/Button.demo.tsx"
 };
 
 export type ComponentEntry = {
-  id: string;             // "starter-button"
-  title: string;          // "Starter/Button"
-  segments: string[];     // ["Starter", "Button"]
+  id: string;             // "base-button"
+  title: string;          // "Base/Button"
+  segments: string[];     // ["Base", "Button"]
   filePath: string;
   stories: StoryEntry[];
 };

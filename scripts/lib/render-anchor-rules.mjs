@@ -166,7 +166,7 @@ export function renderCursorrules(specs, decorativeLibs) {
   if (decorativeLibs && Array.isArray(decorativeLibs.libraries) && decorativeLibs.libraries.length > 0) {
     lines.push("## Decorative/Animation Component Libraries (page embellishments)");
     lines.push("");
-    lines.push("The following third-party component libraries can be used as visual embellishments. Core interactions still use `@/components/starter/*`; decorative components are for non-functional visual enhancement only.");
+    lines.push("The following third-party component libraries can be used as visual embellishments. Core interactions still use `@/components/base/*`; decorative components are for non-functional visual enhancement only.");
     lines.push("");
     const g = decorativeLibs.usageGuidelines;
     if (g) {

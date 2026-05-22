@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Dropdown menu for action lists below a trigger button. For 'more actions', bulk operations, etc.",
   "wraps": {
-    "module": "@/components/starter/dropdown-menu",
+    "module": "@/components/base/dropdown-menu",
     "primitives": [
       "DropdownMenu",
       "DropdownMenuTrigger",
@@ -61,7 +61,7 @@
       }
     ]
   },
-  "aiPrompt": "Use DropdownMenu from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use DropdownMenu from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "dropdown",

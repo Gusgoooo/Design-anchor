@@ -113,7 +113,7 @@ function translateAiPrompt(prompt, componentName) {
 
   // If still heavily Chinese, generate a clean English prompt
   if (/[一-鿿]/.test(result)) {
-    return `Use ${componentName} from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.`;
+    return `Use ${componentName} from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.`;
   }
 
   return result.trim().replace(/\.\s*\./g, ".").replace(/\s{2,}/g, " ");

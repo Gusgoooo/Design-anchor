@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Slider control for selecting a value within a range. Based on native range input.",
   "wraps": {
-    "module": "@/components/starter/slider",
+    "module": "@/components/base/slider",
     "primitives": [
       "Slider",
       "SliderTrack",
@@ -71,7 +71,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Slider from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Slider from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "slider",

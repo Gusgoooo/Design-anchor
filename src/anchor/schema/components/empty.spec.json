@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "intent": "Empty state placeholder for lists/pages with no data. Shows explanatory text and guidance actions.",
   "wraps": {
-    "module": "@/components/starter/empty",
+    "module": "@/components/base/empty",
     "primitives": [
       "Empty",
       "EmptyHeader",
@@ -69,7 +69,7 @@
       }
     ]
   },
-  "aiPrompt": "Use Empty from @/components/starter. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
+  "aiPrompt": "Use Empty from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.",
   "meta": {
     "tags": [
       "empty",

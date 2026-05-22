@@ -1,20 +1,17 @@
 import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";
-import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import componentSrc from "./assistant-modal.tsx?raw";
 import { AssistantModal } from "./assistant-modal";
 import { MockRuntimeProvider } from "./_story-runtime";
 
-const audit = autoClassControls(componentSrc);
+// AssistantModal doesn't accept a className prop, so autoClassControls
+// would generate controls that have no effect. Skipped here.
 
 type Args = Record<string, unknown>;
 
 const meta: Meta<Args> = {
   title: "AI/AssistantModal",
   parameters: { layout: "fullscreen" },
-  args: {
-    ...audit.args,
-  },
-  argTypes: audit.argTypes as Meta<Args>["argTypes"],
+  args: {},
+  argTypes: {},
   decorators: [
     (Story) => (
       <MockRuntimeProvider>

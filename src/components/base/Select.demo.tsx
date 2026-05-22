@@ -61,7 +61,7 @@ export const Default: Story = {
 };
 
 export const AlignWithButtons: Story = {
-  render: () => (
+  render: (args) => (
     <div className="flex w-[min(100%,520px)] flex-col gap-6">
       {(["sm", "default", "lg"] as const).map((sz) => (
         <div key={sz} className="flex flex-nowrap items-center gap-2">
@@ -71,7 +71,10 @@ export const AlignWithButtons: Story = {
           </Button>
           <div className="w-[220px]">
             <Select>
-              <SelectTrigger size={sz}>
+              <SelectTrigger
+                size={sz}
+                className={audit.buildClassName(args as unknown as Record<string, string>)}
+              >
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent>

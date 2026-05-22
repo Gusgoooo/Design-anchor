@@ -1,12 +1,11 @@
 import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";
-import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import componentSrc from "./thread-list.tsx?raw";
 import { ThreadList } from "./thread-list";
 import { MockRuntimeProvider } from "./_story-runtime";
 
-const audit = autoClassControls(componentSrc);
+// ThreadList doesn't accept className overrides — auto class controls
+// would have no visible effect. The width arg below DOES work.
 
-type Args = Record<string, unknown> & {
+type Args = {
   width: number;
 };
 
@@ -15,11 +14,9 @@ const meta: Meta<Args> = {
   parameters: { layout: "centered" },
   args: {
     width: 280,
-    ...audit.args,
   },
   argTypes: {
     width: { control: { type: "range", min: 200, max: 400, step: 10 }, description: "Container width (px)" },
-    ...audit.argTypes,
   },
   decorators: [
     (Story) => (

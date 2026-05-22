@@ -1,21 +1,18 @@
 import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";
 import type { ThreadMessageLike } from "@assistant-ui/react";
-import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import componentSrc from "./thread.tsx?raw";
 import { Thread } from "./thread";
 import { MockRuntimeProvider } from "./_story-runtime";
 
-const audit = autoClassControls(componentSrc);
+// Thread doesn't accept a className prop, so autoClassControls would
+// generate controls that have no effect. Skipped here.
 
 type Args = Record<string, unknown>;
 
 const meta: Meta<Args> = {
   title: "AI/Thread",
   parameters: { layout: "fullscreen" },
-  args: {
-    ...audit.args,
-  },
-  argTypes: audit.argTypes as Meta<Args>["argTypes"],
+  args: {},
+  argTypes: {},
   decorators: [
     (Story) => (
       <MockRuntimeProvider>

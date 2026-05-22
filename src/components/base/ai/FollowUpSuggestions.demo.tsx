@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";
 import type { ThreadMessageLike } from "@assistant-ui/react";
-import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import componentSrc from "./follow-up-suggestions.tsx?raw";
 import { Thread } from "./thread";
 import { MockRuntimeProvider } from "./_story-runtime";
 
-const audit = autoClassControls(componentSrc);
+// FollowUpSuggestions primitives don't accept className overrides —
+// auto class controls would have no visible effect, so they're not
+// loaded here. The text controls below DO work (piped into messages).
 
-type Args = Record<string, unknown> & {
+type Args = {
   userMessage: string;
   assistantReply: string;
 };
@@ -19,12 +19,10 @@ const meta: Meta<Args> = {
     userMessage: "Tell me about React",
     assistantReply:
       "React is a JavaScript library for building user interfaces. It uses a component-based architecture and a virtual DOM for efficient rendering.",
-    ...audit.args,
   },
   argTypes: {
     userMessage: { control: "text", description: "User message" },
     assistantReply: { control: "text", description: "Assistant reply" },
-    ...audit.argTypes,
   },
   decorators: [
     (Story) => (

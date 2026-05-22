@@ -58,20 +58,20 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const Variants: Story = {
-  render: () => (
+  render: (args) => (
     <div className="flex flex-col gap-4">
       {(["outline", "ghost", "muted"] as const).map((v) => (
-        <ModelSelector key={v} models={sampleModels} variant={v} />
+        <ModelSelector key={v} models={sampleModels} variant={v} {...spreadAutoPreviewProps(audit, args)} />
       ))}
     </div>
   ),
 };
 
 export const Sizes: Story = {
-  render: () => (
+  render: (args) => (
     <div className="flex flex-col gap-4">
       {(["sm", "default", "lg"] as const).map((s) => (
-        <ModelSelector key={s} models={sampleModels} size={s} />
+        <ModelSelector key={s} models={sampleModels} size={s} {...spreadAutoPreviewProps(audit, args)} />
       ))}
     </div>
   ),
@@ -80,7 +80,11 @@ export const Sizes: Story = {
 export const Composed: Story = {
   render: (args) => (
     <ModelSelectorRoot models={sampleModels}>
-      <ModelSelectorTrigger variant={args.variant} size={args.size} />
+      <ModelSelectorTrigger
+        variant={args.variant}
+        size={args.size}
+        {...spreadAutoPreviewProps(audit, args)}
+      />
       <ModelSelectorContent />
     </ModelSelectorRoot>
   ),

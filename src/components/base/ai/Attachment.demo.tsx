@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";
 import type { ThreadMessageLike } from "@assistant-ui/react";
-import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import componentSrc from "./attachment.tsx?raw";
 import { Thread } from "./thread";
 import { MockRuntimeProvider } from "./_story-runtime";
 
-const audit = autoClassControls(componentSrc);
+// Attachment primitives don't accept className overrides — auto class
+// controls would have no visible effect, so they're not loaded here.
+// The text controls below DO work (they're piped into the messages).
 
-type Args = Record<string, unknown> & {
+type Args = {
   imageUrl: string;
   userText: string;
   assistantReply: string;
@@ -20,13 +20,11 @@ const meta: Meta<Args> = {
     imageUrl: "https://placehold.co/200x200/eee/999?text=Preview",
     userText: "Can you analyze this image?",
     assistantReply: "I can see the image you uploaded. This appears to be a placeholder image.",
-    ...audit.args,
   },
   argTypes: {
     imageUrl: { control: "text", description: "Image URL for the attachment" },
     userText: { control: "text", description: "User message text" },
     assistantReply: { control: "text", description: "Assistant reply text" },
-    ...audit.argTypes,
   },
   decorators: [
     (Story) => (

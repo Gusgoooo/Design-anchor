@@ -75,7 +75,13 @@ export const AlignWithButtons: Story = {
             Button
           </Button>
           <div className="w-[200px] min-w-0 shrink-0">
-            <Input type="text" placeholder="Input" size={sz} disabled={args.disabled} className="w-full" />
+            <Input
+              type="text"
+              placeholder="Input"
+              size={sz}
+              disabled={args.disabled}
+              className={`w-full ${audit.buildClassName(args as Record<string, string>)}`}
+            />
           </div>
         </div>
       ))}

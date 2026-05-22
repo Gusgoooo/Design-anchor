@@ -1,11 +1,10 @@
 import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";
 import type { ThreadMessageLike } from "@assistant-ui/react";
-import { autoClassControls } from "@/design-tokens/tw-class-audit";
-import componentSrc from "./markdown-text.tsx?raw";
 import { Thread } from "./thread";
 import { MockRuntimeProvider } from "./_story-runtime";
 
-const audit = autoClassControls(componentSrc);
+// MarkdownText doesn't accept className overrides — auto class
+// controls would have no visible effect.
 
 const defaultMarkdown = `# Heading 1
 ## Heading 2
@@ -39,7 +38,7 @@ Here is a [link](https://example.com) and a horizontal rule:
 
 That's all the markdown!`;
 
-type Args = Record<string, unknown> & {
+type Args = {
   markdownContent: string;
 };
 
@@ -48,11 +47,9 @@ const meta: Meta<Args> = {
   parameters: { layout: "fullscreen" },
   args: {
     markdownContent: defaultMarkdown,
-    ...audit.args,
   },
   argTypes: {
     markdownContent: { control: "text", description: "Markdown content to render in the assistant message" },
-    ...audit.argTypes,
   },
   decorators: [
     (Story) => (

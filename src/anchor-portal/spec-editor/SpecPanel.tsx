@@ -9,6 +9,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLocale } from "../i18n/LocaleProvider";
 import {
   normalizePrimitives,
   serializePrimitives,
@@ -177,6 +178,7 @@ function matchSchemaForTitle(schemas: SchemaListItem[], leafTitle: string | null
 /* ===================================================================== */
 
 export function SpecPanel() {
+  const { t } = useLocale();
   const { session } = useStorySession();
   const leafTitle = session?.story.componentTitle.split("/").pop() ?? null;
   const storyId = session?.story.id ?? null;
@@ -309,7 +311,7 @@ export function SpecPanel() {
 
   if (!session) {
     return (
-      <CenterMessage>Select a story from the sidebar to edit its Spec.json.</CenterMessage>
+      <CenterMessage>{t({ en: "Select a story from the sidebar to edit its Spec.json.", zh: "从左侧选一个 story 来编辑它的 Spec.json。" })}</CenterMessage>
     );
   }
 
@@ -329,8 +331,8 @@ export function SpecPanel() {
     );
   }
 
-  if (loading && !base) return <CenterMessage>Loading…</CenterMessage>;
-  if (!spec) return <CenterMessage>Select a component to view its spec.</CenterMessage>;
+  if (loading && !base) return <CenterMessage>{t({ en: "Loading…", zh: "加载中…" })}</CenterMessage>;
+  if (!spec) return <CenterMessage>{t({ en: "Select a component to view its spec.", zh: "选一个组件查看它的 spec。" })}</CenterMessage>;
 
   return (
     <div className="flex h-full flex-col">
@@ -341,7 +343,7 @@ export function SpecPanel() {
         </div>
         {storyName ? (
           <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-            Variant:
+            {t({ en: "Variant:", zh: "变体：" })}
             <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground">{storyName}</code>
           </div>
         ) : null}
@@ -349,11 +351,20 @@ export function SpecPanel() {
 
       <div className="flex-1 overflow-y-auto px-3 py-3 text-[13px]">
         <Collapsible
-          title="Spec · Intent & dependencies"
-          hint="Bound to the current story variant: saving writes storyAnchor[storyId], deep-merged with the base spec. Common: Intent, schema directives, primary import."
+          title={t({ en: "Spec · Intent & dependencies", zh: "Spec · 用途与依赖" })}
+          hint={t({
+            en: "Bound to the current story variant: saving writes storyAnchor[storyId], deep-merged with the base spec. Common: Intent, schema directives, primary import.",
+            zh: "绑定到当前 story 变体：保存时写入 storyAnchor[storyId]，再与 base spec 深度合并。这里改的是 Intent、schema directive、primary import。",
+          })}
           defaultOpen
         >
-          <Field label="Intent" hint="One judgable sentence: when this component is required and what counts as misuse.">
+          <Field
+            label={t({ en: "Intent", zh: "Intent（用途）" })}
+            hint={t({
+              en: "One judgable sentence: when this component is required and what counts as misuse.",
+              zh: "一句可判别的话：什么时候必须用这个组件，什么算误用。",
+            })}
+          >
             <textarea
               value={spec.intent}
               onChange={(e) => update("intent", e.target.value)}
@@ -361,7 +372,13 @@ export function SpecPanel() {
               className={TX}
             />
           </Field>
-          <Field label="Schema directive (written to .cursorrules)" hint="Hard rules for code assistants: imports, variant/density values, forbidden Tailwind patterns.">
+          <Field
+            label={t({ en: "Schema directive (written to .cursorrules)", zh: "Schema 指令（写入 .cursorrules）" })}
+            hint={t({
+              en: "Hard rules for code assistants: imports, variant/density values, forbidden Tailwind patterns.",
+              zh: "给 AI 工具的硬规则：import 路径、variant/density 取值、禁用的 Tailwind 模式。",
+            })}
+          >
             <textarea
               value={spec.aiPrompt}
               onChange={(e) => update("aiPrompt", e.target.value)}
@@ -369,7 +386,13 @@ export function SpecPanel() {
               className={TX}
             />
           </Field>
-          <Field label="Primary import path" hint="The most recommended path; multiple legal entries go in the full reference list below.">
+          <Field
+            label={t({ en: "Primary import path", zh: "推荐 import 路径" })}
+            hint={t({
+              en: "The most recommended path; multiple legal entries go in the full reference list below.",
+              zh: "最推荐的那一条路径；多条合法 import 在下面的 reference 列表里全列。",
+            })}
+          >
             <input
               type="text"
               value={(spec.referencePriority ?? [])[0] ?? ""}
@@ -385,14 +408,17 @@ export function SpecPanel() {
         </Collapsible>
 
         <Collapsible
-          title="Spec · Forbidden, Corrections & Few-shot"
-          hint="Aligns with anchor-audit and .cursorrules: HTML tag replacements, judgable violations → fix prompts, minimal JSX templates."
+          title={t({ en: "Spec · Forbidden, Corrections & Few-shot", zh: "Spec · 禁用、纠正与示例" })}
+          hint={t({
+            en: "Aligns with anchor-audit and .cursorrules: HTML tag replacements, judgable violations → fix prompts, minimal JSX templates.",
+            zh: "和 anchor-audit、.cursorrules 一致：HTML tag 替换、可判别的违规 → 改正 prompt、minimal JSX 模板。",
+          })}
         >
-          <Subheading hint="Each entry: HTML tag, why forbidden, replacement business component.">Forbidden</Subheading>
+          <Subheading hint={t({ en: "Each entry: HTML tag, why forbidden, replacement business component.", zh: "每条：HTML tag、为什么禁、替换用的业务组件。" })}>{t({ en: "Forbidden", zh: "禁用 (Forbidden)" })}</Subheading>
           {(spec.forbidden ?? []).map((f, i) => (
             <Card key={i}>
               <div className="grid grid-cols-3 gap-2">
-                <Field label="HTML tag" compact>
+                <Field label={t({ en: "HTML tag", zh: "HTML tag" })} compact>
                   <input
                     value={f.htmlTag}
                     onChange={(e) => {
@@ -403,7 +429,7 @@ export function SpecPanel() {
                     className={cn(IN, "font-mono")}
                   />
                 </Field>
-                <Field label="Reason" compact>
+                <Field label={t({ en: "Reason", zh: "原因" })} compact>
                   <input
                     value={f.reason}
                     onChange={(e) => {
@@ -414,7 +440,7 @@ export function SpecPanel() {
                     className={IN}
                   />
                 </Field>
-                <Field label="Use instead" compact>
+                <Field label={t({ en: "Use instead", zh: "改用" })} compact>
                   <input
                     value={f.useInstead}
                     onChange={(e) => {
@@ -430,15 +456,15 @@ export function SpecPanel() {
             </Card>
           ))}
           <AddRowButton
-            label="Add forbidden"
+            label={t({ en: "Add forbidden", zh: "添加禁用项" })}
             onClick={() => update("forbidden", [...(spec.forbidden ?? []), { htmlTag: "", reason: "", useInstead: "" }])}
           />
 
-          <Subheading hint="Pairs of judgable violation + fix instruction." topMargin>Corrections</Subheading>
+          <Subheading hint={t({ en: "Pairs of judgable violation + fix instruction.", zh: "成对的「可判别违规 + 改正指令」。" })} topMargin>{t({ en: "Corrections", zh: "纠正 (Corrections)" })}</Subheading>
           {(spec.corrections ?? []).map((c, i) => (
             <Card key={i}>
               <div className="grid grid-cols-[120px_1fr] gap-2">
-                <Field label="ID" compact>
+                <Field label={t({ en: "ID", zh: "ID" })} compact>
                   <input
                     value={c.id}
                     onChange={(e) => {
@@ -449,7 +475,7 @@ export function SpecPanel() {
                     className={cn(IN, "font-mono")}
                   />
                 </Field>
-                <Field label="Violation" compact>
+                <Field label={t({ en: "Violation", zh: "违规描述" })} compact>
                   <input
                     value={c.violation}
                     onChange={(e) => {
@@ -461,7 +487,7 @@ export function SpecPanel() {
                   />
                 </Field>
               </div>
-              <Field label="Fix prompt" compact>
+              <Field label={t({ en: "Fix prompt", zh: "修复 prompt" })} compact>
                 <input
                   value={c.fixPrompt}
                   onChange={(e) => {
@@ -476,31 +502,34 @@ export function SpecPanel() {
             </Card>
           ))}
           <AddRowButton
-            label="Add correction"
+            label={t({ en: "Add correction", zh: "添加纠正项" })}
             onClick={() => update("corrections", [...(spec.corrections ?? []), { id: "", violation: "", fixPrompt: "" }])}
           />
 
-          <Subheading hint="1–2 examples per component: title + optional one-liner + minimal JSX." topMargin>Examples (Few-shot)</Subheading>
+          <Subheading hint={t({ en: "1–2 examples per component: title + optional one-liner + minimal JSX.", zh: "每个组件 1–2 个示例：标题 + 可选一句描述 + 最小 JSX。" })} topMargin>{t({ en: "Examples (Few-shot)", zh: "示例 (Few-shot)" })}</Subheading>
           <ExamplesEditor examples={spec.examples ?? []} onChange={(v) => update("examples", v)} />
         </Collapsible>
 
         <Collapsible
-          title="Engineering · id / wraps / props / styleLock / refs"
-          hint="Component id/version, wraps.module + primitives, prop types + enumMap, styleLock patterns, reference list."
+          title={t({ en: "Engineering · id / wraps / props / styleLock / refs", zh: "工程字段 · id / wraps / props / styleLock / refs" })}
+          hint={t({
+            en: "Component id/version, wraps.module + primitives, prop types + enumMap, styleLock patterns, reference list.",
+            zh: "组件 id/version、wraps.module + primitives、prop 类型 + enumMap、styleLock 模式、reference 列表。",
+          })}
         >
           <div className="grid grid-cols-[1fr_1fr_100px] gap-2">
-            <Field label="Component name" compact>
+            <Field label={t({ en: "Component name", zh: "组件名" })} compact>
               <input value={spec.componentName} onChange={(e) => update("componentName", e.target.value)} className={IN} />
             </Field>
             <Field label="ID" compact>
               <input value={spec.id} onChange={(e) => update("id", e.target.value)} className={IN} />
             </Field>
-            <Field label="Version" compact>
+            <Field label={t({ en: "Version", zh: "Version" })} compact>
               <input value={spec.version} onChange={(e) => update("version", e.target.value)} className={IN} />
             </Field>
           </div>
-          <Subheading hint="module points to the base/ui re-export; primitives are sub-components exported." topMargin>Wraps</Subheading>
-          <Field label="Module path" compact>
+          <Subheading hint={t({ en: "module points to the base/ui re-export; primitives are sub-components exported.", zh: "module 指向 base/ui 的 re-export；primitives 是导出的子组件。" })} topMargin>{t({ en: "Wraps", zh: "Wraps（封装）" })}</Subheading>
+          <Field label={t({ en: "Module path", zh: "Module 路径" })} compact>
             <input value={spec.wraps.module} onChange={(e) => update("wraps", { ...spec.wraps, module: e.target.value })} className={IN} />
           </Field>
           <PrimitivesEditor
@@ -508,8 +537,8 @@ export function SpecPanel() {
             onChange={(p) => update("wraps", { ...spec.wraps, primitives: p })}
           />
 
-          <Subheading topMargin>Style lock</Subheading>
-          <Field label="Baseline tokens (comma-separated)" compact>
+          <Subheading topMargin>{t({ en: "Style lock", zh: "Style lock（样式锁）" })}</Subheading>
+          <Field label={t({ en: "Baseline tokens (comma-separated)", zh: "Baseline tokens（逗号分隔）" })} compact>
             <input
               value={spec.styleLock.baselineTokens.join(", ")}
               onChange={(e) =>
@@ -526,7 +555,7 @@ export function SpecPanel() {
             onChange={(bl) => update("styleLock", { ...spec.styleLock, blacklist: bl })}
           />
 
-          <Subheading hint="First line should match Primary import above." topMargin>Reference priority</Subheading>
+          <Subheading hint={t({ en: "First line should match Primary import above.", zh: "第一行应与上方的「推荐 import 路径」一致。" })} topMargin>{t({ en: "Reference priority", zh: "Reference 优先级" })}</Subheading>
           <textarea
             value={(spec.referencePriority ?? []).join("\n")}
             onChange={(e) => update("referencePriority", e.target.value.split("\n").map((s) => s.trim()).filter(Boolean))}
@@ -556,14 +585,14 @@ export function SpecPanel() {
           onClick={() => void load()}
           className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-muted"
         >
-          <RefreshCw size={11} /> Reload
+          <RefreshCw size={11} /> {t({ en: "Reload", zh: "重新加载" })}
         </button>
         <button
           type="button"
           onClick={() => void save()}
-          className="inline-flex items-center gap-1 rounded-md bg-foreground px-3 py-1.5 text-[12px] font-medium text-background transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
         >
-          <Save size={11} /> Save
+          <Save size={11} /> {t({ en: "Save", zh: "保存" })}
         </button>
       </footer>
     </div>
@@ -669,13 +698,14 @@ function Card({ children }: { children: React.ReactNode }) {
 }
 
 function DeleteRowButton({ onClick }: { onClick: () => void }) {
+  const { t } = useLocale();
   return (
     <button
       type="button"
       onClick={onClick}
       className="mt-2 inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
-      <Trash2 size={10} /> Delete
+      <Trash2 size={10} /> {t({ en: "Delete", zh: "删除" })}
     </button>
   );
 }
@@ -699,12 +729,13 @@ function PrimitivesEditor({
   primitives: WrapPrimitiveRef[];
   onChange: (next: WrapPrimitiveRef[]) => void;
 }) {
+  const { t } = useLocale();
   const rows = primitives.length > 0 ? primitives : [{ symbol: "" }];
   return (
     <div className="space-y-1.5">
       {rows.map((row, i) => (
         <div key={i} className="grid grid-cols-[1fr_1fr_auto] items-end gap-2 border-b border-border/60 pb-2">
-          <Field label="Export symbol" compact>
+          <Field label={t({ en: "Export symbol", zh: "导出符号" })} compact>
             <input
               value={row.symbol}
               onChange={(e) => {
@@ -717,7 +748,7 @@ function PrimitivesEditor({
               placeholder="e.g. DialogContent"
             />
           </Field>
-          <Field label="Display name (optional)" compact>
+          <Field label={t({ en: "Display name (optional)", zh: "显示名（可选）" })} compact>
             <input
               value={row.displayName ?? ""}
               onChange={(e) => {
@@ -740,7 +771,7 @@ function PrimitivesEditor({
           </button>
         </div>
       ))}
-      <AddRowButton label="Add sub-component" onClick={() => onChange([...primitives, { symbol: "" }])} />
+      <AddRowButton label={t({ en: "Add sub-component", zh: "添加子组件" })} onClick={() => onChange([...primitives, { symbol: "" }])} />
     </div>
   );
 }
@@ -752,6 +783,7 @@ function BlacklistEditor({
   rules: BlacklistRule[];
   onChange: (r: BlacklistRule[]) => void;
 }) {
+  const { t } = useLocale();
   return (
     <div className="space-y-1.5">
       {rules.map((rule, i) => (
@@ -785,7 +817,7 @@ function BlacklistEditor({
           </button>
         </div>
       ))}
-      <AddRowButton label="Add blacklist rule" onClick={() => onChange([...rules, { description: "", pattern: "" }])} />
+      <AddRowButton label={t({ en: "Add blacklist rule", zh: "添加黑名单规则" })} onClick={() => onChange([...rules, { description: "", pattern: "" }])} />
     </div>
   );
 }
@@ -797,12 +829,13 @@ function ExamplesEditor({
   examples: NonNullable<SpecData["examples"]>;
   onChange: (next: NonNullable<SpecData["examples"]>) => void;
 }) {
+  const { t } = useLocale();
   const list = examples ?? [];
   return (
     <div className="space-y-2">
       {list.map((ex, i) => (
         <Card key={i}>
-          <Field label={`Example title ${i + 1}`} compact>
+          <Field label={t({ en: `Example title ${i + 1}`, zh: `示例标题 ${i + 1}` })} compact>
             <input
               value={ex.title}
               onChange={(e) => {
@@ -813,7 +846,7 @@ function ExamplesEditor({
               className={IN}
             />
           </Field>
-          <Field label="One-line description (optional)" compact>
+          <Field label={t({ en: "One-line description (optional)", zh: "一句话描述（可选）" })} compact>
             <input
               value={ex.description ?? ""}
               placeholder="e.g.: Primary button within list row"
@@ -826,7 +859,7 @@ function ExamplesEditor({
               className={IN}
             />
           </Field>
-          <Field label="Minimal JSX" hint="Written into .cursorrules as a template." compact>
+          <Field label={t({ en: "Minimal JSX", zh: "最小 JSX" })} hint={t({ en: "Written into .cursorrules as a template.", zh: "作为模板写入 .cursorrules。" })} compact>
             <textarea
               value={ex.snippet}
               rows={3}
@@ -843,7 +876,7 @@ function ExamplesEditor({
         </Card>
       ))}
       {list.length < 2 ? (
-        <AddRowButton label="Add example (max 2)" onClick={() => onChange([...list, { title: `Example ${list.length + 1}`, snippet: "" }])} />
+        <AddRowButton label={t({ en: "Add example (max 2)", zh: "添加示例（最多 2 个）" })} onClick={() => onChange([...list, { title: `Example ${list.length + 1}`, snippet: "" }])} />
       ) : null}
     </div>
   );
@@ -856,6 +889,7 @@ function CreateSchemaPrompt({
   leafTitle: string;
   onCreated: (filename: string) => void;
 }) {
+  const { t } = useLocale();
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const kebab = leafTitle.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase().replace(/\s+/g, "-");
@@ -899,15 +933,18 @@ function CreateSchemaPrompt({
     <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
       <span className="text-sm font-medium text-foreground">{leafTitle}</span>
       <p className="max-w-xs text-xs text-muted-foreground">
-        No <strong>Spec</strong> has been created for this component yet (<code className="font-mono text-[10px]">*.spec.json</code>).
+        {t({
+          en: "No Spec has been created for this component yet (*.spec.json).",
+          zh: "这个组件还没有 Spec（*.spec.json）。",
+        })}
       </p>
       <button
         type="button"
         disabled={busy}
         onClick={() => void create()}
-        className="inline-flex items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity disabled:opacity-60"
+        className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground shadow-sm transition-opacity disabled:opacity-60"
       >
-        <Plus size={12} /> {busy ? "Creating…" : "Create Spec"}
+        <Plus size={12} /> {busy ? t({ en: "Creating…", zh: "创建中…" }) : t({ en: "Create Spec", zh: "创建 Spec" })}
       </button>
       {error ? <p className="max-w-xs text-xs text-destructive">{error}</p> : null}
     </div>

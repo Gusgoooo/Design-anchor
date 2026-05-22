@@ -1,7 +1,6 @@
 import * as React from "react";
 import { HexAlphaColorPicker, HexColorInput } from "react-colorful";
 import { converter, parse } from "culori";
-import { Ruler } from "lucide-react";
 import { Input } from "@/components/base/input";
 import { Label } from "@/components/base/label";
 import {
@@ -53,14 +52,6 @@ function formatRgba(cssColor: string): string {
   const a = typeof rgb.alpha === "number" ? clamp(rgb.alpha, 0, 1) : 1;
   return `rgba(${r}, ${g}, ${b}, ${a.toFixed(2).replace(/\.?0+$/, "")})`;
 }
-
-const UNIT_RANGES: Record<string, { min: number; max: number; step: number }> = {
-  rem: { min: 0, max: 5, step: 0.0625 },
-  em: { min: 0, max: 5, step: 0.0625 },
-  px: { min: 0, max: 100, step: 1 },
-  "%": { min: 0, max: 100, step: 1 },
-};
-const DEFAULT_RANGE = { min: 0, max: 10, step: 0.1 };
 
 export function ColorEditor({
   value,
@@ -149,106 +140,44 @@ export function LengthEditor({
   value: string;
   onChange: (v: string) => void;
 }) {
+  // One field. Type any CSS length: "4", "4px", "1rem", "1.5em", "calc(100% - 8px)".
+  // Bare numbers default to whatever unit the previous value carried (or "px" if none).
   const parsed = parseCssLength(value);
-  const num = parsed?.num ?? 0;
-  const unit = parsed?.unit ?? "rem";
-  const range = UNIT_RANGES[unit] ?? DEFAULT_RANGE;
+  const lastUnit = parsed?.unit ?? "px";
 
   const [textVal, setTextVal] = React.useState(value);
   React.useEffect(() => setTextVal(value), [value]);
 
-  function handleSlider(e: React.ChangeEvent<HTMLInputElement>) {
-    const n = Number.parseFloat(e.target.value);
-    if (Number.isFinite(n)) onChange(formatCssLength(n, unit));
-  }
-
-  function handleNumInput(e: React.ChangeEvent<HTMLInputElement>) {
-    const n = Number.parseFloat(e.target.value);
-    if (Number.isFinite(n) && n >= 0) onChange(formatCssLength(n, unit));
-  }
-
-  function commitTextInput() {
+  function commit() {
     const trimmed = textVal.trim();
-    if (!trimmed) return;
-    const p = parseCssLength(trimmed);
-    if (p) {
-      onChange(formatCssLength(p.num, p.unit));
-    } else {
-      onChange(trimmed);
+    if (!trimmed || trimmed === value) return;
+    // If it parses as a length without an explicit unit (just a number),
+    // attach the previous value's unit so designers can type "8" instead
+    // of "8px" every time.
+    if (/^-?\d*\.?\d+$/.test(trimmed)) {
+      onChange(formatCssLength(Number(trimmed), lastUnit));
+      return;
     }
+    // Otherwise pass through whatever the user typed.
+    const p = parseCssLength(trimmed);
+    onChange(p ? formatCssLength(p.num, p.unit) : trimmed);
   }
-
-  const previewSize = Math.min(Math.max(num * (unit === "px" ? 1 : 16), 0), 120);
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3">
-        <Ruler size={16} className="shrink-0 text-muted-foreground" />
-        <div className="flex flex-1 items-end gap-3">
-          <div
-            className="rounded-md border border-border bg-primary/15 transition-all"
-            style={{ width: `${previewSize}px`, height: "40px" }}
-          />
-          <span className="shrink-0 font-mono text-sm font-semibold text-foreground tabular-nums">
-            {value}
-          </span>
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-          {range.min}{unit} – {range.max}{unit} · step {range.step}{unit}
-        </Label>
-        <input
-          type="range"
-          min={range.min}
-          max={range.max}
-          step={range.step}
-          value={num}
-          onChange={handleSlider}
-          className="h-2 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary [&::-webkit-slider-thumb]:shadow"
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-2">
-        <div className="space-y-1.5">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Value</Label>
-          <Input
-            type="number"
-            min={0}
-            step={range.step}
-            value={num}
-            onChange={handleNumInput}
-            className="h-8 font-mono text-xs tabular-nums"
-            autoComplete="off"
-          />
-        </div>
-        <div className="space-y-1.5">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Unit</Label>
-          <select
-            value={unit}
-            onChange={(e) => onChange(formatCssLength(num, e.target.value))}
-            className="flex h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-xs text-foreground shadow-sm transition-colors focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none"
-          >
-            {["rem", "em", "px", "%"].map((u) => (
-              <option key={u} value={u}>{u}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      <div className="space-y-1.5">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">CSS (free input)</Label>
-        <Input
-          value={textVal}
-          onChange={(e) => setTextVal(e.target.value)}
-          onBlur={commitTextInput}
-          onKeyDown={(e) => { if (e.key === "Enter") commitTextInput(); }}
-          className="h-8 font-mono text-xs"
-          spellCheck={false}
-          autoComplete="off"
-        />
-      </div>
+    <div className="space-y-1.5">
+      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
+        Value · accepts plain numbers, px / rem / em / %, or calc(…)
+      </Label>
+      <Input
+        value={textVal}
+        onChange={(e) => setTextVal(e.target.value)}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === "Enter") commit(); }}
+        className="h-9 font-mono text-sm tabular-nums"
+        spellCheck={false}
+        autoComplete="off"
+        placeholder="4px"
+      />
     </div>
   );
 }

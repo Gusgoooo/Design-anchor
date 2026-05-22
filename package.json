@@ -29,8 +29,6 @@
     ".cursorrules",
     "tailwind.config.ts",
     "tsconfig.json",
-    "postcss.config.mjs",
-    "vite.config.ts",
     "vite-plugin-schema-api.mjs",
     "components.json",
     "anchor-vite.d.ts",
@@ -44,7 +42,6 @@
     "sync:tokens:pull": "node scripts/pull-product-tokens.mjs",
     "sync:anchor": "npm run sync:tokens && node scripts/sync-from-schema.mjs",
     "anchor:audit": "node scripts/anchor-audit.mjs",
-    "dev:portal": "vite --config src/design-portal/vite.config.ts --open",
     "dev": "vite --config src/anchor-portal/vite.config.ts",
     "build": "vite build --config src/anchor-portal/vite.config.ts",
     "typecheck": "tsc --noEmit"

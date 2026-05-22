@@ -8,7 +8,7 @@ import {
   groupByCategory,
   type NormalizedArgType,
 } from "./normalize";
-import { ControlInput } from "./controls/ControlInput";
+import { ControlInput } from "./ControlInput";
 
 export function ControlsPanel() {
   const { t } = useLocale();

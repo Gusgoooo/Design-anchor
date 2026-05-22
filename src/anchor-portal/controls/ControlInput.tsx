@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { NormalizedControl } from "../normalize";
+import type { NormalizedControl } from "./normalize";
 
 export type ControlInputProps = {
   control: NormalizedControl;

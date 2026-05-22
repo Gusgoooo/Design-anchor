@@ -16,9 +16,7 @@ if (Object.keys(anchorTailwindExtend.borderRadius).length) {
 export default {
   content: [
     "./src/**/*.{ts,tsx}",
-    "./src/design-portal/**/*.{html,ts,tsx}",
     "./src/anchor/schema/**/*.json",
-    "./.storybook/**/*.{ts,tsx}",
   ],
   safelist: anchorSafelist,
   theme: {

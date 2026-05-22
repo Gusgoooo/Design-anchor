@@ -523,9 +523,9 @@ export function CodespacesCard() {
       <Card>
         <CardContent>
           <Tabs defaultValue="codespaces">
-            <TabsList className="w-full">
-              <TabsTrigger value="codespaces">Codespaces</TabsTrigger>
-              <TabsTrigger value="local">Local</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="codespaces" className="w-full">Codespaces</TabsTrigger>
+              <TabsTrigger value="local" className="w-full">Local</TabsTrigger>
             </TabsList>
             <TabsContent value="codespaces">
               <Item size="sm" className="px-1 pt-2">
@@ -600,9 +600,9 @@ export function CodespacesCard() {
             <TabsContent value="local">
               <Tabs defaultValue="https">
                 <TabsList variant="underline" className="w-full justify-start border-b">
-                  <TabsTrigger value="https">HTTPS</TabsTrigger>
-                  <TabsTrigger value="ssh">SSH</TabsTrigger>
-                  <TabsTrigger value="cli">GitHub CLI</TabsTrigger>
+                  <TabsTrigger variant="underline" value="https">HTTPS</TabsTrigger>
+                  <TabsTrigger variant="underline" value="ssh">SSH</TabsTrigger>
+                  <TabsTrigger variant="underline" value="cli">GitHub CLI</TabsTrigger>
                 </TabsList>
                 <div className="rounded-md border bg-muted/30 p-2">
                   <CloneUrl id="https" defaultValue="https://github.com/shadcn-ui/ui.git" hint="Clone using the web URL." />

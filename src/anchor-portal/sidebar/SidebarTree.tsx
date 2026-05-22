@@ -275,17 +275,24 @@ function RowButton({
           : "text-foreground/85 hover:bg-muted/60",
       )}
     >
-      <span className="flex h-3 w-3 shrink-0 items-center justify-center text-muted-foreground/70">
-        {chevron === "none" ? null : (
-          <ChevronRight
-            size={11}
-            className={cn("transition-transform", chevron === "open" && "rotate-90")}
-          />
-        )}
-      </span>
       <span className="flex shrink-0 items-center">{icon}</span>
-      <span className="flex-1 truncate">{label}</span>
+      <span className="min-w-0 flex-1 truncate">{label}</span>
       {statusName ? <KitDot componentName={statusName} /> : null}
+      <span
+        aria-hidden
+        className={cn(
+          "ml-auto flex h-3 w-3 shrink-0 items-center justify-center text-muted-foreground/60",
+          chevron === "none" && "invisible",
+        )}
+      >
+        <ChevronRight
+          size={11}
+          className={cn(
+            "transition-transform duration-150",
+            chevron === "open" && "rotate-90",
+          )}
+        />
+      </span>
     </button>
   );
 }
@@ -297,7 +304,7 @@ function KitDot({ componentName }: { componentName: string }) {
   return (
     <span
       title={`${componentName}: ${status}`}
-      className="ml-auto h-1.5 w-1.5 shrink-0 rounded-full ring-1 ring-black/10"
+      className="h-1.5 w-1.5 shrink-0 rounded-full ring-1 ring-black/10"
       style={{ background: dotColorFor(kit, status) }}
     />
   );

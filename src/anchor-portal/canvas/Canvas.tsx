@@ -3,15 +3,13 @@ import { Loader2, MousePointerClick } from "lucide-react";
 import { useRoute } from "../router";
 import { useStorySession } from "../usePreviewState";
 import { PreviewFrame } from "./PreviewFrame";
-import { DesignTokenRoute } from "../docs/DesignTokenRoute";
 import { PatternsRoute } from "../docs/PatternsRoute";
 
 export function Canvas() {
   const route = useRoute();
   const { session, loading, error, registry } = useStorySession();
 
-  if (route.kind === "welcome") return <WelcomeScreen registryCount={registry?.length ?? 0} />;
-  if (route.kind === "designtoken") return <DesignTokenRoute />;
+  if (route.kind === "components") return <WelcomeScreen registryCount={registry?.length ?? 0} />;
   if (route.kind === "patterns") return <PatternsRoute />;
 
   if (loading) return <CenterMessage icon={<Loader2 size={16} className="animate-spin" />} text="Loading story…" />;

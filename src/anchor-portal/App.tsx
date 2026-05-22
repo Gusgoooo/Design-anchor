@@ -3,11 +3,14 @@ import { Group, Panel, Separator } from "react-resizable-panels";
 import { FileText, Sliders } from "lucide-react";
 import { DarkModeProvider } from "./theme/DarkModeProvider";
 import { useRoute } from "./router";
+import { TopNav } from "./TopNav";
 import { Sidebar } from "./sidebar/SidebarTop";
 import { StorySessionProvider } from "./usePreviewState";
 import { Canvas } from "./canvas/Canvas";
 import { ControlsPanel } from "./controls/ControlsPanel";
 import { SpecPanel } from "./spec-editor/SpecPanel";
+import { DocsRoute } from "./docs/DocsRoute";
+import { DesignTokenRoute } from "./docs/DesignTokenRoute";
 
 export default function App() {
   return (
@@ -23,39 +26,57 @@ const SEP_V = "h-px bg-border hover:bg-foreground/30 data-[dragging]:bg-foregrou
 function AppShell() {
   const route = useRoute();
   const currentStoryId = route.kind === "story" ? route.storyId : null;
-  // Docs routes (DesignToken / Patterns) render their own full-width content
-  // and have no editable args — skip the bottom Controls/Spec panel entirely.
-  const showBottomPanel = route.kind === "story" || route.kind === "welcome";
 
   return (
-    <StorySessionProvider storyId={currentStoryId}>
-      <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground">
-        <Group id="anchor-portal-h" orientation="horizontal" className="flex h-full w-full">
-          {/* v4 size props are pixels when numeric; use "%" strings for ratios. */}
-          <Panel id="sidebar" defaultSize="20%" minSize="14%" maxSize="36%" className="flex flex-col">
-            <Sidebar currentStoryId={currentStoryId} />
-          </Panel>
-          <Separator className={SEP_H} />
-          <Panel id="main" defaultSize="80%" minSize="40%" className="flex flex-col">
-            {showBottomPanel ? (
-              <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
-                <Panel id="canvas" defaultSize="62%" minSize="20%" className="flex flex-col bg-background">
-                  <Canvas />
-                </Panel>
-                <Separator className={SEP_V} />
-                <Panel id="panel" defaultSize="38%" minSize="12%" className="flex flex-col">
-                  <PanelTabs />
-                </Panel>
-              </Group>
-            ) : (
-              <div className="flex h-full w-full flex-col bg-background">
-                <Canvas />
-              </div>
-            )}
-          </Panel>
-        </Group>
-      </div>
-    </StorySessionProvider>
+    <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
+      <TopNav />
+      <main className="min-h-0 flex-1">
+        {route.kind === "docs" ? (
+          <DocsRoute />
+        ) : route.kind === "designtoken" ? (
+          <DesignTokenRoute />
+        ) : (
+          // components / story / patterns — show sidebar + canvas + bottom panel
+          <StorySessionProvider storyId={currentStoryId}>
+            <ComponentsArea currentStoryId={currentStoryId} hasStoryRoute={route.kind === "story"} />
+          </StorySessionProvider>
+        )}
+      </main>
+    </div>
+  );
+}
+
+function ComponentsArea({
+  currentStoryId,
+  hasStoryRoute,
+}: {
+  currentStoryId: string | null;
+  hasStoryRoute: boolean;
+}) {
+  return (
+    <Group id="anchor-portal-h" orientation="horizontal" className="flex h-full w-full">
+      <Panel id="sidebar" defaultSize="22%" minSize="16%" maxSize="40%" className="flex flex-col">
+        <Sidebar currentStoryId={currentStoryId} />
+      </Panel>
+      <Separator className={SEP_H} />
+      <Panel id="main" defaultSize="78%" minSize="40%" className="flex flex-col">
+        {hasStoryRoute ? (
+          <Group id="anchor-portal-v" orientation="vertical" className="flex h-full w-full flex-col">
+            <Panel id="canvas" defaultSize="62%" minSize="20%" className="flex flex-col bg-background">
+              <Canvas />
+            </Panel>
+            <Separator className={SEP_V} />
+            <Panel id="panel" defaultSize="38%" minSize="12%" className="flex flex-col">
+              <PanelTabs />
+            </Panel>
+          </Group>
+        ) : (
+          <div className="flex h-full w-full flex-col bg-background">
+            <Canvas />
+          </div>
+        )}
+      </Panel>
+    </Group>
   );
 }
 

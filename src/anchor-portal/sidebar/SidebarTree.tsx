@@ -20,10 +20,24 @@ import { globPathToRepoPath, openContextMenu } from "./ContextMenu";
 type Props = {
   entries: ComponentEntry[];
   currentStoryId: string | null;
+  /** When non-empty, the tree is filtered to entries whose component or
+   *  story name contains the query (case-insensitive). All ancestor groups
+   *  of matching entries are auto-expanded so matches stay visible. */
+  searchQuery?: string;
 };
 
-export function SidebarTree({ entries, currentStoryId }: Props) {
-  const tree = React.useMemo(() => buildTree(entries), [entries]);
+function filterEntries(entries: ComponentEntry[], query: string): ComponentEntry[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return entries;
+  return entries.filter((e) => {
+    if (e.title.toLowerCase().includes(q)) return true;
+    return e.stories.some((s) => s.storyName.toLowerCase().includes(q));
+  });
+}
+
+export function SidebarTree({ entries, currentStoryId, searchQuery = "" }: Props) {
+  const filtered = React.useMemo(() => filterEntries(entries, searchQuery), [entries, searchQuery]);
+  const tree = React.useMemo(() => buildTree(filtered), [filtered]);
   const [expanded, setExpanded] = React.useState<Record<string, boolean>>(() =>
     initialExpanded(tree, currentStoryId, entries),
   );
@@ -39,6 +53,24 @@ export function SidebarTree({ entries, currentStoryId }: Props) {
       return next;
     });
   }, [currentStoryId, tree]);
+
+  // When searching, auto-expand every group so matches are visible.
+  React.useEffect(() => {
+    if (!searchQuery.trim()) return;
+    setExpanded((prev) => {
+      const next = { ...prev };
+      function walk(nodes: TreeNode[]) {
+        for (const n of nodes) {
+          if (n.kind === "group") {
+            next[n.id] = true;
+            walk(n.children);
+          }
+        }
+      }
+      walk(tree);
+      return next;
+    });
+  }, [searchQuery, tree]);
 
   const toggle = React.useCallback((id: string) => {
     setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));

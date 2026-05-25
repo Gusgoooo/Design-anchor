@@ -448,7 +448,7 @@ export function DesignTokenPage() {
                 <span className="shrink-0 text-xs text-muted-foreground">
                   {picker.field === "light" ? "Light" : "Dark"} mode
                 </span>
-                <span className="shrink-0 rounded bg-muted px-2 py-0.5 text-[10px] font-medium uppercase text-muted-foreground">
+                <span className="shrink-0 rounded bg-muted px-2 py-0.5 text-xs font-medium uppercase text-muted-foreground">
                   {KIND_LABEL[valueKind]}
                 </span>
               </div>

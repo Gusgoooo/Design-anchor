@@ -29,7 +29,7 @@
 |------|--------------------|--------------------|
 | **Data location** | Platform/service-side aggregation, consumed by MCP. | **In the Git repo** (`.anchor/`, root-level generated files), aligned with PRs and code review. |
 | **Spec granularity** | Asset catalog + descriptions + links. | **Story-variant-level** anchor overrides; spec participates in **sync, Tailwind fragments, static audit**. |
-| **Collaboration loop** | Developers maintain DSM on platform → MCP consumes. | Designers save via **Storybook panel** → Engineers run **`anchor sync` / `audit`** → AI reads **`.cursorrules`** + `CLAUDE.md` + `.windsurfrules`. |
+| **Collaboration loop** | Developers maintain DSM on platform → MCP consumes. | Designers save via the **Anchor Portal** → Engineers run **`anchor sync` / `audit`** → AI reads **`.cursorrules`** + `CLAUDE.md` + `.windsurfrules`. |
 
 ---
 

@@ -25,13 +25,13 @@
   - @/components/base
   - @/components/base/button
   - @/components/base/checkbox
-  - @/components/base/data-table
+  - @/components/base/DataTable
   - @/components/base/input
 
 ## Forbidden (native HTML)
 - Do not use <div> — Do not hand-build chat containers (div+input+message list) instead of using the Thread component; use instead: @/components/base/ai/thread
 - Do not use <button> — Raw <button> is forbidden to ensure consistent border-radius, spacing, and brand colors; use instead: @/components/base/button
-- Do not use <table> — Business lists must use DataTable to ensure consistent spacing and brand compliance; use instead: @/components/base/data-table
+- Do not use <table> — Business lists must use DataTable to ensure consistent spacing and brand compliance; use instead: @/components/base/DataTable
 - Do not use <input> — Raw <input> is forbidden to ensure consistent height, border, and focus styles; use instead: @/components/base/input
 
 ## Style Lock (blocklist approach)
@@ -735,8 +735,8 @@
 - **Intent**: Right-click context menu providing contextual actions for selected content.
 - **Spec directive**: Use ContextMenu from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### DataTable
-- **Upstream module**: `@/components/ui/table`
-- **Sub-components (Spec)**: `Table`, `TableHeader`, `TableBody`, `TableRow`, `TableHead`, `TableCell` (display name: Data Cell (TableCell))
+- **Upstream module**: `@/components/base/DataTable`
+- **Sub-components (Spec)**: `DataTable`, `CompositeDataTable`
 - **Intent**: Primary business data table: pagination, sorting, bulk actions converge here. Raw <table> with arbitrary spacing is forbidden.
 - **Spec directive**: Use DataTable from @/components/base. Use semantic props for variant and size. Do not hardcode colors or spacing. Colors must use design token classes only.
 ### Dialog

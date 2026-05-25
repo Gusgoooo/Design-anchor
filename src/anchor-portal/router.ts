@@ -3,12 +3,13 @@ import * as React from "react";
 export type Route =
   | { kind: "docs" }
   | { kind: "designtoken" }
+  | { kind: "govern" }
   | { kind: "components" }
   | { kind: "story"; storyId: string }
   | { kind: "patterns" };
 
 /** Which top-nav tab is highlighted for a given route. */
-export type TopTab = "docs" | "designtoken" | "components";
+export type TopTab = "docs" | "designtoken" | "govern" | "components";
 
 export function tabForRoute(r: Route): TopTab {
   switch (r.kind) {
@@ -16,6 +17,8 @@ export function tabForRoute(r: Route): TopTab {
       return "docs";
     case "designtoken":
       return "designtoken";
+    case "govern":
+      return "govern";
     case "components":
     case "story":
     case "patterns":
@@ -30,6 +33,7 @@ export function parseHash(hash: string = window.location.hash): Route {
   const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
   if (path === "/" || path === "" || path === "/docs") return { kind: "docs" };
   if (path === "/_designtoken" || path === "/designtoken") return { kind: "designtoken" };
+  if (path === "/_govern" || path === "/govern") return { kind: "govern" };
   if (path === "/_patterns" || path === "/patterns") return { kind: "patterns" };
   if (path === "/components") return { kind: "components" };
   if (path.startsWith(STORY_PREFIX)) {
@@ -44,6 +48,8 @@ export function serializeRoute(r: Route): string {
       return "#/docs";
     case "designtoken":
       return "#/_designtoken";
+    case "govern":
+      return "#/_govern";
     case "components":
       return "#/components";
     case "patterns":

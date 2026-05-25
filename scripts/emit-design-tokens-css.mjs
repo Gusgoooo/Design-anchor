@@ -200,7 +200,11 @@ for (const dest of Object.values(MOTION_MAP)) themeVarNames.add(dest);
 // ─── Output builders ────────────────────────────────────────────────────────
 
 function buildThemeBlock(vars) {
-  const lines = ["@theme inline {"];
+  // `@theme {}` (not `@theme inline {}`) forces Tailwind v4 to compile utilities
+  // with `var(--name)` indirection instead of inlining literal values, so the
+  // PreviewBoard runtime can override `--_anchor-*` source vars and have
+  // `text-*` / `rounded-*` / `duration-*` re-paint without a CSS rebuild.
+  const lines = ["@theme {"];
 
   lines.push("  /* Semantic colors — var() refs; dark mode switches the underlying variable */");
   for (const name of SHADCN_COLORS) {
@@ -210,10 +214,11 @@ function buildThemeBlock(vars) {
   }
 
   lines.push("");
-  lines.push("  /* Border radius — direct values */");
+  lines.push("  /* Border radius — var() refs to _anchor-* sources so PreviewBoard can live-override */");
   for (const [srcKey, destKey] of Object.entries(RADIUS_MAP)) {
-    const val = vars[srcKey];
-    if (val != null && val !== "") lines.push(`  --${destKey}: ${val};`);
+    if (vars[srcKey] != null && vars[srcKey] !== "") {
+      lines.push(`  --${destKey}: var(--_anchor-${destKey});`);
+    }
   }
 
   lines.push("");
@@ -251,14 +256,12 @@ function buildThemeBlock(vars) {
   }
 
   lines.push("");
-  lines.push("  /* Font sizes — direct values; token naming differs from Tailwind (see mapping above) */");
+  lines.push("  /* Font sizes — var() refs to _anchor-* sources so PreviewBoard can live-override */");
   for (const [srcKey, destKey] of Object.entries(FONT_SIZE_MAP)) {
-    const val = vars[srcKey];
-    if (val != null && val !== "") {
-      lines.push(`  --${destKey}: ${val};`);
-      const lhSrc = FONT_SIZE_LINE_HEIGHT[destKey];
-      if (lhSrc && vars[lhSrc] != null) {
-        lines.push(`  --${destKey}--line-height: ${vars[lhSrc]};`);
+    if (vars[srcKey] != null && vars[srcKey] !== "") {
+      lines.push(`  --${destKey}: var(--_anchor-${destKey});`);
+      if (FONT_SIZE_LINE_HEIGHT[destKey]) {
+        lines.push(`  --${destKey}--line-height: var(--_anchor-${destKey}--line-height);`);
       }
     }
   }
@@ -271,10 +274,11 @@ function buildThemeBlock(vars) {
   }
 
   lines.push("");
-  lines.push("  /* Motion duration — maps to Tailwind duration-* utilities */");
+  lines.push("  /* Motion duration — var() refs to _anchor-* sources so PreviewBoard can live-override */");
   for (const [srcKey, destKey] of Object.entries(MOTION_MAP)) {
-    const val = vars[srcKey];
-    if (val != null && val !== "") lines.push(`  --${destKey}: ${val};`);
+    if (vars[srcKey] != null && vars[srcKey] !== "") {
+      lines.push(`  --${destKey}: var(--_anchor-${destKey});`);
+    }
   }
 
   lines.push("");

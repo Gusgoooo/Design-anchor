@@ -31,10 +31,12 @@ export const SECTIONS: DocsSection[] = [
 
 Design-anchor is a **token-driven design system + AI governance pipeline** that makes it structurally hard for AI coding tools to drift away from your design language.
 
+It is especially valuable for long-lived products: B2B SaaS, admin consoles, internal platforms, enterprise dashboards, and any React + Tailwind product where many people and AI agents will keep changing the same UI for years.
+
 Drop it into any React + Tailwind project with one command. You get:
 
 - A complete component library (60+ shadcn-aligned base components)
-- A live visual **token customizer** (color / radius / spacing / font seeds → derives 100+ semantic tokens)
+- A live visual **token customizer** (color / radius / spacing / font seeds → derives 200+ semantic tokens)
 - A **spec.json contract** per component (what props, what's forbidden, what tokens are baseline)
 - Generated AI rules consumed by Cursor / Claude Code / Copilot / Qoder
 - An **MCP server** that exposes the schema and audit tooling to any MCP-aware agent
@@ -65,10 +67,12 @@ Design seeds → derived tokens → component className → AST audit. Every nod
 
 Design-anchor 是一套 **以 token 驱动的设计系统 + AI 治理管线**，让 AI 编码工具在结构上没法偏离你的设计语言。
 
+它尤其适合长期产品：B 端 SaaS、后台管理系统、内部平台、企业 dashboard，以及任何会被多人和 AI agent 持续维护多年的 React + Tailwind 产品。
+
 任何 React + Tailwind 项目，一行命令就能接入。你会拿到：
 
 - 一套完整的组件库（60+ 个对齐 shadcn 的 base 组件）
-- 一个实时可视化的 **token customizer**（color / radius / spacing / font 等 seed → 自动派生 100+ 语义 token）
+- 一个实时可视化的 **token customizer**（color / radius / spacing / font 等 seed → 自动派生 200+ 语义 token）
 - 每个组件配套一份 **spec.json 契约**（声明 props、禁止用法、baseline token）
 - 一组自动生成的 AI 规则文件，供 Cursor / Claude Code / Copilot / Qoder 等工具直接读取
 - 一个 **MCP server**，把 schema 和 audit 工具暴露给任何支持 MCP 的 agent
@@ -487,7 +491,7 @@ Add to \`.cursor/mcp.json\` at your project root:
   "mcpServers": {
     "design-anchor": {
       "command": "npx",
-      "args": ["anchor", "mcp", "."]
+      "args": ["design-anchor", "mcp", "."]
     }
   }
 }
@@ -504,7 +508,7 @@ In your project, add to \`.mcp.json\`:
   "mcpServers": {
     "design-anchor": {
       "command": "npx",
-      "args": ["anchor", "mcp", "."]
+      "args": ["design-anchor", "mcp", "."]
     }
   }
 }
@@ -562,7 +566,7 @@ MCP（Model Context Protocol）让 AI agent 能调用结构化工具。Design-an
   "mcpServers": {
     "design-anchor": {
       "command": "npx",
-      "args": ["anchor", "mcp", "."]
+      "args": ["design-anchor", "mcp", "."]
     }
   }
 }
@@ -579,7 +583,7 @@ MCP（Model Context Protocol）让 AI agent 能调用结构化工具。Design-an
   "mcpServers": {
     "design-anchor": {
       "command": "npx",
-      "args": ["anchor", "mcp", "."]
+      "args": ["design-anchor", "mcp", "."]
     }
   }
 }

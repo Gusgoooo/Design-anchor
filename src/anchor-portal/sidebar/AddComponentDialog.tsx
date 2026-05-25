@@ -112,7 +112,7 @@ export function AddComponentDialog({ open, onClose }: Props) {
           </div>
 
           <label className="flex flex-col gap-1.5">
-            <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+            <span className="text-sm uppercase tracking-wider text-muted-foreground">
               {t({ en: "Local path", zh: "本地路径" })}
             </span>
             <input
@@ -130,7 +130,7 @@ export function AddComponentDialog({ open, onClose }: Props) {
               autoFocus
               className="h-9 rounded-md border border-border bg-background px-3 font-mono text-xs text-foreground placeholder:text-muted-foreground/60 focus:border-foreground/30 focus:outline-none"
             />
-            <span className="text-[11px] leading-snug text-muted-foreground">
+            <span className="text-sm leading-snug text-muted-foreground">
               {t({
                 en: "Absolute path. ~ expands to $HOME. A folder imports every direct-child .tsx (skipping *.demo.tsx). Files copy to src/components/base/; a matching *.demo.tsx is auto-generated if missing.",
                 zh: "绝对路径。~ 会扩展为 $HOME。指向文件夹时会导入其下所有 .tsx（跳过 *.demo.tsx）。文件会复制到 src/components/base/；如果没有同名 *.demo.tsx 会自动生成一个。",

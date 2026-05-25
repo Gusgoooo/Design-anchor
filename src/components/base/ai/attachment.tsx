@@ -205,6 +205,8 @@ export const ComposerAttachments: FC = () => {
   );
 };
 
+export const Attachment = ComposerAttachments;
+
 export const ComposerAddAttachment: FC = () => {
   return (
     <ComposerPrimitive.AddAttachment asChild>

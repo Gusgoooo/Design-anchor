@@ -5,7 +5,7 @@ import {
   type SeedDef,
   type EditorKind,
 } from "@/design-tokens/seed-card-config";
-import { TokenValueEditor } from "@/design-tokens/token-editors";
+import { TokenValueEditor, SliderEditor } from "@/design-tokens/token-editors";
 import { detectTokenValueKind } from "@/design-tokens/token-value-type";
 
 function isColorValue(value: string) {
@@ -44,8 +44,8 @@ export function SeedRow({
         onClick={() => setOpen((v) => !v)}
         className={cn(
           "group flex w-full items-center gap-2.5 px-2.5 py-2 text-left transition-colors",
-          isFirst && "rounded-t-[10px]",
-          isLast && !open && "rounded-b-[10px]",
+          isFirst && "rounded-t-lg",
+          isLast && !open && "rounded-b-lg",
           open ? "bg-muted/40" : "hover:bg-muted/30",
         )}
       >
@@ -59,14 +59,14 @@ export function SeedRow({
         />
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-1.5">
-            <span className="truncate text-[12px] font-medium text-foreground">{seed.label}</span>
+            <span className="truncate text-sm font-medium text-foreground">{seed.label}</span>
             {isDirty ? (
               <span aria-label="modified" className="inline-block h-1 w-1 shrink-0 rounded-full bg-primary" />
             ) : null}
           </span>
         </span>
         <span
-          className="shrink-0 truncate font-mono text-[11px] tabular-nums text-muted-foreground"
+          className="shrink-0 truncate font-mono text-sm tabular-nums text-muted-foreground"
           style={{ maxWidth: 140 }}
           title={value}
         >
@@ -84,10 +84,14 @@ export function SeedRow({
         <div
           className={cn(
             "border-t border-border/60 bg-background px-3 py-3",
-            isLast && "rounded-b-[10px]",
+            isLast && "rounded-b-lg",
           )}
         >
-          <TokenValueEditor kind={editorKind} value={value} onChange={onChange} compact />
+          {seed.slider ? (
+            <SliderEditor value={value} onChange={onChange} config={seed.slider} />
+          ) : (
+            <TokenValueEditor kind={editorKind} value={value} onChange={onChange} compact />
+          )}
         </div>
       ) : null}
     </div>
@@ -117,7 +121,7 @@ export function DerivedRow({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="group flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-[11px] transition-colors hover:bg-muted/30"
+        className="group flex w-full items-center gap-2 px-2.5 py-1.5 text-left text-sm transition-colors hover:bg-muted/30"
       >
         {color ? (
           <span
@@ -155,7 +159,7 @@ export function DerivedRow({
             <button
               type="button"
               onClick={onReset}
-              className="mt-2 text-[10px] text-muted-foreground underline-offset-2 hover:underline"
+              className="mt-2 text-xs text-muted-foreground underline-offset-2 hover:underline"
             >
               Reset to derived default
             </button>

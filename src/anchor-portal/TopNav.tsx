@@ -11,6 +11,7 @@ const TABS: { id: TopTab; label: Bilingual; onClick: () => void }[] = [
   { id: "docs", label: { en: "Docs", zh: "文档" }, onClick: () => navigateTo({ kind: "docs" }) },
   { id: "designtoken", label: { en: "Design Token", zh: "Design Token" }, onClick: () => navigateTo({ kind: "designtoken" }) },
   { id: "components", label: { en: "Components", zh: "组件" }, onClick: () => navigateTo({ kind: "components" }) },
+  { id: "govern", label: { en: "Govern", zh: "治理" }, onClick: () => navigateTo({ kind: "govern" }) },
 ];
 
 export function TopNav() {
@@ -23,7 +24,7 @@ export function TopNav() {
     <header className="flex shrink-0 items-center gap-6 border-b border-border bg-background px-5 py-2.5">
       <a
         href="#/docs"
-        className="text-[15px] font-bold tracking-tight text-foreground no-underline hover:opacity-80"
+        className="text-base font-bold tracking-tight text-foreground no-underline hover:opacity-80"
       >
         DesignAnchor
       </a>
@@ -35,7 +36,7 @@ export function TopNav() {
             type="button"
             onClick={tab.onClick}
             className={cn(
-              "rounded-md px-3 py-1.5 text-[13px] font-medium transition-colors",
+              "rounded-md px-3 py-1.5 text-base font-medium transition-colors",
               active === tab.id
                 ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -52,7 +53,7 @@ export function TopNav() {
           type="button"
           onClick={toggleLocale}
           title={locale === "en" ? "切换到中文" : "Switch to English"}
-          className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         >
           <Globe size={13} />
           <span className="font-semibold">{locale === "en" ? "EN" : "中文"}</span>
@@ -89,7 +90,7 @@ function BashHint({ command, hintLabel }: { command: string; hintLabel: string }
       title={hintLabel}
     >
       <Terminal size={12} className="shrink-0 text-muted-foreground" />
-      <code className="font-mono text-[11px] text-foreground/85">{command}</code>
+      <code className="font-mono text-sm text-foreground/85">{command}</code>
       <button
         type="button"
         onClick={handleCopy}

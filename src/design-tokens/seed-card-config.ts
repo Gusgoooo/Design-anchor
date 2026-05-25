@@ -14,11 +14,25 @@ export type EditorKind = "color" | "length" | "generic";
 /** Where the seed value lives in tokens.json. */
 export type SeedSource = "seed" | "customSeeds" | "fixedAliases";
 
+/**
+ * Slider config for length seeds whose underlying token is a *multiplier* on
+ * the rest of the scale (e.g. sizeUnit). A constrained slider replaces the
+ * free-form length input so a careless drag can't 50%-balloon every spacing
+ * token at once. Power users can still hand-edit tokens.json beyond range.
+ */
+export type SliderConfig = {
+  min: number;
+  max: number;
+  step: number;
+  labels?: Array<{ value: number; label: string }>;
+};
+
 export type SeedDef = {
   key: string;
   label: string;
   source: SeedSource;
   editor: EditorKind;
+  slider?: SliderConfig;
 };
 
 export type DerivedFilter = {
@@ -58,62 +72,42 @@ export const SEED_GROUPS: SeedGroup[] = [
     derived: { prefixes: ["color-error"] },
   },
   {
+    // Info covers both info-* and link-* derived tokens — seed-to-map's
+    // genColorMapToken falls back `colorLink || colorInfo` so removing the
+    // separate Link seed makes link three-states (link / link-hover /
+    // link-active) automatically follow Info's hue. Most products use the
+    // same color for both anyway.
     title: "Info",
     seeds: [{ key: "colorInfo", label: "colorInfo", source: "seed", editor: "color" }],
-    derived: { prefixes: ["color-info"] },
-  },
-  {
-    title: "Link",
-    seeds: [{ key: "colorLink", label: "colorLink", source: "seed", editor: "color" }],
-    derived: { prefixes: ["color-link"] },
+    derived: { prefixes: ["color-info", "color-link"] },
   },
   {
     // Surfaces owns the ink (colorTextBase) + canvas (colorBgBase) seeds.
-    // All derived neutrals — antd's color-bg-* / color-text-* / color-fill-*
-    // / color-border-* ladder AND shadcn's 18 semantic names (background /
-    // foreground / primary / muted / accent / border / ring / …) — flow
-    // from those two seeds and live under this card's Derived block. Any
-    // semantic slot can be individually tuned by opening its Derived row
-    // (writes to mapOverrides[branch] under the hood).
+    // Derived block surfaces only the 11 shadcn semantic slots that designers
+    // actually micro-tune (card / popover / muted / accent / border / input /
+    // ring + secondary pair). The antd color-bg-* / color-text-* / color-fill-*
+    // / color-border-* ladders and the redundant background/foreground/primary/
+    // destructive aliases are still emitted by seed-to-map (so components keep
+    // working) but hidden from the Customizer to avoid choice overload.
     title: "Surfaces",
     seeds: [
       { key: "colorBgBase", label: "colorBgBase", source: "seed", editor: "color" },
       { key: "colorTextBase", label: "colorTextBase", source: "seed", editor: "color" },
     ],
     derived: {
-      prefixes: ["color-bg", "color-text", "color-border", "color-fill", "color-white", "color-shadow"],
       exactIds: [
-        "background", "foreground", "card", "card-foreground",
-        "popover", "popover-foreground", "primary", "primary-foreground",
-        "secondary", "secondary-foreground", "muted", "muted-foreground",
-        "accent", "accent-foreground", "destructive",
+        "card", "popover",
+        "secondary", "secondary-foreground",
+        "muted", "muted-foreground",
+        "accent", "accent-foreground",
         "border", "input", "ring",
       ],
     },
-    derivedSubGroups: [
-      { title: "Semantic", match: (id) => [
-        "background", "foreground", "card", "card-foreground",
-        "popover", "popover-foreground", "primary", "primary-foreground",
-        "secondary", "secondary-foreground", "muted", "muted-foreground",
-        "accent", "accent-foreground", "destructive",
-        "border", "input", "ring",
-      ].includes(id) },
-      { title: "Text", match: (id) => id.startsWith("color-text") },
-      { title: "Border", match: (id) => id.startsWith("color-border") },
-      { title: "Fill", match: (id) => id.startsWith("color-fill") },
-      { title: "Background", match: (id) => id.startsWith("color-bg") },
-      { title: "Other", match: (id) => id === "color-white" || id === "color-shadow" },
-    ],
   },
   {
     title: "Radius",
     seeds: [{ key: "borderRadius", label: "borderRadius", source: "seed", editor: "length" }],
     derived: { prefixes: ["border-radius"] },
-  },
-  {
-    title: "Sidebar",
-    seeds: [],
-    derived: { prefixes: ["sidebar"] },
   },
   {
     title: "Charts",
@@ -141,7 +135,22 @@ export const SEED_GROUPS: SeedGroup[] = [
   {
     title: "Spacing",
     seeds: [
-      { key: "sizeUnit", label: "sizeUnit", source: "seed", editor: "length" },
+      {
+        key: "sizeUnit",
+        label: "sizeUnit",
+        source: "seed",
+        editor: "length",
+        slider: {
+          min: 3,
+          max: 5,
+          step: 0.25,
+          labels: [
+            { value: 3, label: "Compact" },
+            { value: 4, label: "Default" },
+            { value: 5, label: "Spacious" },
+          ],
+        },
+      },
     ],
     derived: { prefixes: ["spacing-"] },
   },
@@ -158,11 +167,9 @@ export const SEED_GROUP_TITLE_ZH: Record<string, string> = {
   "Success": "成功色",
   "Warning": "警告色",
   "Error": "错误色",
-  "Info": "信息色",
-  "Link": "链接色",
+  "Info": "信息 / 链接色",
   "Surfaces": "表面",
   "Radius": "圆角",
-  "Sidebar": "侧边栏",
   "Charts": "图表",
   "Typography": "字号",
   "Spacing": "间距",

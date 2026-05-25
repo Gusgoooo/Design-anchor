@@ -1,0 +1,35 @@
+{
+  "version": 2,
+  "description": "Factory defaults snapshot — consumed by the Customizer's Reset to defaults button. Resets only seed / seedDark / customSeeds / fixedAliases / mapOverrides; storyBindings (preview UI) is preserved.",
+  "seed": {
+    "colorPrimary": "#000000",
+    "colorSuccess": "#10b981",
+    "colorWarning": "#f59e0b",
+    "colorError": "#ef4444",
+    "colorInfo": "#6366f1",
+    "colorBgBase": "#ffffff",
+    "colorTextBase": "#0a0a0a",
+    "fontSize": 14,
+    "borderRadius": 8,
+    "sizeUnit": 4
+  },
+  "seedDark": {
+    "colorPrimary": "#818cf8",
+    "colorBgBase": "#0a0a0a",
+    "colorTextBase": "#fafafa"
+  },
+  "mapOverrides": { "light": {}, "dark": {} },
+  "customSeeds": {
+    "chart1": "#6366f1",
+    "chart2": "#8b5cf6",
+    "chart3": "#06b6d4",
+    "chart4": "#10b981",
+    "chart5": "#f59e0b",
+    "chart1Dark": "#818cf8",
+    "chart2Dark": "#a78bfa",
+    "chart3Dark": "#22d3ee",
+    "chart4Dark": "#34d399",
+    "chart5Dark": "#fbbf24"
+  },
+  "fixedAliases": {}
+}

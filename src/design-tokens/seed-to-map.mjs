@@ -332,6 +332,10 @@ function genSizeMapToken(seed) {
   // few legacy size-* tokens that still reference it.
   const SIZE_STEP = 4;
   const { sizeUnit } = seed;
+  // sizeMap is internal-only — consumed by deriveSpacingScaleSuffixes which
+  // inverts `px / sizeUnit` to recover suffixes. Keep raw multiplication so
+  // that inverse stays integer; rounding happens at the emit sites
+  // (genUnifiedSpacingScaleTokens / computeSpacingScaleSnapshot).
   return {
     sizeXXL: sizeUnit * (SIZE_STEP + 8),
     sizeXL: sizeUnit * (SIZE_STEP + 4),
@@ -539,7 +543,7 @@ function genUnifiedSpacingScaleTokens(sizeUnit, sizeMap) {
       continue;
     }
     const m = Number(k);
-    const numPx = m * sizeUnit;
+    const numPx = Math.round(m * sizeUnit);
     addSpacing(k, `${numPx}px`);
   }
   return out;
@@ -561,7 +565,7 @@ export function computeSpacingScaleSnapshot(seed) {
     else if (k === "px") entries.push({ suffix: "px", px: 1, pxStr: "1px" });
     else {
       const m = Number(k);
-      const numPx = m * sizeUnit;
+      const numPx = Math.round(m * sizeUnit);
       entries.push({ suffix: k, px: numPx, pxStr: `${numPx}px` });
     }
   }
@@ -917,6 +921,39 @@ export function deriveSeedToMap(rawSeed, { dark = false, customSeeds = {}, fixed
 
   // Elevation "none" alias
   vars["elevation-none"] = "none";
+
+  // ─── Tailwind v4 @theme inline indirection layer ──────────────────────────
+  // Tailwind 4 inlines `@theme inline { --x: 14px; }` as a literal value into
+  // utility classes — runtime CSS-var override doesn't reach them. To get a
+  // live preview, @theme refs `var(--_anchor-x)` instead, and these `_anchor-*`
+  // mirror vars are emitted to :root by the build (and to the [data-anchor-
+  // preview] scope at runtime). PreviewBoard overrides `_anchor-*`, the var()
+  // chain in @theme resolves, and `text-*` / `rounded-*` / `duration-*` /
+  // `shadow-*` utilities re-paint without touching disk.
+  vars["_anchor-font-size-xs"] = `${fontMap.fontSizeSM}px`;
+  vars["_anchor-font-size-sm"] = `${fontMap.fontSize}px`;
+  vars["_anchor-font-size-base"] = `${fontMap.fontSizeLG}px`;
+  vars["_anchor-font-size-lg"] = `${fontMap.fontSizeHeading5}px`;
+  vars["_anchor-font-size-xl"] = `${fontMap.fontSizeXL}px`;
+  vars["_anchor-font-size-2xl"] = `${fontMap.fontSizeHeading3}px`;
+  vars["_anchor-font-size-3xl"] = `${fontMap.fontSizeHeading2}px`;
+  vars["_anchor-font-size-xs--line-height"] = fontMap.lineHeightSM.toFixed(4);
+  vars["_anchor-font-size-sm--line-height"] = fontMap.lineHeight.toFixed(4);
+  vars["_anchor-font-size-base--line-height"] = fontMap.lineHeightLG.toFixed(4);
+  vars["_anchor-radius-sm"] = vars["border-radius-sm"];
+  vars["_anchor-radius-md"] = vars["border-radius"];
+  vars["_anchor-radius-lg"] = vars["border-radius-lg"];
+  vars["_anchor-radius-xl"] = vars["border-radius-xl"];
+  vars["_anchor-shadow-sm"] = vars["elevation-sm"];
+  vars["_anchor-shadow"] = vars["elevation"];
+  vars["_anchor-shadow-md"] = vars["elevation-md"];
+  vars["_anchor-shadow-lg"] = vars["elevation-lg"];
+  vars["_anchor-transition-duration-fast"] = vars["motion-duration-fast"];
+  vars["_anchor-transition-duration-mid"] = vars["motion-duration-mid"];
+  vars["_anchor-transition-duration-slow"] = vars["motion-duration-slow"];
+  vars["_anchor-transition-duration-150"] = vars["motion-duration-150"];
+  vars["_anchor-transition-duration-long"] = vars["motion-duration-long"];
+  vars["_anchor-transition-duration-whole"] = vars["motion-duration-whole"];
 
   // Internal metadata for @theme generation
   vars["__sizeUnit"] = `${seed.sizeUnit}px`;

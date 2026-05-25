@@ -3,6 +3,7 @@ import * as React from "react";
 // @ts-ignore — .mjs without types
 import { deriveSeedToMap } from "@/design-tokens/seed-to-map.mjs";
 import tokensFallback from "@/design-tokens/tokens.json";
+import factoryDoc from "@/design-tokens/factory-tokens.json";
 
 export type TokensDocV2 = {
   version: 2;
@@ -110,6 +111,28 @@ export type TokenDraft = {
   setMapOverride(key: string, value: string, branch?: Branch): void;
   /** Removes a mapOverride entry. */
   clearMapOverride(key: string, branch?: Branch): void;
+  /**
+   * Bulk-merge a screenshot/prompt extraction result into the draft.
+   * Writes literally to `seed`/`seedDark`/`customSeeds`/`fixedAliases` —
+   * does NOT depend on the current darkMode toggle, so dark proposals
+   * always end up in `seedDark` regardless of what the user is viewing.
+   */
+  applyExtraction(
+    proposed: {
+      seed?: Record<string, string | number>;
+      seedDark?: Record<string, string | number>;
+      customSeeds?: Record<string, string>;
+      fixedAliases?: Record<string, string | number>;
+    },
+    acceptFields?: string[],
+  ): void;
+  /**
+   * Reset all theme seeds (seed / seedDark / customSeeds / fixedAliases /
+   * mapOverrides) to the bundled factory snapshot. storyBindings — the
+   * preview-UI layer that has nothing to do with theme — is preserved.
+   * Caller is responsible for confirming with the user before invoking.
+   */
+  resetToFactory(): void;
   discardDraft(): void;
   reload(): Promise<void>;
   saveAndSync(): Promise<SaveResult>;
@@ -240,6 +263,51 @@ export function useTokenDraft(darkMode: boolean): TokenDraft {
     [darkMode],
   );
 
+  const applyExtraction = React.useCallback(
+    (
+      proposed: {
+        seed?: Record<string, string | number>;
+        seedDark?: Record<string, string | number>;
+        customSeeds?: Record<string, string>;
+        fixedAliases?: Record<string, string | number>;
+      },
+      acceptFields?: string[],
+    ) => {
+      const accept = acceptFields ? new Set(acceptFields) : null;
+      setDraft((prev) => {
+        const next = cloneDoc(prev);
+        ensureBranches(next);
+        for (const section of ["seed", "seedDark", "customSeeds", "fixedAliases"] as const) {
+          const incoming = (proposed as Record<string, Record<string, unknown> | undefined>)[section] ?? {};
+          for (const [k, v] of Object.entries(incoming)) {
+            if (v == null) continue;
+            const path = `${section}.${k}`;
+            if (accept && !accept.has(path)) continue;
+            (next[section] as Record<string, unknown>)[k] = v;
+          }
+        }
+        return next;
+      });
+    },
+    [],
+  );
+
+  const resetToFactory = React.useCallback(() => {
+    setDraft((prev) => {
+      const next = cloneDoc(prev);
+      ensureBranches(next);
+      const factory = factoryDoc as TokensDocV2;
+      next.seed = JSON.parse(JSON.stringify(factory.seed ?? {}));
+      next.seedDark = JSON.parse(JSON.stringify(factory.seedDark ?? {}));
+      next.customSeeds = JSON.parse(JSON.stringify(factory.customSeeds ?? {}));
+      next.fixedAliases = JSON.parse(JSON.stringify(factory.fixedAliases ?? {}));
+      next.mapOverrides = JSON.parse(JSON.stringify(factory.mapOverrides ?? { light: {}, dark: {} }));
+      // storyBindings deliberately untouched — preview-only state
+      return next;
+    });
+    setStatus(null);
+  }, []);
+
   const discardDraft = React.useCallback(() => {
     setDraft(cloneDoc(persisted));
     setStatus(null);
@@ -294,6 +362,8 @@ export function useTokenDraft(darkMode: boolean): TokenDraft {
     setFixedAlias,
     setMapOverride,
     clearMapOverride,
+    applyExtraction,
+    resetToFactory,
     discardDraft,
     reload,
     saveAndSync,

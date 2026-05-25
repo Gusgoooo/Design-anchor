@@ -22,7 +22,7 @@ export function Sidebar({ currentStoryId }: Props) {
         <button
           type="button"
           onClick={() => setAddOpen(true)}
-          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-[13px] font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
+          className="inline-flex w-full items-center justify-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-base font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
         >
           <Plus size={13} /> {t({ en: "Add Component", zh: "添加组件" })}
         </button>
@@ -37,7 +37,7 @@ export function Sidebar({ currentStoryId }: Props) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t({ en: "Search components", zh: "搜索组件" })}
-            className="h-7 w-full rounded-md border border-border bg-background pl-7 pr-7 text-[12px] text-foreground placeholder:text-muted-foreground/70 focus:border-foreground/30 focus:outline-none"
+            className="h-7 w-full rounded-md border border-border bg-background pl-7 pr-7 text-sm text-foreground placeholder:text-muted-foreground/70 focus:border-foreground/30 focus:outline-none"
           />
           {query ? (
             <button

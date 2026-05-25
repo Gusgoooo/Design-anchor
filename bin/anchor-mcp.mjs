@@ -5,13 +5,13 @@
  * Tools:
  *   list_components    List all components
  *   read_component     Read component source code
- *   create_component   Create a new component (generates tsx + stories)
+ *   create_component   Create a new component (generates tsx + demo)
  *   list_tokens        List all design tokens
  *   update_token       Modify a token value
  *   read_file          Read any file in the component library
  *   write_file         Write any file in the component library
  */
-import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync, statSync } from "node:fs";
 import { join, resolve, relative, dirname } from "node:path";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -43,13 +43,14 @@ const TOOLS = [
   },
   {
     name: "create_component",
-    description: "Create a new component file and its corresponding stories file",
+    description: "Create a new component file and its corresponding demo file",
     inputSchema: {
       type: "object",
       properties: {
         name: { type: "string", description: "Component name (PascalCase, e.g. Select)" },
         code: { type: "string", description: "Component TSX source code" },
-        stories: { type: "string", description: "Stories file source code (optional)" },
+        demo: { type: "string", description: "Demo file source code (optional)" },
+        stories: { type: "string", description: "Deprecated alias for demo source code" },
       },
       required: ["name", "code"],
     },
@@ -61,12 +62,16 @@ const TOOLS = [
   },
   {
     name: "update_token",
-    description: "Modify the light or dark value of a specified token",
+    description: "Modify a seed token value in tokens.json. light maps to seed, dark maps to seedDark.",
     inputSchema: {
       type: "object",
       properties: {
-        id: { type: "string", description: "token id (e.g. primary, radius)" },
-        field: { type: "string", enum: ["light", "dark"], description: "Field to modify" },
+        id: { type: "string", description: "seed token id (e.g. colorPrimary, borderRadius, sizeUnit)" },
+        field: {
+          type: "string",
+          enum: ["seed", "seedDark", "light", "dark", "customSeeds"],
+          description: "Field to modify. Use light/seed for normal seed values and dark/seedDark for dark seed values.",
+        },
         value: { type: "string", description: "New value" },
       },
       required: ["id", "field", "value"],
@@ -125,7 +130,7 @@ const TOOLS = [
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
-    name: "sync_rules",
+    name: "run_sync_rules",
     description: "Trigger sync:anchor full sync: spec -> Tailwind extensions + .cursorrules + rule mirror",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
@@ -142,42 +147,93 @@ function listComponents() {
   const result = [];
   const dir = join(LIB_ROOT, "src/components/base");
   if (!existsSync(dir)) return result;
-  for (const f of readdirSync(dir)) {
-    if (f.endsWith(".tsx") && !f.includes(".stories.")) {
-      result.push({ name: f.replace(/\.tsx$/, ""), path: `src/components/base/${f}` });
-    }
+  walkFiles(dir, (file) => {
+    const rel = relative(dir, file).split(/[\\/]/).join("/");
+    if (!rel.endsWith(".tsx")) return;
+    if (rel.includes(".demo.") || rel.includes(".stories.")) return;
+    result.push({ name: rel.replace(/\.tsx$/, ""), path: `src/components/base/${rel}` });
+  });
+  return result.sort((a, b) => a.name.localeCompare(b.name));
+}
+
+function walkFiles(dir, cb) {
+  for (const entry of readdirSync(dir)) {
+    const p = join(dir, entry);
+    const st = statSync(p);
+    if (st.isDirectory()) walkFiles(p, cb);
+    else cb(p);
   }
-  return result;
 }
 
 function readComponent(name) {
-  const file = join(LIB_ROOT, "src/components/base", name.endsWith(".tsx") ? name : `${name}.tsx`);
+  const baseDir = join(LIB_ROOT, "src/components/base");
+  const file = resolve(baseDir, name.endsWith(".tsx") ? name : `${name}.tsx`);
+  assertInside(baseDir, file);
   if (existsSync(file)) return readFileSync(file, "utf8");
   throw new Error(`Component ${name} does not exist`);
 }
 
-function createComponent(name, code, stories) {
+function createComponent(name, code, demo) {
   const dir = join(LIB_ROOT, "src/components/base");
   mkdirSync(dir, { recursive: true });
   const lower = name.charAt(0).toLowerCase() + name.slice(1);
   writeFileSync(join(dir, `${lower}.tsx`), code);
-  if (stories) {
-    writeFileSync(join(dir, `${name}.stories.tsx`), stories);
+  if (demo) {
+    writeFileSync(join(dir, `${name}.demo.tsx`), demo);
   }
-  return { created: [`src/components/base/${lower}.tsx`, stories ? `src/components/base/${name}.stories.tsx` : null].filter(Boolean) };
+  return { created: [`src/components/base/${lower}.tsx`, demo ? `src/components/base/${name}.demo.tsx` : null].filter(Boolean) };
 }
 
 function listTokens() {
   const tokensPath = join(LIB_ROOT, "src/design-tokens/tokens.json");
   const doc = JSON.parse(readFileSync(tokensPath, "utf8"));
-  return (doc.tokens || []).map((t) => ({
-    id: t.id, category: t.category, light: t.light, dark: t.dark,
-  }));
+  if (doc.seed && typeof doc.seed === "object") {
+    const ids = new Set([
+      ...Object.keys(doc.seed || {}),
+      ...Object.keys(doc.seedDark || {}),
+      ...Object.keys(doc.customSeeds || {}),
+    ]);
+    const tokens = [...ids].sort().map((id) => ({
+      id,
+      category: id in (doc.customSeeds || {}) ? "customSeeds" : "seed",
+      seed: doc.seed?.[id],
+      seedDark: doc.seedDark?.[id],
+      customSeed: doc.customSeeds?.[id],
+    }));
+    return {
+      version: doc.version ?? 2,
+      tokens,
+      mapOverrides: doc.mapOverrides ?? {},
+    };
+  }
+  return {
+    version: doc.version ?? 1,
+    tokens: (doc.tokens || []).map((t) => ({
+      id: t.id,
+      category: t.category,
+      light: t.light,
+      dark: t.dark,
+    })),
+  };
 }
 
 function updateToken(id, field, value) {
   const tokensPath = join(LIB_ROOT, "src/design-tokens/tokens.json");
   const doc = JSON.parse(readFileSync(tokensPath, "utf8"));
+  if (doc.seed && typeof doc.seed === "object") {
+    const section = normalizeTokenField(field);
+    if (!["seed", "seedDark", "customSeeds"].includes(section)) {
+      throw new Error(`Unsupported token field for v2 tokens: ${field}`);
+    }
+    if (!doc[section] || typeof doc[section] !== "object") doc[section] = {};
+    if (section !== "customSeeds" && !(id in doc.seed) && !(id in (doc.seedDark || {}))) {
+      throw new Error(`seed token ${id} does not exist`);
+    }
+    doc[section][id] = value;
+    writeFileSync(tokensPath, JSON.stringify(doc, null, 2) + "\n");
+    const sync = runTokenSync();
+    return { id, field: section, value, ok: true, sync };
+  }
   const token = (doc.tokens || []).find((t) => t.id === id);
   if (!token) throw new Error(`token ${id} does not exist`);
   token[field] = value;
@@ -185,18 +241,40 @@ function updateToken(id, field, value) {
   return { id, field, value, ok: true };
 }
 
+function normalizeTokenField(field) {
+  if (field === "light") return "seed";
+  if (field === "dark") return "seedDark";
+  return field || "seed";
+}
+
+function runTokenSync() {
+  try {
+    const output = execSync("npm run sync:tokens", { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+    return output.trim();
+  } catch (e) {
+    return `sync:tokens failed: ${e.stdout || e.stderr || e.message}`;
+  }
+}
+
 function readFile(relPath) {
   const abs = resolve(LIB_ROOT, relPath);
-  if (!abs.startsWith(LIB_ROOT)) throw new Error("Path traversal out of bounds");
+  assertInside(LIB_ROOT, abs);
   return readFileSync(abs, "utf8");
 }
 
 function writeFile(relPath, content) {
   const abs = resolve(LIB_ROOT, relPath);
-  if (!abs.startsWith(LIB_ROOT)) throw new Error("Path traversal out of bounds");
+  assertInside(LIB_ROOT, abs);
   mkdirSync(join(abs, ".."), { recursive: true });
   writeFileSync(abs, content);
   return { path: relPath, ok: true };
+}
+
+function assertInside(root, absPath) {
+  const rel = relative(root, absPath);
+  if (rel === ".." || rel.startsWith("../") || rel.startsWith("..\\")) {
+    throw new Error("Path traversal out of bounds");
+  }
 }
 
 /* ─── Schema governance handlers ─── */
@@ -263,34 +341,33 @@ function runAudit() {
 }
 
 function runSyncRules() {
-  const syncScript = join(PKG_ROOT, "scripts/sync-from-schema.mjs");
-  if (!existsSync(syncScript)) {
-    try {
-      execSync("npm run sync:anchor", { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
-      return "sync complete";
-    } catch (e) {
-      return `sync failed: ${e.message}`;
-    }
-  }
   try {
-    const output = execSync(`node "${syncScript}"`, { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+    const output = execSync("npm run sync:anchor", { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
     return output.trim();
   } catch (e) {
-    return `sync failed: ${e.stdout || e.stderr || e.message}`;
+    const syncScript = join(PKG_ROOT, "scripts/sync-from-schema.mjs");
+    if (!existsSync(syncScript)) return `sync failed: ${e.stdout || e.stderr || e.message}`;
+    try {
+      const output = execSync(`node "${syncScript}"`, { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+      return output.trim();
+    } catch (fallbackError) {
+      return `sync failed: ${fallbackError.stdout || fallbackError.stderr || fallbackError.message}`;
+    }
   }
 }
 
 function getCursorrules() {
   const p = join(LIB_ROOT, ".cursorrules");
-  if (!existsSync(p)) throw new Error(".cursorrules does not exist, please run sync_rules first");
+  if (!existsSync(p)) throw new Error(".cursorrules does not exist, please run run_sync_rules first");
   return readFileSync(p, "utf8");
 }
+
 
 function handleToolCall(name, args) {
   switch (name) {
     case "list_components": return listComponents();
     case "read_component": return readComponent(args.name);
-    case "create_component": return createComponent(args.name, args.code, args.stories);
+    case "create_component": return createComponent(args.name, args.code, args.demo ?? args.stories);
     case "list_tokens": return listTokens();
     case "update_token": return updateToken(args.id, args.field, args.value);
     case "read_file": return readFile(args.path);
@@ -299,7 +376,9 @@ function handleToolCall(name, args) {
     case "read_schema": return readSchema(args.id);
     case "update_schema": return updateSchema(args.filename, args.content);
     case "run_audit": return runAudit();
-    case "sync_rules": return runSyncRules();
+    case "run_sync_rules":
+    case "sync_rules":
+      return runSyncRules();
     case "get_cursorrules": return getCursorrules();
     default: throw new Error(`Unknown tool: ${name}`);
   }

@@ -56,7 +56,7 @@ export function ControlsPanel() {
 
   return (
     <div ref={containerRef} className="relative flex h-full flex-col" tabIndex={-1}>
-      <header className="flex shrink-0 items-center justify-between gap-2 px-3 py-2 text-[11px]">
+      <header className="flex shrink-0 items-center justify-between gap-2 px-3 py-2 text-sm">
         <div className="flex items-center gap-1.5 text-muted-foreground">
           <Sliders size={11} />
           <span className="font-medium text-foreground/85">
@@ -68,7 +68,7 @@ export function ControlsPanel() {
               : t({ en: "No controls", zh: "无参数" })}
           </span>
           {isDirty ? (
-            <span className="ml-1 inline-flex h-4 items-center rounded-full bg-primary/15 px-1.5 text-[10px] font-semibold tabular-nums text-primary">
+            <span className="ml-1 inline-flex h-4 items-center rounded-full bg-primary/15 px-1.5 text-xs font-semibold tabular-nums text-primary">
               {t({ en: `${dirtyKeys.size} pending`, zh: `${dirtyKeys.size} 项待应用` })}
             </span>
           ) : null}
@@ -97,11 +97,11 @@ export function ControlsPanel() {
             {groups.map((g) => (
               <section key={g.category ?? "_default"}>
                 {g.category ? (
-                  <h3 className="mb-1.5 px-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                  <h3 className="mb-1.5 px-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
                     {g.category}
                   </h3>
                 ) : null}
-                <div className="overflow-hidden rounded-[10px] ring-1 ring-border bg-card">
+                <div className="overflow-hidden rounded-lg ring-1 ring-border bg-card">
                   {g.rows.map((row, idx) => (
                     <ArgRow
                       key={`${g.category ?? "_"}::${row.argName}`}
@@ -160,7 +160,7 @@ function ArgRow({
       <div className="flex items-start gap-3 px-3 py-2">
         <div className="min-w-0 flex-1 pt-1">
           <div className="flex items-center gap-1.5">
-            <span className="truncate font-mono text-[11.5px] font-medium text-foreground">
+            <span className="truncate font-mono text-sm font-medium text-foreground">
               {row.displayName}
             </span>
             {dirty ? (
@@ -185,7 +185,7 @@ function ArgRow({
             ) : null}
           </div>
           {showMeta && hasMeta ? (
-            <div className="mt-1.5 space-y-0.5 text-[10.5px] leading-snug text-muted-foreground">
+            <div className="mt-1.5 space-y-0.5 text-xs leading-snug text-muted-foreground">
               {row.typeSummary ? (
                 <div className="font-mono text-muted-foreground/80">{row.typeSummary}</div>
               ) : null}
@@ -229,14 +229,14 @@ function DraftFooter({
       aria-label={t({ en: "Pending changes", zh: "待应用的改动" })}
       aria-hidden={!isDirty}
       className={cn(
-        "pointer-events-none absolute inset-x-3 bottom-3 z-20 rounded-[10px] border border-border bg-background/95 px-3 py-2 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)] ring-1 ring-border/40 backdrop-blur transition-all duration-200 ease-out",
+        "pointer-events-none absolute inset-x-3 bottom-3 z-20 rounded-lg border border-border bg-background/95 px-3 py-2 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)] ring-1 ring-border/40 backdrop-blur transition-all duration-200 ease-out",
         isDirty
           ? "pointer-events-auto translate-y-0 opacity-100"
           : "translate-y-3 opacity-0",
       )}
     >
       <div className="flex items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-2 text-[11px] text-muted-foreground">
+        <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">
           <span className="inline-flex h-1.5 w-1.5 shrink-0 rounded-full bg-primary" />
           <span className="truncate">
             <span className="font-medium text-foreground">{count}</span>{" "}
@@ -247,7 +247,7 @@ function DraftFooter({
           <button
             type="button"
             onClick={onDiscard}
-            className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="inline-flex items-center gap-1 rounded-md border border-border px-2.5 py-1 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             title={t({ en: "Discard pending changes (Esc)", zh: "撤销待应用改动 (Esc)" })}
           >
             <Undo2 size={11} /> {t({ en: "Discard", zh: "撤销" })}
@@ -255,11 +255,11 @@ function DraftFooter({
           <button
             type="button"
             onClick={onApply}
-            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-1 text-[11px] font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-2.5 py-1 text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
             title={t({ en: "Apply changes to preview (⌘/Ctrl+Enter)", zh: "应用到预览 (⌘/Ctrl+Enter)" })}
           >
             <Check size={11} /> {t({ en: "Apply", zh: "应用" })}
-            <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary-foreground/20 px-1 text-[9px] font-semibold tabular-nums">
+            <span className="inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary-foreground/20 px-1 text-xs font-semibold tabular-nums">
               {count}
             </span>
           </button>
@@ -284,7 +284,7 @@ function EmptyState({
         {icon}
       </div>
       <p className="text-xs font-medium text-foreground">{title}</p>
-      <p className="max-w-[240px] text-[11px] leading-snug text-muted-foreground">{hint}</p>
+      <p className="max-w-[240px] text-sm leading-snug text-muted-foreground">{hint}</p>
     </div>
   );
 }

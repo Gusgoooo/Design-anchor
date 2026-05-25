@@ -5,6 +5,44 @@ import { execSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createConnection } from "node:net";
 import { createHash } from "node:crypto";
+import { applyTokenExtraction } from "../scripts/lib/screenshot-to-tokens.mjs";
+
+/* ─── ANSI constants used by doScreenshot — defined at top to avoid TDZ
+ *     since the top-level switch dispatches calls before later const blocks
+ *     are initialized. ─── */
+const ANSI = {
+  reset: "\x1b[0m",
+  bold: "\x1b[1m",
+  cyan: "\x1b[36m",
+  gray: "\x1b[90m",
+  yellow: "\x1b[33m",
+};
+
+const SCREENSHOT_PROMPT = `Analyze the attached screenshot and update Design-anchor design tokens.
+
+The MCP server (in this project's .mcp.json) exposes:
+  list_tokens          — view current seed values
+  update_token         — { id, field: "light" | "dark", value } writes to tokens.json
+  run_sync_rules       — regenerate generated CSS after edits
+
+Identify the *semantic role* of what you see, not every color present. Only fill values you can identify with high confidence (≥ 70%). For each, call \`update_token\` with the seed id below.
+
+  colorPrimary    Brand / primary CTA color (main button fill, key brand accent — NOT body text or background).
+  colorBgBase     Page canvas — the dominant background.
+  colorTextBase   Body text — dominant paragraph / label color.
+  colorSuccess    Success feedback (green checks, success toast). Skip if not visible.
+  colorWarning    Warnings (amber / yellow). Skip if not visible.
+  colorError      Error / destructive (red). Skip if not visible.
+  colorInfo       Info / link accent (usually blue / indigo). Skip if not visible.
+  borderRadius    Most common corner radius in px (median across cards / buttons).
+  fontSize        Body text size in px (paragraph / label, NOT headings).
+  sizeUnit        Base spacing unit. 3 = compact, 4 = default, 5 = spacious. Read padding / gap rhythm.
+
+Rules:
+  1. Only update a token when confident. Skip ambiguous ones.
+  2. Colors are #RRGGBB hex. borderRadius / fontSize / sizeUnit are plain integers.
+  3. After all updates, call run_sync_rules.
+  4. Print a one-line summary of what changed and what was skipped.`;
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 const PKG_ROOT = resolve(__dirname, "..");
@@ -51,7 +89,7 @@ const HELP = `
 anchor — AI coding governance CLI
 
 说明:
-  默认在**当前项目根**下创建隐藏目录 ${DEFAULT_ANCHOR_DIR}/（组件库 + Storybook），
+  默认在**当前项目根**下创建隐藏目录 ${DEFAULT_ANCHOR_DIR}/（组件库 + Anchor Portal），
   并在 .cursor/ 写入规则与 MCP；不在业务树里创建 anchor-ui visible folders。
   业务应用代码仍放在项目自有的 src/；组件库仅在 ${DEFAULT_ANCHOR_DIR}/ 内维护。
 
@@ -60,8 +98,9 @@ anchor — AI coding governance CLI
   anchor init  [目标目录]    初始化组件库（默认 ./${DEFAULT_ANCHOR_DIR}）
   anchor govern              治理模式：仅注入 AI 规则文件，不拷贝组件/CSS（适合已有项目）
   anchor theme  <文件>       从 Design Prompt 提取 Token，写入 tokens.json 并生成主题规则
+  anchor screenshot [图片]   打印一段 prompt + 操作引导，让你的 AI 工具读图并通过 MCP 改 tokens.json
   anchor upgrade [目标目录]  升级 kit：新增组件直接加入、未修改覆盖、已修改跳过
-  anchor dev   [目标目录]    启动 anchor-portal（Storybook 替代）并打开浏览器
+  anchor dev   [目标目录]    启动 Anchor Portal（Vite）并打开浏览器
   anchor mcp   [目标目录]    启动 MCP Server（供 Cursor Agent 使用）
   anchor sync  [目标目录]    同步 schema → Tailwind + .cursorrules + 规则镜像
   anchor audit [目标目录]    运行合规审计（检测禁止标签 + 任意值 Tailwind）
@@ -80,6 +119,9 @@ switch (cmd) {
     break;
   case "theme":
     doTheme(rest[0]);
+    break;
+  case "screenshot":
+    doScreenshot(rest[0]);
     break;
   case "upgrade":
     doUpgrade(rest[0]);
@@ -168,7 +210,7 @@ function buildManifest(target, kitVersion) {
 }
 
 /**
- * Derive component-level status from file-level manifest for Storybook sidebar.
+ * Derive component-level status from file-level manifest for the Portal sidebar.
  * Maps component display names to { status: "new" | "modified" | "unchanged" }.
  */
 function buildKitStatus(manifest) {
@@ -268,6 +310,11 @@ function doInit(targetArg) {
       "sync:tokens": parentPkg.scripts?.["sync:tokens"] || "node scripts/emit-design-tokens-css.mjs",
       "sync:anchor": parentPkg.scripts?.["sync:anchor"] || "npm run sync:tokens && node scripts/sync-from-schema.mjs",
       "anchor:audit": parentPkg.scripts?.["anchor:audit"] || "node scripts/anchor-audit.mjs",
+      "anchor:audit:app": parentPkg.scripts?.["anchor:audit:app"] || "node scripts/anchor-audit.mjs --scope app",
+      "anchor:audit:kit": parentPkg.scripts?.["anchor:audit:kit"] || "node scripts/anchor-audit.mjs --scope kit",
+      "anchor:audit:portal": parentPkg.scripts?.["anchor:audit:portal"] || "node scripts/anchor-audit.mjs --scope portal",
+      "anchor:audit:all": parentPkg.scripts?.["anchor:audit:all"] || "node scripts/anchor-audit.mjs --scope all",
+      "check:anchor": parentPkg.scripts?.["check:anchor"] || "node scripts/check-anchor-consistency.mjs",
       dev: "vite --config src/anchor-portal/vite.config.ts",
       build: "vite build --config src/anchor-portal/vite.config.ts",
       typecheck: "tsc --noEmit",
@@ -324,7 +371,7 @@ function doInit(targetArg) {
 
 /**
  * 脚手架 package.json：将 react / react-dom 从 dependencies 挪到 peerDependencies，
- * 并在 devDependencies 中保留同版本供 Storybook 本地开发解析。
+ * 并在 devDependencies 中保留同版本供 Portal 本地开发解析。
  */
 function buildScaffoldPackageJson(parentPkg) {
   const deps = { ...(parentPkg.dependencies || {}) };
@@ -433,9 +480,13 @@ function generateIndex(target) {
     "",
   ];
 
-  // base 组件
+  // base/index.ts is the source of truth for public exports. Keeping the
+  // scaffold barrel pointed at it prevents nested groups such as base/ai from
+  // drifting out of @design.
   const baseDir = join(compsDir, "base");
-  if (existsSync(baseDir)) {
+  if (existsSync(join(baseDir, "index.ts"))) {
+    lines.push('export * from "./src/components/base";');
+  } else if (existsSync(baseDir)) {
     const files = readdirSyncSafe(baseDir).filter(
       (f) => f.endsWith(".tsx") && !f.includes(".demo.") && !f.includes(".stories."),
     );
@@ -757,7 +808,7 @@ function doGovern() {
   console.log(`
 ╔══════════════════════════════════════════╗
 ║       Design-anchor Govern — Governance Mode          ║
-║  仅注入 AI 规则，不拷贝组件/CSS/Storybook ║
+║  仅注入 AI 规则，不拷贝组件/CSS/Portal    ║
 ╚══════════════════════════════════════════╝
 `);
   console.log(`  📂 项目根: ${projectRoot}\n`);
@@ -1283,48 +1334,18 @@ function doTheme(promptFile) {
     process.exit(1);
   }
 
-  const tokens = JSON.parse(readFileSync(tokensPath, "utf8"));
-  let mergeCount = 0;
-
-  for (const [k, v] of Object.entries(extracted.seed)) {
-    if (v != null) { tokens.seed[k] = v; mergeCount++; }
-  }
-  for (const [k, v] of Object.entries(extracted.seedDark)) {
-    if (v != null) {
-      if (!tokens.seedDark) tokens.seedDark = {};
-      tokens.seedDark[k] = v;
-      mergeCount++;
-    }
-  }
-  for (const [k, v] of Object.entries(extracted.fixedAliases)) {
-    if (v != null) {
-      if (!tokens.fixedAliases) tokens.fixedAliases = {};
-      tokens.fixedAliases[k] = v;
-      mergeCount++;
-    }
-  }
-  for (const [k, v] of Object.entries(extracted.customSeeds)) {
-    if (v != null) {
-      if (!tokens.customSeeds) tokens.customSeeds = {};
-      tokens.customSeeds[k] = v;
-      mergeCount++;
-    }
-  }
-
-  writeFileSync(tokensPath, JSON.stringify(tokens, null, 2) + "\n");
-  console.log(`  ✅ tokens.json 已更新（${mergeCount} 个值合并）`);
-
-  // 3. 运行 sync:tokens 重新生成 CSS
-  const tokensDir = join(tokensPath, "..", "..");
-  const emitScript = join(PKG_ROOT, "scripts/emit-design-tokens-css.mjs");
-  const localEmit = join(tokensDir, "scripts/emit-design-tokens-css.mjs");
-  const script = existsSync(localEmit) ? localEmit : emitScript;
-
-  try {
-    execSync(`node "${script}"`, { cwd: tokensDir, stdio: "pipe" });
+  const proposed = {
+    seed: extracted.seed,
+    seedDark: extracted.seedDark,
+    customSeeds: extracted.customSeeds,
+    fixedAliases: extracted.fixedAliases,
+  };
+  const applyResult = applyTokenExtraction(tokensPath, proposed);
+  console.log(`  ✅ tokens.json 已更新（${applyResult.mergedCount} 个值合并）`);
+  if (applyResult.syncOk) {
     console.log("  ✅ design-tokens.generated.css 已重新生成");
-  } catch {
-    console.log("  ⚠️  CSS 生成失败（可手动运行 npm run sync:tokens）");
+  } else {
+    console.log(`  ⚠️  CSS 生成失败（可手动运行 npm run sync:tokens）${applyResult.syncError ? ": " + applyResult.syncError.split("\n")[0] : ""}`);
   }
 
   // 4. 生成风格分工规则
@@ -1386,10 +1407,60 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 ✅ 主题提取完成！
 
 下一步：
-  • npx design-anchor dev    — 在 Storybook 中预览新主题
+  • npx design-anchor dev    — 在 Anchor Portal 中预览新主题
   • 打开 Cursor，AI 将使用提取后的 token + Design-anchor components
   • 视觉氛围细节参考 design-prompt.md
 `);
+}
+
+/* ─── screenshot（打印 AI prompt + 引导，不调任何 LLM；AI 自己用 MCP 写 tokens.json） ─── */
+
+function findTokensPath() {
+  const projectRoot = process.cwd();
+  const anchorDir = join(projectRoot, DEFAULT_ANCHOR_DIR);
+  const candidates = [
+    join(anchorDir, "src/design-tokens/tokens.json"),
+    join(projectRoot, "src/design-tokens/tokens.json"),
+  ];
+  for (const c of candidates) {
+    if (existsSync(c)) return { tokensPath: c, projectRoot };
+  }
+  return { tokensPath: null, projectRoot };
+}
+
+function doScreenshot(imageArg) {
+  const { tokensPath, projectRoot } = findTokensPath();
+  const tokensRel = tokensPath ? relative(projectRoot, tokensPath) : null;
+
+  console.log(`
+${ANSI.bold}📷 Design-anchor — Screenshot → Token${ANSI.reset}
+${ANSI.gray}用你自己的 AI 工具读图，AI 通过 MCP 直接改 tokens.json${ANSI.reset}
+`);
+
+  if (tokensRel) {
+    console.log(`  ${ANSI.gray}tokens.json:${ANSI.reset} ${tokensRel}`);
+  } else {
+    console.log(`  ${ANSI.yellow}⚠ 未找到 tokens.json — 请先在项目根目录运行此命令${ANSI.reset}`);
+  }
+  if (imageArg) {
+    console.log(`  ${ANSI.gray}截图:${ANSI.reset} ${imageArg}`);
+  }
+  console.log("");
+
+  console.log(`${ANSI.bold}操作步骤${ANSI.reset}\n`);
+  console.log(`  ${ANSI.cyan}1.${ANSI.reset} 打开你的 AI 工具（Cursor / Claude Code / Copilot / ChatGPT / …）`);
+  console.log(`     ${ANSI.gray}确保它已加载本项目的 .mcp.json（Cursor / Claude Code 默认会加载）${ANSI.reset}`);
+  console.log(`  ${ANSI.cyan}2.${ANSI.reset} 把截图拖进对话`);
+  console.log(`  ${ANSI.cyan}3.${ANSI.reset} 复制下面这段 prompt 一起发过去`);
+  console.log(`  ${ANSI.cyan}4.${ANSI.reset} AI 完成后，回到 Portal 点 ${ANSI.bold}Reload tokens${ANSI.reset}（或刷新页面）\n`);
+
+  const divider = `${ANSI.gray}${"─".repeat(64)}${ANSI.reset}`;
+  console.log(divider);
+  console.log(SCREENSHOT_PROMPT);
+  console.log(divider);
+  console.log("");
+  console.log(`${ANSI.gray}提示：截图越精简、越聚焦关键区域（按钮 / 卡片 / 文字），识别越稳。${ANSI.reset}`);
+  console.log("");
 }
 
 /* ─── upgrade ─── */

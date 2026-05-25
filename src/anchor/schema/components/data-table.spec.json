@@ -4,17 +4,10 @@
   "version": "1.0.0",
   "intent": "Primary business data table: pagination, sorting, bulk actions converge here. Raw <table> with arbitrary spacing is forbidden.",
   "wraps": {
-    "module": "@/components/ui/table",
+    "module": "@/components/base/DataTable",
     "primitives": [
-      "Table",
-      "TableHeader",
-      "TableBody",
-      "TableRow",
-      "TableHead",
-      {
-        "symbol": "TableCell",
-        "displayName": "Data Cell (TableCell)"
-      }
+      "DataTable",
+      "CompositeDataTable"
     ]
   },
   "requiredProps": [
@@ -101,7 +94,7 @@
     {
       "htmlTag": "table",
       "reason": "Business lists must use DataTable to ensure consistent spacing and brand compliance",
-      "useInstead": "@/components/base/data-table"
+      "useInstead": "@/components/base/DataTable"
     }
   ],
   "corrections": [
@@ -117,7 +110,7 @@
     }
   ],
   "referencePriority": [
-    "@/components/base/data-table",
+    "@/components/base/DataTable",
     "@/components/base"
   ],
   "tailwindExtend": {

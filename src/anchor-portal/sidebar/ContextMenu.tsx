@@ -91,11 +91,11 @@ export function ComponentContextMenu() {
     <div
       ref={menuRef}
       style={{ position: "fixed", top: state.y, left: state.x, zIndex: 2147483647 }}
-      className="min-w-[200px] rounded-md border border-border bg-popover py-1 text-[12px] text-popover-foreground shadow-lg"
+      className="min-w-[200px] rounded-md border border-border bg-popover py-1 text-sm text-popover-foreground shadow-lg"
     >
       {confirm ? (
         <div className="px-3 py-2">
-          <p className="mb-2 text-[11px] text-muted-foreground">
+          <p className="mb-2 text-sm text-muted-foreground">
             Delete <strong>{state.componentName}</strong>? This removes the .demo.tsx, the
             component file, and the spec.json (if present).
           </p>
@@ -103,7 +103,7 @@ export function ComponentContextMenu() {
             <button
               type="button"
               onClick={() => setConfirm(false)}
-              className="rounded-md border border-border px-2 py-1 text-[11px] text-foreground transition-colors hover:bg-muted"
+              className="rounded-md border border-border px-2 py-1 text-sm text-foreground transition-colors hover:bg-muted"
             >
               Cancel
             </button>
@@ -111,7 +111,7 @@ export function ComponentContextMenu() {
               type="button"
               disabled={busy}
               onClick={() => void doDelete()}
-              className="rounded-md bg-destructive px-2 py-1 text-[11px] font-medium text-destructive-foreground transition-opacity disabled:opacity-60"
+              className="rounded-md bg-destructive px-2 py-1 text-sm font-medium text-destructive-foreground transition-opacity disabled:opacity-60"
             >
               {busy ? "Deleting…" : "Delete"}
             </button>

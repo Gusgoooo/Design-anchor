@@ -148,7 +148,7 @@ function RangeInput({
         onChange={(e) => onChange(Number(e.target.value))}
         className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-primary"
       />
-      <span className="w-12 shrink-0 text-right font-mono text-[11px] tabular-nums text-muted-foreground">{safe}</span>
+      <span className="w-12 shrink-0 text-right font-mono text-sm tabular-nums text-muted-foreground">{safe}</span>
     </div>
   );
 }
@@ -162,6 +162,29 @@ function labelFor(opt: unknown, labels?: Record<string, string>): string {
   if (opt === undefined) return "undefined";
   if (typeof opt === "object") return JSON.stringify(opt);
   return String(opt);
+}
+
+function optionKey(index: number): string {
+  return `option:${index}`;
+}
+
+function optionIndexFromKey(key: string): number | null {
+  if (!key.startsWith("option:")) return null;
+  const index = Number(key.slice("option:".length));
+  return Number.isInteger(index) ? index : null;
+}
+
+function optionMatchesValue(opt: unknown, value: unknown): boolean {
+  if (Object.is(opt, value)) return true;
+  if (opt && value && typeof opt === "object" && typeof value === "object") {
+    return stringify(opt) === stringify(value);
+  }
+  return false;
+}
+
+function optionKeyForValue(value: unknown, options: unknown[]): string | null {
+  const index = options.findIndex((opt) => optionMatchesValue(opt, value));
+  return index >= 0 ? optionKey(index) : null;
 }
 
 function SelectInput({
@@ -180,39 +203,50 @@ function SelectInput({
   argName: string;
 }) {
   if (multi) {
-    const selected = Array.isArray(value) ? value.map(String) : [];
+    const selected = Array.isArray(value)
+      ? value.map((v) => optionKeyForValue(v, options)).filter((v): v is string => v != null)
+      : [];
     return (
       <select
         multiple
         value={selected}
         onChange={(e) => {
-          const next = Array.from(e.target.selectedOptions).map((o) => o.value);
+          const next = Array.from(e.target.selectedOptions)
+            .map((o) => optionIndexFromKey(o.value))
+            .filter((index): index is number => index != null && index >= 0 && index < options.length)
+            .map((index) => options[index]);
           onChange(next);
         }}
         className={cn(inputBase, "h-auto min-h-[64px] font-mono")}
       >
         {options.map((opt, i) => (
-          <option key={i} value={String(opt)}>
+          <option key={i} value={optionKey(i)}>
             {labelFor(opt, labels)}
           </option>
         ))}
       </select>
     );
   }
-  const cur = value == null ? "" : String(value);
+  const currentKey = optionKeyForValue(value, options);
+  const fallbackKey = "__current__";
+  const selectValue = currentKey ?? (value == null ? "" : fallbackKey);
   return (
     <div className="relative">
       <select
-        value={cur}
-        onChange={(e) => onChange(e.target.value)}
+        value={selectValue}
+        onChange={(e) => {
+          const index = optionIndexFromKey(e.target.value);
+          if (index != null && index >= 0 && index < options.length) onChange(options[index]);
+          else onChange(value);
+        }}
         className={cn(inputBase, "appearance-none pr-7 font-mono")}
         aria-label={argName}
       >
-        {!options.some((o) => String(o) === cur) && cur !== "" ? (
-          <option value={cur}>{cur} (current)</option>
+        {!currentKey && value != null ? (
+          <option value={fallbackKey}>{labelFor(value, labels)} (current)</option>
         ) : null}
         {options.map((opt, i) => (
-          <option key={i} value={String(opt)}>
+          <option key={i} value={optionKey(i)}>
             {labelFor(opt, labels)}
           </option>
         ))}
@@ -244,8 +278,7 @@ function RadioInput({
   return (
     <div className={cn("flex gap-2", inline ? "flex-row flex-wrap" : "flex-col")}>
       {options.map((opt, i) => {
-        const key = String(opt);
-        const checked = String(value) === key;
+        const checked = optionMatchesValue(opt, value);
         return (
           <label key={i} className="inline-flex items-center gap-1.5 text-xs text-foreground">
             <input
@@ -276,22 +309,21 @@ function CheckInput({
   labels?: Record<string, string>;
   inline?: boolean;
 }) {
-  const set = new Set(value.map(String));
   return (
     <div className={cn("flex gap-2", inline ? "flex-row flex-wrap" : "flex-col")}>
       {options.map((opt, i) => {
-        const key = String(opt);
-        const checked = set.has(key);
+        const checked = value.some((v) => optionMatchesValue(opt, v));
         return (
           <label key={i} className="inline-flex items-center gap-1.5 text-xs text-foreground">
             <input
               type="checkbox"
               checked={checked}
               onChange={(e) => {
-                const next = new Set(set);
-                if (e.target.checked) next.add(key);
-                else next.delete(key);
-                onChange(options.filter((o) => next.has(String(o))));
+                if (e.target.checked) {
+                  onChange(checked ? value : [...value, opt]);
+                } else {
+                  onChange(value.filter((v) => !optionMatchesValue(opt, v)));
+                }
               }}
               className="h-3 w-3 cursor-pointer accent-primary"
             />
@@ -383,7 +415,7 @@ function ObjectInput({ value, onChange }: { value: unknown; onChange: (v: unknow
         }}
         className={cn(inputBase, "min-h-[72px] resize-vertical font-mono leading-relaxed")}
       />
-      {err ? <span className="text-[10px] text-destructive">{err}</span> : null}
+      {err ? <span className="text-xs text-destructive">{err}</span> : null}
     </div>
   );
 }

@@ -179,7 +179,7 @@ export function StyleOverview() {
                 className="relative aspect-square w-full rounded-lg after:absolute after:inset-0 after:rounded-lg after:border after:border-border after:mix-blend-darken dark:after:mix-blend-lighten"
                 style={{ background: `var(${v})` }}
               />
-              <div className="hidden max-w-14 truncate font-mono text-[0.6rem] md:block">{v}</div>
+              <div className="hidden max-w-14 truncate font-mono text-xs md:block">{v}</div>
             </div>
           ))}
         </div>
@@ -505,7 +505,7 @@ export function BarChartCard() {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div className="px-2 text-center">
-      <div className="text-[0.65rem] uppercase text-muted-foreground">{label}</div>
+      <div className="text-xs uppercase text-muted-foreground">{label}</div>
       <div className="text-sm font-medium tabular-nums">{value}</div>
     </div>
   );

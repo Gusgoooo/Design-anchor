@@ -41,7 +41,7 @@ export function DerivedMapTokens({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex w-full items-center gap-1.5 rounded-b-[10px] px-2.5 py-1.5 text-[10px] uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted/30",
+          "flex w-full items-center gap-1.5 rounded-b-lg px-2.5 py-1.5 text-xs uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted/30",
           open && "bg-muted/30",
         )}
       >
@@ -52,7 +52,7 @@ export function DerivedMapTokens({
         <span>Derived</span>
         <span className="ml-auto inline-flex items-center gap-1.5 tabular-nums">
           {overriddenInGroup > 0 ? (
-            <span className="rounded-sm bg-primary/15 px-1 py-px text-[9px] font-medium text-primary">
+            <span className="rounded-sm bg-primary/15 px-1 py-px text-xs font-medium text-primary">
               {overriddenInGroup}
             </span>
           ) : null}
@@ -117,7 +117,7 @@ function SubGroup({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center gap-1.5 bg-muted/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80 transition-colors hover:bg-muted/40"
+        className="flex w-full items-center gap-1.5 bg-muted/20 px-2.5 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 transition-colors hover:bg-muted/40"
       >
         <ChevronDown
           size={10}

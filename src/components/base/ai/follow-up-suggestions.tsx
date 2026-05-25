@@ -23,3 +23,5 @@ export const ThreadFollowupSuggestions: FC = () => {
     </AuiIf>
   );
 };
+
+export const FollowUpSuggestions = ThreadFollowupSuggestions;

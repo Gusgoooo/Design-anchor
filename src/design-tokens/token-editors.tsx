@@ -108,14 +108,14 @@ export function ColorEditor({
             className="h-8 w-8 shrink-0 rounded-md border border-border shadow-inner"
             style={{ background: value || "transparent" }}
           />
-          <div className="min-w-0 flex-1 space-y-0.5 text-[11px]">
+          <div className="min-w-0 flex-1 space-y-0.5 text-sm">
             <p className="font-mono break-all text-foreground">{hexDisplay}</p>
             <p className="font-mono break-all text-muted-foreground">{rgbaDisplay}</p>
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">CSS</Label>
+          <Label className="text-xs uppercase tracking-wider text-muted-foreground">CSS</Label>
           <Input
             defaultValue={value}
             key={value}
@@ -163,21 +163,127 @@ export function LengthEditor({
     onChange(p ? formatCssLength(p.num, p.unit) : trimmed);
   }
 
+  /**
+   * Live-commit on every keystroke so the draft (and PreviewBoard, dirty
+   * indicator, Save button count) updates without waiting for blur/Enter.
+   * We pass the raw text — no unit auto-appending mid-type, otherwise
+   * typing "4" would become "4px" before the user finishes their "40".
+   * The full normalize (add unit) still happens in commit() on blur/Enter.
+   */
+  function liveCommit(rawText: string) {
+    const trimmed = rawText.trim();
+    if (!trimmed || trimmed === value) return;
+    onChange(trimmed);
+  }
+
+  function step(direction: 1 | -1, fine: boolean) {
+    // Arrow keys nudge by 0.25 (shift = 0.1) — small enough that on the
+    // largest spacing token (spacing-12 = 12 × sizeUnit) a single press
+    // produces ~3px of change pre-round, which after Math.round in the emit
+    // path lands as 0–1px on most stops. Avoids the "20% jump everywhere"
+    // feel of full integer sizeUnit increments.
+    const cur = parseCssLength(textVal);
+    if (!cur) return;
+    const delta = (fine ? 0.1 : 0.25) * direction;
+    const next = +(cur.num + delta).toFixed(3);
+    const formatted = formatCssLength(next, cur.unit);
+    setTextVal(formatted);
+    onChange(formatted);
+  }
+
   return (
     <div className="space-y-1.5">
-      <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">
-        Value · accepts plain numbers, px / rem / em / %, or calc(…)
+      <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+        Value · ↑↓ ±0.25 · ⇧↑↓ ±0.1 · accepts px / rem / em / % / calc(…)
       </Label>
       <Input
         value={textVal}
-        onChange={(e) => setTextVal(e.target.value)}
+        onChange={(e) => {
+          const v = e.target.value;
+          setTextVal(v);
+          liveCommit(v);
+        }}
         onBlur={commit}
-        onKeyDown={(e) => { if (e.key === "Enter") commit(); }}
+        onKeyDown={(e) => {
+          if (e.key === "Enter") { commit(); return; }
+          if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+            e.preventDefault();
+            step(e.key === "ArrowUp" ? 1 : -1, e.shiftKey);
+          }
+        }}
         className="h-9 font-mono text-sm tabular-nums"
         spellCheck={false}
         autoComplete="off"
         placeholder="4px"
       />
+    </div>
+  );
+}
+
+export function SliderEditor({
+  value,
+  onChange,
+  config,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  config: { min: number; max: number; step: number; labels?: Array<{ value: number; label: string }> };
+}) {
+  const parsed = parseCssLength(value);
+  const unit = parsed?.unit ?? "px";
+  const num = Number.isFinite(parsed?.num) ? (parsed!.num as number) : config.min;
+
+  // Clamp display to slider range without mutating tokens.json — if seed has
+  // a value outside the slider's range (e.g. legacy 6px), show it pinned at
+  // the closest end while the slider's visual position stays inside.
+  const displayNum = Math.max(config.min, Math.min(config.max, num));
+
+  function commit(next: number) {
+    const rounded = Math.round(next / config.step) * config.step;
+    const clean = +rounded.toFixed(3);
+    onChange(formatCssLength(clean, unit));
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-baseline justify-between">
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">
+          {`Range ${config.min}–${config.max} · step ${config.step}`}
+        </Label>
+        <span className="font-mono text-sm tabular-nums text-foreground">
+          {formatCssLength(num, unit)}
+        </span>
+      </div>
+      <input
+        type="range"
+        min={config.min}
+        max={config.max}
+        step={config.step}
+        value={displayNum}
+        onChange={(e) => commit(Number(e.currentTarget.value))}
+        className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-muted accent-foreground"
+      />
+      {config.labels && config.labels.length ? (
+        <div className="relative h-4 text-xs text-muted-foreground">
+          {config.labels.map((l) => {
+            const pct = ((l.value - config.min) / (config.max - config.min)) * 100;
+            const transform =
+              pct < 5 ? "translateX(0)" : pct > 95 ? "translateX(-100%)" : "translateX(-50%)";
+            return (
+              <button
+                key={l.value}
+                type="button"
+                onClick={() => commit(l.value)}
+                className="absolute top-0 whitespace-nowrap text-muted-foreground hover:text-foreground"
+                style={{ left: `${pct}%`, transform }}
+                title={`${l.label} (${l.value}${unit})`}
+              >
+                {l.label}
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -199,11 +305,11 @@ export function GenericEditor({
   return (
     <div className="flex flex-col gap-3">
       <div className="space-y-1.5">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">Current</Label>
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">Current</Label>
         <p className="font-mono text-xs break-all text-foreground">{value}</p>
       </div>
       <div className="space-y-1.5">
-        <Label className="text-[10px] uppercase tracking-wider text-muted-foreground">New value</Label>
+        <Label className="text-xs uppercase tracking-wider text-muted-foreground">New value</Label>
         <Input
           value={text}
           onChange={(e) => setText(e.target.value)}

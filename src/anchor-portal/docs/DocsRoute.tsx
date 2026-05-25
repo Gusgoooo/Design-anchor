@@ -67,7 +67,7 @@ function LeftNav({
       <div className="space-y-6">
         {NAV_GROUPS.map((group) => (
           <div key={group.title.en}>
-            <div className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+            <div className="mb-2 px-2 text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">
               {t(group.title)}
             </div>
             <nav className="flex flex-col gap-0.5">
@@ -81,7 +81,7 @@ function LeftNav({
                     type="button"
                     onClick={() => onSelect(id)}
                     className={cn(
-                      "w-full rounded-md px-2 py-1 text-left text-[13px] transition-colors",
+                      "w-full rounded-md px-2 py-1 text-left text-base transition-colors",
                       isActive
                         ? "bg-muted font-medium text-foreground"
                         : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
@@ -124,7 +124,7 @@ function SectionHeader({ section }: { section: DocsSection }) {
       <button
         type="button"
         onClick={copyAll}
-        className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        className="inline-flex shrink-0 items-center gap-1.5 rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
         title={t({ en: "Copy this page as markdown", zh: "复制本页 markdown" })}
       >
         {copied ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} />}
@@ -146,7 +146,7 @@ const PROSE_CLASSES = cn(
   "[&_ol]:mb-4 [&_ol]:list-decimal [&_ol]:pl-6 [&_ol_li]:mb-1.5",
   "[&_a]:text-primary [&_a]:underline-offset-2 hover:[&_a]:underline",
   "[&_strong]:font-semibold [&_strong]:text-foreground",
-  "[&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-[0.85em] [&_code]:before:content-none [&_code]:after:content-none",
+  "[&_code]:rounded [&_code]:bg-muted [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:font-mono [&_code]:text-sm [&_code]:before:content-none [&_code]:after:content-none",
   "[&_pre]:mb-4 [&_pre]:overflow-x-auto [&_pre]:rounded-lg [&_pre]:border [&_pre]:border-border [&_pre]:bg-muted/40 [&_pre]:p-4 [&_pre_code]:bg-transparent [&_pre_code]:p-0",
   "[&_table]:my-4 [&_table]:w-full [&_table]:border-collapse [&_table]:text-sm",
   "[&_th]:border-b [&_th]:border-border [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:font-semibold",
@@ -203,7 +203,7 @@ function SectionFooter({
           onClick={() => onSelect(prev.id)}
           className="group flex flex-col items-start gap-0.5 rounded-md border border-border bg-background px-3 py-2 text-left transition-colors hover:bg-muted"
         >
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t({ en: "Previous", zh: "上一节" })}</span>
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">{t({ en: "Previous", zh: "上一节" })}</span>
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
             <ChevronRight size={14} className="rotate-180 text-muted-foreground" />
             {t(prev.title)}
@@ -216,7 +216,7 @@ function SectionFooter({
           onClick={() => onSelect(next.id)}
           className="group ml-auto flex flex-col items-end gap-0.5 rounded-md border border-border bg-background px-3 py-2 text-right transition-colors hover:bg-muted"
         >
-          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">{t({ en: "Next", zh: "下一节" })}</span>
+          <span className="text-xs uppercase tracking-wider text-muted-foreground">{t({ en: "Next", zh: "下一节" })}</span>
           <span className="inline-flex items-center gap-1.5 text-sm font-medium text-foreground">
             {t(next.title)}
             <ChevronRight size={14} className="text-muted-foreground" />
@@ -296,7 +296,7 @@ function RightToc({
 
   return (
     <aside className="overflow-y-auto border-l border-border px-4 py-10">
-      <div className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+      <div className="text-sm font-semibold uppercase tracking-wider text-muted-foreground/80">
         {t({ en: "On this page", zh: "本节目录" })}
       </div>
       <nav className="mt-3 flex flex-col gap-1">
@@ -308,7 +308,7 @@ function RightToc({
               type="button"
               onClick={() => jumpTo(e.id)}
               className={cn(
-                "text-left text-[12px] leading-snug transition-colors",
+                "text-left text-sm leading-snug transition-colors",
                 e.level === 3 && "pl-3",
                 isActive
                   ? "font-medium text-foreground"

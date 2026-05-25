@@ -38,4 +38,4 @@ const Toaster = ({ theme, ...props }: ToasterProps) => {
   )
 }
 
-export { Toaster }
+export { Toaster, Toaster as Sonner }

@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url("https://rsms.me/inter/inter.css");
+@import "tailwindcss";
 @import "./design-tokens.generated.css";
 
 @custom-variant dark (&:is(.dark *));

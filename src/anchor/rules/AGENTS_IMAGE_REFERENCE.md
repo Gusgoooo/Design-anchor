@@ -18,6 +18,22 @@ Analyse the reference image and propose a diff against
 After the user confirms the diff, run `anchor sync` so every component
 re-skins to match the reference.
 
+### Automated path (recommended)
+
+Don't eyeball-extract values yourself. Use one of:
+
+- **CLI**: `anchor screenshot <image>` — interactive diff in the terminal,
+  applies on `y`. Requires `OPENAI_API_KEY`.
+- **MCP** (Cursor / Claude Code): call `extract_tokens_from_screenshot`
+  with `{ imagePath }`, present the returned diff to the user, and only
+  call `apply_token_extraction` after the user picks fields to accept.
+- **Portal**: open Design Token tab → "Extract from screenshot" button
+  → drop image → review diff → "Apply to draft" merges into the live
+  preview; user clicks Save & Sync to commit.
+
+All three paths share the same vision core and never write to disk
+without explicit user approval.
+
 **Use this when** the user wants the product to *look like* the reference,
 or the reference is a brand redesign (new logo + palette).
 

@@ -339,17 +339,17 @@ export function SpecPanel() {
       <header className="flex shrink-0 flex-col gap-1.5 border-b border-border bg-muted/30 px-3 py-2">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-foreground">{spec.componentName}</span>
-          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground">{filename}</code>
+          <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs text-muted-foreground">{filename}</code>
         </div>
         {storyName ? (
-          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             {t({ en: "Variant:", zh: "变体：" })}
-            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-[11px] text-foreground">{storyName}</code>
+            <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-sm text-foreground">{storyName}</code>
           </div>
         ) : null}
       </header>
 
-      <div className="flex-1 overflow-y-auto px-3 py-3 text-[13px]">
+      <div className="flex-1 overflow-y-auto px-3 py-3 text-base">
         <Collapsible
           title={t({ en: "Spec · Intent & dependencies", zh: "Spec · 用途与依赖" })}
           hint={t({
@@ -569,7 +569,7 @@ export function SpecPanel() {
         {status ? (
           <div
             className={cn(
-              "flex-1 rounded-md px-2 py-1 text-[11px] whitespace-pre-wrap",
+              "flex-1 rounded-md px-2 py-1 text-sm whitespace-pre-wrap",
               status.ok
                 ? "border border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
                 : "border border-destructive/30 bg-destructive/10 text-destructive",
@@ -583,14 +583,14 @@ export function SpecPanel() {
         <button
           type="button"
           onClick={() => void load()}
-          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-[12px] font-medium text-foreground transition-colors hover:bg-muted"
+          className="inline-flex items-center gap-1 rounded-md border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
           <RefreshCw size={11} /> {t({ en: "Reload", zh: "重新加载" })}
         </button>
         <button
           type="button"
           onClick={() => void save()}
-          className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-[12px] font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
+          className="inline-flex items-center gap-1 rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground shadow-sm transition-opacity hover:opacity-90"
         >
           <Save size={11} /> {t({ en: "Save", zh: "保存" })}
         </button>
@@ -603,8 +603,8 @@ export function SpecPanel() {
 /*  Sub-components                                                       */
 /* ===================================================================== */
 
-const IN = "block w-full rounded-md border border-input bg-background px-2 py-1.5 text-[12px] text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none";
-const TX = "block w-full rounded-md border border-input bg-background px-2 py-1.5 text-[12px] leading-relaxed text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none resize-vertical font-mono";
+const IN = "block w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none";
+const TX = "block w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm leading-relaxed text-foreground shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus-visible:outline-none resize-vertical font-mono";
 
 function CenterMessage({ children }: { children: React.ReactNode }) {
   return (
@@ -631,13 +631,13 @@ function Collapsible({
       <button
         type="button"
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between gap-2 rounded-t-md bg-muted/40 px-3 py-2 text-left text-[12px] font-semibold text-foreground transition-colors hover:bg-muted/60"
+        className="flex w-full items-center justify-between gap-2 rounded-t-md bg-muted/40 px-3 py-2 text-left text-sm font-semibold text-foreground transition-colors hover:bg-muted/60"
       >
         <span className="flex min-w-0 items-center gap-1.5 truncate">
           <span className="truncate">{title}</span>
           {hint ? <InfoTip text={hint} /> : null}
         </span>
-        <span className="shrink-0 text-[11px] font-normal text-muted-foreground">
+        <span className="shrink-0 text-sm font-normal text-muted-foreground">
           {open ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
         </span>
       </button>
@@ -667,7 +667,7 @@ function Field({
 }) {
   return (
     <div className={cn("flex flex-col gap-1", compact ? "mb-2" : "mb-3")}>
-      <div className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground">
+      <div className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground">
         {label}
         {hint ? <InfoTip text={hint} /> : null}
       </div>
@@ -686,7 +686,7 @@ function Subheading({
   topMargin?: boolean;
 }) {
   return (
-    <div className={cn("mb-2 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground", topMargin && "mt-4")}>
+    <div className={cn("mb-2 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground", topMargin && "mt-4")}>
       {children}
       {hint ? <InfoTip text={hint} /> : null}
     </div>
@@ -703,7 +703,7 @@ function DeleteRowButton({ onClick }: { onClick: () => void }) {
     <button
       type="button"
       onClick={onClick}
-      className="mt-2 inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="mt-2 inline-flex items-center gap-1 rounded-md border border-border bg-background px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       <Trash2 size={10} /> {t({ en: "Delete", zh: "删除" })}
     </button>
@@ -715,7 +715,7 @@ function AddRowButton({ label, onClick }: { label: string; onClick: () => void }
     <button
       type="button"
       onClick={onClick}
-      className="inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-background px-3 py-1.5 text-[11px] font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+      className="inline-flex items-center gap-1 rounded-md border border-dashed border-border bg-background px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
     >
       <Plus size={11} /> {label}
     </button>
@@ -765,7 +765,7 @@ function PrimitivesEditor({
           <button
             type="button"
             onClick={() => onChange(primitives.filter((_, j) => j !== i))}
-            className="mb-2 rounded-md border border-border px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+            className="mb-2 rounded-md border border-border px-2 py-1 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
             <Trash2 size={11} />
           </button>

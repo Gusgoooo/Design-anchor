@@ -11,11 +11,12 @@ export function detectTokenValueKind(value: string): TokenValueKind {
 }
 
 export function parseCssLength(value: string): { num: number; unit: string } | null {
-  const m = value.trim().match(/^(-?[\d.]+)\s*(rem|em|px|%|vh|vw|vmin|vmax|ch|ex|cap|ic|lh|rlh|dvh|dvw|svh|svw|cqw|cqh)$/);
+  const trimmed = value.trim();
+  const m = trimmed.match(/^(-?[\d.]+)\s*(rem|em|px|%|vh|vw|vmin|vmax|ch|ex|cap|ic|lh|rlh|dvh|dvw|svh|svw|cqw|cqh)?$/);
   if (!m) return null;
   const num = Number.parseFloat(m[1]);
   if (!Number.isFinite(num)) return null;
-  return { num, unit: m[2] };
+  return { num, unit: m[2] ?? "" };
 }
 
 export function formatCssLength(num: number, unit: string): string {

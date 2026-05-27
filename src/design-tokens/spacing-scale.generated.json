@@ -1,44 +1,44 @@
 {
   "version": 2,
   "mode": "linear-sizeMap",
-  "sizeUnit": null,
+  "sizeUnit": 4,
   "sizeStep": 4,
   "suffixToPx": {
     "0": "0",
-    "1": "NaNpx",
-    "2": "NaNpx",
-    "3": "NaNpx",
-    "4": "NaNpx",
-    "5": "NaNpx",
-    "6": "NaNpx",
-    "7": "NaNpx",
-    "8": "NaNpx",
-    "9": "NaNpx",
-    "10": "NaNpx",
-    "11": "NaNpx",
-    "12": "NaNpx",
-    "14": "NaNpx",
-    "16": "NaNpx",
-    "20": "NaNpx",
-    "24": "NaNpx",
-    "28": "NaNpx",
-    "32": "NaNpx",
-    "36": "NaNpx",
-    "40": "NaNpx",
-    "44": "NaNpx",
-    "48": "NaNpx",
-    "52": "NaNpx",
-    "56": "NaNpx",
-    "60": "NaNpx",
-    "64": "NaNpx",
-    "72": "NaNpx",
-    "80": "NaNpx",
-    "96": "NaNpx",
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "20px",
+    "6": "24px",
+    "7": "28px",
+    "8": "32px",
+    "9": "36px",
+    "10": "40px",
+    "11": "44px",
+    "12": "48px",
+    "14": "56px",
+    "16": "64px",
+    "20": "80px",
+    "24": "96px",
+    "28": "112px",
+    "32": "128px",
+    "36": "144px",
+    "40": "160px",
+    "44": "176px",
+    "48": "192px",
+    "52": "208px",
+    "56": "224px",
+    "60": "240px",
+    "64": "256px",
+    "72": "288px",
+    "80": "320px",
+    "96": "384px",
     "px": "1px",
-    "0.5": "NaNpx",
-    "1.5": "NaNpx",
-    "2.5": "NaNpx",
-    "3.5": "NaNpx"
+    "0.5": "2px",
+    "1.5": "6px",
+    "2.5": "10px",
+    "3.5": "14px"
   },
   "stepLabels": [
     {
@@ -53,168 +53,168 @@
     },
     {
       "suffix": "0.5",
-      "zh": "Half-step · NaNpx",
-      "en": "Half-step · NaNpx"
+      "zh": "Half-step · 2px",
+      "en": "Half-step · 2px"
     },
     {
       "suffix": "1",
-      "zh": "Extra-tight · NaNpx",
-      "en": "XS · NaNpx"
+      "zh": "Extra-tight · 4px",
+      "en": "XS · 4px"
     },
     {
       "suffix": "1.5",
-      "zh": "Compact · NaNpx",
-      "en": "SM · NaNpx"
+      "zh": "Compact · 6px",
+      "en": "SM · 6px"
     },
     {
       "suffix": "2",
-      "zh": "Compact · NaNpx",
-      "en": "SM · NaNpx"
+      "zh": "Compact · 8px",
+      "en": "SM · 8px"
     },
     {
       "suffix": "2.5",
-      "zh": "Dense · NaNpx",
-      "en": "MD · NaNpx"
+      "zh": "Dense · 10px",
+      "en": "MD · 10px"
     },
     {
       "suffix": "3",
-      "zh": "Dense · NaNpx",
-      "en": "MD · NaNpx"
+      "zh": "Dense · 12px",
+      "en": "MD · 12px"
     },
     {
       "suffix": "3.5",
-      "zh": "Small · NaNpx",
-      "en": "LG · NaNpx"
+      "zh": "Small · 14px",
+      "en": "LG · 14px"
     },
     {
       "suffix": "4",
-      "zh": "Small · NaNpx",
-      "en": "LG · NaNpx"
+      "zh": "Small · 16px",
+      "en": "LG · 16px"
     },
     {
       "suffix": "5",
-      "zh": "Balanced · NaNpx",
-      "en": "XL · NaNpx"
+      "zh": "Balanced · 20px",
+      "en": "XL · 20px"
     },
     {
       "suffix": "6",
-      "zh": "Comfortable · NaNpx",
-      "en": "2XL · NaNpx"
+      "zh": "Comfortable · 24px",
+      "en": "2XL · 24px"
     },
     {
       "suffix": "7",
-      "zh": "Relaxed · NaNpx",
-      "en": "3XL · NaNpx"
+      "zh": "Relaxed · 28px",
+      "en": "3XL · 28px"
     },
     {
       "suffix": "8",
-      "zh": "Large · NaNpx",
-      "en": "4XL · NaNpx"
+      "zh": "Large · 32px",
+      "en": "4XL · 32px"
     },
     {
       "suffix": "9",
-      "zh": "Section · NaNpx",
-      "en": "5XL · NaNpx"
+      "zh": "Section · 36px",
+      "en": "5XL · 36px"
     },
     {
       "suffix": "10",
-      "zh": "Large section · NaNpx",
-      "en": "6XL · NaNpx"
+      "zh": "Large section · 40px",
+      "en": "6XL · 40px"
     },
     {
       "suffix": "11",
-      "zh": "Extra-large · NaNpx",
-      "en": "7XL · NaNpx"
+      "zh": "Extra-large · 44px",
+      "en": "7XL · 44px"
     },
     {
       "suffix": "12",
-      "zh": "Huge · NaNpx",
-      "en": "8XL · NaNpx"
+      "zh": "Huge · 48px",
+      "en": "8XL · 48px"
     },
     {
       "suffix": "14",
-      "zh": "Full-width · NaNpx",
-      "en": "10XL · NaNpx"
+      "zh": "Full-width · 56px",
+      "en": "10XL · 56px"
     },
     {
       "suffix": "16",
-      "zh": "Maximum · NaNpx",
-      "en": "12XL · NaNpx"
+      "zh": "Maximum · 64px",
+      "en": "12XL · 64px"
     },
     {
       "suffix": "20",
-      "zh": "Step 20 · NaNpx",
-      "en": "Step 20 · NaNpx"
+      "zh": "Step 20 · 80px",
+      "en": "Step 20 · 80px"
     },
     {
       "suffix": "24",
-      "zh": "Step 24 · NaNpx",
-      "en": "Step 24 · NaNpx"
+      "zh": "Step 24 · 96px",
+      "en": "Step 24 · 96px"
     },
     {
       "suffix": "28",
-      "zh": "Step 28 · NaNpx",
-      "en": "Step 28 · NaNpx"
+      "zh": "Step 28 · 112px",
+      "en": "Step 28 · 112px"
     },
     {
       "suffix": "32",
-      "zh": "Step 32 · NaNpx",
-      "en": "Step 32 · NaNpx"
+      "zh": "Step 32 · 128px",
+      "en": "Step 32 · 128px"
     },
     {
       "suffix": "36",
-      "zh": "Step 36 · NaNpx",
-      "en": "Step 36 · NaNpx"
+      "zh": "Step 36 · 144px",
+      "en": "Step 36 · 144px"
     },
     {
       "suffix": "40",
-      "zh": "Step 40 · NaNpx",
-      "en": "Step 40 · NaNpx"
+      "zh": "Step 40 · 160px",
+      "en": "Step 40 · 160px"
     },
     {
       "suffix": "44",
-      "zh": "Step 44 · NaNpx",
-      "en": "Step 44 · NaNpx"
+      "zh": "Step 44 · 176px",
+      "en": "Step 44 · 176px"
     },
     {
       "suffix": "48",
-      "zh": "Step 48 · NaNpx",
-      "en": "Step 48 · NaNpx"
+      "zh": "Step 48 · 192px",
+      "en": "Step 48 · 192px"
     },
     {
       "suffix": "52",
-      "zh": "Step 52 · NaNpx",
-      "en": "Step 52 · NaNpx"
+      "zh": "Step 52 · 208px",
+      "en": "Step 52 · 208px"
     },
     {
       "suffix": "56",
-      "zh": "Step 56 · NaNpx",
-      "en": "Step 56 · NaNpx"
+      "zh": "Step 56 · 224px",
+      "en": "Step 56 · 224px"
     },
     {
       "suffix": "60",
-      "zh": "Step 60 · NaNpx",
-      "en": "Step 60 · NaNpx"
+      "zh": "Step 60 · 240px",
+      "en": "Step 60 · 240px"
     },
     {
       "suffix": "64",
-      "zh": "Step 64 · NaNpx",
-      "en": "Step 64 · NaNpx"
+      "zh": "Step 64 · 256px",
+      "en": "Step 64 · 256px"
     },
     {
       "suffix": "72",
-      "zh": "Step 72 · NaNpx",
-      "en": "Step 72 · NaNpx"
+      "zh": "Step 72 · 288px",
+      "en": "Step 72 · 288px"
     },
     {
       "suffix": "80",
-      "zh": "Step 80 · NaNpx",
-      "en": "Step 80 · NaNpx"
+      "zh": "Step 80 · 320px",
+      "en": "Step 80 · 320px"
     },
     {
       "suffix": "96",
-      "zh": "Step 96 · NaNpx",
-      "en": "Step 96 · NaNpx"
+      "zh": "Step 96 · 384px",
+      "en": "Step 96 · 384px"
     }
   ]
 }

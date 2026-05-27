@@ -4,12 +4,14 @@ import {
   ArrowRight,
   Check,
   CheckCircle2,
-  FilePlus2,
   FolderInput,
+  Globe,
   Loader2,
-  Package,
+  Moon,
+  Palette,
   Search,
   Sparkles,
+  Sun,
   Anchor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -26,8 +28,34 @@ import { Badge } from "@/components/base/badge";
 import { Alert, AlertDescription, AlertTitle } from "@/components/base/alert";
 import { Separator } from "@/components/base/separator";
 import { useLocale } from "../i18n/LocaleProvider";
+import { navigateTo } from "../router";
+import { useTheme } from "../theme/DarkModeProvider";
+import { findOnboardingPreset, ONBOARDING_PRESETS, type OnboardingPreset } from "./presets";
 
-type Mode = "default" | "import" | "empty";
+type StartPath = "quick" | "existing";
+
+const TAILWIND_DEFAULT_ID = "tailwind-default";
+
+const TAILWIND_DEFAULT_BASELINE: OnboardingPreset = {
+  id: TAILWIND_DEFAULT_ID,
+  name: "Tailwind Default",
+  tagline: { en: "Start from zero", zh: "从 0 开始" },
+  bestFor: { en: "New products that want a clean Tailwind baseline first", zh: "希望先用干净 Tailwind 基线启动的新产品" },
+  tone: { en: "Neutral, simple, extensible", zh: "中性、简单、可扩展" },
+  tokenPatch: { seed: {} },
+  preview: {
+    background: "#ffffff",
+    surface: "#f8fafc",
+    foreground: "#0f172a",
+    muted: "#64748b",
+    primary: "#0f172a",
+    accent: "#2563eb",
+    border: "#e2e8f0",
+    chart1: "#0f172a",
+    chart2: "#2563eb",
+    chart3: "#64748b",
+  },
+};
 
 type ScanReport = {
   ok: boolean;
@@ -39,7 +67,7 @@ type ScanReport = {
     level: "safe" | "warn" | "risky";
     imports: Array<{ import: string; level: "safe" | "warn" | "risky" }>;
   }>;
-  summary?: { safe: number; warn: number; risky: number };
+  summary?: { safe: number; warn: number; risky: number; incompatible?: number };
   error?: string;
 };
 
@@ -51,9 +79,14 @@ type ImportResult = {
   error?: string;
 };
 
+type OnboardingStep = "select" | "injecting";
+
 export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
-  const { t } = useLocale();
-  const [mode, setMode] = React.useState<Mode>("default");
+  const { t, locale, toggle: toggleLocale } = useLocale();
+  const { dark, setDark, toggle: toggleDark } = useTheme();
+  const [step, setStep] = React.useState<OnboardingStep>("select");
+  const [startPath, setStartPath] = React.useState<StartPath>("quick");
+  const [selectedBaselineId, setSelectedBaselineId] = React.useState(TAILWIND_DEFAULT_ID);
   const [busy, setBusy] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -73,38 +106,43 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
     }
   }
 
-  async function handleStartDefault() {
+  async function applyPresetTokenPatch(preset: OnboardingPreset) {
+    const res = await fetch("/api/apply-token-preset", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ preset: preset.id, tokenPatch: preset.tokenPatch }),
+    });
+    const body = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+    if (!res.ok || !body.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+
+  async function handleStartQuick() {
+    const preset = selectedBaselineId === TAILWIND_DEFAULT_ID ? null : findOnboardingPreset(selectedBaselineId);
+    const shouldUseDark = preset?.preferredTheme === "dark";
     setBusy(true);
     setError(null);
     try {
-      await commitSetup({ mode: "default" });
-      onComplete();
+      if (preset) await applyPresetTokenPatch(preset);
+      setDark(shouldUseDark);
+      setStep("injecting");
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setBusy(false);
     }
   }
 
-  async function handleStartEmpty() {
-    if (!confirm(t({
-      en: "This will delete all components in src/components/base/. Continue?",
-      zh: "这会删除 src/components/base/ 下所有组件。继续？",
-    }))) return;
-    setBusy(true);
-    setError(null);
-    try {
-      const clearRes = await fetch("/api/clear-components", { method: "POST" });
-      const clearBody = await clearRes.json().catch(() => ({}));
-      if (!clearRes.ok || !clearBody.ok) {
-        throw new Error(clearBody.error ?? `clear failed: HTTP ${clearRes.status}`);
-      }
-      await commitSetup({ mode: "empty" });
-      onComplete();
-      window.location.reload();
-    } catch (e) {
-      setError(e instanceof Error ? e.message : String(e));
-      setBusy(false);
-    }
+  async function finalizeSetup() {
+    const preset = selectedBaselineId === TAILWIND_DEFAULT_ID ? null : findOnboardingPreset(selectedBaselineId);
+    await commitSetup({
+      mode: preset ? "preset" : "default",
+      componentSource: "default",
+      projectMode: "new",
+      baseline: preset ? "preset" : TAILWIND_DEFAULT_ID,
+      ...(preset
+        ? { preset: preset.id, presetAppliedAt: new Date().toISOString(), preferredTheme: preset.preferredTheme ?? "light" }
+        : {}),
+      startIntent: "ai-coding",
+    });
   }
 
   async function handleScan() {
@@ -146,10 +184,13 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
       if (!res.ok || !body.ok) throw new Error(body.error ?? `HTTP ${res.status}`);
       await commitSetup({
         mode: "import",
+        componentSource: "owned",
+        projectMode: "existing",
         imported: body.imported ?? [],
         importedFrom: scan.root,
         importMode: filterRisky ? "safe-only" : "all",
       });
+      navigateTo({ kind: "designtoken" });
       onComplete();
       window.location.reload();
     } catch (e) {
@@ -158,77 +199,115 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
     }
   }
 
+  if (step === "injecting") {
+    return (
+      <InjectingStep
+        onCustomize={async () => { await finalizeSetup(); navigateTo({ kind: "designtoken" }); onComplete(); }}
+      />
+    );
+  }
+
   return (
-    <div className="h-full w-full overflow-y-auto bg-muted/30 dark:bg-background/40">
-      <div className="mx-auto flex min-h-full max-w-4xl flex-col gap-6 px-6 py-12">
-        <header className="flex flex-col items-center gap-3 text-center">
-          <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-foreground text-background">
-            <Anchor size={18} />
+    <div className="h-full w-full overflow-y-auto bg-muted/20 dark:bg-background/40">
+      <div className="mx-auto flex min-h-full max-w-6xl flex-col gap-6 px-6 py-8 md:px-8 lg:py-10">
+        <div className="flex items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={toggleLocale}
+            className="inline-flex h-8 items-center gap-1 rounded-md px-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <Globe size={13} />
+            <span className="font-semibold">{locale === "en" ? "EN" : "中文"}</span>
+          </button>
+          <button
+            type="button"
+            onClick={toggleDark}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            {dark ? <Sun size={14} /> : <Moon size={14} />}
+          </button>
+        </div>
+        <header className="flex flex-col items-center gap-3.5 text-center">
+          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground text-background shadow-sm">
+            <Anchor size={20} />
           </div>
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-foreground">
+            <h1 className="text-3xl font-semibold tracking-tight text-foreground">
               {t({ en: "Welcome to Design-anchor", zh: "欢迎使用 Design-anchor" })}
             </h1>
-            <p className="mt-1.5 text-sm text-muted-foreground">
-              {t({
-                en: "Pick a starting point. You can switch modes later by deleting .anchor-portal/setup.json.",
-                zh: "选一个起点。之后想换模式，删 .anchor-portal/setup.json 即可",
-              })}
-            </p>
           </div>
         </header>
 
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <ModeCard
-            active={mode === "default"}
-            onClick={() => setMode("default")}
-            icon={<Package size={18} />}
-            badge={t({ en: "Recommended", zh: "推荐" })}
-            title={t({ en: "Default kit", zh: "默认组件库" })}
-            subtitle={t({ en: "60+ shadcn-aligned", zh: "60+ shadcn 对齐" })}
-            body={t({
-              en: "Start with the bundled component library. Tokens already wired up.",
-              zh: "直接使用 bundled 的组件库，token 已就绪",
-            })}
-          />
-          <ModeCard
-            active={mode === "import"}
-            onClick={() => setMode("import")}
-            icon={<FolderInput size={18} />}
-            title={t({ en: "Import yours", zh: "导入自有组件" })}
-            subtitle={t({ en: "Bring your .tsx files", zh: "带上你的 .tsx" })}
-            body={t({
-              en: "Point at a folder or single file. We'll scan compat first, then copy in.",
-              zh: "指向文件夹或单文件——先扫兼容度，再拷进来",
-            })}
-          />
-          <ModeCard
-            active={mode === "empty"}
-            onClick={() => setMode("empty")}
-            icon={<FilePlus2 size={18} />}
-            title={t({ en: "Empty library", zh: "空白起步" })}
-            subtitle={t({ en: "Tokens only", zh: "仅保留 token" })}
-            body={t({
-              en: "Wipe components, keep tokens & rules. Grow from zero.",
-              zh: "清空组件，留 token + 规则，从零开始",
-            })}
-          />
-        </div>
+        <section className="space-y-3">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">
+              {t({ en: "1. Choose a path", zh: "1. 选择路径" })}
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+            <ModeCard
+              active={startPath === "quick"}
+              onClick={() => setStartPath("quick")}
+              icon={<Sparkles size={18} />}
+              badge={t({ en: "Recommended", zh: "推荐" })}
+              title={t({ en: "Quick start", zh: "快速开始" })}
+              subtitle={t({ en: "New product, from zero", zh: "新产品，从 0 开始" })}
+            />
+            <ModeCard
+              active={startPath === "existing"}
+              onClick={() => setStartPath("existing")}
+              icon={<FolderInput size={18} />}
+              title={t({ en: "Start from existing", zh: "从已有开始" })}
+              subtitle={t({ en: "Migrate a component library", zh: "迁移已有组件库" })}
+            />
+          </div>
+        </section>
 
-        {mode === "import" ? (
-          <Card>
-            <CardHeader>
+        {startPath === "quick" ? (
+          <section className="space-y-3">
+            <div>
+              <div>
+                <h2 className="text-sm font-semibold text-foreground">
+                  {t({ en: "2. Choose a brand style", zh: "2. 选择品牌风格" })}
+                </h2>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {[...ONBOARDING_PRESETS, TAILWIND_DEFAULT_BASELINE]
+                .sort((a, b) => {
+                  const aD = a.preferredTheme === "dark" || a.id === "tailwind-default" ? 1 : 0;
+                  const bD = b.preferredTheme === "dark" || b.id === "tailwind-default" ? 1 : 0;
+                  if (aD !== bD) return aD - bD;
+                  if (a.id === "tailwind-default") return 1;
+                  if (b.id === "tailwind-default") return -1;
+                  return 0;
+                })
+                .map((preset) => (
+                  <PresetCard
+                    key={preset.id}
+                    preset={preset}
+                    active={selectedBaselineId === preset.id}
+                    onClick={() => setSelectedBaselineId(preset.id)}
+                  />
+                ))}
+            </div>
+          </section>
+        ) : null}
+
+        {startPath === "existing" ? (
+          <Card className="border-border/80 shadow-sm">
+            <CardHeader className="space-y-2 p-6">
               <CardTitle className="text-sm">
-                {t({ en: "Import .tsx components", zh: "导入 .tsx 组件" })}
+                {t({ en: "2. Import React + Tailwind .tsx components", zh: "2. 导入 React + Tailwind .tsx 组件" })}
               </CardTitle>
               <CardDescription>
                 {t({
-                  en: "Absolute path (~/foo or /Users/...). Folder mode scans nested .tsx files and skips *.demo.tsx / *.stories.tsx.",
-                  zh: "绝对路径（~/foo 或 /Users/...）。文件夹模式会递归扫描 .tsx，跳过 *.demo.tsx / *.stories.tsx",
+                  en: "Only React + Tailwind component libraries are supported here. Use an absolute path (~/foo or /Users/...). Folder mode scans nested .tsx files and skips *.demo.tsx / *.stories.tsx.",
+                  zh: "这里只支持 React + Tailwind 组件库。请输入绝对路径（~/foo 或 /Users/...）。文件夹模式会递归扫描 .tsx，跳过 *.demo.tsx / *.stories.tsx。",
                 })}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex flex-col gap-4">
+            <CardContent className="flex flex-col gap-4 px-6 pb-6">
               <div className="flex gap-2">
                 <Input
                   value={importPath}
@@ -269,6 +348,11 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
                     {scan.summary?.risky ? (
                       <Badge variant="destructive" className="gap-1">
                         ✗ {scan.summary.risky} {t({ en: "risky", zh: "风险" })}
+                      </Badge>
+                    ) : null}
+                    {scan.summary?.incompatible ? (
+                      <Badge variant="outline" className="gap-1 border-destructive/30 text-destructive">
+                        {scan.summary.incompatible} {t({ en: "incompatible", zh: "不兼容" })}
                       </Badge>
                     ) : null}
                   </div>
@@ -313,8 +397,8 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
                       variant="outline"
                     >
                       {t({
-                        en: `Import all (${scan.files?.length ?? 0})`,
-                        zh: `全部导入 (${scan.files?.length ?? 0})`,
+                        en: `Import scanned (${scan.files?.length ?? 0})`,
+                        zh: `导入扫描结果 (${scan.files?.length ?? 0})`,
                       })}
                     </Button>
                   </div>
@@ -340,26 +424,116 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
         ) : null}
 
         <footer className="mt-auto flex flex-col items-center gap-3 border-t border-border pt-5">
-          {mode === "default" ? (
-            <Button onClick={() => void handleStartDefault()} disabled={busy}>
-              {busy ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
-              {t({ en: "Start with default kit", zh: "用默认组件库开始" })}
+          {startPath === "quick" ? (
+            <Button onClick={() => void handleStartQuick()} disabled={busy}>
+              {busy ? (
+                <Loader2 size={14} className="animate-spin" />
+              ) : selectedBaselineId === TAILWIND_DEFAULT_ID ? (
+                <Sparkles size={14} />
+              ) : (
+                <Palette size={14} />
+              )}
+              {t({
+                en: selectedBaselineId === TAILWIND_DEFAULT_ID
+                  ? "Start from Tailwind Default"
+                  : `Apply ${findOnboardingPreset(selectedBaselineId).name} & start AI Coding`,
+                zh: selectedBaselineId === TAILWIND_DEFAULT_ID
+                  ? "从 Tailwind Default 开始"
+                  : `应用 ${findOnboardingPreset(selectedBaselineId).name} 并开始 AI Coding`,
+              })}
               <ArrowRight size={14} />
             </Button>
           ) : null}
-          {mode === "empty" ? (
-            <Button onClick={() => void handleStartEmpty()} disabled={busy} variant="destructive">
-              {busy ? <Loader2 size={14} className="animate-spin" /> : <FilePlus2 size={14} />}
-              {t({ en: "Wipe components & start empty", zh: "清空组件并开始" })}
-            </Button>
-          ) : null}
-          <p className="text-center text-sm text-muted-foreground">
-            {t({
-              en: "Re-run this wizard later by deleting .anchor-portal/setup.json.",
-              zh: "稍后想重新选，删 .anchor-portal/setup.json",
-            })}
-          </p>
         </footer>
+      </div>
+    </div>
+  );
+}
+
+function InjectingStep({
+  onCustomize,
+}: {
+  onCustomize: () => void | Promise<void>;
+}) {
+  const { t } = useLocale();
+  const [completedItems, setCompletedItems] = React.useState<number[]>([]);
+  const [done, setDone] = React.useState(false);
+
+  const checklistItems = React.useMemo(() => [
+    t({ en: "Applying brand style", zh: "应用品牌风格" }),
+    t({ en: "Syncing Design Tokens", zh: "同步 Design Tokens" }),
+    t({ en: "Injecting component specs", zh: "注入组件规范" }),
+    t({ en: "Configuring AI rules", zh: "配置 AI 规则" }),
+  ], [t]);
+
+  React.useEffect(() => {
+    const timers: ReturnType<typeof setTimeout>[] = [];
+    checklistItems.forEach((_, idx) => {
+      timers.push(setTimeout(() => {
+        setCompletedItems((prev) => [...prev, idx]);
+      }, 500 + idx * 450));
+    });
+    timers.push(setTimeout(() => setDone(true), 500 + checklistItems.length * 450 + 400));
+    return () => timers.forEach(clearTimeout);
+  }, [checklistItems]);
+
+  return (
+    <div className="flex h-full w-full items-center justify-center bg-muted/20 dark:bg-background/40">
+      <div className="flex w-full max-w-md flex-col items-center gap-6 px-6 text-center">
+        <div className={cn(
+          "flex h-16 w-16 items-center justify-center rounded-2xl transition-all duration-500",
+          done ? "bg-foreground text-background" : "bg-muted text-muted-foreground",
+        )}>
+          {done ? <Check size={28} strokeWidth={2.5} /> : <Loader2 size={28} className="animate-spin" />}
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-xl font-semibold text-foreground">
+            {done
+              ? t({ en: "Design-anchor is ready", zh: "Design-anchor 已就绪" })
+              : t({ en: "Setting up…", zh: "配置中…" })}
+          </h2>
+          {done && (
+            <p className="text-sm text-muted-foreground">
+              {t({
+                en: "Style rules have been injected into your project. All future AI Coding will follow this component library's design system.",
+                zh: "样式规则已注入项目，后续 AI Coding 将以这套组件库规范为准。",
+              })}
+            </p>
+          )}
+        </div>
+
+        <div className="w-full space-y-2 rounded-lg border border-border bg-background p-4 text-left">
+          {checklistItems.map((label, idx) => (
+            <div key={label} className={cn(
+              "flex items-center gap-3 text-sm transition-opacity duration-300",
+              completedItems.includes(idx) ? "opacity-100" : "opacity-30",
+            )}>
+              <div className={cn(
+                "flex h-5 w-5 shrink-0 items-center justify-center rounded-full transition-colors duration-300",
+                completedItems.includes(idx) ? "bg-foreground text-background" : "bg-muted",
+              )}>
+                {completedItems.includes(idx) ? <Check size={11} strokeWidth={3} /> : null}
+              </div>
+              <span className={cn(completedItems.includes(idx) && "text-foreground")}>{label}</span>
+            </div>
+          ))}
+        </div>
+
+        {done && (
+          <div className="flex w-full flex-col gap-2 pt-2">
+            <Button onClick={onCustomize} className="w-full">
+              <Palette size={14} />
+              {t({ en: "Browse component library", zh: "查看组件库样式" })}
+            </Button>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t({
+                en: "Or close this page to start Coding — every change you make here syncs to your project in real time.",
+                zh: "或直接关闭该页面开始 Coding，后续随时可以回来微调，每次修改都会实时同步到项目中。",
+              })}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -379,7 +553,7 @@ function ModeCard({
   icon: React.ReactNode;
   title: string;
   subtitle: string;
-  body: string;
+  body?: string;
   badge?: string;
 }) {
   function handleKey(e: React.KeyboardEvent<HTMLDivElement>) {
@@ -390,20 +564,21 @@ function ModeCard({
   }
   return (
     <Card
+      size="sm"
       role="button"
       tabIndex={0}
       onClick={onClick}
       onKeyDown={handleKey}
       className={cn(
-        "cursor-pointer select-none transition-all hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "min-h-32 cursor-pointer select-none gap-3 border-border/80 bg-background/95 py-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
         active
-          ? "ring-2 ring-foreground"
-          : "hover:ring-1 hover:ring-foreground/30",
+          ? "border-foreground/40 ring-2 ring-foreground"
+          : "hover:border-foreground/25",
       )}
     >
-      <CardHeader className="pb-2">
+      <CardHeader className="p-4 pb-1.5">
         <div className="flex items-start justify-between gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted text-foreground">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-foreground">
             {icon}
           </div>
           <div className="flex items-center gap-1.5">
@@ -414,10 +589,149 @@ function ModeCard({
         <CardTitle className="mt-3 text-sm">{title}</CardTitle>
         <CardDescription className="text-sm">{subtitle}</CardDescription>
       </CardHeader>
-      <CardContent className="pt-0">
-        <p className="text-sm leading-relaxed text-muted-foreground">{body}</p>
-      </CardContent>
+      {body ? (
+        <CardContent className="px-4 pb-4 pt-0">
+          <p className="text-sm leading-snug text-muted-foreground">{body}</p>
+        </CardContent>
+      ) : null}
     </Card>
+  );
+}
+
+function PresetCard({
+  preset,
+  active,
+  onClick,
+}: {
+  preset: OnboardingPreset;
+  active: boolean;
+  onClick: () => void;
+}) {
+  const { t } = useLocale();
+  function handleKey(e: React.KeyboardEvent<HTMLButtonElement>) {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onClick();
+    }
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onKeyDown={handleKey}
+      aria-pressed={active}
+      className={cn(
+        "group overflow-hidden rounded-xl border bg-background p-0 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        active ? "border-foreground/50 ring-2 ring-foreground" : "border-border/80 hover:border-foreground/25",
+      )}
+    >
+      <PresetScreenshot preset={preset} />
+      <div className="space-y-2.5 p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="truncate text-sm font-semibold text-foreground">{preset.name}</div>
+            <div className="mt-0.5 text-sm text-muted-foreground">{t(preset.tagline)}</div>
+          </div>
+          {active ? <CheckCircle2 size={16} className="mt-0.5 shrink-0 text-foreground" /> : null}
+        </div>
+        <p className="text-sm leading-relaxed text-muted-foreground">{t(preset.bestFor)}</p>
+        <div className="flex items-center justify-between gap-2">
+          <Badge variant="secondary" className="max-w-full truncate">
+            {t(preset.tone)}
+          </Badge>
+          <span className="text-sm font-medium text-foreground opacity-0 transition-opacity group-hover:opacity-100">
+            {t({ en: "Select", zh: "选择" })}
+          </span>
+        </div>
+      </div>
+    </button>
+  );
+}
+
+function PresetScreenshot({ preset }: { preset: OnboardingPreset }) {
+  const style = {
+    "--preset-bg": preset.preview.background,
+    "--preset-surface": preset.preview.surface,
+    "--preset-fg": preset.preview.foreground,
+    "--preset-muted": preset.preview.muted,
+    "--preset-primary": preset.preview.primary,
+    "--preset-accent": preset.preview.accent,
+    "--preset-border": preset.preview.border,
+    "--preset-chart-1": preset.preview.chart1,
+    "--preset-chart-2": preset.preview.chart2,
+    "--preset-chart-3": preset.preview.chart3,
+  } as React.CSSProperties;
+
+  if (preset.previewImage) {
+    return (
+      <div className="aspect-[4/3] overflow-hidden">
+        <img src={preset.previewImage} alt="" className="h-full w-full object-cover object-top" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="aspect-[4/3] overflow-hidden" style={style}>
+      <div
+        className="h-full overflow-hidden"
+        style={{
+          background: "var(--preset-bg)",
+          borderColor: "var(--preset-border)",
+          color: "var(--preset-fg)",
+        }}
+      >
+        <div className="flex h-full">
+          <div
+            className="flex w-16 shrink-0 flex-col gap-2 border-r p-2"
+            style={{ borderColor: "var(--preset-border)", background: "color-mix(in srgb, var(--preset-surface) 92%, transparent)" }}
+          >
+            <div className="h-2 w-9 rounded-full" style={{ background: "var(--preset-primary)" }} />
+            <div className="mt-2 h-1.5 w-10 rounded-full" style={{ background: "var(--preset-muted)", opacity: 0.5 }} />
+            <div className="h-1.5 w-7 rounded-full" style={{ background: "var(--preset-muted)", opacity: 0.35 }} />
+            <div className="h-1.5 w-11 rounded-full" style={{ background: "var(--preset-muted)", opacity: 0.35 }} />
+            <div className="mt-auto h-5 w-5 rounded-full" style={{ background: "var(--preset-accent)", opacity: 0.8 }} />
+          </div>
+          <div className="min-w-0 flex-1 p-3">
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div>
+                <div className="h-2.5 w-24 rounded-full" style={{ background: "var(--preset-fg)", opacity: 0.9 }} />
+                <div className="mt-1.5 h-1.5 w-16 rounded-full" style={{ background: "var(--preset-muted)", opacity: 0.55 }} />
+              </div>
+              <div className="h-6 w-14 rounded-md" style={{ background: "var(--preset-primary)" }} />
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              {[preset.preview.chart1, preset.preview.chart2, preset.preview.chart3].map((color, idx) => (
+                <div
+                  key={`${preset.id}-metric-${color}`}
+                  className="rounded-md border p-2"
+                  style={{
+                    background: "var(--preset-surface)",
+                    borderColor: "var(--preset-border)",
+                  }}
+                >
+                  <div className="h-1.5 w-8 rounded-full" style={{ background: "var(--preset-muted)", opacity: 0.5 }} />
+                  <div className="mt-3 h-4 w-9 rounded-sm" style={{ background: color, opacity: idx === 1 ? 0.85 : 1 }} />
+                </div>
+              ))}
+            </div>
+            <div className="mt-2 rounded-md border" style={{ background: "var(--preset-surface)", borderColor: "var(--preset-border)" }}>
+              {[0, 1, 2].map((row) => (
+                <div
+                  key={`${preset.id}-row-${row}`}
+                  className="flex items-center gap-2 border-b px-2 py-1.5 last:border-b-0"
+                  style={{ borderColor: "var(--preset-border)" }}
+                >
+                  <div className="h-2 w-2 rounded-full" style={{ background: row === 0 ? "var(--preset-primary)" : "var(--preset-muted)" }} />
+                  <div className="h-1.5 flex-1 rounded-full" style={{ background: "var(--preset-muted)", opacity: 0.35 }} />
+                  <div className="h-1.5 w-8 rounded-full" style={{ background: "var(--preset-muted)", opacity: 0.25 }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

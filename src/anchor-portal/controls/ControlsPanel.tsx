@@ -229,7 +229,7 @@ function DraftFooter({
       aria-label={t({ en: "Pending changes", zh: "待应用的改动" })}
       aria-hidden={!isDirty}
       className={cn(
-        "pointer-events-none absolute inset-x-3 bottom-3 z-20 rounded-lg border border-border bg-background/95 px-3 py-2 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.18)] ring-1 ring-border/40 backdrop-blur transition-all duration-200 ease-out",
+        "pointer-events-none absolute inset-x-3 bottom-3 z-20 rounded-lg border border-border bg-background/95 px-3 py-2 shadow-lg ring-1 ring-border/40 backdrop-blur transition-all duration-200 ease-out",
         isDirty
           ? "pointer-events-auto translate-y-0 opacity-100"
           : "translate-y-3 opacity-0",

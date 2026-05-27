@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ExternalLink,
   FileWarning,
+  Palette,
   RefreshCw,
   ShieldCheck,
   Wrench,
@@ -13,14 +14,11 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "../i18n/LocaleProvider";
 
 /**
- * Govern tab — the differentiation surface vs shadcn-style theme generators.
- * Three sections, all driven by Vite middleware endpoints:
- *   • KPI strip   — health at a glance (audit / usage / token count / MCP)
- *   • Usage table — which kit components the project actually consumes
- *   • Treaty list — generated AI rule files + freshness check
+ * Govern tab
  *
- * Every endpoint is read-only. Refreshing the tab re-runs the audit (and the
- * scans) so the surface is always live, never cached.
+ * Product stance:
+ * - Migration phase: clean up an existing project and reduce design-system debt.
+ * - Steady state: observe component adoption, token baseline, and AI contract freshness.
  */
 
 type AuditStatus = {
@@ -41,8 +39,53 @@ type ComponentUsage = {
   total?: number;
   used?: number;
   unused?: number;
+  coverage?: number;
+  totalReferences?: number;
   scannedFiles?: number;
-  components?: Array<{ name: string; usage: number; files: string[]; origin?: "kit" | "user-import" }>;
+  projectRoot?: string;
+  anchorRoot?: string;
+  importKinds?: { designAlias?: number; baseDeep?: number; jsxDetected?: number };
+  top?: Array<ComponentUsageRow>;
+  components?: Array<ComponentUsageRow>;
+  error?: string;
+};
+
+type ComponentUsageRow = {
+  id?: string;
+  name: string;
+  usage: number;
+  files: string[];
+  origin?: "kit" | "user-import" | string;
+  specId?: string;
+  specFile?: string;
+};
+
+type TokenSummary = {
+  ok: boolean;
+  status?: "ready" | "stale" | "missing";
+  version?: number | null;
+  seedCount?: number;
+  darkOverrideCount?: number;
+  customSeedCount?: number;
+  overrideCount?: number;
+  chartSeedCount?: number;
+  spacingStopCount?: number;
+  cssVarCount?: number;
+  anchorMirrorCount?: number;
+  colorVarCount?: number;
+  radiusVarCount?: number;
+  fontVarCount?: number;
+  updatedAt?: number | null;
+  generatedAt?: number | null;
+  generatedStale?: boolean;
+  seeds?: {
+    colorPrimary?: string;
+    colorBgBase?: string;
+    colorTextBase?: string;
+    fontSize?: string | number;
+    borderRadius?: string | number;
+    sizeUnit?: string | number;
+  };
   error?: string;
 };
 
@@ -57,24 +100,44 @@ type GovernanceStatus = {
   error?: string;
 };
 
+type SetupStatus = {
+  configured?: boolean;
+  mode?: "preset" | "default" | "import" | "empty";
+  componentSource?: "owned" | "default" | "empty";
+  projectMode?: "new" | "existing";
+  baseline?: string;
+  preset?: string;
+  startIntent?: "ai-coding" | string;
+  imported?: string[];
+  importedFrom?: string;
+  importMode?: string;
+  error?: string;
+};
+
 function useGovernData() {
   const [audit, setAudit] = React.useState<AuditStatus | null>(null);
   const [usage, setUsage] = React.useState<ComponentUsage | null>(null);
+  const [tokens, setTokens] = React.useState<TokenSummary | null>(null);
   const [governance, setGovernance] = React.useState<GovernanceStatus | null>(null);
+  const [setup, setSetup] = React.useState<SetupStatus | null>(null);
   const [loading, setLoading] = React.useState(false);
   const [lastFetched, setLastFetched] = React.useState<Date | null>(null);
 
   const refresh = React.useCallback(async () => {
     setLoading(true);
     try {
-      const [a, u, g] = await Promise.all([
+      const [a, u, tk, g, s] = await Promise.all([
         fetch("/api/audit-status?scope=all").then((r) => r.json()).catch((e) => ({ ok: false, error: String(e) })),
         fetch("/api/component-usage").then((r) => r.json()).catch((e) => ({ ok: false, error: String(e) })),
+        fetch("/api/token-summary").then((r) => r.json()).catch((e) => ({ ok: false, error: String(e) })),
         fetch("/api/governance-status").then((r) => r.json()).catch((e) => ({ ok: false, error: String(e) })),
+        fetch("/api/setup-status").then((r) => r.json()).catch((e) => ({ configured: true, error: String(e) })),
       ]);
       setAudit(a);
       setUsage(u);
+      setTokens(tk);
       setGovernance(g);
+      setSetup(s);
       setLastFetched(new Date());
     } finally {
       setLoading(false);
@@ -83,7 +146,7 @@ function useGovernData() {
 
   React.useEffect(() => { void refresh(); }, [refresh]);
 
-  return { audit, usage, governance, loading, lastFetched, refresh };
+  return { audit, usage, tokens, governance, setup, loading, lastFetched, refresh };
 }
 
 function relativeTime(date: Date | null, locale: "en" | "zh"): string {
@@ -99,26 +162,31 @@ function relativeTime(date: Date | null, locale: "en" | "zh"): string {
   return date.toLocaleString();
 }
 
+function formatDate(ms: number | null | undefined, locale: "en" | "zh") {
+  if (!ms) return "—";
+  return new Date(ms).toLocaleString(locale === "zh" ? "zh-CN" : "en-US");
+}
+
 export function GovernRoute() {
   const { t, locale } = useLocale();
-  const { audit, usage, governance, loading, lastFetched, refresh } = useGovernData();
+  const { audit, usage, tokens, governance, setup, loading, lastFetched, refresh } = useGovernData();
 
   return (
     <div className="h-full w-full overflow-y-auto bg-muted/30 dark:bg-background/40">
-      <div className="mx-auto max-w-[1280px] px-6 py-6">
-        <header className="mb-5 flex items-center justify-between">
-          <div>
+      <div className="mx-auto max-w-7xl px-6 py-6">
+        <header className="mb-5 flex items-center justify-between gap-4">
+          <div className="min-w-0">
             <h1 className="text-lg font-semibold text-foreground">
-              {t({ en: "Govern", zh: "治理" })}
+              {t({ en: "Project Health", zh: "项目健康" })}
             </h1>
-            <p className="mt-0.5 text-xs text-muted-foreground">
+            <p className="mt-0.5 text-sm text-muted-foreground">
               {t({
-                en: "Project-wide compliance, component usage, and AI rule freshness.",
-                zh: "项目全局合规、组件使用情况、AI 规则新鲜度",
+                en: "First migrate existing projects. Then keep default-library adoption, token baseline, and AI contracts observable.",
+                zh: "先治理存量项目；进入稳定期后，重点观测默认组件库采用、Token 基线与 AI 契约状态。",
               })}
             </p>
           </div>
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex shrink-0 items-center gap-2 text-sm text-muted-foreground">
             <span>
               {t({ en: "Last scan:", zh: "上次扫描：" })} {relativeTime(lastFetched, locale)}
             </span>
@@ -134,16 +202,61 @@ export function GovernRoute() {
           </div>
         </header>
 
-        <KpiStrip audit={audit} usage={usage} governance={governance} />
+        <KpiStrip audit={audit} usage={usage} tokens={tokens} governance={governance} />
 
-        <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <UsageTable usage={usage} className="lg:col-span-2" />
-          <TreatyHealth governance={governance} />
+        <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <UsageTable usage={usage} className="xl:col-span-2" />
+          <TokenHealth tokens={tokens} />
         </div>
 
-        <ViolationsList audit={audit} className="mt-4" />
+        <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
+          <MigrationBacklog audit={audit} setup={setup} className="xl:col-span-2" />
+          <AiContractHealth governance={governance} />
+        </div>
       </div>
     </div>
+  );
+}
+
+function projectModeFromSetup(setup: SetupStatus | null): "new" | "existing" {
+  if (setup?.projectMode === "new" || setup?.mode === "empty") return "new";
+  return "existing";
+}
+
+function componentSourceLabel(setup: SetupStatus | null, locale: "en" | "zh") {
+  if (setup?.mode === "preset") {
+    return locale === "zh" ? "Preset + 默认组件库" : "Preset + bundled kit";
+  }
+  if (setup?.componentSource === "owned" || setup?.mode === "import") {
+    return locale === "zh" ? "自有组件库" : "Owned library";
+  }
+  if (setup?.componentSource === "empty" || setup?.mode === "empty") {
+    return locale === "zh" ? "空组件库" : "Tokens only";
+  }
+  return locale === "zh" ? "默认组件库" : "Bundled kit";
+}
+
+function presetLabel(id: string | undefined) {
+  if (!id) return "—";
+  return id
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function baselineLabel(setup: SetupStatus | null) {
+  if (setup?.preset) return presetLabel(setup.preset);
+  if (setup?.baseline === "tailwind-default") return "Tailwind Default";
+  return null;
+}
+
+
+function MetricPill({ label, value }: { label: string; value: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-border bg-muted/30 px-2 py-1 text-muted-foreground">
+      <span>{label}</span>
+      <strong className="font-semibold text-foreground tabular-nums">{value}</strong>
+    </span>
   );
 }
 
@@ -161,28 +274,28 @@ function KpiCard({
   tone?: "neutral" | "good" | "warn" | "bad";
 }) {
   const toneRing =
-    tone === "good"
-      ? "ring-emerald-500/30"
-      : tone === "warn"
-        ? "ring-amber-500/30"
-        : tone === "bad"
-          ? "ring-rose-500/30"
+    tone === "bad"
+      ? "ring-destructive/30"
+      : tone === "good"
+        ? "ring-primary/25"
+        : tone === "warn"
+          ? "ring-border"
           : "ring-border";
   const toneIcon =
-    tone === "good"
-      ? "text-emerald-600 dark:text-emerald-400"
-      : tone === "warn"
-        ? "text-amber-600 dark:text-amber-400"
-        : tone === "bad"
-          ? "text-rose-600 dark:text-rose-400"
+    tone === "bad"
+      ? "text-destructive"
+      : tone === "good"
+        ? "text-primary"
+        : tone === "warn"
+          ? "text-foreground"
           : "text-muted-foreground";
   return (
     <div className={cn("rounded-xl bg-background p-4 ring-1", toneRing)}>
-      <div className={cn("mb-2 flex items-center gap-1.5 text-sm font-medium uppercase tracking-wider text-muted-foreground", toneIcon)}>
+      <div className={cn("mb-2 flex items-center gap-1.5 text-sm font-medium text-muted-foreground", toneIcon)}>
         {icon}
         {label}
       </div>
-      <div className="text-2xl font-semibold tracking-tight text-foreground tabular-nums">
+      <div className="text-2xl font-semibold text-foreground tabular-nums">
         {value}
       </div>
       {sub ? <div className="mt-1 text-sm text-muted-foreground">{sub}</div> : null}
@@ -193,10 +306,12 @@ function KpiCard({
 function KpiStrip({
   audit,
   usage,
+  tokens,
   governance,
 }: {
   audit: AuditStatus | null;
   usage: ComponentUsage | null;
+  tokens: TokenSummary | null;
   governance: GovernanceStatus | null;
 }) {
   const { t } = useLocale();
@@ -205,54 +320,67 @@ function KpiStrip({
   const auditSub = !audit?.ok
     ? t({ en: "audit unavailable", zh: "audit 不可用" })
     : audit.passed
-      ? t({
-          en: `${audit.scanned} files · ${(audit.profiles ?? []).length || 1} scope(s)`,
-          zh: `${audit.scanned} 个文件 · ${(audit.profiles ?? []).length || 1} 个范围`,
-        })
-      : t({
-          en: `${audit.issueCount} issue(s) · ${(audit.profiles ?? []).length || 1} scope(s)`,
-          zh: `${audit.issueCount} 项违规 · ${(audit.profiles ?? []).length || 1} 个范围`,
-        });
+      ? t({ en: "steady state", zh: "稳定态" })
+      : t({ en: "migration backlog", zh: "存量迁移债务" });
 
-  const usageTone = !usage?.ok ? "neutral" : usage.used && usage.used > 0 ? "good" : "warn";
+  const usageTone = !usage?.ok ? "neutral" : (usage.used ?? 0) > 0 ? "good" : "warn";
+  const tokenTone = !tokens?.ok
+    ? "neutral"
+    : tokens.status === "missing"
+      ? "bad"
+      : tokens.generatedStale
+        ? "warn"
+        : "good";
   const govTone = !governance?.ok
     ? "neutral"
-    : governance.missingCount! > 0
+    : (governance.missingCount ?? 0) > 0
       ? "bad"
-      : governance.staleCount! > 0
+      : (governance.staleCount ?? 0) > 0
         ? "warn"
         : "good";
 
   return (
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
       <KpiCard
-        icon={<ShieldCheck size={11} />}
-        label={t({ en: "Violations", zh: "违规数" })}
+        icon={<ShieldCheck size={12} />}
+        label={t({ en: "Migration debt", zh: "待治理问题" })}
         value={auditValue}
         sub={auditSub}
         tone={auditTone}
       />
       <KpiCard
-        icon={<Wrench size={11} />}
-        label={t({ en: "Components in use", zh: "使用中的组件" })}
-        value={
-          usage?.ok
-            ? `${usage.used ?? 0} / ${usage.total ?? 0}`
-            : "—"
-        }
+        icon={<Wrench size={12} />}
+        label={t({ en: "Component adoption", zh: "组件采用" })}
+        value={usage?.ok ? `${usage.used ?? 0} / ${usage.total ?? 0}` : "—"}
         sub={
           usage?.ok
             ? t({
-                en: `${usage.scannedFiles ?? 0} files scanned · ${usage.unused ?? 0} unused`,
-                zh: `扫描 ${usage.scannedFiles ?? 0} 个文件 · ${usage.unused ?? 0} 个未使用`,
+                en: `${usage.totalReferences ?? 0} refs · ${usage.scannedFiles ?? 0} files`,
+                zh: `${usage.totalReferences ?? 0} 次引用 · ${usage.scannedFiles ?? 0} 个文件`,
               })
             : t({ en: "scan unavailable", zh: "扫描不可用" })
         }
         tone={usageTone}
       />
       <KpiCard
-        icon={<FileWarning size={11} />}
-        label={t({ en: "AI rule files", zh: "AI 规则文件" })}
+        icon={<Palette size={12} />}
+        label={t({ en: "Token baseline", zh: "Token 基线" })}
+        value={tokens?.ok ? String(tokens.seedCount ?? 0) : "—"}
+        sub={
+          tokens?.ok
+            ? tokens.generatedStale
+              ? t({ en: "generated CSS is stale", zh: "生成 CSS 已过期" })
+              : t({
+                  en: `${tokens.cssVarCount ?? 0} vars · ${tokens.spacingStopCount ?? 0} spacing`,
+                  zh: `${tokens.cssVarCount ?? 0} 个变量 · ${tokens.spacingStopCount ?? 0} 个间距档位`,
+                })
+            : t({ en: "token scan unavailable", zh: "Token 扫描不可用" })
+        }
+        tone={tokenTone}
+      />
+      <KpiCard
+        icon={<ExternalLink size={12} />}
+        label={t({ en: "AI contract", zh: "AI 契约" })}
         value={
           governance?.ok
             ? `${governance.presentCount ?? 0} / ${(governance.presentCount ?? 0) + (governance.missingCount ?? 0)}`
@@ -260,19 +388,13 @@ function KpiStrip({
         }
         sub={
           governance?.ok
-            ? governance.staleCount
-              ? t({ en: `${governance.staleCount} stale (older than tokens.json)`, zh: `${governance.staleCount} 个过期（早于 tokens.json）` })
-              : t({ en: "all up-to-date", zh: "全部最新" })
-            : t({ en: "—", zh: "—" })
+            ? t({
+                en: `${governance.mcpToolCount ?? 0} MCP tools · ${governance.staleCount ?? 0} stale`,
+                zh: `${governance.mcpToolCount ?? 0} 个 MCP 工具 · ${governance.staleCount ?? 0} 个过期`,
+              })
+            : t({ en: "contract scan unavailable", zh: "契约扫描不可用" })
         }
         tone={govTone}
-      />
-      <KpiCard
-        icon={<ExternalLink size={11} />}
-        label={t({ en: "MCP tools", zh: "MCP 工具" })}
-        value={governance?.ok && governance.mcpToolCount != null ? String(governance.mcpToolCount) : "—"}
-        sub={t({ en: "exposed to AI agents", zh: "可被 AI agent 调用" })}
-        tone="neutral"
       />
     </div>
   );
@@ -280,14 +402,14 @@ function KpiStrip({
 
 function UsageTable({ usage, className }: { usage: ComponentUsage | null; className?: string }) {
   const { t } = useLocale();
-  const [filter, setFilter] = React.useState<"all" | "used" | "unused">("all");
+  const [filter, setFilter] = React.useState<"all" | "used" | "unused">("used");
   const [showAll, setShowAll] = React.useState(false);
 
   if (!usage?.ok) {
     return (
       <div className={cn("rounded-xl bg-background p-4 ring-1 ring-border", className)}>
         <h3 className="text-sm font-semibold text-foreground">
-          {t({ en: "Component usage", zh: "组件使用" })}
+          {t({ en: "Component adoption", zh: "组件采用" })}
         </h3>
         <p className="mt-2 text-xs text-muted-foreground">
           {usage?.error ?? t({ en: "Loading…", zh: "加载中…" })}
@@ -304,18 +426,29 @@ function UsageTable({ usage, className }: { usage: ComponentUsage | null; classN
 
   return (
     <section className={cn("flex flex-col rounded-xl bg-background p-4 ring-1 ring-border", className)}>
-      <header className="mb-3 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-foreground">
-          {t({ en: "Component usage", zh: "组件使用" })}
-        </h3>
-        <div className="flex items-center gap-1 rounded-md bg-muted p-0.5 text-sm">
-          {(["all", "used", "unused"] as const).map((k) => (
+      <header className="mb-3 flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">
+            {t({ en: "Component adoption", zh: "组件采用" })}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t({
+              en: `${usage.coverage ?? 0}% coverage · ${(usage.unused ?? 0)} unused components`,
+              zh: `${usage.coverage ?? 0}% 采用率 · ${(usage.unused ?? 0)} 个未使用组件`,
+            })}
+          </p>
+        </div>
+        <div className="flex items-center gap-1 rounded-[var(--radius-md)] bg-muted p-0.5 text-sm">
+          {(["used", "all", "unused"] as const).map((k) => (
             <button
               key={k}
               type="button"
-              onClick={() => setFilter(k)}
+              onClick={() => {
+                setFilter(k);
+                setShowAll(false);
+              }}
               className={cn(
-                "rounded px-2 py-0.5 font-medium transition-colors",
+                "rounded-[max(2px,calc(var(--radius-md)-var(--spacing-1)))] px-2 py-0.5 font-medium transition-colors",
                 filter === k ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground",
               )}
             >
@@ -328,25 +461,32 @@ function UsageTable({ usage, className }: { usage: ComponentUsage | null; classN
         </div>
       </header>
 
+      <div className="mb-3 flex flex-wrap gap-2 text-sm">
+        <MetricPill label={t({ en: "refs", zh: "引用" })} value={usage.totalReferences ?? 0} />
+        <MetricPill label={t({ en: "files", zh: "文件" })} value={usage.scannedFiles ?? 0} />
+        <MetricPill label={t({ en: "@design", zh: "@design" })} value={usage.importKinds?.designAlias ?? 0} />
+        <MetricPill label={t({ en: "deep imports", zh: "深层引用" })} value={usage.importKinds?.baseDeep ?? 0} />
+      </div>
+
       <div className="overflow-hidden rounded-lg border border-border">
         <table className="w-full text-xs">
           <thead className="bg-muted/40 text-muted-foreground">
             <tr>
               <th className="px-3 py-2 text-left font-medium">{t({ en: "Component", zh: "组件" })}</th>
-              <th className="px-3 py-2 text-left font-medium">{t({ en: "Origin", zh: "来源" })}</th>
-              <th className="px-3 py-2 text-right font-medium">{t({ en: "Usage", zh: "使用次数" })}</th>
+              <th className="px-3 py-2 text-left font-medium">{t({ en: "Library", zh: "库" })}</th>
+              <th className="px-3 py-2 text-right font-medium">{t({ en: "Files", zh: "文件数" })}</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
             {visible.map((c) => (
-              <tr key={c.name} className="hover:bg-muted/30">
+              <tr key={c.id ?? c.name} className="hover:bg-muted/30">
                 <td className="px-3 py-2 font-mono text-foreground">
                   <span className="flex items-center gap-2">
                     <span
-                      aria-label={c.origin === "user-import" ? "User imported" : "Kit"}
+                      aria-label={c.origin === "user-import" ? "Imported component" : "Default library component"}
                       className={cn(
                         "inline-block h-1.5 w-1.5 rounded-full",
-                        c.origin === "user-import" ? "bg-blue-500" : "bg-muted-foreground/40",
+                        c.origin === "user-import" ? "bg-primary" : "bg-muted-foreground/40",
                       )}
                     />
                     {c.name}
@@ -354,8 +494,8 @@ function UsageTable({ usage, className }: { usage: ComponentUsage | null; classN
                 </td>
                 <td className="px-3 py-2 text-muted-foreground">
                   {c.origin === "user-import"
-                    ? t({ en: "User import", zh: "用户上传" })
-                    : t({ en: "Kit", zh: "默认 Kit" })}
+                    ? t({ en: "Imported", zh: "已导入" })
+                    : t({ en: "Default library", zh: "默认组件库" })}
                 </td>
                 <td className="px-3 py-2 text-right tabular-nums text-foreground">
                   {c.usage === 0 ? <span className="text-muted-foreground">0</span> : c.usage}
@@ -389,13 +529,106 @@ function UsageTable({ usage, className }: { usage: ComponentUsage | null; classN
   );
 }
 
-function TreatyHealth({ governance }: { governance: GovernanceStatus | null }) {
+function TokenHealth({ tokens }: { tokens: TokenSummary | null }) {
+  const { t, locale } = useLocale();
+
+  if (!tokens?.ok) {
+    return (
+      <section className="rounded-xl bg-background p-4 ring-1 ring-border">
+        <h3 className="text-sm font-semibold text-foreground">
+          {t({ en: "Token baseline", zh: "Token 基线" })}
+        </h3>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {tokens?.error ?? t({ en: "Loading…", zh: "加载中…" })}
+        </p>
+      </section>
+    );
+  }
+
+  const statusText = tokens.status === "missing"
+    ? t({ en: "missing", zh: "缺失" })
+    : tokens.generatedStale
+      ? t({ en: "stale", zh: "过期" })
+      : t({ en: "ready", zh: "可用" });
+
+  const metrics = [
+    { label: t({ en: "Seed tokens", zh: "Seed token" }), value: tokens.seedCount ?? 0 },
+    { label: t({ en: "Dark overrides", zh: "暗色覆盖" }), value: tokens.darkOverrideCount ?? 0 },
+    { label: t({ en: "Custom seeds", zh: "自定义 seed" }), value: tokens.customSeedCount ?? 0 },
+    { label: t({ en: "Map overrides", zh: "Map 覆盖" }), value: tokens.overrideCount ?? 0 },
+    { label: t({ en: "CSS vars", zh: "CSS 变量" }), value: tokens.cssVarCount ?? 0 },
+    { label: t({ en: "Spacing stops", zh: "间距档位" }), value: tokens.spacingStopCount ?? 0 },
+  ];
+
+  return (
+    <section className="rounded-xl bg-background p-4 ring-1 ring-border">
+      <header className="flex items-start justify-between gap-3">
+        <div>
+          <h3 className="text-sm font-semibold text-foreground">
+            {t({ en: "Token baseline", zh: "Token 基线" })}
+          </h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            {t({
+              en: `v${tokens.version ?? "?"} · generated ${formatDate(tokens.generatedAt, locale)}`,
+              zh: `v${tokens.version ?? "?"} · 生成于 ${formatDate(tokens.generatedAt, locale)}`,
+            })}
+          </p>
+        </div>
+        <span className="rounded-md border border-border bg-muted/30 px-2 py-1 text-sm font-medium text-foreground">
+          {statusText}
+        </span>
+      </header>
+
+      <dl className="mt-4 divide-y divide-border text-sm">
+        {metrics.map((item) => (
+          <div key={item.label} className="flex items-center justify-between gap-3 py-2">
+            <dt className="text-muted-foreground">{item.label}</dt>
+            <dd className="font-semibold text-foreground tabular-nums">{item.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      <div className="mt-4 border-t border-border pt-3">
+        <h4 className="text-sm font-medium text-foreground">
+          {t({ en: "Key seeds", zh: "关键 seed" })}
+        </h4>
+        <div className="mt-2 space-y-2 text-sm">
+          <SeedValue label="colorPrimary" value={tokens.seeds?.colorPrimary} swatch />
+          <SeedValue label="colorBgBase" value={tokens.seeds?.colorBgBase} swatch />
+          <SeedValue label="colorTextBase" value={tokens.seeds?.colorTextBase} swatch />
+          <SeedValue label="borderRadius" value={tokens.seeds?.borderRadius} />
+          <SeedValue label="sizeUnit" value={tokens.seeds?.sizeUnit} />
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function SeedValue({ label, value, swatch = false }: { label: string; value: unknown; swatch?: boolean }) {
+  const displayValue = value == null || value === "" ? "—" : String(value);
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <span className="text-muted-foreground">{label}</span>
+      <span className="flex min-w-0 items-center gap-2 font-mono text-foreground">
+        {swatch && value ? (
+          <span
+            className="h-4 w-4 shrink-0 rounded border border-border"
+            style={{ background: String(value) }}
+          />
+        ) : null}
+        <span className="truncate">{displayValue}</span>
+      </span>
+    </div>
+  );
+}
+
+function AiContractHealth({ governance }: { governance: GovernanceStatus | null }) {
   const { t } = useLocale();
   if (!governance?.ok) {
     return (
       <section className="rounded-xl bg-background p-4 ring-1 ring-border">
         <h3 className="text-sm font-semibold text-foreground">
-          {t({ en: "AI treaty health", zh: "AI 契约健康度" })}
+          {t({ en: "AI contract", zh: "AI 契约" })}
         </h3>
         <p className="mt-2 text-xs text-muted-foreground">
           {governance?.error ?? t({ en: "Loading…", zh: "加载中…" })}
@@ -407,24 +640,18 @@ function TreatyHealth({ governance }: { governance: GovernanceStatus | null }) {
   return (
     <section className="rounded-xl bg-background p-4 ring-1 ring-border">
       <h3 className="text-sm font-semibold text-foreground">
-        {t({ en: "AI treaty health", zh: "AI 契约健康度" })}
+        {t({ en: "AI contract", zh: "AI 契约" })}
       </h3>
-      <p className="mt-0.5 text-sm text-muted-foreground">
+      <p className="mt-1 text-sm text-muted-foreground">
         {t({
-          en: "Generated rule files that AI tools (Cursor / Claude / Copilot) load.",
-          zh: "AI 工具（Cursor / Claude / Copilot）加载的规则文件",
+          en: "Generated rule files and MCP tools that keep future AI code aligned.",
+          zh: "让后续 AI 生码保持一致的规则文件与 MCP 工具。",
         })}
       </p>
       <ul className="mt-3 space-y-1.5">
         {(governance.files ?? []).map((f) => {
-          const tone = !f.present ? "bad" : f.stale ? "warn" : "good";
           const Icon = !f.present ? AlertCircle : f.stale ? FileWarning : CheckCircle2;
-          const toneClass =
-            tone === "bad"
-              ? "text-rose-600 dark:text-rose-400"
-              : tone === "warn"
-                ? "text-amber-600 dark:text-amber-400"
-                : "text-emerald-600 dark:text-emerald-400";
+          const toneClass = !f.present || f.stale ? "text-destructive" : "text-primary";
           return (
             <li key={f.id} className="flex items-center justify-between gap-2 text-sm">
               <span className="flex min-w-0 items-center gap-2">
@@ -446,30 +673,43 @@ function TreatyHealth({ governance }: { governance: GovernanceStatus | null }) {
   );
 }
 
-function ViolationsList({ audit, className }: { audit: AuditStatus | null; className?: string }) {
+function MigrationBacklog({
+  audit,
+  setup,
+  className,
+}: {
+  audit: AuditStatus | null;
+  setup: SetupStatus | null;
+  className?: string;
+}) {
   const { t } = useLocale();
   const profiles = audit?.profiles ?? [];
+  const isNewProject = projectModeFromSetup(setup) === "new";
   if (!audit?.ok || audit.passed || !audit.issues?.length) {
     if (audit?.passed) {
       return (
-        <section className={cn("rounded-xl border border-emerald-500/30 bg-emerald-500/5 p-4", className)}>
-          <div className="flex items-center gap-2 text-sm font-medium text-emerald-700 dark:text-emerald-300">
-            <CheckCircle2 size={14} />
-            {t({
-              en: "Zero violations — AI coding rules are working.",
-              zh: "零违规——AI 编码规则起作用了",
-            })}
+        <section className={cn("rounded-xl bg-background p-4 ring-1 ring-border", className)}>
+          <div className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <CheckCircle2 size={14} className="text-primary" />
+            {isNewProject
+              ? t({ en: "Health baseline is ready", zh: "健康基线已就绪" })
+              : t({ en: "Migration backlog cleared", zh: "存量治理 backlog 已清空" })}
           </div>
-          <p className="mt-1 text-sm text-emerald-700/80 dark:text-emerald-300/80">
-            {t({
-              en: "Hardcoded hex / arbitrary Tailwind values were prevented at write-time by the rules in CLAUDE.md / .cursorrules / Copilot instructions.",
-              zh: "硬编码 hex / 任意 Tailwind 值在写入时被 CLAUDE.md / .cursorrules / Copilot instructions 拦下来了",
-            })}
+          <p className="mt-1 text-sm text-muted-foreground">
+            {isNewProject
+              ? t({
+                  en: "As the product grows, this section will surface drift that needs review instead of pretending empty usage is a problem.",
+                  zh: "产品开始生长后，这里会展示需要关注的漂移项；空采用不是问题，它只是起点。",
+                })
+              : t({
+                  en: "Keep the audit quiet while the daily view shifts to component adoption and token baseline.",
+                  zh: "后续让 audit 保持安静，日常关注组件采用和 Token 基线即可。",
+                })}
           </p>
           {profiles.length ? (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {profiles.map((profile) => (
-                <span key={profile.scope} className="rounded-md bg-background/60 px-2 py-1 text-sm text-emerald-700 ring-1 ring-emerald-500/20 dark:text-emerald-300">
+                <span key={profile.scope} className="rounded-md bg-muted/40 px-2 py-1 text-sm text-muted-foreground ring-1 ring-border">
                   {profile.scope}: {profile.scanned}
                 </span>
               ))}
@@ -482,11 +722,17 @@ function ViolationsList({ audit, className }: { audit: AuditStatus | null; class
   }
 
   return (
-    <section className={cn("rounded-xl bg-background p-4 ring-1 ring-rose-500/30", className)}>
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-rose-700 dark:text-rose-400">
+    <section className={cn("rounded-xl bg-background p-4 ring-1 ring-destructive/30", className)}>
+      <h3 className="flex items-center gap-2 text-sm font-semibold text-destructive">
         <AlertCircle size={14} />
-        {t({ en: `${audit.issueCount} violation(s)`, zh: `${audit.issueCount} 项违规` })}
+        {t({ en: `${audit.issueCount} migration issue(s)`, zh: `${audit.issueCount} 项存量治理问题` })}
       </h3>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {t({
+          en: "Run confirmed auto-fix for safe token and spacing cases, then review the remaining product decisions manually.",
+          zh: "对安全的 token、间距等问题执行确认式自动修复，剩余需要产品判断的项人工处理。",
+        })}
+      </p>
       {profiles.length ? (
         <div className="mt-2 flex flex-wrap gap-1.5">
           {profiles.map((profile) => (
@@ -495,8 +741,8 @@ function ViolationsList({ audit, className }: { audit: AuditStatus | null; class
               className={cn(
                 "rounded-md px-2 py-1 text-sm ring-1",
                 profile.passed
-                  ? "bg-emerald-500/5 text-emerald-700 ring-emerald-500/25 dark:text-emerald-300"
-                  : "bg-rose-500/5 text-rose-700 ring-rose-500/25 dark:text-rose-300",
+                  ? "bg-muted/40 text-muted-foreground ring-border"
+                  : "bg-destructive/10 text-destructive ring-destructive/30",
               )}
             >
               {profile.scope}: {profile.issueCount} / {profile.scanned}
@@ -516,7 +762,7 @@ function ViolationsList({ audit, className }: { audit: AuditStatus | null; class
       </ul>
       {audit.truncated ? (
         <p className="mt-2 text-sm text-muted-foreground">
-          {t({ en: "Issue list truncated. Run the CLI with --max-issues for the full output.", zh: "违规列表已截断。可用 CLI 加 --max-issues 查看完整输出。" })}
+          {t({ en: "Issue list truncated. Run the CLI with --max-issues for the full output.", zh: "治理问题列表已截断。可用 CLI 加 --max-issues 查看完整输出。" })}
         </p>
       ) : null}
     </section>

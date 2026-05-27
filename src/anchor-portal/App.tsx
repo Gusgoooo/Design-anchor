@@ -49,6 +49,15 @@ function AppShell() {
       </div>
     );
   }
+  if (route.kind === "onboarding") {
+    return (
+      <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">
+        <React.Suspense fallback={<RouteFallback />}>
+          <OnboardingRoute onComplete={() => setSetupConfigured(true)} />
+        </React.Suspense>
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground">

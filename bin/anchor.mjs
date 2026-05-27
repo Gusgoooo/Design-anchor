@@ -103,7 +103,7 @@ anchor — AI coding governance CLI
   anchor dev   [目标目录]    启动 Anchor Portal（Vite）并打开浏览器
   anchor mcp   [目标目录]    启动 MCP Server（供 Cursor Agent 使用）
   anchor sync  [目标目录]    同步 schema → Tailwind + .cursorrules + 规则镜像
-  anchor audit [目标目录]    运行合规审计（检测禁止标签 + 任意值 Tailwind）
+  anchor audit [目标目录]    运行合规审计（可加 --fix；写入前会确认，脚本化使用 --yes）
   anchor help                显示帮助
 `.trim();
 
@@ -136,7 +136,7 @@ switch (cmd) {
     doSync(rest[0]);
     break;
   case "audit":
-    doAudit(rest[0]);
+    doAudit(rest);
     break;
   case "help":
   case "--help":
@@ -314,7 +314,9 @@ function doInit(targetArg) {
       "anchor:audit:kit": parentPkg.scripts?.["anchor:audit:kit"] || "node scripts/anchor-audit.mjs --scope kit",
       "anchor:audit:portal": parentPkg.scripts?.["anchor:audit:portal"] || "node scripts/anchor-audit.mjs --scope portal",
       "anchor:audit:all": parentPkg.scripts?.["anchor:audit:all"] || "node scripts/anchor-audit.mjs --scope all",
-      "check:anchor": parentPkg.scripts?.["check:anchor"] || "node scripts/check-anchor-consistency.mjs",
+      "anchor:audit:fix": parentPkg.scripts?.["anchor:audit:fix"] || "node scripts/anchor-audit.mjs --scope all --fix",
+      "check:tokens": parentPkg.scripts?.["check:tokens"] || "node scripts/check-token-contract.mjs",
+      "check:anchor": parentPkg.scripts?.["check:anchor"] || "node scripts/check-anchor-consistency.mjs && npm run check:tokens",
       dev: "vite --config src/anchor-portal/vite.config.ts",
       build: "vite build --config src/anchor-portal/vite.config.ts",
       typecheck: "tsc --noEmit",
@@ -348,12 +350,13 @@ function doInit(targetArg) {
   installCursorHooks(projectRoot);
   installSelfcheckRule(projectRoot);
   writeAnchorConsumerDocs(projectRoot, target);
+  patchGlobalsCss(projectRoot, target);
+  injectDepsToProject(projectRoot, parentPkg);
 
   console.log("\n📦 scaffold 完成！\n");
   console.log("后续步骤：");
-  console.log(`  cd ${targetArg || DEFAULT_ANCHOR_DIR}`);
   console.log("  npm install");
-  console.log("  anchor dev .");
+  console.log("  npx design-anchor dev");
   console.log("");
   console.log("🤖 AI 集成已自动配置：");
   console.log("  • CLAUDE.md                          — Claude Code / Claude Desktop");
@@ -370,29 +373,137 @@ function doInit(targetArg) {
 }
 
 /**
- * 脚手架 package.json：将 react / react-dom 从 dependencies 挪到 peerDependencies，
- * 并在 devDependencies 中保留同版本供 Portal 本地开发解析。
+ * 脚手架 package.json：所有运行时依赖（react / radix / 工具库）全部移到
+ * peerDependencies，避免 .anchor/node_modules 出现独立 React 副本。
+ * devDependencies 保留 Portal 本地开发需要的版本。
  */
 function buildScaffoldPackageJson(parentPkg) {
   const deps = { ...(parentPkg.dependencies || {}) };
   const peer = {};
-  for (const key of ["react", "react-dom"]) {
-    if (deps[key] != null) {
-      peer[key] = deps[key];
-      delete deps[key];
-    }
+  // 所有运行时依赖都走 peer，让 resolve 从项目根走
+  for (const key of Object.keys(deps)) {
+    peer[key] = deps[key];
   }
   const devDeps = { ...(parentPkg.devDependencies || {}) };
-  for (const key of ["react", "react-dom"]) {
-    if (peer[key] != null && devDeps[key] == null) {
-      devDeps[key] = peer[key];
-    }
-  }
   return {
-    dependencies: deps,
+    dependencies: {},
     peerDependencies: peer,
     devDependencies: devDeps,
   };
+}
+
+/** 自动 patch 消费端 globals.css：智能合并 anchor tokens，保留用户自定义样式 */
+/** 将 .anchor 的运行时依赖注入到用户项目的 package.json，避免 .anchor 有独立 node_modules */
+function injectDepsToProject(projectRoot, parentPkg) {
+  const projectPkgPath = join(projectRoot, "package.json");
+  if (!existsSync(projectPkgPath)) return;
+
+  const projectPkg = JSON.parse(readFileSync(projectPkgPath, "utf8"));
+  const projectDeps = projectPkg.dependencies || {};
+  const anchorDeps = parentPkg.dependencies || {};
+
+  let added = 0;
+  for (const [name, version] of Object.entries(anchorDeps)) {
+    if (!projectDeps[name]) {
+      projectDeps[name] = version;
+      added++;
+    }
+  }
+
+  if (added > 0) {
+    projectPkg.dependencies = Object.fromEntries(
+      Object.entries(projectDeps).sort(([a], [b]) => a.localeCompare(b))
+    );
+    writeFileSync(projectPkgPath, JSON.stringify(projectPkg, null, 2) + "\n");
+    console.log(`  ✅ package.json — 注入 ${added} 个组件库依赖（运行 npm install 生效）`);
+  }
+}
+
+function patchGlobalsCss(projectRoot, libTarget) {
+  const candidates = [
+    "src/app/globals.css",
+    "app/globals.css",
+    "src/globals.css",
+    "styles/globals.css",
+  ];
+  let globalsCssPath = null;
+  for (const c of candidates) {
+    const p = join(projectRoot, c);
+    if (existsSync(p)) { globalsCssPath = p; break; }
+  }
+  if (!globalsCssPath) return;
+
+  const content = readFileSync(globalsCssPath, "utf8");
+  if (content.includes("design-tokens.generated.css")) return;
+
+  const relLib = relative(join(globalsCssPath, ".."), join(libTarget, "src/styles/design-tokens.generated.css")).split(sep).join("/");
+
+  // anchor 接管的 CSS 变量名（会出现在 :root 或 @media dark 中）
+  const anchorVars = new Set([
+    "--background", "--foreground", "--card", "--card-foreground",
+    "--popover", "--popover-foreground", "--primary", "--primary-foreground",
+    "--secondary", "--secondary-foreground", "--muted", "--muted-foreground",
+    "--accent", "--accent-foreground", "--destructive", "--destructive-foreground",
+    "--border", "--input", "--ring", "--radius",
+    "--chart-1", "--chart-2", "--chart-3", "--chart-4", "--chart-5",
+    "--sidebar-background", "--sidebar-foreground", "--sidebar-primary",
+    "--sidebar-primary-foreground", "--sidebar-accent", "--sidebar-accent-foreground",
+    "--sidebar-border", "--sidebar-ring",
+  ]);
+
+  let css = content;
+
+  // 1. 删除 @theme inline { ... } 块（anchor 通过 generated.css 提供 @theme）
+  css = css.replace(/@theme\s+inline\s*\{[^}]*\}/gs, "");
+
+  // 2. 从 :root { ... } 块中删除 anchor 接管的变量，保留用户自定义变量
+  css = css.replace(/:root\s*\{([^}]*)\}/gs, (_match, body) => {
+    const lines = body.split("\n").filter((line) => {
+      const varMatch = line.match(/^\s*(--[\w-]+)\s*:/);
+      if (!varMatch) return true;
+      return !anchorVars.has(varMatch[1]);
+    });
+    const remaining = lines.filter((l) => l.trim()).join("\n");
+    return remaining ? `:root {\n${remaining}\n}` : "";
+  });
+
+  // 3. 删除 prefers-color-scheme dark 中只包含 anchor 变量的 @media 块
+  css = css.replace(/@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{[^}]*:root\s*\{([^}]*)\}[^}]*\}/gs, (_match, body) => {
+    const lines = body.split("\n").filter((line) => {
+      const varMatch = line.match(/^\s*(--[\w-]+)\s*:/);
+      if (!varMatch) return true;
+      return !anchorVars.has(varMatch[1]);
+    });
+    const remaining = lines.filter((l) => l.trim()).join("\n");
+    return remaining ? `@media (prefers-color-scheme: dark) {\n  :root {\n${remaining}\n  }\n}` : "";
+  });
+
+  // 4. 清理空 @media 块和多余空行
+  css = css.replace(/@media[^{]*\{\s*\}/gs, "");
+  css = css.replace(/\n{3,}/g, "\n\n").trim();
+
+  // 5. 确保 @import "tailwindcss" 存在
+  if (!/@import\s+["']tailwindcss["']/.test(css)) {
+    css = `@import "tailwindcss";\n${css}`;
+  }
+
+  // 6. 注入 anchor token import（紧跟 tailwindcss import 之后）
+  const importLine = `@import "${relLib}";`;
+  css = css.replace(/(@import\s+["']tailwindcss["'];?\s*\n?)/, `$1${importLine}\n`);
+
+  // 7. 确保有 @custom-variant dark
+  if (!css.includes("@custom-variant dark")) {
+    css = css.replace(/(design-tokens\.generated\.css["'];?\s*\n)/, `$1\n@custom-variant dark (&:is(.dark *));\n`);
+  }
+
+  // 8. 确保有 @layer base 中的 border-border + bg-background
+  if (!css.includes("border-border")) {
+    css += `\n\n@layer base {\n  * {\n    @apply border-border outline-ring/50;\n  }\n\n  body {\n    @apply bg-background text-foreground;\n  }\n}\n`;
+  }
+
+  writeFileSync(globalsCssPath, css + "\n");
+  const relCss = relative(projectRoot, globalsCssPath);
+  console.log(`  ✅ ${relCss} — 已智能合并 design-anchor tokens（用户自定义样式已保留）`);
 }
 
 /** 项目根：边界说明 + import 别名集成（立刻可做的「一页纸」） */
@@ -1720,7 +1831,37 @@ function doSync(targetArg) {
 
 /* ─── audit ─── */
 
-function doAudit(targetArg) {
+function shellQuote(value) {
+  return `"${String(value).replace(/(["\\$`])/g, "\\$1")}"`;
+}
+
+function splitAuditArgs(auditArgs) {
+  const args = Array.isArray(auditArgs) ? auditArgs : [auditArgs].filter(Boolean);
+  let targetArg = null;
+  const passArgs = [];
+
+  for (let i = 0; i < args.length; i += 1) {
+    const arg = args[i];
+    if (arg === "--scope" || arg === "--max-issues") {
+      passArgs.push(arg);
+      if (args[i + 1] != null) {
+        passArgs.push(args[i + 1]);
+        i += 1;
+      }
+      continue;
+    }
+    if (arg.startsWith("-")) {
+      passArgs.push(arg);
+      continue;
+    }
+    targetArg = arg;
+  }
+
+  return { targetArg, passArgs };
+}
+
+function doAudit(auditArgs) {
+  const { targetArg, passArgs } = splitAuditArgs(auditArgs);
   const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
   if (!existsSync(join(target, "src/anchor"))) {
@@ -1735,7 +1876,8 @@ function doAudit(targetArg) {
   const script = existsSync(localAudit) ? localAudit : auditScript;
 
   try {
-    execSync(`node "${script}"`, { cwd: target, stdio: "inherit" });
+    const extraArgs = passArgs.map(shellQuote).join(" ");
+    execSync(`node ${shellQuote(script)}${extraArgs ? ` ${extraArgs}` : ""}`, { cwd: target, stdio: "inherit" });
   } catch (e) {
     process.exit(e.status ?? 1);
   }

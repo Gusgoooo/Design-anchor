@@ -2,6 +2,7 @@ import * as React from "react";
 
 export type Route =
   | { kind: "docs" }
+  | { kind: "onboarding" }
   | { kind: "designtoken" }
   | { kind: "govern" }
   | { kind: "components" }
@@ -14,6 +15,7 @@ export type TopTab = "docs" | "designtoken" | "govern" | "components";
 export function tabForRoute(r: Route): TopTab {
   switch (r.kind) {
     case "docs":
+    case "onboarding":
       return "docs";
     case "designtoken":
       return "designtoken";
@@ -31,11 +33,12 @@ const STORY_PREFIX = "/story/";
 export function parseHash(hash: string = window.location.hash): Route {
   const trimmed = hash.replace(/^#/, "");
   const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  if (path === "/onboarding" || path === "/setup") return { kind: "onboarding" };
   if (path === "/" || path === "" || path === "/docs") return { kind: "docs" };
-  if (path === "/_designtoken" || path === "/designtoken") return { kind: "designtoken" };
-  if (path === "/_govern" || path === "/govern") return { kind: "govern" };
+  if (path === "/_designtoken" || path === "/designtoken" || path === "/theme") return { kind: "designtoken" };
+  if (path === "/_govern" || path === "/govern" || path === "/health") return { kind: "govern" };
   if (path === "/_patterns" || path === "/patterns") return { kind: "patterns" };
-  if (path === "/components") return { kind: "components" };
+  if (path === "/components" || path === "/library") return { kind: "components" };
   if (path.startsWith(STORY_PREFIX)) {
     return { kind: "story", storyId: path.slice(STORY_PREFIX.length) };
   }
@@ -46,12 +49,14 @@ export function serializeRoute(r: Route): string {
   switch (r.kind) {
     case "docs":
       return "#/docs";
+    case "onboarding":
+      return "#/onboarding";
     case "designtoken":
-      return "#/_designtoken";
+      return "#/theme";
     case "govern":
-      return "#/_govern";
+      return "#/health";
     case "components":
-      return "#/components";
+      return "#/library";
     case "patterns":
       return "#/_patterns";
     case "story":

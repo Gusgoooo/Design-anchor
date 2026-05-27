@@ -675,8 +675,7 @@ export function DesignTokenShowcase({
   return (
     <div
       className={cn(
-        // In dark mode, don't use semantic background (#000); match Storybook Docs / preview iframe canvas (#1c1c1e)
-        "w-full min-w-0 bg-background text-foreground dark:bg-[#1c1c1e]",
+        "w-full min-w-0 bg-background text-foreground dark:bg-card",
         embedded ? "" : "min-h-screen px-4 py-8 sm:px-6 lg:px-8",
       )}
     >

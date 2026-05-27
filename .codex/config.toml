@@ -1,0 +1,6 @@
+[mcp_servers.anchor]
+args = [
+    "./bin/anchor-mcp.mjs",
+    ".",
+]
+command = "node"

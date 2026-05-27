@@ -125,6 +125,7 @@ const SHADCN_COLORS = [
 
 // Border radius → @theme --radius-* with direct values (theme-invariant)
 const RADIUS_MAP = {
+  "border-radius-xs": "radius-xs",
   "border-radius-sm": "radius-sm",
   "border-radius": "radius-md",
   "border-radius-lg": "radius-lg",

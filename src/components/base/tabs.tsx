@@ -13,7 +13,7 @@ const tabsListVariants = cva(
   {
     variants: {
       variant: {
-        pill: "rounded-md bg-muted p-1 justify-center",
+        pill: "rounded-[var(--radius-md)] bg-muted p-1 justify-center",
         underline: "border-b border-border",
       },
       orientation: {
@@ -48,7 +48,7 @@ const tabsTriggerVariants = cva(
   {
     variants: {
       variant: {
-        pill: "rounded-sm px-3 py-1 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
+        pill: "rounded-[max(2px,calc(var(--radius-md)-var(--spacing-1)))] px-3 py-1 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm",
         underline:
           "border-b-2 border-transparent px-3 py-1.5 data-[state=active]:border-foreground data-[state=active]:text-foreground -mb-px",
       },

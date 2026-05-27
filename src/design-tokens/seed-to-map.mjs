@@ -892,7 +892,7 @@ export function deriveSeedToMap(rawSeed, { dark = false, customSeeds = {}, fixed
   vars["opacity-opaque"] = 1;
   vars["font-weight-medium"] = 500;
   vars["font-weight-semibold"] = 600;
-  vars["ring-width"] = "2px";
+  vars["ring-width"] = "3px";
   vars["ring-offset"] = "2px";
   // paddingXXXS — applies to spacing/padding/margin -0.5
   vars["spacing-0.5"] = "2px";
@@ -940,6 +940,7 @@ export function deriveSeedToMap(rawSeed, { dark = false, customSeeds = {}, fixed
   vars["_anchor-font-size-xs--line-height"] = fontMap.lineHeightSM.toFixed(4);
   vars["_anchor-font-size-sm--line-height"] = fontMap.lineHeight.toFixed(4);
   vars["_anchor-font-size-base--line-height"] = fontMap.lineHeightLG.toFixed(4);
+  vars["_anchor-radius-xs"] = vars["border-radius-xs"];
   vars["_anchor-radius-sm"] = vars["border-radius-sm"];
   vars["_anchor-radius-md"] = vars["border-radius"];
   vars["_anchor-radius-lg"] = vars["border-radius-lg"];

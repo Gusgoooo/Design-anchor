@@ -141,11 +141,11 @@ export const SEED_GROUPS: SeedGroup[] = [
         source: "seed",
         editor: "length",
         slider: {
-          min: 3,
+          min: 3.5,
           max: 5,
           step: 0.25,
           labels: [
-            { value: 3, label: "Compact" },
+            { value: 3.5, label: "Compact" },
             { value: 4, label: "Default" },
             { value: 5, label: "Spacious" },
           ],

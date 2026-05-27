@@ -1,7 +1,9 @@
 import * as React from "react";
-import { Camera, Check, MoreHorizontal, RotateCcw, Save, Undo2 } from "lucide-react";
+import { Activity, Camera, Check, MoreHorizontal, RotateCcw, Save, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/base/button";
 import { useLocale } from "../i18n/LocaleProvider";
+import { navigateTo } from "../router";
 import { SEED_GROUPS, SEED_GROUP_TITLE_ZH } from "@/design-tokens/seed-card-config";
 import { readSeedValue, type TokenDraft } from "./useTokenDraft";
 import { SeedRow } from "./SeedCard";
@@ -56,10 +58,12 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
   const dirtyCount = dirtyKeys.size;
 
   const [saving, setSaving] = React.useState(false);
+  const [showHealthPrompt, setShowHealthPrompt] = React.useState(false);
   async function handleSave() {
     setSaving(true);
     try {
-      await saveAndSync();
+      const result = await saveAndSync();
+      if (result.ok) setShowHealthPrompt(true);
     } finally {
       setSaving(false);
     }
@@ -141,6 +145,33 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
         {status ? (
           <div className="mt-3 rounded-md border border-border bg-muted/30 px-2.5 py-2 text-sm leading-snug text-foreground/80">
             {status}
+          </div>
+        ) : null}
+
+        {showHealthPrompt && !isDirty ? (
+          <div className="mt-3 rounded-lg border border-border bg-background px-3 py-3 text-sm">
+            <div className="flex items-start gap-2">
+              <Activity size={14} className="mt-0.5 shrink-0 text-primary" />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground">
+                  {t({ en: "Theme baseline saved", zh: "主题基线已保存" })}
+                </p>
+                <p className="mt-0.5 text-muted-foreground">
+                  {t({
+                    en: "Next, check Project Health to see component adoption, token status, and AI contract freshness.",
+                    zh: "下一步查看项目健康，确认组件采用、Token 状态和 AI 契约新鲜度。",
+                  })}
+                </p>
+              </div>
+              <Button
+                type="button"
+                onClick={() => navigateTo({ kind: "govern" })}
+                size="sm"
+                className="shrink-0"
+              >
+                {t({ en: "View Health", zh: "查看健康度" })}
+              </Button>
+            </div>
           </div>
         ) : null}
       </div>

@@ -101,6 +101,47 @@ function isImportableComponentFile(filePath) {
   return name.endsWith(".tsx") && !name.includes(".demo.") && !name.includes(".stories.");
 }
 
+function inspectReactTailwindComponent(absPath) {
+  const text = fs.readFileSync(absPath, "utf8");
+  const reasons = [];
+  const hasTsxExtension = isImportableComponentFile(absPath);
+  const hasJsxSignal = /<([A-Z][A-Za-z0-9]*|[a-z][a-z0-9-]*)(\s|>|\/)/.test(text) || /React\.createElement\s*\(/.test(text);
+  const hasReactSignal =
+    /\bfrom\s+["']react["']/.test(text) ||
+    /\bReact\./.test(text) ||
+    /\bReactNode\b|\bComponentProps\b|\bHTMLAttributes\b|\bforwardRef\b/.test(text) ||
+    hasJsxSignal;
+  const hasComponentExport =
+    /export\s+(?:default\s+)?(?:function|const|class)\s+[A-Z][A-Za-z0-9_]*/.test(text) ||
+    /export\s+default\s+[A-Z][A-Za-z0-9_]*/.test(text) ||
+    /export\s+const\s+[A-Z][A-Za-z0-9_]*\s*=.*(?:forwardRef|React\.forwardRef|\(|<)/s.test(text);
+  const hasTailwindSignal =
+    /\bclassName\s*=/.test(text) ||
+    /\bclassName\s*:/.test(text) ||
+    /\b(?:cn|clsx|cva|twMerge)\s*\(/.test(text) ||
+    /\bfrom\s+["'](?:clsx|tailwind-merge|class-variance-authority|@\/lib\/utils)["']/.test(text);
+  const hasTailwindUtility =
+    /\b(?:bg|text|border|rounded|shadow|ring|p|px|py|m|mx|my|w|h|min-w|min-h|max-w|max-h|flex|grid|gap|items|justify|content|space|divide|absolute|relative|fixed|sticky|inset|top|right|bottom|left|z|opacity|transition|duration|ease|hover|focus|active|disabled|data-\[[^\]]+\]):?-/.test(text);
+  const hasUnsupportedStyleImport = /import\s+["'][^"']+\.(?:css|scss|sass|less|styl|module\.css)["']/.test(text)
+    || /from\s+["'][^"']+\.(?:css|scss|sass|less|styl|module\.css)["']/.test(text);
+
+  if (!hasTsxExtension) reasons.push("must be a component .tsx file");
+  if (!hasReactSignal || !hasJsxSignal || !hasComponentExport) reasons.push("must look like an exported React component");
+  if (!hasTailwindSignal || !hasTailwindUtility) reasons.push("must use Tailwind-style className/cn/cva utilities");
+  if (hasUnsupportedStyleImport) reasons.push("external CSS/module style imports are not supported");
+
+  return {
+    ok: reasons.length === 0,
+    reasons,
+    checks: {
+      tsx: hasTsxExtension,
+      react: hasReactSignal && hasJsxSignal && hasComponentExport,
+      tailwind: hasTailwindSignal && hasTailwindUtility,
+      externalStyleImport: hasUnsupportedStyleImport,
+    },
+  };
+}
+
 function collectImportableComponentFiles(sourcePath, { recursive = true, maxFiles = 500 } = {}) {
   const files = [];
   const stat = fs.statSync(sourcePath);
@@ -133,6 +174,131 @@ function componentReportName(rootPath, filePath) {
     // fall back to basename below
   }
   return path.basename(filePath);
+}
+
+function consumerProjectRoot(anchorRoot) {
+  return path.basename(anchorRoot) === ".anchor" ? path.dirname(anchorRoot) : anchorRoot;
+}
+
+function toPascalName(name) {
+  return String(name)
+    .replace(/\.[tj]sx?$/, "")
+    .replace(/(^|[-_\s])(\w)/g, (_, _sep, c) => c.toUpperCase());
+}
+
+function toKebabName(name) {
+  return String(name)
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/[_\s]+/g, "-")
+    .toLowerCase();
+}
+
+function collectComponentCatalog(repoRoot) {
+  const components = new Map();
+  const baseDir = path.join(repoRoot, "src/components/base");
+  const specDir = path.join(repoRoot, "src/anchor/schema/components");
+
+  if (fs.existsSync(baseDir)) {
+    function walkBase(dir) {
+      for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+        const p = path.join(dir, entry.name);
+        if (entry.isDirectory()) {
+          walkBase(p);
+          continue;
+        }
+        if (!entry.name.endsWith(".tsx")) continue;
+        if (entry.name.includes(".demo.") || entry.name.includes(".stories.")) continue;
+        const rel = path.relative(baseDir, p).split(path.sep).join("/");
+        const id = rel.replace(/\.tsx$/, "");
+        const leaf = path.basename(id);
+        components.set(id, {
+          id,
+          name: toPascalName(leaf),
+          file: `src/components/base/${rel}`,
+          files: new Set(),
+          origin: "kit",
+        });
+      }
+    }
+    walkBase(baseDir);
+  }
+
+  if (fs.existsSync(specDir)) {
+    for (const file of fs.readdirSync(specDir)) {
+      if (!file.endsWith(".spec.json")) continue;
+      try {
+        const spec = JSON.parse(fs.readFileSync(path.join(specDir, file), "utf8"));
+        const modulePath = String(spec.wraps?.module ?? "");
+        const id = modulePath.startsWith("@/components/base/")
+          ? modulePath.slice("@/components/base/".length)
+          : file.replace(/\.spec\.json$/, "");
+        const entry = components.get(id) ?? {
+          id,
+          name: spec.componentName ?? toPascalName(path.basename(id)),
+          file: modulePath,
+          files: new Set(),
+          origin: "kit",
+        };
+        entry.name = spec.componentName ?? entry.name;
+        entry.specId = spec.id;
+        entry.specFile = `src/anchor/schema/components/${file}`;
+        components.set(id, entry);
+      } catch {
+        // tolerate a broken spec; consistency checks report it elsewhere
+      }
+    }
+  }
+
+  return components;
+}
+
+function collectUsageScanFiles(projectRoot, anchorRoot) {
+  const roots = ["src", "app", "pages", "packages", "apps"]
+    .map((dir) => path.join(projectRoot, dir))
+    .filter((dir) => fs.existsSync(dir));
+  const out = [];
+  const projectAbs = path.resolve(projectRoot);
+  const anchorAbs = path.resolve(anchorRoot);
+  const scanStandaloneRepo = projectAbs === anchorAbs;
+  const skipDirs = new Set([
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".nuxt",
+    ".turbo",
+    ".vite",
+    ".git",
+    "coverage",
+  ]);
+
+  function walk(dir) {
+    const resolved = path.resolve(dir);
+    if (!scanStandaloneRepo && isInsidePath(anchorAbs, resolved)) return;
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, ent.name);
+      const rel = path.relative(projectRoot, p).split(path.sep).join("/");
+      if (ent.isDirectory()) {
+        if (skipDirs.has(ent.name) || ent.name === ".anchor") continue;
+        if (scanStandaloneRepo && (
+          rel === "src/components" ||
+          rel === "src/anchor" ||
+          rel === "src/styles"
+        )) continue;
+        walk(p);
+      } else if (
+        /\.(tsx|ts|jsx|js)$/.test(ent.name) &&
+        !ent.name.includes(".demo.") &&
+        !ent.name.includes(".stories.") &&
+        !ent.name.endsWith(".d.ts")
+      ) {
+        out.push(p);
+      }
+    }
+  }
+
+  for (const root of roots) walk(root);
+  return out;
 }
 
 /**
@@ -202,7 +368,8 @@ export function schemaApiPlugin(repoRoot) {
         }
 
         if (req.method === "POST" && url === "/api/scan-component-path") {
-          // Pre-import compatibility check. Given a folder or .tsx path,
+          // Pre-import compatibility check. Given a folder or React + Tailwind
+          // .tsx path,
           // returns a per-file report:
           //   safe   — only imports from a curated allow-list
           //   warn   — uses @/lib/utils or other path-aliased imports
@@ -235,11 +402,13 @@ export function schemaApiPlugin(repoRoot) {
 
               const reports = files.map((f) => {
                 const insp = inspectComponentImports(f);
+                const stack = inspectReactTailwindComponent(f);
                 return {
                   file: componentReportName(p, f),
                   absPath: f,
-                  level: insp.level,
+                  level: stack.ok ? insp.level : "risky",
                   imports: insp.imports,
+                  stack,
                 };
               });
 
@@ -253,6 +422,7 @@ export function schemaApiPlugin(repoRoot) {
                   safe: reports.filter((r) => r.level === "safe").length,
                   warn: reports.filter((r) => r.level === "warn").length,
                   risky: reports.filter((r) => r.level === "risky").length,
+                  incompatible: reports.filter((r) => !r.stack.ok).length,
                 },
               }));
             } catch (e) {
@@ -314,112 +484,169 @@ export function schemaApiPlugin(repoRoot) {
         }
 
         if (req.method === "GET" && url === "/api/component-usage") {
-          // Surveys src/** for imports of base components, counts how many
-          // distinct files reference each. Powers the Govern usage table.
-          // Excludes the kit's own demo / story / spec / index files so we
-          // measure real consumption, not internal bookkeeping.
+          // Surveys the consumer app for imports of base components, counts how
+          // many distinct files reference each. When Portal runs inside
+          // project/.anchor, scan the parent business project; when developing
+          // this repo directly, scan this repo.
           try {
-            const baseDir = path.join(repoRoot, "src/components/base");
-            const components = new Map(); // name → { files: Set, status: "kit" | "user-import" }
-            if (fs.existsSync(baseDir)) {
-              for (const f of fs.readdirSync(baseDir)) {
-                if (!f.endsWith(".tsx")) continue;
-                if (f.includes(".demo.") || f.includes(".stories.")) continue;
-                const name = f.replace(/\.tsx$/, "");
-                components.set(name, { files: new Set(), origin: "kit" });
-              }
-            }
+            const projectRoot = consumerProjectRoot(repoRoot);
+            const components = collectComponentCatalog(repoRoot);
 
-            // Pull origin from kit-status.json if present (so user-imported
-            // components appear with origin: "user-import").
             const kitStatusPath = path.join(repoRoot, ".anchor-portal/kit-status.json");
             if (fs.existsSync(kitStatusPath)) {
               try {
                 const ks = JSON.parse(fs.readFileSync(kitStatusPath, "utf8"));
                 for (const [name, info] of Object.entries(ks.components ?? {})) {
-                  const lower = name.charAt(0).toLowerCase() + name.slice(1);
-                  const entry = components.get(lower) ?? components.get(name);
+                  const entry = components.get(toKebabName(name)) ?? components.get(name);
                   if (entry && info.origin) entry.origin = info.origin;
                 }
               } catch { /* tolerate broken kit-status */ }
             }
 
-            // Recursive scan for .tsx / .ts files in src/, excluding the kit
-            // itself and demo / story / spec / generated / portal sources.
-            function walk(dir, acc = []) {
-              for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
-                const p = path.join(dir, ent.name);
-                if (ent.isDirectory()) {
-                  if (ent.name === "node_modules" || ent.name === "anchor-portal" ||
-                      ent.name === "components" || ent.name === "anchor" ||
-                      ent.name === "design-tokens" || ent.name === "styles" ||
-                      ent.name === "lib") continue;
-                  walk(p, acc);
-                } else if (
-                  /\.(tsx|ts)$/.test(ent.name) &&
-                  !ent.name.includes(".demo.") &&
-                  !ent.name.includes(".stories.") &&
-                  !ent.name.endsWith(".d.ts")
-                ) {
-                  acc.push(p);
-                }
-              }
-              return acc;
+            const userFiles = collectUsageScanFiles(projectRoot, repoRoot);
+            const byKebab = new Map();
+            const byPascal = new Map();
+            for (const entry of components.values()) {
+              byKebab.set(entry.id, entry);
+              byKebab.set(toKebabName(path.basename(entry.id)), entry);
+              byPascal.set(entry.name, entry);
             }
-            const srcRoot = path.join(repoRoot, "src");
-            const userFiles = fs.existsSync(srcRoot) ? walk(srcRoot, []) : [];
 
-            const importRe = /from\s+["'](?:@\/components\/base\/|\.\.?\/.*\/components\/base\/|@design(?:\/|"$|'$|"\s|'\s))([\w-]*)["']/g;
-            const designBarrelRe = /from\s+["']@design["']/;
-            const namedImportRe = /import\s+\{([^}]+)\}\s+from\s+["']@design["']/g;
+            const importKinds = { designAlias: 0, baseDeep: 0, jsxDetected: 0 };
 
             for (const file of userFiles) {
               const text = fs.readFileSync(file, "utf8");
+              const relFile = path.relative(projectRoot, file).split(path.sep).join("/");
 
-              // Path-style imports (@/components/base/button)
-              importRe.lastIndex = 0;
+              if (/from\s+["']@design/.test(text)) importKinds.designAlias += 1;
+              if (/components\/base\//.test(text) || /\.anchor\/src\/components\/base\//.test(text)) importKinds.baseDeep += 1;
+              if (/<[A-Z][A-Za-z0-9]*\b/.test(text)) importKinds.jsxDetected += 1;
+
+              const importRe = /import\s+([\s\S]*?)\s+from\s+["']([^"']+)["']/g;
               let m;
               while ((m = importRe.exec(text)) !== null) {
-                const compName = m[1];
-                if (!compName) continue;
-                const entry = components.get(compName);
-                if (entry) entry.files.add(path.relative(repoRoot, file));
+                const clause = m[1];
+                const source = m[2];
+
+                if (source === "@design" || source.endsWith("/.anchor/src/components/base")) {
+                  const named = /\{([^}]+)\}/.exec(clause);
+                  if (!named) continue;
+                  for (const raw of named[1].split(",")) {
+                    const ident = raw.trim().split(/\s+as\s+/)[0].trim();
+                    const entry = byPascal.get(ident) ?? byKebab.get(toKebabName(ident));
+                    if (entry) entry.files.add(relFile);
+                  }
+                  continue;
+                }
+
+                const baseMatch =
+                  /(?:^@\/components\/base\/|^@design\/|\/\.anchor\/src\/components\/base\/)(.+)$/.exec(source);
+                if (baseMatch) {
+                  const id = baseMatch[1].replace(/\/index$/, "");
+                  const entry = byKebab.get(id) ?? byKebab.get(toKebabName(path.basename(id)));
+                  if (entry) entry.files.add(relFile);
+                  continue;
+                }
+
+                if (source.includes("components/base/")) {
+                  const id = source.split("components/base/").pop().replace(/\/index$/, "");
+                  const entry = byKebab.get(id) ?? byKebab.get(toKebabName(path.basename(id)));
+                  if (entry) entry.files.add(relFile);
+                }
               }
 
-              // Barrel `import { Button, Card } from "@design"` — match each
-              // imported identifier against component names (case-insensitive
-              // since base files are kebab/lowercase, identifiers PascalCase).
-              if (designBarrelRe.test(text)) {
-                namedImportRe.lastIndex = 0;
-                let nm;
-                while ((nm = namedImportRe.exec(text)) !== null) {
-                  for (const raw of nm[1].split(",")) {
-                    const ident = raw.trim().split(/\s+as\s+/)[0].trim();
-                    if (!ident) continue;
-                    const lower = ident.charAt(0).toLowerCase() + ident.slice(1);
-                    const kebab = lower.replace(/[A-Z]/g, (c) => `-${c.toLowerCase()}`);
-                    const entry = components.get(lower) ?? components.get(kebab);
-                    if (entry) entry.files.add(path.relative(repoRoot, file));
-                  }
-                }
+              const jsxTags = [...text.matchAll(/<([A-Z][A-Za-z0-9]*)\b/g)].map((match) => match[1]);
+              for (const tag of jsxTags) {
+                const entry = byPascal.get(tag);
+                if (entry) entry.files.add(relFile);
               }
             }
 
-            const list = [...components.entries()].map(([name, { files, origin }]) => ({
+            const list = [...components.values()].map(({ id, name, files, origin, specId, specFile }) => ({
+              id,
               name,
               usage: files.size,
               files: [...files],
               origin,
+              specId,
+              specFile,
             }));
+            const usedList = list.filter((c) => c.usage > 0);
+            const coverage = list.length ? Math.round((usedList.length / list.length) * 100) : 0;
 
             res.setHeader("Content-Type", "application/json; charset=utf-8");
             res.end(JSON.stringify({
               ok: true,
+              projectRoot,
+              anchorRoot: repoRoot,
               total: list.length,
-              used: list.filter((c) => c.usage > 0).length,
+              used: usedList.length,
               unused: list.filter((c) => c.usage === 0).length,
+              coverage,
+              totalReferences: list.reduce((sum, c) => sum + c.usage, 0),
               scannedFiles: userFiles.length,
+              importKinds,
+              top: [...usedList].sort((a, b) => b.usage - a.usage).slice(0, 8),
               components: list,
+            }));
+          } catch (e) {
+            res.statusCode = 500;
+            res.setHeader("Content-Type", "application/json");
+            res.end(JSON.stringify({ ok: false, error: String(e) }));
+          }
+          return;
+        }
+
+        if (req.method === "GET" && url === "/api/token-summary") {
+          try {
+            const tokenDoc = fs.existsSync(tokensPath)
+              ? JSON.parse(fs.readFileSync(tokensPath, "utf8"))
+              : {};
+            const cssPath = path.join(repoRoot, "src/styles/design-tokens.generated.css");
+            const cssText = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
+            const spacingPath = path.join(repoRoot, "src/design-tokens/spacing-scale.generated.json");
+            const spacing = fs.existsSync(spacingPath)
+              ? JSON.parse(fs.readFileSync(spacingPath, "utf8"))
+              : null;
+
+            const seed = tokenDoc.seed ?? {};
+            const seedDark = tokenDoc.seedDark ?? {};
+            const customSeeds = tokenDoc.customSeeds ?? {};
+            const mapOverrides = tokenDoc.mapOverrides ?? {};
+            const lightOverrides = mapOverrides.light ?? {};
+            const darkOverrides = mapOverrides.dark ?? {};
+            const cssVars = [...cssText.matchAll(/^\s*--([a-zA-Z0-9_.\\-]+)\s*:/gm)].map((m) => m[1]);
+            const updatedAt = fs.existsSync(tokensPath) ? fs.statSync(tokensPath).mtimeMs : null;
+            const generatedAt = fs.existsSync(cssPath) ? fs.statSync(cssPath).mtimeMs : null;
+            const generatedStale = updatedAt != null && generatedAt != null ? generatedAt < updatedAt : false;
+
+            res.setHeader("Content-Type", "application/json; charset=utf-8");
+            res.end(JSON.stringify({
+              ok: true,
+              status: generatedStale ? "stale" : Object.keys(seed).length ? "ready" : "missing",
+              version: tokenDoc.version ?? null,
+              seedCount: Object.keys(seed).length,
+              darkOverrideCount: Object.keys(seedDark).length,
+              customSeedCount: Object.keys(customSeeds).length,
+              overrideCount: Object.keys(lightOverrides).length + Object.keys(darkOverrides).length,
+              chartSeedCount: Object.keys(customSeeds).filter((key) => /^chart\d/.test(key)).length,
+              spacingStopCount: spacing?.suffixToPx ? Object.keys(spacing.suffixToPx).length : cssVars.filter((name) => name.startsWith("spacing-")).length,
+              cssVarCount: cssVars.length,
+              anchorMirrorCount: cssVars.filter((name) => name.startsWith("_anchor-")).length,
+              colorVarCount: cssVars.filter((name) => name.startsWith("color-")).length,
+              radiusVarCount: cssVars.filter((name) => name.startsWith("radius-")).length,
+              fontVarCount: cssVars.filter((name) => name.startsWith("font-size-")).length,
+              updatedAt,
+              generatedAt,
+              generatedStale,
+              seeds: {
+                colorPrimary: seed.colorPrimary,
+                colorBgBase: seed.colorBgBase,
+                colorTextBase: seed.colorTextBase,
+                fontSize: seed.fontSize,
+                borderRadius: seed.borderRadius,
+                sizeUnit: seed.sizeUnit,
+              },
             }));
           } catch (e) {
             res.statusCode = 500;
@@ -432,6 +659,10 @@ export function schemaApiPlugin(repoRoot) {
         if (req.method === "GET" && url === "/api/governance-status") {
           // Reports presence + freshness of generated AI rule / MCP files.
           // Consumed by the Govern tab's "treaty health" widget.
+          // AI contract files live at the *project* root, not inside .anchor/.
+          const projectRoot = path.basename(repoRoot) === ".anchor"
+            ? path.dirname(repoRoot)
+            : repoRoot;
           try {
             const items = [
               { id: "cursorrules",       label: ".cursorrules",                   path: ".cursorrules" },
@@ -448,7 +679,7 @@ export function schemaApiPlugin(repoRoot) {
             const tokensMtime = fs.existsSync(tokensPath) ? fs.statSync(tokensPath).mtimeMs : 0;
 
             const status = items.map((item) => {
-              const abs = path.join(repoRoot, item.path);
+              const abs = path.join(projectRoot, item.path);
               if (!fs.existsSync(abs)) return { ...item, present: false };
               const stat = fs.statSync(abs);
               const stale = item.id !== "root-mcp" && item.id !== "cursor-mcp"
@@ -464,7 +695,7 @@ export function schemaApiPlugin(repoRoot) {
 
             // MCP tool count — best-effort parse of root .mcp.json
             let mcpToolCount = null;
-            const mcpPath = path.join(repoRoot, ".mcp.json");
+            const mcpPath = path.join(projectRoot, ".mcp.json");
             if (fs.existsSync(mcpPath)) {
               try {
                 JSON.parse(fs.readFileSync(mcpPath, "utf8"));
@@ -524,6 +755,69 @@ export function schemaApiPlugin(repoRoot) {
             res.statusCode = 404;
             res.end("not found");
           }
+          return;
+        }
+
+        if (req.method === "POST" && url === "/api/apply-token-preset") {
+          let raw = "";
+          req.on("data", (c) => {
+            raw += String(c);
+          });
+          req.on("end", () => {
+            try {
+              if (!isWriteAllowed(repoRoot, tokensPath)) {
+                res.statusCode = 403;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ ok: false, error: "write path not in whitelist" }));
+                return;
+              }
+              const payload = raw ? JSON.parse(raw) : {};
+              const preset = String(payload.preset ?? "").trim();
+              const patch = payload.tokenPatch ?? {};
+              if (!preset || typeof patch !== "object" || Array.isArray(patch)) {
+                res.statusCode = 400;
+                res.setHeader("Content-Type", "application/json");
+                res.end(JSON.stringify({ ok: false, error: "preset and tokenPatch are required" }));
+                return;
+              }
+
+              const doc = fs.existsSync(tokensPath)
+                ? JSON.parse(fs.readFileSync(tokensPath, "utf8"))
+                : { version: 2, seed: {}, seedDark: {}, customSeeds: {}, fixedAliases: {}, mapOverrides: { light: {}, dark: {} } };
+              let mergedFields = 0;
+              for (const section of ["seed", "seedDark", "customSeeds", "fixedAliases", "mapOverrides"]) {
+                const incoming = patch[section];
+                if (!incoming || typeof incoming !== "object" || Array.isArray(incoming)) continue;
+                if (!doc[section] || typeof doc[section] !== "object" || Array.isArray(doc[section])) doc[section] = {};
+                for (const [key, value] of Object.entries(incoming)) {
+                  if (value && typeof value === "object" && !Array.isArray(value)) {
+                    doc[section][key] = { ...(doc[section][key] ?? {}), ...value };
+                  } else {
+                    doc[section][key] = value;
+                  }
+                  mergedFields++;
+                }
+              }
+
+              writeFileWithFsync(tokensPath, JSON.stringify(doc, null, 2) + "\n");
+              const sync = execSyncCaptured("npm run sync:anchor", { cwd: repoRoot });
+              res.setHeader("Content-Type", "application/json");
+              res.end(
+                JSON.stringify({
+                  ok: true,
+                  preset,
+                  mergedFields,
+                  fileWritten: true,
+                  syncOk: sync.ok,
+                  syncError: sync.ok ? null : sync.stderr || sync.stdout,
+                }),
+              );
+            } catch (e) {
+              res.statusCode = 500;
+              res.setHeader("Content-Type", "application/json");
+              res.end(JSON.stringify({ ok: false, error: String(e) }));
+            }
+          });
           return;
         }
 
@@ -933,9 +1227,9 @@ export function schemaApiPlugin(repoRoot) {
 
         // POST /api/import-component-path  — accepts { path } where path is
         // an absolute (or ~-prefixed) file or folder on the dev machine.
-        // For a .tsx file: copies it into src/components/base/ and
-        // auto-generates a *.demo.tsx if missing.
-        // For a folder: imports scanned .tsx files (skipping
+        // For a React + Tailwind .tsx file: copies it into
+        // src/components/base/ and auto-generates a *.demo.tsx if missing.
+        // For a folder: imports compatible scanned .tsx files (skipping
         // *.demo.tsx and *.stories.tsx).
         if (req.method === "POST" && url === "/api/import-component-path") {
           const chunks = [];
@@ -1011,6 +1305,14 @@ export function schemaApiPlugin(repoRoot) {
                     skipped.push({ file: entry, error: "not an importable component .tsx file" });
                     continue;
                   }
+                  const stack = inspectReactTailwindComponent(selectedPath);
+                  if (!stack.ok) {
+                    skipped.push({
+                      file: entry,
+                      error: `not a supported React + Tailwind component (${stack.reasons.join("; ")})`,
+                    });
+                    continue;
+                  }
                   if (safeOnly) {
                     const inspection = inspectComponentImports(selectedPath);
                     if (inspection.level !== "safe") {
@@ -1027,9 +1329,30 @@ export function schemaApiPlugin(repoRoot) {
                   res.end(JSON.stringify({ ok: false, error: "File must be an importable component .tsx file" }));
                   return;
                 }
+                const stack = inspectReactTailwindComponent(sourcePath);
+                if (!stack.ok) {
+                  res.statusCode = 400;
+                  res.setHeader("Content-Type", "application/json");
+                  res.end(JSON.stringify({
+                    ok: false,
+                    error: "File must be a React + Tailwind .tsx component",
+                    reasons: stack.reasons,
+                  }));
+                  return;
+                }
                 filesToImport.push(sourcePath);
               } else {
-                filesToImport.push(...collectImportableComponentFiles(sourcePath, { recursive: body?.recursive === true }));
+                for (const candidate of collectImportableComponentFiles(sourcePath, { recursive: body?.recursive === true })) {
+                  const stack = inspectReactTailwindComponent(candidate);
+                  if (!stack.ok) {
+                    skipped.push({
+                      file: componentReportName(sourcePath, candidate),
+                      error: `not a supported React + Tailwind component (${stack.reasons.join("; ")})`,
+                    });
+                    continue;
+                  }
+                  filesToImport.push(candidate);
+                }
               }
               if (filesToImport.length === 0) {
                 res.statusCode = 400;

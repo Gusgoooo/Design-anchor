@@ -2,7 +2,7 @@
 
 Design-anchor is an AI-native design-system governance pipeline for long-lived React + Tailwind products.
 
-It combines tokens, component specs, generated AI rules, MCP tools, Portal editing, and executable audit checks so teams can let humans and AI agents ship UI faster without losing product consistency.
+It combines a recommended default component library, tokens, component specs, generated AI rules, MCP tools, Portal editing, and executable audit checks so teams can let humans and AI agents ship UI faster without losing product consistency.
 
 ## Recommended Reading Order
 
@@ -10,6 +10,7 @@ It combines tokens, component specs, generated AI rules, MCP tools, Portal editi
 |---|---|
 | [Product Adoption Guide](./PRODUCT_ADOPTION_GUIDE.md) | You need to explain the product value, target users, B2B use cases, rollout plan, and adoption ROI. |
 | [Product Architecture](./PRODUCT_ARCHITECTURE.md) | You need to understand the technical architecture: Portal, tokens, schema, MCP, sync, and audit. |
+| [Token Contract](./TOKEN_CONTRACT.md) | You need the executable seed-to-component protocol for future governance work. |
 | [Directory Boundaries](./BOUNDARIES.md) | You are integrating Design-anchor into an app and need to know where app code, UI code, and AI config belong. |
 | [Design-anchor vs. Centralized DSM-ForAI](./ANCHOR_VS_DONE_DSM_ONEPAGER.md) | You are comparing local repo-level governance with centralized design-system/MCP platforms. |
 | [Project Review Report](./PROJECT_REVIEW_REPORT_2026-05-25.md) | You want the latest project review, product selling points, risks, and optimization status. |
@@ -21,7 +22,7 @@ Chinese docs: [docs/README.zh-CN.md](./README.zh-CN.md).
 
 Traditional UI kits answer: "Which component should I use?"
 
-Design-anchor answers a larger question: "How do we keep the whole product coherent when many people and AI agents keep changing it over years?"
+Design-anchor answers a larger question: "How do we keep the default component system coherent when many people and AI agents keep changing the product over years?"
 
 The answer is a governed loop:
 

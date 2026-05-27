@@ -24,11 +24,11 @@ const checkboxVariants = cva(
 const iconSizeFor = (size: VariantProps<typeof checkboxVariants>["size"]) => {
   switch (size) {
     case "sm":
-      return "h-3 w-3"
+      return "h-2.5 w-2.5"
     case "lg":
-      return "h-4 w-4"
-    default:
       return "h-3.5 w-3.5"
+    default:
+      return "h-3 w-3"
   }
 }
 

@@ -17,7 +17,7 @@ type ImportResult = {
 };
 
 /**
- * Imports a .tsx file or a folder of .tsx files into
+ * Imports a React + Tailwind .tsx file or folder into
  * src/components/base/ by reading from a local path on the dev machine.
  * The dev-only Vite middleware (/api/import-component-path) does the
  * filesystem work; this dialog is just the input.
@@ -108,7 +108,7 @@ export function AddComponentDialog({ open, onClose }: Props) {
         <div className="flex flex-col gap-3 px-5 py-4">
           <div className="flex items-center gap-2 text-sm font-medium text-foreground">
             <FolderInput size={14} />
-            {t({ en: "Import .tsx file or folder", zh: "导入 .tsx 文件或文件夹" })}
+            {t({ en: "Import React + Tailwind .tsx file or folder", zh: "导入 React + Tailwind .tsx 文件或文件夹" })}
           </div>
 
           <label className="flex flex-col gap-1.5">
@@ -132,8 +132,8 @@ export function AddComponentDialog({ open, onClose }: Props) {
             />
             <span className="text-sm leading-snug text-muted-foreground">
               {t({
-                en: "Absolute path. ~ expands to $HOME. A folder imports every direct-child .tsx (skipping *.demo.tsx). Files copy to src/components/base/; a matching *.demo.tsx is auto-generated if missing.",
-                zh: "绝对路径。~ 会扩展为 $HOME。指向文件夹时会导入其下所有 .tsx（跳过 *.demo.tsx）。文件会复制到 src/components/base/；如果没有同名 *.demo.tsx 会自动生成一个。",
+                en: "Only React + Tailwind components are supported. Absolute path. ~ expands to $HOME. A folder imports .tsx files (skipping *.demo.tsx). Files copy to src/components/base/; a matching *.demo.tsx is auto-generated if missing.",
+                zh: "仅支持 React + Tailwind 组件。绝对路径，~ 会扩展为 $HOME。指向文件夹时会导入 .tsx（跳过 *.demo.tsx）。文件会复制到 src/components/base/；如果没有同名 *.demo.tsx 会自动生成一个。",
               })}
             </span>
           </label>

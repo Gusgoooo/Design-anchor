@@ -1,6 +1,6 @@
 {
   "name": "design-anchor",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "AI coding governance pipeline — define design protocols, generate components + rules + audits automatically",
   "private": false,
   "publishConfig": {
@@ -46,7 +46,9 @@
     "anchor:audit:kit": "node scripts/anchor-audit.mjs --scope kit",
     "anchor:audit:portal": "node scripts/anchor-audit.mjs --scope portal",
     "anchor:audit:all": "node scripts/anchor-audit.mjs --scope all",
-    "check:anchor": "node scripts/check-anchor-consistency.mjs",
+    "anchor:audit:fix": "node scripts/anchor-audit.mjs --scope all --fix",
+    "check:tokens": "node scripts/check-token-contract.mjs",
+    "check:anchor": "node scripts/check-anchor-consistency.mjs && npm run check:tokens",
     "dev": "vite --config src/anchor-portal/vite.config.ts",
     "build": "vite build --config src/anchor-portal/vite.config.ts",
     "typecheck": "tsc --noEmit"

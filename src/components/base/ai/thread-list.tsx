@@ -93,13 +93,13 @@ const ThreadListItemMore: FC = () => {
         className="aui-thread-list-item-more-content z-50 min-w-32 overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
       >
         <ThreadListItemPrimitive.Archive asChild>
-          <ThreadListItemMorePrimitive.Item className="aui-thread-list-item-more-item flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+          <ThreadListItemMorePrimitive.Item className="aui-thread-list-item-more-item flex cursor-pointer select-none items-center gap-2 rounded-[max(2px,calc(var(--radius-md)-var(--spacing-1)))] px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
             <ArchiveIcon className="size-4" />
             Archive
           </ThreadListItemMorePrimitive.Item>
         </ThreadListItemPrimitive.Archive>
         <ThreadListItemPrimitive.Delete asChild>
-          <ThreadListItemMorePrimitive.Item className="aui-thread-list-item-more-item flex cursor-pointer select-none items-center gap-2 rounded-sm px-2 py-1.5 text-destructive text-sm outline-none hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive">
+          <ThreadListItemMorePrimitive.Item className="aui-thread-list-item-more-item flex cursor-pointer select-none items-center gap-2 rounded-[max(2px,calc(var(--radius-md)-var(--spacing-1)))] px-2 py-1.5 text-destructive text-sm outline-none hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive">
             <TrashIcon className="size-4" />
             Delete
           </ThreadListItemMorePrimitive.Item>

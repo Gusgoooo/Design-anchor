@@ -9,9 +9,9 @@ const BASH_COMMAND = "npx design-anchor start";
 
 const TABS: { id: TopTab; label: Bilingual; onClick: () => void }[] = [
   { id: "docs", label: { en: "Docs", zh: "文档" }, onClick: () => navigateTo({ kind: "docs" }) },
-  { id: "designtoken", label: { en: "Design Token", zh: "Design Token" }, onClick: () => navigateTo({ kind: "designtoken" }) },
-  { id: "components", label: { en: "Components", zh: "组件" }, onClick: () => navigateTo({ kind: "components" }) },
-  { id: "govern", label: { en: "Govern", zh: "治理" }, onClick: () => navigateTo({ kind: "govern" }) },
+  { id: "govern", label: { en: "Project Health", zh: "项目健康" }, onClick: () => navigateTo({ kind: "govern" }) },
+  { id: "components", label: { en: "Library", zh: "组件库" }, onClick: () => navigateTo({ kind: "components" }) },
+  { id: "designtoken", label: { en: "Theme", zh: "主题" }, onClick: () => navigateTo({ kind: "designtoken" }) },
 ];
 
 export function TopNav() {

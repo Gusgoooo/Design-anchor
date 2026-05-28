@@ -7,21 +7,33 @@
 3. **Components first**: page development must use Spec-declared business components; no native HTML tag substitutes.
 4. **Single source of truth**: component behavior follows `src/anchor/schema/components/*.spec.json`; do not infer API from memory.
 
+## AI Coding Loop (Design-anchor must be visible)
+
+- **Preflight exposure**: when a task touches UI, theme, components, tokens, or page layout, start with a visible line: `Design Anchor 预检：我会先查组件规范与 token，优先复用 @design。`
+- **Before writing UI**: choose existing Spec-declared components and token classes first; mention any missing component/token before inventing one.
+- **During edits**: when rules or audit detect raw HTML, hard-coded colors, arbitrary token-sensitive values, or bypassed `@design` components, fix them inside the code generation flow and say: `Design Anchor 自动治理：已将 <button> / hardcoded color / arbitrary spacing 改为组件或语义 token。`
+- **After edits**: run or summarize the Design Anchor self-check in the assistant's task summary. Do not turn these findings into a Portal backlog.
+- **Final answer must include a `Design Anchor 自检` line whenever UI code changed**, covering reused components, token compliance, auto-fixes, unresolved confirmations, and sync/audit status.
+- **Passed summary**: `Design Anchor 自检：复用了 N 个 @design 组件，未发现硬编码颜色，规则已同步。`
+- **Auto-fixed summary**: `Design Anchor 自检：检测到 N 处绕过 @design / token 的实现，已改为使用 Button / DataTable / semantic tokens。`
+- **Needs-confirmation summary**: `Design Anchor 自检：有 N 处需要确认：这个原生 table 是否应该替换为 DataTable？`
+- **Never hide Design Anchor behind generic wording** such as “lint passed” or “checks passed”; name it explicitly in the AI response.
+
 ## Portal Intent Router (Chinese/English)
 
 When the user asks to inspect or change design-system state, open Anchor Portal first instead of editing files blindly. Run `npx design-anchor portal <tab>`.
 
 | User intent | Chinese trigger examples | English trigger examples | Open |
 |---|---|---|---|
-| Token / theme | 改 token、调整 token、看看 token、当前 token、改品牌色、改圆角、改间距、切暗色、主题设置 | change token, edit tokens, show tokens, token status, brand color, radius, spacing, dark mode, theme | `npx design-anchor portal tokens` |
+| Token / theme | 改 token、调整 token、看看 token、当前 token、修改主题、调整主题、打开主题编辑器、主题编辑器、改品牌色、改圆角、改间距、切暗色、主题设置 | change token, edit tokens, show tokens, token status, edit theme, adjust theme, open theme editor, theme editor, brand color, radius, spacing, dark mode, theme | `npx design-anchor portal tokens` |
 | Component library | 有哪些组件、组件列表、组件库、看看组件、组件预览 | component list, available components, component library, show components, preview components | `npx design-anchor portal components` |
 | Component spec / schema | 组件规范、组件协议、组件 schema、组件 props、映射关系、变体规范 | component spec, schema, props contract, variant mapping, component contract | `npx design-anchor portal specs` |
 | Component style tuning | 改组件样式、调整组件、按钮样式、表格样式、组件风格 | change component style, tune component, button style, table style | `npx design-anchor portal components` |
-| Governance / health | 治理、健康度、组件使用情况、使用统计、审计、漂移检查 | governance, health, component usage, audit, drift check, compliance | `npx design-anchor portal govern` |
+| Dashboard / health | 右上角仪表盘、健康度、AI 约束状态、审计、自检 | dashboard, health, AI constraints, audit, self-check | `npx design-anchor portal theme` then use the top-right dashboard icon |
 | Docs / help | 文档、使用说明、怎么接入、CLI 命令 | docs, documentation, how to use, setup, CLI commands | `npx design-anchor portal docs` |
 | Preset / onboarding | 选择 preset、品牌风格、重新 onboarding、从预设开始 | preset, style preset, onboarding, brand style | `npx design-anchor portal presets` |
 
-If the request contains open/show/check/list/change/edit/configure/查看/看看/打开/调整/修改/配置 plus token/theme/component/spec/governance/preset/docs terms, open Portal. Skip this only when the user explicitly says not to open Portal or asks for code-only file edits.
+If the request contains open/show/check/list/change/edit/configure/查看/看看/打开/调整/修改/配置 plus token/theme/theme editor/component/spec/dashboard/health/preset/docs terms, open Portal. Skip this only when the user explicitly says not to open Portal or asks for code-only file edits.
 
 ## Import Priority
 - **Primary path**: each component uses its `referencePriority[0]` as the default import; do not switch between multiple paths arbitrarily.

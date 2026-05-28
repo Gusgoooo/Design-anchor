@@ -28,13 +28,25 @@
 - **组件规范**：以 `./.anchor/src/anchor/schema/components/*.spec.json` 为唯一数据源；规范中的组件路径应指向 `@/components/anchor-ui` 或 `@design`。
 - **修改后**：运行 `npm run sync:anchor` 同步 .cursorrules 与 Tailwind 扩展。
 
+## AI 生码链路中的 Design Anchor
+
+- **生码开始**：只要任务涉及 UI / 主题 / 组件 / token / 页面布局，先显式输出：`Design Anchor 预检：我会先查组件规范与 token，优先复用 @design。`
+- **写 UI 前**：先查 `@design` / `src/components/anchor-ui` 和组件 spec，优先复用已有组件与 token。
+- **写 UI 中**：发现原生 `<button>`、`<input>`、`<table>`、硬编码颜色、任意值 Tailwind 或绕过 `@design` 的实现时，直接在当前生码任务里改正，并显式说明：`Design Anchor 自动治理：已改为组件或语义 token。`
+- **写 UI 后**：运行或总结 Design Anchor 自检，把结果放在 AI 任务总结中，不把问题处理迁移到 Portal backlog。
+- **最终回复**：只要改过 UI，必须包含一行 `Design Anchor 自检`，说明组件复用、token 合规、自动修复、待确认项与同步 / audit 状态。
+- **通过示例**：`Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`
+- **自动修复示例**：`Design Anchor 自检：检测到 2 处绕过 @design / token 的实现，已改为使用 Button / DataTable。`
+- **需要确认示例**：`Design Anchor 自检：有 1 处需要确认：这个原生 table 是否应该替换为 DataTable？`
+- **禁止弱化表达**：不要只说 “lint passed / checks passed”，必须点名 Design Anchor。
+
 ## Portal 自动唤起
 
-用户要求查看或修改 token、主题、组件库、组件规范、组件样式、治理健康度、preset 或文档时，优先运行 `npx design-anchor portal <tab>` 打开 Portal。中英文都要识别，例如：
+用户要求查看或修改 token、主题、组件库、组件规范、组件样式、右上角仪表盘、preset 或文档时，优先运行 `npx design-anchor portal <tab>` 打开 Portal。中英文都要识别，例如：
 
-- `tokens`：改 token、看看 token、改品牌色、改圆角、theme、design tokens。
+- `tokens`：改 token、看看 token、修改主题、调整主题、打开主题编辑器、主题编辑器、改品牌色、改圆角、theme、theme editor、design tokens。
 - `components`：有哪些组件、组件列表、组件预览、component library。
 - `specs`：组件规范、组件 schema、props contract、variant mapping。
-- `govern`：治理、健康度、组件使用情况、audit、drift check。
+- `dashboard`：右上角仪表盘、健康度、AI 约束状态、audit、self-check。
 - `docs`：文档、怎么接入、CLI commands。
 - `presets`：选择 preset、品牌风格、onboarding。

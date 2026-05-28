@@ -46,6 +46,8 @@ Design-anchor 把软文档换成三层硬约束，让漂移在机制上不可能
 | **Hooks** | `anchor audit` AST 扫描，保存/pre-commit/CI 三处触发。`bg-[#0204a3]`、`<button>` 会被拦截；明确 px 值会先尝试映射到等值 token，再决定是否保留手写值。 | 生码之后 |
 | **MCP** | 13 个工具让 agent 读 schema、改 token、跑 audit、同步规则——零拷贝 | 按需调度 |
 
+AI 生码时，Design-anchor 的反馈应该直接出现在同一段对话里：开始 UI 任务时先出现 `Design Anchor 预检`，自动修复时明确说 `Design Anchor 自动治理`，只有需要产品判断时才提确认问题，任务结束时追加轻量自检，例如 `Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`。
+
 <a id="快速开始"></a>
 ## 快速开始
 
@@ -144,7 +146,7 @@ anchor start [dir]        Init + install + 打开 Portal
 anchor init  [dir]        仅 scaffold .anchor/
 anchor govern             仅注入 AI 规则（不拷贝组件）
 anchor dev   [dir]        在已有 .anchor/ 上启动 Portal
-anchor portal [tab] [dir] 打开指定 Portal tab：tokens/components/specs/govern/docs/patterns
+anchor portal [tab] [dir] 打开指定 Portal tab：tokens/theme/theme-editor/components/specs/docs
 anchor sync  [dir]        重新生成规则 + token
 anchor audit [dir]        AST 扫描违规
 anchor upgrade [dir]      更新模板（保留你的修改）

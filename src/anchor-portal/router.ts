@@ -4,28 +4,22 @@ export type Route =
   | { kind: "docs" }
   | { kind: "onboarding" }
   | { kind: "designtoken" }
-  | { kind: "govern" }
   | { kind: "components" }
-  | { kind: "story"; storyId: string }
-  | { kind: "patterns" };
+  | { kind: "story"; storyId: string };
 
 /** Which top-nav tab is highlighted for a given route. */
-export type TopTab = "docs" | "designtoken" | "govern" | "components" | "patterns";
+export type TopTab = "designtoken" | "components";
 
-export function tabForRoute(r: Route): TopTab {
+export function tabForRoute(r: Route): TopTab | null {
   switch (r.kind) {
     case "docs":
     case "onboarding":
-      return "docs";
+      return null;
     case "designtoken":
       return "designtoken";
-    case "govern":
-      return "govern";
     case "components":
     case "story":
       return "components";
-    case "patterns":
-      return "patterns";
   }
 }
 
@@ -35,15 +29,16 @@ export function parseHash(hash: string = window.location.hash): Route {
   const trimmed = hash.replace(/^#/, "");
   const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
   if (path === "/onboarding" || path === "/setup") return { kind: "onboarding" };
-  if (path === "/" || path === "" || path === "/docs") return { kind: "docs" };
+  if (path === "/" || path === "") return { kind: "designtoken" };
+  if (path === "/docs") return { kind: "docs" };
   if (path === "/_designtoken" || path === "/designtoken" || path === "/theme") return { kind: "designtoken" };
-  if (path === "/_govern" || path === "/govern" || path === "/health") return { kind: "govern" };
-  if (path === "/_patterns" || path === "/patterns") return { kind: "patterns" };
+  if (path === "/_govern" || path === "/govern" || path === "/health") return { kind: "designtoken" };
+  if (path === "/_patterns" || path === "/patterns") return { kind: "designtoken" };
   if (path === "/components" || path === "/library") return { kind: "components" };
   if (path.startsWith(STORY_PREFIX)) {
     return { kind: "story", storyId: path.slice(STORY_PREFIX.length) };
   }
-  return { kind: "docs" };
+  return { kind: "designtoken" };
 }
 
 export function serializeRoute(r: Route): string {
@@ -54,12 +49,8 @@ export function serializeRoute(r: Route): string {
       return "#/onboarding";
     case "designtoken":
       return "#/theme";
-    case "govern":
-      return "#/health";
     case "components":
       return "#/library";
-    case "patterns":
-      return "#/_patterns";
     case "story":
       return `#${STORY_PREFIX}${r.storyId}`;
   }

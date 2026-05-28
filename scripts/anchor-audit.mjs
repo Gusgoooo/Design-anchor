@@ -540,6 +540,7 @@ if (fixMode && pendingFixes.length > 0 && !fixesApplied) {
 
 if (!payload.passed) {
   const fixedText = fixMode && payload.fixedCount ? ` (${payload.fixedCount} auto-fixed)` : "";
+  console.error(`Design Anchor 自检：发现 ${payload.issueCount} 处需要处理 (${payload.scope} scope)${fixedText}`);
   console.error(`anchor-audit failed: ${payload.issueCount} issue(s) in ${payload.scope} scope${fixedText}\n`);
   if (payload.profiles) {
     for (const profile of payload.profiles) {
@@ -557,8 +558,10 @@ if (!payload.passed) {
 
 if (payload.profiles) {
   const fixedText = fixMode && payload.fixedCount ? `, ${payload.fixedCount} auto-fixed` : "";
+  console.log(`Design Anchor 自检：通过，扫描 ${payload.scanned} 个 .tsx 文件，未发现硬编码颜色或组件绕过。`);
   console.log(`anchor-audit passed (${payload.scanned} .tsx files across ${payload.profiles.length} scopes${fixedText})`);
 } else {
   const fixedText = fixMode && payload.fixedCount ? `, ${payload.fixedCount} auto-fixed` : "";
+  console.log(`Design Anchor 自检：通过，扫描 ${payload.scanned} 个 .tsx 文件，未发现硬编码颜色或组件绕过。`);
   console.log(`anchor-audit passed (${payload.scope} scope, scanned ${payload.scanned} .tsx files${fixedText})`);
 }

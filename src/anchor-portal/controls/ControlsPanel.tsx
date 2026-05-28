@@ -10,9 +10,48 @@ import {
 } from "./normalize";
 import { ControlInput } from "./ControlInput";
 
+const EMPTY_DIRTY_KEYS = new Set<string>();
+
 export function ControlsPanel() {
   const { t } = useLocale();
   const { session } = useStorySession();
+  const containerRef = React.useRef<HTMLDivElement>(null);
+
+  const visible = React.useMemo(
+    () =>
+      session
+        ? buildVisibleArgTypes(
+            session.meta.argTypes,
+            session.storyObj.argTypes,
+            session.draftArgs,
+          )
+        : [],
+    [session],
+  );
+  const hasControls = visible.length > 0;
+  const groups = React.useMemo(() => groupByCategory(visible), [visible]);
+  const isDirty = session?.isDirty ?? false;
+  const dirtyKeys = session?.dirtyKeys ?? EMPTY_DIRTY_KEYS;
+
+  // Apply / Discard via keyboard while the panel is focused.
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el || !session || !isDirty) return;
+    const activeSession = session;
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement | null;
+      const editing = target && (target.tagName === "TEXTAREA" || target.tagName === "SELECT");
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
+        e.preventDefault();
+        activeSession.applyDraft();
+      } else if (e.key === "Escape" && !editing) {
+        e.preventDefault();
+        activeSession.discardDraft();
+      }
+    }
+    el.addEventListener("keydown", onKey);
+    return () => el.removeEventListener("keydown", onKey);
+  }, [isDirty, session]);
 
   if (!session) {
     return (
@@ -23,36 +62,6 @@ export function ControlsPanel() {
       />
     );
   }
-
-  const visible = buildVisibleArgTypes(
-    session.meta.argTypes,
-    session.storyObj.argTypes,
-    session.draftArgs,
-  );
-
-  const hasControls = visible.length > 0;
-  const groups = groupByCategory(visible);
-  const { isDirty, dirtyKeys } = session;
-
-  // Apply / Discard via keyboard while the panel is focused.
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  React.useEffect(() => {
-    const el = containerRef.current;
-    if (!el || !isDirty) return;
-    function onKey(e: KeyboardEvent) {
-      const target = e.target as HTMLElement | null;
-      const editing = target && (target.tagName === "TEXTAREA" || target.tagName === "SELECT");
-      if ((e.metaKey || e.ctrlKey) && e.key === "Enter") {
-        e.preventDefault();
-        session!.applyDraft();
-      } else if (e.key === "Escape" && !editing) {
-        e.preventDefault();
-        session!.discardDraft();
-      }
-    }
-    el.addEventListener("keydown", onKey);
-    return () => el.removeEventListener("keydown", onKey);
-  }, [isDirty, session]);
 
   return (
     <div ref={containerRef} className="relative flex h-full flex-col" tabIndex={-1}>
@@ -120,9 +129,8 @@ export function ControlsPanel() {
         </div>
       )}
 
-      {hasControls ? (
+      {hasControls && isDirty ? (
         <DraftFooter
-          isDirty={isDirty}
           count={dirtyKeys.size}
           onApply={session.applyDraft}
           onDiscard={session.discardDraft}
@@ -212,12 +220,10 @@ function ArgRow({
 }
 
 function DraftFooter({
-  isDirty,
   count,
   onApply,
   onDiscard,
 }: {
-  isDirty: boolean;
   count: number;
   onApply: () => void;
   onDiscard: () => void;
@@ -227,13 +233,7 @@ function DraftFooter({
     <div
       role="region"
       aria-label={t({ en: "Pending changes", zh: "待应用的改动" })}
-      aria-hidden={!isDirty}
-      className={cn(
-        "pointer-events-none absolute inset-x-3 bottom-3 z-20 rounded-lg border border-border bg-background/95 px-3 py-2 shadow-lg ring-1 ring-border/40 backdrop-blur transition-all duration-200 ease-out",
-        isDirty
-          ? "pointer-events-auto translate-y-0 opacity-100"
-          : "translate-y-3 opacity-0",
-      )}
+      className="absolute inset-x-3 bottom-3 z-20 rounded-lg border border-border bg-background/95 px-3 py-2 shadow-lg ring-1 ring-border/40 backdrop-blur transition-all duration-200 ease-out"
     >
       <div className="flex items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-2 text-sm text-muted-foreground">

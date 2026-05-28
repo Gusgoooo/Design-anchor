@@ -1,6 +1,6 @@
 {
   "name": "design-anchor",
-  "version": "4.1.0",
+  "version": "4.1.2",
   "description": "AI coding governance pipeline — define design protocols, generate components + rules + audits automatically",
   "private": false,
   "publishConfig": {
@@ -102,10 +102,8 @@
     "motion": "^12.38.0",
     "nanoid": "^5.1.11",
     "radix-ui": "^1.4.3",
-    "react": "^19.0.0",
     "react-colorful": "^5.6.1",
     "react-day-picker": "^10.0.0",
-    "react-dom": "^19.0.0",
     "react-resizable-panels": "^4.11.0",
     "recharts": "^3.8.1",
     "remark-gfm": "^4.0.1",
@@ -117,6 +115,10 @@
     "vaul": "^1.1.2",
     "zustand": "^5.0.13"
   },
+  "peerDependencies": {
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20"
+  },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "@types/culori": "^4.0.1",
@@ -126,6 +128,8 @@
     "@vitejs/plugin-react": "^4.3.4",
     "autoprefixer": "^10.4.20",
     "postcss": "^8.4.49",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
     "tailwindcss": "^4.2.4",
     "tailwindcss-animate": "^1.0.7",
     "typescript": "^5.7.0",

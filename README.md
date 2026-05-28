@@ -44,7 +44,7 @@ Design-anchor replaces soft documentation with three hard layers that make drift
 | Layer | What it does | When it acts |
 |---|---|---|
 | **Rules** | AI-readable contracts (`.cursorrules` / `CLAUDE.md` / `copilot-instructions.md`) generated from per-component `spec.json`. AI sees "use `<Button>`, not `<button>`" *before* writing the wrong thing. | Before generation |
-| **Hooks** | `anchor audit` AST scan runs on save, pre-commit, and CI. Rejects `bg-[#0204a3]`, raw `<button>`, `p-[13px]`. | After generation |
+| **Hooks** | `anchor audit` AST scan runs on save, pre-commit, and CI. Rejects `bg-[#0204a3]` and raw `<button>`; exact-value px overrides are mapped back to tokens before staying arbitrary. | After generation |
 | **MCP** | 13-tool server lets agents read schemas, update tokens, run audit, sync rules — no copy-paste loop. | On demand |
 
 <a id="quick-start"></a>
@@ -57,7 +57,7 @@ npx design-anchor start
 
 This does three things:
 
-1. **Scaffolds** `.anchor/` — 60+ governed React + Tailwind components, token engine, specs
+1. **Scaffolds** `.anchor/` + `src/components/anchor-ui/` — Anchor control plane plus 60+ governed React + Tailwind components in your source tree
 2. **Patches** your project — injects component dependencies, adds token import to `globals.css` (preserves your existing styles), generates AI rule files for Cursor / Claude / Copilot
 3. **Opens** the Portal — pick a brand preset or start from Tailwind Default
 
@@ -67,7 +67,7 @@ After the preset selection, Design-anchor shows a brief injection summary confir
 
 ```ts
 // tsconfig.json
-{ "compilerOptions": { "paths": { "@design": [".anchor/src/components/base"] } } }
+{ "compilerOptions": { "paths": { "@design": ["src/components/anchor-ui"], "@design/*": ["src/components/anchor-ui/*"] } } }
 ```
 
 ```tsx
@@ -121,7 +121,7 @@ your-project/
 AST scan that enforces two classes of rules:
 
 - **Forbidden native tags** — raw `<button>` when `<Button>` exists in the kit
-- **Arbitrary values on token-sensitive prefixes** — `bg-[#hex]`, `p-[13px]`, `rounded-[10px]` are rejected; `w-[280px]`, `max-w-[480px]` pass (layout one-offs are fine)
+- **Arbitrary values on token-sensitive prefixes** — hard-coded colors like `bg-[#hex]` are rejected. Numeric overrides such as `p-[24px]`, `rounded-[16px]`, and `text-[14px]` are first mapped to an equal token (`p-6`, `rounded-lg`, `text-sm`); unmatched one-off values stay explicit. `w-[280px]`, `max-w-[480px]` pass (layout one-offs are fine).
 
 ### MCP server
 
@@ -146,6 +146,7 @@ anchor start [dir]        Init + install + open Portal
 anchor init  [dir]        Scaffold .anchor/ only
 anchor govern             Inject AI rules without scaffolding
 anchor dev   [dir]        Start Portal on existing .anchor/
+anchor portal [tab] [dir] Open Portal tab: tokens/components/specs/govern/docs/patterns
 anchor sync  [dir]        Regenerate rules + tokens
 anchor audit [dir]        AST scan for violations
 anchor upgrade [dir]      Pull latest template (preserves edits)
@@ -154,15 +155,22 @@ anchor screenshot [img]   Image-based token extraction prompt
 anchor theme <prompt.md>  Extract tokens from design prompt
 ```
 
+React is a peer dependency (`>=18 <20`). Keep `react` and `react-dom` deduped to the host project when importing the visible `src/components/anchor-ui` source through `@design`.
+
 ## What lands in your project
 
 ```
 your-project/
-├── .anchor/                            Component library + token engine
-│   ├── src/components/base/            60+ React + Tailwind components
+├── src/design-tokens/                  Project token source of truth
+│   └── tokens.json
+├── src/styles/
+│   └── design-tokens.generated.css     Generated runtime CSS imported by the app
+├── src/components/anchor-ui/           60+ React + Tailwind components
+├── .anchor/                            Anchor Portal + schema + sync control plane
 │   ├── src/anchor/schema/              Per-component spec.json contracts
-│   ├── src/design-tokens/              tokens.json + derivation algorithm
-│   └── package.json                    peerDependencies (resolved from project root)
+│   ├── src/anchor/component-demos/     Portal-only component demos
+│   ├── src/design-tokens/              Seed-to-map algorithm + default template
+│   └── package.json                    Portal toolchain only; runtime deps resolve from project root
 ├── CLAUDE.md                           AI rules (Claude)
 ├── .cursor/rules/anchor.mdc            AI rules (Cursor)
 ├── .github/copilot-instructions.md     AI rules (Copilot)

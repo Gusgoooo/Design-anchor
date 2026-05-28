@@ -39,21 +39,24 @@ This is especially important for B2B and enterprise products where repeated form
 |---|---|---|
 | Product designer | Adjust theme, review components, preserve product language | Portal Design Token and Components views |
 | Frontend engineer | Import governed components and keep PRs clean | `@design`, `anchor sync`, `anchor audit` |
-| Design-system owner | Maintain tokens, specs, and adoption rules | `src/design-tokens`, `src/anchor/schema`, Portal |
+| Design-system owner | Maintain tokens, specs, and adoption rules | `src/design-tokens`, `.anchor/src/anchor/schema`, Portal |
 | AI agent | Discover components, read rules, update tokens, self-check | Generated rule files and MCP tools |
 | Engineering lead | Make governance visible and CI-enforced | Govern view, audit profiles, CI integration |
 
 ## 4. Runtime And Repository Layout
 
-In a consuming project, Design-anchor creates a local `.anchor/` subtree and root-level governance files.
+In a consuming project, Design-anchor creates a local `.anchor/` control plane, a visible component source directory, and root-level governance files.
 
 ```
 your-project/
 ├── app or src/                         business application code
-├── .anchor/                            local design-system workspace
-│   ├── src/components/base/             React + Tailwind component source
-│   ├── src/design-tokens/               tokens.json + seed-to-map pipeline
+├── src/components/anchor-ui/            React + Tailwind component source of truth
+├── src/design-tokens/                   project token source of truth
+├── src/styles/                          generated token CSS
+├── .anchor/                             Anchor control plane
 │   ├── src/anchor/schema/components/    per-component *.spec.json
+│   ├── src/anchor/component-demos/      Portal-only component previews
+│   ├── src/design-tokens/               seed-to-map pipeline and default template
 │   ├── src/anchor-portal/               Vite Portal UI
 │   └── scripts/                         sync, token, audit helpers
 ├── .cursor/rules/anchor.mdc             Cursor project rule
@@ -74,9 +77,9 @@ In the product repo itself, the same source lives under `src/` and is packaged i
 | CLI | `bin/anchor.mjs` | `start`, `init`, `dev`, `sync`, `audit`, `upgrade`, `mcp`, onboarding orchestration |
 | MCP server | `bin/anchor-mcp.mjs` | Exposes schema, tokens, files, audit, and sync over stdio JSON-RPC |
 | Portal shell | `src/anchor-portal/` | Vite React app for Docs, Design Token, Components, Onboarding, Govern |
-| Component source | `src/components/base/` | Governed React + Tailwind components exported through the base barrel |
-| Component specs | `src/anchor/schema/components/*.spec.json` | Machine-readable contracts for usage, forbidden tags, primitives, and AI hints |
-| Token source | `src/design-tokens/tokens.json` | Seed, dark overrides, custom seeds, and derived-token overrides |
+| Component source | Consumer projects: `src/components/anchor-ui/`; product template source: `src/components/base/` | Governed React + Tailwind components exported through `@design` |
+| Component specs | Consumer projects: `.anchor/src/anchor/schema/components/*.spec.json`; product template source: `src/anchor/schema/components/*.spec.json` | Machine-readable contracts for usage, forbidden tags, primitives, and AI hints |
+| Token source | Consumer projects: `src/design-tokens/tokens.json`; product template source: `src/design-tokens/tokens.json` | Seed, dark overrides, custom seeds, and derived-token overrides |
 | Token compiler | `src/design-tokens/seed-to-map.mjs` | Converts compact seeds into 200+ semantic CSS variables |
 | Sync pipeline | `scripts/sync-from-schema.mjs`, `scripts/emit-design-tokens-css.mjs` | Regenerates rules, CSS variables, and Tailwind extensions |
 | Audit | `scripts/anchor-audit.mjs` | AST checks for forbidden tags and arbitrary token-sensitive Tailwind values |
@@ -92,7 +95,7 @@ tokens.json
   -> seed-to-map.mjs
   -> design-tokens.generated.css
   -> Tailwind v4 @theme variables
-  -> component className utilities
+  -> src/components/anchor-ui className utilities
   -> live Portal preview and app UI
 ```
 
@@ -143,8 +146,8 @@ The Portal is a Vite React application, not a Storybook runtime. It is optimized
 
 - **Docs**: bilingual usage and integration docs.
 - **Design Token**: visual token editor with live preview and Save & Sync.
-- **Components**: component browser, controls, and spec editing.
-- **Onboarding**: default kit, import existing components, or start empty.
+- **Components**: reads real components from `src/components/anchor-ui`, then uses `.anchor/src/anchor/component-demos` for previews, controls, and spec editing.
+- **Onboarding**: default kit, import existing components into `src/components/anchor-ui`, or start empty.
 - **Govern**: audit status, scope tags, issue list, and rule health.
 
 Routes are lazy-loaded so heavier workbench screens do not inflate the initial bundle.
@@ -155,13 +158,13 @@ The CLI is the user's operational entry point.
 
 | Command | Role |
 |---|---|
-| `anchor start` | One-click init, install, and Portal launch |
-| `anchor init` | Scaffold `.anchor/` and governance files |
+| `anchor start` | One-click init, project dependency install, Portal toolchain install, and Portal launch |
+| `anchor init` | Scaffold `.anchor/` control plane, `src/components/anchor-ui/` component source, and governance files |
 | `anchor govern` | Add rules and governance to an existing project without full component setup |
 | `anchor dev` | Start Portal for an existing workspace |
 | `anchor sync` | Regenerate tokens, AI rules, and generated contract files |
 | `anchor audit` | Run AST governance checks |
-| `anchor upgrade` | Pull the latest template while preserving local product assets |
+| `anchor upgrade` | Pull the latest template while preserving local component changes, tokens, specs, and product assets |
 | `anchor mcp` | Start MCP server for AI clients |
 | `anchor screenshot` | Print the screenshot-to-token workflow prompt |
 | `anchor theme` | Extract tokens from a markdown design prompt |
@@ -170,8 +173,8 @@ The CLI is the user's operational entry point.
 
 The MCP server gives agents structured access to local project truth. Current tool categories:
 
-- Component discovery and reading.
-- Component creation.
+- Component discovery and reading, defaulting to `src/components/anchor-ui`.
+- Component creation into `src/components/anchor-ui`, with Portal demos written to `.anchor/src/anchor/component-demos`.
 - Token listing and updating.
 - Schema listing, reading, and updating.
 - Audit and sync execution.
@@ -204,5 +207,5 @@ The audit intentionally allows many layout-specific arbitrary values such as wid
 
 - AI tools can still make mistakes. Design-anchor reduces drift through context and checks; it does not make model behavior mathematically perfect.
 - Audit coverage is intentionally focused on high-value violations first. Deeper checks for complex `cn()` expressions, inline styles, and dependency-aware imports can extend it further.
-- The local `.anchor/` workspace is a real component and Portal workspace. It is intentionally versionable and visible to the project, not a hidden remote service.
+- The local `.anchor/` directory is the Anchor control plane; real component source lives in `src/components/anchor-ui/`. Both are intentionally versionable and visible to the project, not hidden remote state.
 - Centralized enterprise design-system platforms can coexist with Design-anchor. A central platform can own cross-repo cataloging while Design-anchor enforces repo-local implementation.

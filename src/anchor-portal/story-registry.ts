@@ -2,13 +2,13 @@ import * as React from "react";
 import type { DemoModule, Meta, StoryObj } from "./argTypes-types";
 
 /**
- * Discover all *.demo.tsx files under src/components/.
+ * Discover all *.demo.tsx files under component demos.
  * Lazy loaders are returned so we don't bundle every story into the entry chunk.
- *
- * Pattern uses the `@/` alias (resolved by Vite to src/) so glob discovery works
- * when this file lives under a different vite root than the demos.
  */
-const demoLoaders = import.meta.glob<DemoModule>("../components/**/*.demo.tsx");
+const demoLoaders = import.meta.glob<DemoModule>([
+  "../components/**/*.demo.tsx",
+  "../anchor/component-demos/**/*.demo.tsx",
+]);
 
 export type StoryEntry = {
   id: string;             // "base-button--default"
@@ -16,7 +16,7 @@ export type StoryEntry = {
   exportName: string;     // "Default" (matches the demo file export)
   componentId: string;    // "base-button"
   componentTitle: string; // "Base/Button"
-  filePath: string;       // glob key, e.g., "../components/base/Button.demo.tsx"
+  filePath: string;       // glob key, e.g., "../anchor/component-demos/base/Button.demo.tsx"
 };
 
 export type ComponentEntry = {
@@ -67,6 +67,64 @@ function isStoryObj(x: unknown): x is StoryObj {
   return Boolean(x) && typeof x === "object";
 }
 
+function uniqueSuffixFromPath(filePath: string): string {
+  return filePath
+    .split("/")
+    .pop()
+    ?.replace(/\.demo\.tsx$/, "")
+    .replace(/[^a-zA-Z0-9]+/g, "-")
+    .toLowerCase()
+    .replace(/^-+|-+$/g, "") || "story";
+}
+
+function reserveUniqueId(baseId: string, used: Set<string>, suffix = "duplicate"): string {
+  if (!used.has(baseId)) {
+    used.add(baseId);
+    return baseId;
+  }
+
+  let index = 2;
+  let nextId = `${baseId}-${suffix}`;
+  while (used.has(nextId)) {
+    nextId = `${baseId}-${suffix}-${index}`;
+    index += 1;
+  }
+  used.add(nextId);
+  return nextId;
+}
+
+function withComponentId(entry: ComponentEntry, componentId: string): ComponentEntry {
+  if (entry.id === componentId) return entry;
+  return {
+    ...entry,
+    id: componentId,
+    stories: entry.stories.map((story) => ({
+      ...story,
+      id: storyIdFromExport(componentId, story.exportName),
+      componentId,
+    })),
+  };
+}
+
+function withUniqueStoryIds(entry: ComponentEntry): ComponentEntry {
+  const used = new Set<string>();
+  return {
+    ...entry,
+    stories: entry.stories.map((story) => {
+      const storyId = reserveUniqueId(story.id, used, kebab(story.exportName) || "story");
+      return storyId === story.id ? story : { ...story, id: storyId };
+    }),
+  };
+}
+
+function withUniqueRegistryIds(entries: ComponentEntry[]): ComponentEntry[] {
+  const usedComponentIds = new Set<string>();
+  return entries.map((entry) => {
+    const componentId = reserveUniqueId(entry.id, usedComponentIds, uniqueSuffixFromPath(entry.filePath));
+    return withUniqueStoryIds(withComponentId(entry, componentId));
+  });
+}
+
 async function readEntry(filePath: string): Promise<ComponentEntry | null> {
   let mod: DemoModule;
   try {
@@ -107,9 +165,9 @@ export function getRegistry(): Promise<ComponentEntry[]> {
     const entries = await Promise.all(
       Object.keys(demoLoaders).map((fp) => readEntry(fp)),
     );
-    return entries
+    return withUniqueRegistryIds(entries
       .filter((e): e is ComponentEntry => e !== null)
-      .sort((a, b) => a.title.localeCompare(b.title));
+      .sort((a, b) => a.title.localeCompare(b.title)));
   })();
   return registryPromise;
 }

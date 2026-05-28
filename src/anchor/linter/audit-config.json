@@ -4,6 +4,7 @@
   "excludePathSubstrings": [
     "/node_modules/",
     "/components/ui/",
+    "/components/anchor-ui/",
     "/components/base/",
     "/anchor/schema/",
     "/anchor-portal/",

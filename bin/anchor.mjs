@@ -1,11 +1,12 @@
 #!/usr/bin/env node
-import { resolve, join, relative, sep } from "node:path";
+import { dirname, resolve, join, relative, sep } from "node:path";
 import { existsSync, mkdirSync, cpSync, readFileSync, writeFileSync, readdirSync, rmSync, statSync } from "node:fs";
 import { execSync, spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { createConnection } from "node:net";
 import { createHash } from "node:crypto";
 import { applyTokenExtraction } from "../scripts/lib/screenshot-to-tokens.mjs";
+import { projectTokenPaths, resolveTokenPaths, TOKEN_REL } from "../scripts/lib/token-source.mjs";
 
 /* ─── ANSI constants used by doScreenshot — defined at top to avoid TDZ
  *     since the top-level switch dispatches calls before later const blocks
@@ -49,11 +50,40 @@ const PKG_ROOT = resolve(__dirname, "..");
 
 const [, , cmd, ...rest] = process.argv;
 
-/** 消费者项目中的组件库根目录：隐藏目录，与业务 `src/` 分离；治理文件在 `.cursor/` */
+/** 消费者项目中的 Anchor 控制面根目录：Portal / schema / sync / governance。 */
 const DEFAULT_ANCHOR_DIR = ".anchor";
+/** 消费者项目中的组件源码根目录：业务代码可见、可提交、可继续维护。 */
+const DEFAULT_COMPONENTS_REL = "src/components/anchor-ui";
+const TEMPLATE_COMPONENTS_REL = "src/components/base";
+const DEMO_COMPONENTS_REL = "src/anchor/component-demos/base";
+const COMPONENT_IMPORT_BASE = "@/components/anchor-ui";
 
 const PORTAL_PATH = "/#/_designtoken";
 const DEFAULT_PORT = 6006;
+const PORTAL_ROUTE_MAP = {
+  token: "/#/theme",
+  tokens: "/#/theme",
+  theme: "/#/theme",
+  designToken: "/#/theme",
+  designtoken: "/#/theme",
+  component: "/#/library",
+  components: "/#/library",
+  library: "/#/library",
+  spec: "/#/library",
+  specs: "/#/library",
+  schema: "/#/library",
+  govern: "/#/health",
+  governance: "/#/health",
+  health: "/#/health",
+  audit: "/#/health",
+  docs: "/#/docs",
+  document: "/#/docs",
+  documents: "/#/docs",
+  patterns: "/#/_patterns",
+  preset: "/#/onboarding",
+  presets: "/#/onboarding",
+  onboarding: "/#/onboarding",
+};
 
 const MANIFEST_FILE = ".design-kit-manifest.json";
 const KIT_STATUS_FILE = ".anchor-portal/kit-status.json";
@@ -89,9 +119,9 @@ const HELP = `
 anchor — AI coding governance CLI
 
 说明:
-  默认在**当前项目根**下创建隐藏目录 ${DEFAULT_ANCHOR_DIR}/（组件库 + Anchor Portal），
-  并在 .cursor/ 写入规则与 MCP；不在业务树里创建 anchor-ui visible folders。
-  业务应用代码仍放在项目自有的 src/；组件库仅在 ${DEFAULT_ANCHOR_DIR}/ 内维护。
+  默认在**当前项目根**下创建隐藏目录 ${DEFAULT_ANCHOR_DIR}/（Anchor Portal / schema / sync 控制面），
+  并把组件源码安装到 ${DEFAULT_COMPONENTS_REL}/。业务代码可直接从 @design 或 @/components/anchor-ui 引用组件。
+  ${DEFAULT_ANCHOR_DIR}/ 不再作为组件实现真源，只负责 Design-anchor 产品能力与 AI 治理文件。
 
 用法:
   anchor start [目标目录]    一键启动（init + install + 打开 Portal）— 设计师推荐
@@ -101,6 +131,7 @@ anchor — AI coding governance CLI
   anchor screenshot [图片]   打印一段 prompt + 操作引导，让你的 AI 工具读图并通过 MCP 改 tokens.json
   anchor upgrade [目标目录]  升级 kit：新增组件直接加入、未修改覆盖、已修改跳过
   anchor dev   [目标目录]    启动 Anchor Portal（Vite）并打开浏览器
+  anchor portal [tab] [目录] 打开指定 Portal tab：tokens/components/specs/govern/docs/patterns
   anchor mcp   [目标目录]    启动 MCP Server（供 Cursor Agent 使用）
   anchor sync  [目标目录]    同步 schema → Tailwind + .cursorrules + 规则镜像
   anchor audit [目标目录]    运行合规审计（可加 --fix；写入前会确认，脚本化使用 --yes）
@@ -127,7 +158,11 @@ switch (cmd) {
     doUpgrade(rest[0]);
     break;
   case "dev":
-    doDev(rest[0]);
+    doDev(rest[0], rest[1]);
+    break;
+  case "portal":
+  case "open":
+    doPortal(rest);
     break;
   case "mcp":
     doMcp(rest[0]);
@@ -156,19 +191,206 @@ function fileHash(absPath) {
   return createHash("sha256").update(readFileSync(absPath)).digest("hex").slice(0, 16);
 }
 
-/** Files the kit manages (non-demo source under toCopy dirs). */
-function collectKitFiles(kitRoot) {
+function contentHash(data) {
+  return createHash("sha256").update(data).digest("hex").slice(0, 16);
+}
+
+function normalizeRel(p) {
+  return p.split(sep).join("/");
+}
+
+function isDemoLike(rel) {
+  const name = rel.split("/").pop() || "";
+  return name.includes(".demo.") || name.includes(".stories.") || name === "_story-runtime.tsx";
+}
+
+function rewriteComponentSource(text) {
+  return text
+    .replaceAll("@/components/base", COMPONENT_IMPORT_BASE)
+    .replaceAll("src/components/base", DEFAULT_COMPONENTS_REL);
+}
+
+function rewriteDemoSource(text, demoRel) {
+  const demoDir = normalizeRel(dirname(demoRel));
+  const componentPrefix = demoDir === "." ? "@design" : `@design/${demoDir}`;
+  return text
+    .replace(/(from\s+["'])\.\/([^"']+)(["'])/g, (_match, open, spec, close) => {
+      if (spec.startsWith("_")) return `${open}./${spec}${close}`;
+      return `${open}${componentPrefix}/${spec}${close}`;
+    })
+    .replace(/(import\s+[^"']+\s+from\s+["'])\.\/([^"']+)(["'])/g, (_match, open, spec, close) => {
+      if (spec.startsWith("_")) return `${open}./${spec}${close}`;
+      return `${open}${componentPrefix}/${spec}${close}`;
+    });
+}
+
+function rewriteAnchorSchemaSource(text) {
+  return rewriteComponentSource(text);
+}
+
+function managedFileContent(entry) {
+  const data = readFileSync(entry.src);
+  if (!entry.transform) return data;
+  const text = data.toString("utf8");
+  if (entry.transform === "component") return rewriteComponentSource(text);
+  if (entry.transform === "demo") return rewriteDemoSource(text, entry.demoRel || "");
+  if (entry.transform === "schema") return rewriteAnchorSchemaSource(text);
+  return text;
+}
+
+function writeManagedFile(entry) {
+  mkdirSync(dirname(entry.dst), { recursive: true });
+  writeFileSync(entry.dst, managedFileContent(entry));
+}
+
+/** Files the kit manages across .anchor control plane and visible component source. */
+function collectKitFiles(anchorRoot, projectRoot = resolve(anchorRoot, "..")) {
   const entries = [];
-  const dirs = ["src/components", "src/design-tokens", "src/styles", "src/lib", "src/anchor-portal"];
-  for (const dir of dirs) {
-    const abs = join(kitRoot, dir);
-    if (!existsSync(abs)) continue;
-    walkDir(abs, (filePath) => {
-      const rel = relative(kitRoot, filePath).split(sep).join("/");
-      entries.push(rel);
+
+  function addFiles(srcRoot, dstRoot, keyRoot, transform = null) {
+    if (!existsSync(srcRoot)) return;
+    walkDir(srcRoot, (filePath) => {
+      const rel = normalizeRel(relative(srcRoot, filePath));
+      if (transform === "component" && isDemoLike(rel)) return;
+      entries.push({
+        key: normalizeRel(join(keyRoot, rel)),
+        src: filePath,
+        dst: join(dstRoot, rel),
+        transform,
+        demoRel: transform === "demo" ? rel : undefined,
+      });
     });
   }
+
+  function addControl(rel, transform = null) {
+    const src = join(PKG_ROOT, rel);
+    const dst = join(anchorRoot, rel);
+    if (!existsSync(src)) return;
+    const stat = statSync(src);
+    if (stat.isDirectory()) addFiles(src, dst, rel, transform);
+    else entries.push({ key: rel, src, dst, transform });
+  }
+
+  for (const rel of [
+    "src/design-tokens",
+    "src/styles",
+    "src/anchor-portal",
+    "vite-plugin-schema-api.mjs",
+    "anchor-vite.d.ts",
+    "tsconfig.json",
+    "tailwind.config.ts",
+    "tailwind.anchor.generated.ts",
+    "scripts",
+  ]) {
+    addControl(rel);
+  }
+  addControl("src/anchor", "schema");
+
+  addFiles(
+    join(PKG_ROOT, TEMPLATE_COMPONENTS_REL),
+    join(projectRoot, DEFAULT_COMPONENTS_REL),
+    `../${DEFAULT_COMPONENTS_REL}`,
+    "component",
+  );
+  addFiles(join(PKG_ROOT, "src/lib"), join(projectRoot, "src/lib"), "../src/lib");
+  addFiles(join(PKG_ROOT, "src/hooks"), join(projectRoot, "src/hooks"), "../src/hooks");
+
+  const demoSrcRoot = join(PKG_ROOT, TEMPLATE_COMPONENTS_REL);
+  if (existsSync(demoSrcRoot)) {
+    walkDir(demoSrcRoot, (filePath) => {
+      const rel = normalizeRel(relative(demoSrcRoot, filePath));
+      if (!isDemoLike(rel)) return;
+      entries.push({
+        key: normalizeRel(join(DEMO_COMPONENTS_REL, rel)),
+        src: filePath,
+        dst: join(anchorRoot, DEMO_COMPONENTS_REL, rel),
+        transform: rel.endsWith(".demo.tsx") ? "demo" : null,
+        demoRel: rel,
+      });
+    });
+  }
+
   return entries;
+}
+
+function copyComponentTree(sourceDir, destDir) {
+  if (!existsSync(sourceDir)) return 0;
+  let count = 0;
+  walkDir(sourceDir, (filePath) => {
+    const rel = normalizeRel(relative(sourceDir, filePath));
+    if (isDemoLike(rel)) return;
+    const dst = join(destDir, rel);
+    mkdirSync(dirname(dst), { recursive: true });
+    writeFileSync(dst, rewriteComponentSource(readFileSync(filePath, "utf8")));
+    count++;
+  });
+  return count;
+}
+
+function copySupportDirIfMissing(sourceDir, destDir) {
+  if (!existsSync(sourceDir)) return 0;
+  let count = 0;
+  walkDir(sourceDir, (filePath) => {
+    const rel = normalizeRel(relative(sourceDir, filePath));
+    const dst = join(destDir, rel);
+    if (existsSync(dst)) return;
+    mkdirSync(dirname(dst), { recursive: true });
+    cpSync(filePath, dst);
+    count++;
+  });
+  return count;
+}
+
+function ensureProjectComponentSource(projectRoot, anchorRoot) {
+  const dest = join(projectRoot, DEFAULT_COMPONENTS_REL);
+  if (existsSync(dest) && readdirSyncSafe(dest).length > 0) {
+    return { created: false, dest, count: 0 };
+  }
+  const source = existsSync(join(anchorRoot, TEMPLATE_COMPONENTS_REL))
+    ? join(anchorRoot, TEMPLATE_COMPONENTS_REL)
+    : join(PKG_ROOT, TEMPLATE_COMPONENTS_REL);
+  const count = copyComponentTree(source, dest);
+  if (count > 0) {
+    console.log(`  ✅ ${DEFAULT_COMPONENTS_REL} — 已安装组件源码（${count} files）`);
+  }
+  return { created: count > 0, dest, count };
+}
+
+function ensureProjectSupportSource(projectRoot) {
+  const copiedLib = copySupportDirIfMissing(join(PKG_ROOT, "src/lib"), join(projectRoot, "src/lib"));
+  const copiedHooks = copySupportDirIfMissing(join(PKG_ROOT, "src/hooks"), join(projectRoot, "src/hooks"));
+  if (copiedLib || copiedHooks) {
+    console.log(`  ✅ src/lib + src/hooks — 已补齐组件运行支持文件（${copiedLib + copiedHooks} files）`);
+  }
+}
+
+function writeAnchorTsconfig(target) {
+  const tsconfigPath = join(target, "tsconfig.json");
+  if (!existsSync(tsconfigPath)) return;
+  try {
+    const json = JSON.parse(readFileSync(tsconfigPath, "utf8"));
+    json.compilerOptions = json.compilerOptions || {};
+    json.compilerOptions.baseUrl = json.compilerOptions.baseUrl || ".";
+    json.compilerOptions.paths = {
+      ...(json.compilerOptions.paths || {}),
+      "@design": [`../${DEFAULT_COMPONENTS_REL}/index.ts`],
+      "@design/*": [`../${DEFAULT_COMPONENTS_REL}/*`],
+      "@/components/base": [`../${DEFAULT_COMPONENTS_REL}/index.ts`],
+      "@/components/base/*": [`../${DEFAULT_COMPONENTS_REL}/*`],
+      "@/components/anchor-ui": [`../${DEFAULT_COMPONENTS_REL}/index.ts`],
+      "@/components/anchor-ui/*": [`../${DEFAULT_COMPONENTS_REL}/*`],
+      "@/lib/*": ["../src/lib/*"],
+      "@/hooks/*": ["../src/hooks/*"],
+      react: ["../node_modules/@types/react"],
+      "react/*": ["../node_modules/@types/react/*"],
+      "react-dom": ["../node_modules/@types/react-dom"],
+      "react-dom/*": ["../node_modules/@types/react-dom/*"],
+    };
+    writeFileSync(tsconfigPath, JSON.stringify(json, null, 2) + "\n");
+    console.log("  ✅ tsconfig.json（Portal aliases → project components）");
+  } catch {
+    // Keep the copied tsconfig if parsing fails; TypeScript will report details.
+  }
 }
 
 function walkDir(dir, cb) {
@@ -194,11 +416,11 @@ function writeManifest(target, manifest) {
 
 function buildManifest(target, kitVersion) {
   const files = {};
-  const kitFiles = collectKitFiles(PKG_ROOT);
-  for (const rel of kitFiles) {
-    const local = join(target, rel);
-    if (!existsSync(local)) continue;
-    files[rel] = { kitHash: fileHash(local), status: "unchanged" };
+  const projectRoot = resolve(target, "..");
+  const kitFiles = collectKitFiles(target, projectRoot);
+  for (const entry of kitFiles) {
+    if (!existsSync(entry.dst)) continue;
+    files[entry.key] = { kitHash: contentHash(managedFileContent(entry)), status: "unchanged" };
   }
   return {
     kitPackage: "design-anchor",
@@ -216,9 +438,9 @@ function buildManifest(target, kitVersion) {
 function buildKitStatus(manifest) {
   const components = {};
   for (const [rel, info] of Object.entries(manifest.files ?? {})) {
-    const m = rel.match(/^src\/components\/base\/([^/]+)\.tsx$/);
+    const m = rel.match(/^(?:\.\.\/)?src\/components\/(?:anchor-ui|base)\/(.+)\.tsx$/);
     if (!m) continue;
-    const fileName = m[1];
+    const fileName = m[1].split("/").pop() || m[1];
     if (fileName.includes(".demo") || fileName.includes(".stories")) continue;
     const name = fileName.charAt(0).toUpperCase() + fileName.slice(1).replace(/-([a-z])/g, (_, c) => c.toUpperCase());
     const prev = components[name];
@@ -247,13 +469,61 @@ function writeKitStatus(target, manifest) {
 
 /* ─── init ─── */
 
+function ensureProjectTokenSource(projectRoot, anchorRoot) {
+  const projectTokens = projectTokenPaths(anchorRoot);
+  if (existsSync(projectTokens.tokensPath)) {
+    return { created: false, ...projectTokens };
+  }
+
+  const candidates = [
+    { label: ".harness", path: join(projectRoot, ".harness", TOKEN_REL) },
+    { label: ".anchor template", path: join(anchorRoot, TOKEN_REL) },
+    { label: "package template", path: join(PKG_ROOT, TOKEN_REL) },
+  ];
+  const source = candidates.find((candidate) => existsSync(candidate.path));
+  if (!source) return { created: false, ...projectTokens };
+
+  mkdirSync(join(projectTokens.tokensPath, ".."), { recursive: true });
+  cpSync(source.path, projectTokens.tokensPath);
+  console.log(`  ✅ ${relative(projectRoot, projectTokens.tokensPath)} — 已建立项目 token 真源（from ${source.label}）`);
+  return { created: true, source: source.label, ...projectTokens };
+}
+
+function ensureProjectTokenCss(projectRoot, anchorRoot) {
+  const paths = projectTokenPaths(anchorRoot);
+  if (!existsSync(paths.tokensPath)) return false;
+  if (existsSync(paths.cssPath)) {
+    try {
+      if (statSync(paths.cssPath).mtimeMs >= statSync(paths.tokensPath).mtimeMs) return true;
+    } catch {
+      return true;
+    }
+  }
+  const canUseLocalRuntime = existsSync(join(anchorRoot, "node_modules"));
+  const emitScript = canUseLocalRuntime && existsSync(join(anchorRoot, "scripts/emit-design-tokens-css.mjs"))
+    ? join(anchorRoot, "scripts/emit-design-tokens-css.mjs")
+    : join(PKG_ROOT, "scripts/emit-design-tokens-css.mjs");
+  execSync(`node "${emitScript}"`, {
+    cwd: anchorRoot,
+    stdio: "inherit",
+    env: { ...process.env, ANCHOR_TOKEN_ROOT: projectRoot },
+  });
+  return true;
+}
+
 function doInit(targetArg) {
   const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
-  console.log(`\n📦 初始化组件库到 ${target}\n`);
+  const projectRoot = resolve(target, "..");
+  console.log(`\n📦 初始化 Design-anchor 控制面到 ${target}\n`);
 
   if (existsSync(join(target, "package.json"))) {
-    console.log("⚠️  目标目录已存在 package.json，跳过 scaffold（使用 anchor dev 启动）");
-    const projectRoot = resolve(target, "..");
+    console.log("⚠️  目标目录已存在 package.json，跳过控制面 scaffold（补齐可见组件目录与规则）");
+    ensureProjectComponentSource(projectRoot, target);
+    ensureProjectSupportSource(projectRoot);
+    writeAnchorTsconfig(target);
+    ensureProjectTokenSource(projectRoot, target);
+    ensureProjectTokenCss(projectRoot, target);
+    patchGlobalsCss(projectRoot, target);
     writeAnchorConsumerDocs(projectRoot, target);
     generateCursorRule(projectRoot, target);
     return;
@@ -261,41 +531,20 @@ function doInit(targetArg) {
 
   mkdirSync(target, { recursive: true });
 
-  const toCopy = [
-    "src/components",
-    "src/design-tokens",
-    "src/styles",
-    "src/lib",
-    "src/anchor-portal",
-    "vite-plugin-schema-api.mjs",
-    "tsconfig.json",
-    "tailwind.config.ts",
-    "tailwind.anchor.generated.ts",
-  ];
-
-  for (const rel of toCopy) {
-    const src = join(PKG_ROOT, rel);
-    const dst = join(target, rel);
-    if (!existsSync(src)) continue;
-    cpSync(src, dst, { recursive: true });
-    console.log(`  ✅ ${rel}`);
+  const managedFiles = collectKitFiles(target, projectRoot);
+  const copiedGroups = new Set();
+  for (const entry of managedFiles) {
+    if (entry.key.startsWith("../") && existsSync(entry.dst)) continue;
+    writeManagedFile(entry);
+    const group = entry.key.startsWith("../")
+      ? entry.key.split("/").slice(0, 3).join("/")
+      : entry.key.split("/").slice(0, 2).join("/");
+    if (!copiedGroups.has(group)) {
+      copiedGroups.add(group);
+      console.log(`  ✅ ${group}`);
+    }
   }
-
-  // Copy anchor schema directory if it exists
-  const schemaDir = join(PKG_ROOT, "src/anchor");
-  if (existsSync(schemaDir)) {
-    cpSync(schemaDir, join(target, "src/anchor"), { recursive: true });
-    console.log("  ✅ src/anchor");
-  }
-
-  // Design Portal (Schema visual editor) is kept only in the Design-anchor product repo；init 出的消费者项目不包含，避免在项目 A 里「强行塞」一套独立编辑产品。
-
-  // 拷贝 scripts
-  const scriptsDir = join(PKG_ROOT, "scripts");
-  if (existsSync(scriptsDir)) {
-    cpSync(scriptsDir, join(target, "scripts"), { recursive: true });
-    console.log("  ✅ scripts");
-  }
+  writeAnchorTsconfig(target);
 
   // 生成 package.json（react / react-dom 用 peer + dev，减轻与业务项目双 React 冲突）
   const parentPkg = readPkgJson(PKG_ROOT);
@@ -340,7 +589,8 @@ function doInit(targetArg) {
   console.log("  ✅ .design-kit-manifest.json + .anchor-portal/kit-status.json");
 
   // 生成 AI 集成文件（写到用户项目根目录）
-  const projectRoot = resolve(target, "..");
+  ensureProjectTokenSource(projectRoot, target);
+  ensureProjectTokenCss(projectRoot, target);
   generateCursorRule(projectRoot, target);          // Cursor → .cursor/rules/anchor.mdc
   generateClaudeMd(projectRoot, target);            // Claude Code / Desktop → CLAUDE.md
   generateCopilotInstructions(projectRoot, target); // Copilot Chat → .github/copilot-instructions.md
@@ -355,7 +605,8 @@ function doInit(targetArg) {
 
   console.log("\n📦 scaffold 完成！\n");
   console.log("后续步骤：");
-  console.log("  npm install");
+  console.log("  npm install                    # 安装业务项目依赖（组件源码从项目根解析依赖）");
+  console.log("  cd .anchor && npm install       # 安装 Portal 工具链（或直接用 npx design-anchor start）");
   console.log("  npx design-anchor dev");
   console.log("");
   console.log("🤖 AI 集成已自动配置：");
@@ -373,21 +624,21 @@ function doInit(targetArg) {
 }
 
 /**
- * 脚手架 package.json：所有运行时依赖（react / radix / 工具库）全部移到
- * peerDependencies，避免 .anchor/node_modules 出现独立 React 副本。
- * devDependencies 保留 Portal 本地开发需要的版本。
+ * 脚手架 package.json：.anchor 只安装 Portal 工具链，运行时依赖装在业务项目根。
+ *
+ * 组件源码现在位于 ../src/components/anchor-ui。TypeScript / Vite 会从组件文件
+ * 所在的业务项目根解析 React、Radix、lucide 等运行时依赖；如果把这些依赖也装进
+ * .anchor/node_modules，容易形成两套 React / @types/react。
  */
 function buildScaffoldPackageJson(parentPkg) {
-  const deps = { ...(parentPkg.dependencies || {}) };
-  const peer = {};
-  // 所有运行时依赖都走 peer，让 resolve 从项目根走
-  for (const key of Object.keys(deps)) {
-    peer[key] = deps[key];
+  const excludedDevDeps = new Set(["react", "react-dom", "@types/react", "@types/react-dom"]);
+  const devDeps = {};
+  for (const [name, version] of Object.entries(parentPkg.devDependencies || {})) {
+    if (!excludedDevDeps.has(name)) devDeps[name] = version;
   }
-  const devDeps = { ...(parentPkg.devDependencies || {}) };
   return {
     dependencies: {},
-    peerDependencies: peer,
+    peerDependencies: {},
     devDependencies: devDeps,
   };
 }
@@ -396,27 +647,96 @@ function buildScaffoldPackageJson(parentPkg) {
 /** 将 .anchor 的运行时依赖注入到用户项目的 package.json，避免 .anchor 有独立 node_modules */
 function injectDepsToProject(projectRoot, parentPkg) {
   const projectPkgPath = join(projectRoot, "package.json");
-  if (!existsSync(projectPkgPath)) return;
+  if (!existsSync(projectPkgPath)) return { runtime: 0, dev: 0 };
 
   const projectPkg = JSON.parse(readFileSync(projectPkgPath, "utf8"));
   const projectDeps = projectPkg.dependencies || {};
-  const anchorDeps = parentPkg.dependencies || {};
+  const projectDevDeps = projectPkg.devDependencies || {};
+  const anchorDeps = { ...(parentPkg.peerDependencies || {}), ...(parentPkg.dependencies || {}) };
 
   let added = 0;
   for (const [name, version] of Object.entries(anchorDeps)) {
-    if (!projectDeps[name]) {
+    if (!hasProjectDependency(projectPkg, name)) {
       projectDeps[name] = version;
       added++;
     }
   }
 
-  if (added > 0) {
+  let addedDev = 0;
+  for (const name of ["@types/react", "@types/react-dom"]) {
+    const version = parentPkg.devDependencies?.[name];
+    if (version && !hasProjectDependency(projectPkg, name)) {
+      projectDevDeps[name] = version;
+      addedDev++;
+    }
+  }
+
+  if (added > 0 || addedDev > 0) {
     projectPkg.dependencies = Object.fromEntries(
       Object.entries(projectDeps).sort(([a], [b]) => a.localeCompare(b))
     );
+    if (Object.keys(projectDevDeps).length) {
+      projectPkg.devDependencies = Object.fromEntries(
+        Object.entries(projectDevDeps).sort(([a], [b]) => a.localeCompare(b))
+      );
+    }
     writeFileSync(projectPkgPath, JSON.stringify(projectPkg, null, 2) + "\n");
-    console.log(`  ✅ package.json — 注入 ${added} 个组件库依赖（运行 npm install 生效）`);
+    console.log(`  ✅ package.json — 注入 ${added} 个组件库依赖、${addedDev} 个类型依赖（运行 npm install 生效）`);
   }
+  return { runtime: added, dev: addedDev };
+}
+
+function hasProjectDependency(pkg, name) {
+  return Boolean(
+    pkg.dependencies?.[name]
+    || pkg.devDependencies?.[name]
+    || pkg.peerDependencies?.[name]
+    || pkg.optionalDependencies?.[name]
+  );
+}
+
+function nodeModulePath(root, name) {
+  return join(root, "node_modules", ...name.split("/"));
+}
+
+function requiredProjectDependencies(parentPkg) {
+  return {
+    ...(parentPkg.peerDependencies || {}),
+    ...(parentPkg.dependencies || {}),
+    "@types/react": parentPkg.devDependencies?.["@types/react"],
+    "@types/react-dom": parentPkg.devDependencies?.["@types/react-dom"],
+  };
+}
+
+function missingProjectDependencies(projectRoot, parentPkg) {
+  const projectPkgPath = join(projectRoot, "package.json");
+  if (!existsSync(projectPkgPath)) return [];
+  const required = requiredProjectDependencies(parentPkg);
+  return Object.keys(required).filter((name) => required[name] && !existsSync(nodeModulePath(projectRoot, name)));
+}
+
+function installProjectDependenciesIfNeeded(projectRoot, parentPkg) {
+  if (!existsSync(join(projectRoot, "package.json"))) return;
+  const missing = missingProjectDependencies(projectRoot, parentPkg);
+  if (!missing.length) return;
+  console.log(`\n  📥 安装业务项目依赖（组件源码位于 ${DEFAULT_COMPONENTS_REL}，需要从项目根解析依赖）…\n`);
+  try {
+    execSync("npm install --loglevel=error", { cwd: projectRoot, stdio: "inherit" });
+  } catch {
+    console.error("❌ 业务项目依赖安装失败");
+    process.exit(1);
+  }
+}
+
+function assertProjectDependenciesInstalled(projectRoot, parentPkg) {
+  const missing = missingProjectDependencies(projectRoot, parentPkg);
+  if (!missing.length) return;
+  const shown = missing.slice(0, 6).join(", ");
+  const more = missing.length > 6 ? ` 等 ${missing.length} 个` : "";
+  console.error(`❌ 业务项目依赖未安装：${shown}${more}`);
+  console.error(`   组件源码在 ${join(projectRoot, DEFAULT_COMPONENTS_REL)}，请先在项目根执行: npm install`);
+  console.error(`   或直接运行: npx design-anchor start`);
+  process.exit(1);
 }
 
 function patchGlobalsCss(projectRoot, libTarget) {
@@ -434,9 +754,8 @@ function patchGlobalsCss(projectRoot, libTarget) {
   if (!globalsCssPath) return;
 
   const content = readFileSync(globalsCssPath, "utf8");
-  if (content.includes("design-tokens.generated.css")) return;
-
-  const relLib = relative(join(globalsCssPath, ".."), join(libTarget, "src/styles/design-tokens.generated.css")).split(sep).join("/");
+  const projectTokenCss = projectTokenPaths(libTarget).cssPath;
+  const relLib = relative(join(globalsCssPath, ".."), projectTokenCss).split(sep).join("/");
 
   // anchor 接管的 CSS 变量名（会出现在 :root 或 @media dark 中）
   const anchorVars = new Set([
@@ -489,7 +808,12 @@ function patchGlobalsCss(projectRoot, libTarget) {
 
   // 6. 注入 anchor token import（紧跟 tailwindcss import 之后）
   const importLine = `@import "${relLib}";`;
-  css = css.replace(/(@import\s+["']tailwindcss["'];?\s*\n?)/, `$1${importLine}\n`);
+  const existingTokenImport = /@import\s+["'][^"']*design-tokens\.generated\.css["'];?\s*/g;
+  if (existingTokenImport.test(css)) {
+    css = css.replace(existingTokenImport, `${importLine}\n`);
+  } else {
+    css = css.replace(/(@import\s+["']tailwindcss["'];?\s*\n?)/, `$1${importLine}\n`);
+  }
 
   // 7. 确保有 @custom-variant dark
   if (!css.includes("@custom-variant dark")) {
@@ -509,6 +833,7 @@ function patchGlobalsCss(projectRoot, libTarget) {
 /** 项目根：边界说明 + import 别名集成（立刻可做的「一页纸」） */
 function writeAnchorConsumerDocs(projectRoot, libTarget) {
   const relLib = "./" + relative(projectRoot, libTarget).split(sep).join("/");
+  const relComponents = "./" + DEFAULT_COMPONENTS_REL;
   const boundariesSrc = join(PKG_ROOT, "docs", "BOUNDARIES.md");
   const boundariesDst = join(projectRoot, "ANCHOR_BOUNDARIES.md");
   if (existsSync(boundariesSrc)) {
@@ -518,7 +843,7 @@ function writeAnchorConsumerDocs(projectRoot, libTarget) {
 
   const integration = `# Design-anchor Integration (import aliases)
 
-组件库物理路径：\`${relLib}/\`（一般为 \`./.anchor/\`）。业务代码请放在项目自有的 \`src/\`，详见同目录 **ANCHOR_BOUNDARIES.md**。
+组件源码路径：\`${relComponents}/\`。Anchor 控制面路径：\`${relLib}/\`（一般为 \`./.anchor/\`）。业务代码请放在项目自有的 \`src/\`，详见同目录 **ANCHOR_BOUNDARIES.md**。
 
 ## 推荐：TypeScript \`paths\` — \`@design\`
 
@@ -528,7 +853,8 @@ function writeAnchorConsumerDocs(projectRoot, libTarget) {
 {
   "compilerOptions": {
     "paths": {
-      "@design": ["${relLib}/index.ts"]
+      "@design": ["${relComponents}/index.ts"],
+      "@design/*": ["${relComponents}/*"]
     }
   }
 }
@@ -549,8 +875,10 @@ import path from "node:path";
 // vite.config.ts
 export default {
   resolve: {
+    // 防止 workspace 里出现第二份 React。
+    dedupe: ["react", "react-dom"],
     alias: {
-      "@design": path.resolve(__dirname, "${relLib}/index.ts"),
+      "@design": path.resolve(__dirname, "${relComponents}/index.ts"),
     },
   },
 };
@@ -561,7 +889,7 @@ export default {
 使用相对路径，例如从 \`src/pages/Foo.tsx\` 导入：
 
 \`\`\`tsx
-import { Button } from "${relLib}/index.ts";
+import { Button } from "../components/anchor-ui";
 \`\`\`
 
 （具体相对路径以文件位置为准。）
@@ -582,28 +910,25 @@ function readPkgJson(dir) {
 }
 
 function generateIndex(target) {
-  const compsDir = join(target, "src/components");
+  const projectRoot = resolve(target, "..");
+  const compsDir = join(projectRoot, DEFAULT_COMPONENTS_REL);
   if (!existsSync(compsDir)) return;
 
   const lines = [
-    "// Auto-generated — 组件库统一入口（位于项目根隐藏目录 .anchor/）",
-    '// App code: import { ... } from "./.anchor" or configure a TS path alias',
+    "// Auto-generated — Design-anchor compatibility barrel.",
+    `// Prefer importing from @design or @/${DEFAULT_COMPONENTS_REL.replace(/^src\//, "")}.`,
     "",
   ];
 
-  // base/index.ts is the source of truth for public exports. Keeping the
-  // scaffold barrel pointed at it prevents nested groups such as base/ai from
-  // drifting out of @design.
-  const baseDir = join(compsDir, "base");
-  if (existsSync(join(baseDir, "index.ts"))) {
-    lines.push('export * from "./src/components/base";');
-  } else if (existsSync(baseDir)) {
-    const files = readdirSyncSafe(baseDir).filter(
+  if (existsSync(join(compsDir, "index.ts"))) {
+    lines.push(`export * from "../${DEFAULT_COMPONENTS_REL}";`);
+  } else {
+    const files = readdirSyncSafe(compsDir).filter(
       (f) => f.endsWith(".tsx") && !f.includes(".demo.") && !f.includes(".stories."),
     );
     for (const f of files) {
       const mod = f.replace(/\.tsx$/, "");
-      lines.push(`export * from "./src/components/base/${mod}";`);
+      lines.push(`export * from "../${DEFAULT_COMPONENTS_REL}/${mod}";`);
     }
   }
 
@@ -691,6 +1016,7 @@ function buildSceneRouting(specDir) {
 /** 收集规则正文需要的所有动态片段（spec 列表 + 场景路由表 + 相对路径）。 */
 function collectRuleSections(projectRoot, libTarget) {
   const relLib = "./" + relative(projectRoot, libTarget).split(sep).join("/");
+  const relComponents = DEFAULT_COMPONENTS_REL;
   const specDir = join(libTarget, "src/anchor/schema/components");
 
   let specSummary = "";
@@ -705,26 +1031,44 @@ function collectRuleSections(projectRoot, libTarget) {
   }
 
   const sceneRouting = buildSceneRouting(specDir);
-  return { relLib, specSummary, sceneRouting };
+  return { relLib, relComponents, specSummary, sceneRouting };
 }
 
 /** 多 IDE 共享的规则正文（不含 frontmatter，留给各 IDE 包装）。 */
-function buildAnchorRuleBody({ relLib, specSummary, sceneRouting }) {
+function buildAnchorRuleBody({ relLib, relComponents, specSummary, sceneRouting }) {
   return `# Design-anchor Component Governance
 
-This project uses the Design-anchor component library (at \`${relLib}\`, typically the hidden \`./.anchor\` directory). All UI development must follow these rules.
+This project uses Design-anchor. The visible component source is \`${relComponents}\`; the hidden \`${relLib}\` directory is the Anchor control plane for Portal, schema, sync, and governance. All UI development must follow these rules.
 
 ## Directory Conventions
 
 - **Application / business pages**: Write in your project's own \`src/\` (or your project's original app directory). **Do NOT** write business pages, routes, or feature code inside \`${relLib}\`.
-- **Component library & Design Tokens**: Maintained only in \`${relLib}\`; Design-anchor injects capabilities via \`${relLib}\` and the rule files at the project root, it does not replace your project's own folder structure.
+- **Component source**: Maintain Design-anchor components in \`${relComponents}\`. App code should import from \`@design\` or \`@/components/anchor-ui\`.
+- **Anchor control plane**: \`${relLib}\` contains Portal, schema, rules, scripts, generated previews, and sync tooling. Do not treat it as the app's UI implementation folder.
+- **Design Tokens**: Runtime token source is \`src/design-tokens/tokens.json\`; generated CSS is \`src/styles/design-tokens.generated.css\`.
+
+## Portal Intent Router（中英文都要识别）
+
+当用户的请求属于「查看/修改设计系统状态」而不是直接写业务功能时，优先唤起 Portal：运行 \`npx design-anchor portal <tab>\`（等价于启动 Anchor Portal 并打开对应页面）。
+
+| 用户意图 / User intent | 中文触发词示例 | English trigger examples | 打开 |
+|---|---|---|---|
+| Token / theme | 改 token、调整 token、看看 token、当前 token、改品牌色、改圆角、改间距、切暗色、主题设置 | change token, edit tokens, show tokens, token status, brand color, radius, spacing, dark mode, theme | \`npx design-anchor portal tokens\` |
+| Component library | 有哪些组件、组件列表、组件库、看看组件、组件预览 | component list, available components, component library, show components, preview components | \`npx design-anchor portal components\` |
+| Component spec / schema | 组件规范、组件协议、组件 schema、组件 props、映射关系、变体规范 | component spec, schema, props contract, variant mapping, component contract | \`npx design-anchor portal specs\` |
+| Component style tuning | 改组件样式、调整组件、按钮样式、表格样式、组件风格 | change component style, tune component, button style, table style | \`npx design-anchor portal components\` |
+| Governance / health | 治理、健康度、组件使用情况、使用统计、审计、漂移检查 | governance, health, component usage, audit, drift check, compliance | \`npx design-anchor portal govern\` |
+| Docs / help | 文档、使用说明、怎么接入、CLI 命令 | docs, documentation, how to use, setup, CLI commands | \`npx design-anchor portal docs\` |
+| Preset / onboarding | 选择 preset、品牌风格、重新 onboarding、从预设开始 | preset, style preset, onboarding, brand style | \`npx design-anchor portal presets\` |
+
+规则：如果用户说“打开/看看/调整/修改/配置/查看/show/change/edit/configure/check/list”并且对象是 token、主题、组件、规范、治理、preset、文档，先打开 Portal；只有用户明确要求“不要打开 Portal / 直接改文件 / code only”时，才跳过 Portal。
 
 ${sceneRouting}
 
 ## 组件引用规则
 
 1. **禁止使用原生 HTML 标签**：\`<button>\`、\`<input>\`、\`<table>\` 等，必须使用组件库组件
-2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`ANCHOR_INTEGRATION.md\`）；否则从 \`${relLib}/src/components/base/\` 导入
+2. **导入路径**：**优先**使用已在业务 \`tsconfig\` / Vite 中配置的 **\`@design\`**（见项目根 \`ANCHOR_INTEGRATION.md\`）；否则从 \`@/components/anchor-ui/\` 导入
 3. **禁止手写间距**：不允许 \`m-[13px]\`、\`p-[7px]\` 等任意值 Tailwind 类
 4. **颜色仅用语义类**：\`bg-primary\`、\`text-muted-foreground\` 等，禁止硬编码色值
 
@@ -743,7 +1087,7 @@ ${specSummary || "（运行 anchor sync 后自动生成）"}
 ## AI 核心契约
 
 详见项目根目录 **AGENTS.md**，三条硬规则：
-1. UI 真源在 \`${relLib}\`，禁止在业务 \`src/\` 复制组件实现
+1. UI 组件真源在 \`${relComponents}\`，\`${relLib}\` 只管 Anchor 产品控制面
 2. 仅通过 Design Token 引用颜色/间距，禁止硬编码
 3. 组件行为以 schema JSON 为唯一数据源
 `;
@@ -814,29 +1158,46 @@ function generateRootMcp(projectRoot, libTarget) {
 
 function generateAgentsMd(projectRoot, libTarget) {
   const relLib = "./" + relative(projectRoot, libTarget).split(sep).join("/");
+  const relComponents = DEFAULT_COMPONENTS_REL;
   const content = `# AGENTS.md — AI 编码边界与契约
 
 ## 目录约定（三条硬规则）
 
-1. **UI / 组件 / token 真源** → \`${relLib}/src/components/\` 与 \`${relLib}/src/design-tokens/\`
+1. **UI / 组件实现真源** → \`${relComponents}/\`
    - 所有组件实现、变体、样式变更只在此处修改。
-   - 业务代码通过 \`@design\` 别名或相对路径引用，禁止复制组件实现到 \`src/\`。
+   - 业务代码通过 \`@design\` 别名或 \`@/components/anchor-ui\` 引用。
+   - 禁止从 \`${relLib}\` 复制或深路径引用组件实现。
 
-2. **Portal / sync / kit 集成** → \`${relLib}/\` 根层（CLI、scripts、anchor-portal）
-   - 仅用于 anchor-portal 配置、schema 同步、Portal 适配。
-   - 非组件实现代码。
+2. **Token 真源** → \`src/design-tokens/tokens.json\`
+   - 项目创建 token 后，业务项目自己的 token 是唯一真源。
+   - \`${relLib}/src/design-tokens/\` 仅作为初始化模板与派生算法，不作为业务运行时 token 来源。
 
-3. **上游 npm 包** → \`node_modules/design-anchor/\` **只读**
+3. **Portal / sync / kit 集成** → \`${relLib}/\` 根层（CLI、scripts、anchor-portal、schema、rules）
+   - 仅用于 Anchor 产品控制面、schema 同步、Portal 适配。
+   - 非组件实现代码；不要把业务页面或组件实现写进这里。
+
+4. **上游 npm 包** → \`node_modules/design-anchor/\` **只读**
    - 通过 \`anchor upgrade\` 同步变更到 \`${relLib}/\`。
    - 禁止直接修改 \`node_modules\` 内文件。
 
 ## AI 编码契约
 
-- **Import 来源**：优先 \`@design\`（指向 \`${relLib}/index.ts\`）；禁止从 \`node_modules\` 深路径引用 kit 组件。
+- **Import 来源**：优先 \`@design\`（指向 \`${relComponents}/index.ts\`）；也可使用 \`@/components/anchor-ui/<component>\`；禁止从 \`node_modules\` 或 \`${relLib}\` 深路径引用组件。
 - **颜色**：仅使用 Design Token 语义类（\`bg-primary\`、\`text-muted-foreground\`），禁止硬编码色值。
+- **Token 修改**：只修改 \`src/design-tokens/tokens.json\`，然后同步生成 \`src/styles/design-tokens.generated.css\`。
 - **间距**：禁止任意值 Tailwind（\`m-[13px]\`），使用 schema 声明的语义 props。
-- **组件规范**：以 \`${relLib}/src/anchor/schema/components/*.spec.json\` 为唯一数据源。
+- **组件规范**：以 \`${relLib}/src/anchor/schema/components/*.spec.json\` 为唯一数据源；规范中的组件路径应指向 \`@/components/anchor-ui\` 或 \`@design\`。
 - **修改后**：运行 \`npm run sync:anchor\` 同步 .cursorrules 与 Tailwind 扩展。
+
+## Portal 自动唤起
+
+用户要求查看或修改 token、主题、组件库、组件规范、组件样式、治理健康度、preset 或文档时，优先运行 \`npx design-anchor portal <tab>\` 打开 Portal。中英文都要识别：
+- \`tokens\`：改 token、看看 token、改品牌色、改圆角、theme、design tokens。
+- \`components\`：有哪些组件、组件列表、组件预览、component library。
+- \`specs\`：组件规范、组件 schema、props contract、variant mapping。
+- \`govern\`：治理、健康度、组件使用情况、audit、drift check。
+- \`docs\`：文档、怎么接入、CLI commands。
+- \`presets\`：选择 preset、品牌风格、onboarding。
 `;
   writeFileSync(join(projectRoot, "AGENTS.md"), content);
   console.log("  ✅ AGENTS.md（项目根）");
@@ -1432,13 +1793,10 @@ function doTheme(promptFile) {
   // 2. 找到 tokens.json 并合并
   const projectRoot = process.cwd();
   const anchorDir = join(projectRoot, DEFAULT_ANCHOR_DIR);
-  const tokensPath = existsSync(join(anchorDir, "src/design-tokens/tokens.json"))
-    ? join(anchorDir, "src/design-tokens/tokens.json")
-    : existsSync(join(projectRoot, "src/design-tokens/tokens.json"))
-      ? join(projectRoot, "src/design-tokens/tokens.json")
-      : null;
+  ensureProjectTokenSource(projectRoot, anchorDir);
+  const tokensPath = projectTokenPaths(anchorDir).tokensPath;
 
-  if (!tokensPath) {
+  if (!existsSync(tokensPath)) {
     console.log("  ⚠️  未找到 tokens.json，请先运行 anchor init 或 anchor start\n");
     console.log("  将提取结果输出为 JSON 供手动合并：\n");
     console.log(JSON.stringify({ seed: extracted.seed, seedDark: extracted.seedDark, fixedAliases: extracted.fixedAliases }, null, 2));
@@ -1451,7 +1809,7 @@ function doTheme(promptFile) {
     customSeeds: extracted.customSeeds,
     fixedAliases: extracted.fixedAliases,
   };
-  const applyResult = applyTokenExtraction(tokensPath, proposed);
+  const applyResult = applyTokenExtraction(tokensPath, proposed, { syncCwd: anchorDir });
   console.log(`  ✅ tokens.json 已更新（${applyResult.mergedCount} 个值合并）`);
   if (applyResult.syncOk) {
     console.log("  ✅ design-tokens.generated.css 已重新生成");
@@ -1529,14 +1887,11 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 function findTokensPath() {
   const projectRoot = process.cwd();
   const anchorDir = join(projectRoot, DEFAULT_ANCHOR_DIR);
-  const candidates = [
-    join(anchorDir, "src/design-tokens/tokens.json"),
-    join(projectRoot, "src/design-tokens/tokens.json"),
-  ];
-  for (const c of candidates) {
-    if (existsSync(c)) return { tokensPath: c, projectRoot };
-  }
-  return { tokensPath: null, projectRoot };
+  const paths = resolveTokenPaths(anchorDir, { requireExisting: true });
+  return {
+    tokensPath: existsSync(paths.tokensPath) ? paths.tokensPath : null,
+    projectRoot,
+  };
 }
 
 function doScreenshot(imageArg) {
@@ -1578,6 +1933,7 @@ ${ANSI.gray}用你自己的 AI 工具读图，AI 通过 MCP 直接改 tokens.jso
 
 function doUpgrade(targetArg) {
   const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
+  const projectRoot = resolve(target, "..");
 
   if (!existsSync(join(target, "package.json"))) {
     console.error(`❌ 目标目录不存在，请先运行: anchor init`);
@@ -1591,20 +1947,22 @@ function doUpgrade(targetArg) {
   console.log(`\n⬆️  升级 kit → ${target}`);
   console.log(`   新版本: ${kitVersion}${oldManifest ? ` (旧版本: ${oldManifest.kitVersion})` : " (无旧 manifest)"}\n`);
 
-  const kitFiles = collectKitFiles(PKG_ROOT);
+  ensureProjectComponentSource(projectRoot, target);
+  ensureProjectSupportSource(projectRoot);
+  const kitFiles = collectKitFiles(target, projectRoot);
   const oldFiles = oldManifest?.files ?? {};
   const stats = { added: 0, updated: 0, skipped: 0, unchanged: 0 };
   const newFiles = {};
 
-  for (const rel of kitFiles) {
-    const kitSrc = join(PKG_ROOT, rel);
-    const localDst = join(target, rel);
-    const kitHash = fileHash(kitSrc);
+  for (const entry of kitFiles) {
+    const rel = entry.key;
+    const localDst = entry.dst;
+    const kitContent = managedFileContent(entry);
+    const kitHash = contentHash(kitContent);
     const oldEntry = oldFiles[rel];
 
     if (!existsSync(localDst)) {
-      mkdirSync(join(target, rel, ".."), { recursive: true });
-      cpSync(kitSrc, localDst);
+      writeManagedFile(entry);
       newFiles[rel] = { kitHash, status: "new" };
       stats.added++;
       console.log(`  ➕ 新增: ${rel}`);
@@ -1613,10 +1971,10 @@ function doUpgrade(targetArg) {
 
     const localHash = fileHash(localDst);
 
-    if (oldEntry && localHash === oldEntry.kitHash) {
-      cpSync(kitSrc, localDst);
+    if ((oldEntry && localHash === oldEntry.kitHash) || (!oldEntry && localHash === kitHash)) {
+      writeManagedFile(entry);
       newFiles[rel] = { kitHash, status: "unchanged" };
-      if (kitHash !== oldEntry.kitHash) {
+      if (oldEntry && kitHash !== oldEntry.kitHash) {
         stats.updated++;
         console.log(`  🔄 已更新: ${rel}`);
       } else {
@@ -1642,6 +2000,13 @@ function doUpgrade(targetArg) {
 
   // 重新生成 index.ts 以包含新增组件
   generateIndex(target);
+  writeAnchorTsconfig(target);
+
+  // 老项目升级后也要跟随新的 token 真源策略：
+  // 项目根 src/design-tokens/tokens.json 是运行时唯一真源，.anchor 只保留模板/算法/Portal。
+  ensureProjectTokenSource(projectRoot, target);
+  ensureProjectTokenCss(projectRoot, target);
+  patchGlobalsCss(projectRoot, target);
 
   console.log(`\n✅ 升级完成`);
   console.log(`   新增: ${stats.added}  更新: ${stats.updated}  跳过: ${stats.skipped}  不变: ${stats.unchanged}\n`);
@@ -1656,13 +2021,17 @@ function doStart(targetArg) {
   const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
   doInit(targetArg);
+  const projectRoot = resolve(target, "..");
+  const parentPkg = readPkgJson(PKG_ROOT);
+
+  installProjectDependenciesIfNeeded(projectRoot, parentPkg);
 
   if (!existsSync(join(target, "node_modules"))) {
-    console.log("\n  📥 安装依赖（首次启动，约 1-2 分钟）…\n");
+    console.log("\n  📥 安装 Anchor Portal 工具链（首次启动，约 1-2 分钟）…\n");
     try {
       execSync("npm install --loglevel=error", { cwd: target, stdio: "inherit" });
     } catch {
-      console.error("❌ 依赖安装失败");
+      console.error("❌ Anchor Portal 工具链安装失败");
       process.exit(1);
     }
   }
@@ -1719,7 +2088,36 @@ function openUrl(url) {
   spawn(cmd, [url], { shell: true, stdio: "ignore", detached: true }).unref();
 }
 
-function doDev(targetArg) {
+function normalizePortalRoute(routeArg) {
+  if (!routeArg) return PORTAL_PATH;
+  const key = String(routeArg).replace(/^[-]+/, "").trim();
+  if (!key) return PORTAL_PATH;
+  if (key.startsWith("/#") || key.startsWith("#")) return key.startsWith("/") ? key : `/${key}`;
+  return PORTAL_ROUTE_MAP[key] || PORTAL_ROUTE_MAP[key.toLowerCase()] || PORTAL_PATH;
+}
+
+function splitPortalArgs(args) {
+  let targetArg = null;
+  let routeArg = null;
+  for (const arg of args) {
+    if (!arg) continue;
+    const normalized = String(arg).replace(/^[-]+/, "");
+    const isRoute = normalized.startsWith("#")
+      || normalized.startsWith("/#")
+      || PORTAL_ROUTE_MAP[normalized]
+      || PORTAL_ROUTE_MAP[normalized.toLowerCase()];
+    if (isRoute && !routeArg) routeArg = normalized;
+    else if (!targetArg) targetArg = arg;
+  }
+  return { targetArg, routeArg };
+}
+
+function doPortal(args) {
+  const { targetArg, routeArg } = splitPortalArgs(args);
+  doDev(targetArg || DEFAULT_ANCHOR_DIR, routeArg);
+}
+
+function doDev(targetArg, routeArg) {
   const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
 
   const portalConfig = join(target, "src/anchor-portal/vite.config.ts");
@@ -1727,9 +2125,15 @@ function doDev(targetArg) {
     console.error(`❌ 未找到 anchor-portal 配置，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
+  const projectRoot = resolve(target, "..");
+  ensureProjectTokenSource(projectRoot, target);
+  ensureProjectTokenCss(projectRoot, target);
+  patchGlobalsCss(projectRoot, target);
+  assertProjectDependenciesInstalled(projectRoot, readPkgJson(PKG_ROOT));
 
   const port = DEFAULT_PORT;
-  const portalUrl = `http://localhost:${port}${PORTAL_PATH}`;
+  const portalPath = normalizePortalRoute(routeArg);
+  const portalUrl = `http://localhost:${port}${portalPath}`;
 
   console.log(`
 ╔══════════════════════════════════════════╗
@@ -1737,7 +2141,8 @@ function doDev(targetArg) {
 ║     AI 组件治理平台 · 设计师工作台        ║
 ╚══════════════════════════════════════════╝
 `);
-  console.log(`  📂 组件库: ${target}`);
+  console.log(`  📂 Anchor 控制面: ${target}`);
+  console.log(`  🧩 组件源码: ${join(projectRoot, DEFAULT_COMPONENTS_REL)}`);
   console.log(`  🌐 地址:   http://localhost:${port}`);
   console.log(`  🎨 Portal: ${portalUrl}`);
   console.log(`\n  启动中…（首次编译约 5–10 秒）\n`);
@@ -1756,7 +2161,7 @@ function doDev(targetArg) {
     {
       cwd: target,
       stdio: "inherit",
-      env: { ...process.env },
+      env: { ...process.env, ANCHOR_TOKEN_ROOT: projectRoot },
     },
   );
 
@@ -1777,8 +2182,10 @@ function doDev(targetArg) {
 
 function doMcp(targetArg) {
   const target = resolve(process.cwd(), targetArg || DEFAULT_ANCHOR_DIR);
+  const projectRoot = resolve(target, "..");
+  ensureProjectTokenSource(projectRoot, target);
 
-  if (!existsSync(join(target, "src/design-tokens/tokens.json"))) {
+  if (!existsSync(projectTokenPaths(target).tokensPath)) {
     console.error(`❌ 未找到 tokens.json，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
@@ -1793,6 +2200,7 @@ function doMcp(targetArg) {
 
   const child = spawn("node", [mcpEntry, target], {
     stdio: "inherit",
+    env: { ...process.env, ANCHOR_TOKEN_ROOT: projectRoot },
   });
 
   child.on("exit", (code) => process.exit(code ?? 0));
@@ -1807,6 +2215,8 @@ function doSync(targetArg) {
     console.error(`❌ 未找到 schema 目录，请先运行: anchor init ${targetArg || DEFAULT_ANCHOR_DIR}`);
     process.exit(1);
   }
+  const projectRoot = resolve(target, "..");
+  ensureProjectTokenSource(projectRoot, target);
 
   console.log(`\n🔄 同步 schema → rules + tailwind → ${target}\n`);
 
@@ -1820,6 +2230,7 @@ function doSync(targetArg) {
     execSync(`node "${join(existsSync(join(target, "scripts/emit-design-tokens-css.mjs")) ? target : PKG_ROOT, "scripts/emit-design-tokens-css.mjs")}"`, {
       cwd: target,
       stdio: "inherit",
+      env: { ...process.env, ANCHOR_TOKEN_ROOT: projectRoot },
     });
 
     console.log("\n✅ 同步完成：.cursorrules + Tailwind 扩展 + 规则镜像 + CSS 变量 已更新\n");

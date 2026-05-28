@@ -225,7 +225,7 @@ function projectModeFromSetup(setup: SetupStatus | null): "new" | "existing" {
 
 function componentSourceLabel(setup: SetupStatus | null, locale: "en" | "zh") {
   if (setup?.mode === "preset") {
-    return locale === "zh" ? "Preset + 默认组件库" : "Preset + bundled kit";
+    return locale === "zh" ? "Preset + anchor-ui 组件" : "Preset + anchor-ui source";
   }
   if (setup?.componentSource === "owned" || setup?.mode === "import") {
     return locale === "zh" ? "自有组件库" : "Owned library";
@@ -233,7 +233,7 @@ function componentSourceLabel(setup: SetupStatus | null, locale: "en" | "zh") {
   if (setup?.componentSource === "empty" || setup?.mode === "empty") {
     return locale === "zh" ? "空组件库" : "Tokens only";
   }
-  return locale === "zh" ? "默认组件库" : "Bundled kit";
+  return locale === "zh" ? "anchor-ui 组件源码" : "anchor-ui source";
 }
 
 function presetLabel(id: string | undefined) {

@@ -18,11 +18,14 @@ import {
   deriveSeedToMap,
   getSpacingSuffixSortOrderFromSeed,
 } from "../src/design-tokens/seed-to-map.mjs";
+import { resolveTokenPaths } from "./lib/token-source.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "..");
-const src = path.join(root, "src/design-tokens/tokens.json");
-const out = path.join(root, "src/styles/design-tokens.generated.css");
+const tokenPaths = resolveTokenPaths(root, { requireExisting: true });
+const src = tokenPaths.tokensPath;
+const out = tokenPaths.cssPath;
+fs.mkdirSync(path.dirname(out), { recursive: true });
 
 const doc = JSON.parse(fs.readFileSync(src, "utf8"));
 
@@ -41,7 +44,7 @@ if (doc.version === 1 || Array.isArray(doc.tokens)) {
   darkLines.push("}");
   const banner = `/* AUTO-GENERATED (v1 legacy) — source: tokens.json; do not edit manually */\n\n`;
   fs.writeFileSync(out, `${banner}${rootLines.join("\n")}\n\n${darkLines.join("\n")}\n`, "utf8");
-  console.log(`[v1] Wrote ${path.relative(root, out)} (${tokens.length} rows)`);
+  console.log(`[v1] Wrote ${path.relative(process.cwd(), out)} (${tokens.length} rows)`);
   process.exit(0);
 }
 
@@ -60,7 +63,8 @@ const darkVarsMerged = { ...darkVars, ...moDark };
 
 const spacingSuffixSortOrder = getSpacingSuffixSortOrderFromSeed(seed);
 
-const spacingScaleJsonPath = path.join(root, "src/design-tokens/spacing-scale.generated.json");
+const spacingScaleJsonPath = tokenPaths.spacingPath;
+fs.mkdirSync(path.dirname(spacingScaleJsonPath), { recursive: true });
 const spacingSnap = computeSpacingScaleSnapshot(seed);
 fs.writeFileSync(
   spacingScaleJsonPath,
@@ -322,5 +326,5 @@ const themeCount = themeVarNames.size;
 const rootCount = Object.keys(lightVarsMerged).filter((k) => lightVarsMerged[k] !== "" && lightVarsMerged[k] != null && !themeVarNames.has(k)).length;
 const darkCount = Object.keys(darkVarsMerged).filter((k) => darkVarsMerged[k] !== "" && darkVarsMerged[k] != null && !themeVarNames.has(k)).length;
 console.log(
-  `[v2] Wrote ${path.relative(root, out)} + ${path.relative(root, spacingScaleJsonPath)} — @theme: ${themeCount}, :root: ${rootCount}, .dark: ${darkCount}`,
+  `[v2] Wrote ${path.relative(process.cwd(), out)} + ${path.relative(process.cwd(), spacingScaleJsonPath)} — @theme: ${themeCount}, :root: ${rootCount}, .dark: ${darkCount}`,
 );

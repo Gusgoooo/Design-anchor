@@ -16,6 +16,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execSync } from "node:child_process";
+import { projectTokenPaths } from "./lib/token-source.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -32,7 +33,8 @@ function argValue(name) {
 
 const url = argValue("--url") ?? process.env.ANCHOR_TOKENS_URL;
 const repoRoot = path.resolve(argValue("--root") ?? process.cwd());
-const tokensPath = path.join(repoRoot, "src/design-tokens/tokens.json");
+const tokenPaths = projectTokenPaths(repoRoot);
+const tokensPath = tokenPaths.tokensPath;
 const auth = process.env.ANCHOR_TOKENS_AUTH_HEADER;
 
 if (!url || !String(url).trim()) {
@@ -89,7 +91,11 @@ async function main() {
   fs.writeFileSync(tokensPath, pretty, "utf8");
   console.log(`Wrote ${path.relative(repoRoot, tokensPath) || tokensPath}`);
 
-  execSync("npm run sync:tokens", { cwd: repoRoot, stdio: "inherit" });
+  execSync("npm run sync:tokens", {
+    cwd: repoRoot,
+    stdio: "inherit",
+    env: { ...process.env, ANCHOR_TOKEN_ROOT: tokenPaths.root },
+  });
   console.log("sync:tokens complete.");
 }
 

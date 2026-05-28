@@ -6,12 +6,19 @@ export type TokenPatch = {
   customSeeds?: Record<string, string>;
 };
 
+export type PresetAiStyleGuide = {
+  designPhilosophy: string;
+  apply: string[];
+  avoid: string[];
+};
+
 export type OnboardingPreset = {
   id: string;
   name: string;
   tagline: Bilingual;
   bestFor: Bilingual;
   tone: Bilingual;
+  aiStyleGuide?: PresetAiStyleGuide;
   tokenPatch: TokenPatch;
   preferredTheme?: "light" | "dark";
   previewImage?: string;
@@ -36,6 +43,18 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
     tagline: { en: "Compact product cockpit", zh: "紧凑型产品工作台" },
     bestFor: { en: "Existing B2B dashboards, task systems, DevTools", zh: "已有 B 端 dashboard、任务系统、DevTools" },
     tone: { en: "Sharp, quiet, high-frequency", zh: "锐利、克制、高频使用" },
+    aiStyleGuide: {
+      designPhilosophy: "A compact B2B product cockpit: high information density, sharp hierarchy, quiet surfaces, and fast scanning over brand expression.",
+      apply: [
+        "Use tight but breathable page grids, clear section labels, thin separators, and token-based neutral surfaces.",
+        "Favor dense tables, sidebars, command palettes, and status rows over large marketing compositions.",
+        "Use the primary color sparingly for active states, selections, and the one main action.",
+      ],
+      avoid: [
+        "Avoid decorative hero art, oversized soft cards, lifestyle imagery, and gradient-heavy backgrounds.",
+        "Avoid adding visual flourish to controls beyond the existing component variants.",
+      ],
+    },
     preferredTheme: "dark",
     previewImage: new URL("./assets/presets/linear-dark.png", import.meta.url).href,
     tokenPatch: {
@@ -83,6 +102,18 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
     tagline: { en: "Trust-heavy SaaS", zh: "高信任商务 SaaS" },
     bestFor: { en: "Finance, billing, API platforms, account portals", zh: "金融、账单、API 平台、客户门户" },
     tone: { en: "Polished, generous, credible", zh: "精致、宽松、可信" },
+    aiStyleGuide: {
+      designPhilosophy: "A credible B2B SaaS surface: calm trust, generous readability, and polished hierarchy without becoming a marketing page.",
+      apply: [
+        "Use clear information grouping, confident whitespace, crisp form flows, and restrained emphasis around conversion-critical actions.",
+        "Prefer plain explanations, compact metrics, and predictable account or billing layouts.",
+        "Let semantic tokens carry the brand color; keep most surfaces neutral and content-first.",
+      ],
+      avoid: [
+        "Avoid excessive gradients, oversized hero sections, decorative blobs, and consumer-style illustration moments inside product workflows.",
+        "Avoid shadow-heavy card stacks when borders and spacing are enough.",
+      ],
+    },
     previewImage: new URL("./assets/presets/stripe.png", import.meta.url).href,
     tokenPatch: {
       seed: {
@@ -129,6 +160,18 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
     tagline: { en: "Modern SaaS launchpad", zh: "现代 SaaS 起步风格" },
     bestFor: { en: "PLG SaaS, onboarding, analytics dashboards", zh: "PLG SaaS、onboarding、分析看板" },
     tone: { en: "Clean, confident, product-led", zh: "干净、自信、产品驱动" },
+    aiStyleGuide: {
+      designPhilosophy: "A modern B2B SaaS baseline: clean, confident, and product-led, with aesthetics serving onboarding clarity and dashboard comprehension.",
+      apply: [
+        "Use simple responsive grids, clear empty states, concise onboarding steps, and obvious primary actions.",
+        "Balance product warmth with operational density; dashboards should be scannable before they are expressive.",
+        "Use accent color to guide task progress, selection, and important affordances.",
+      ],
+      avoid: [
+        "Avoid landing-page hero patterns inside app screens unless the user explicitly asks for a marketing page.",
+        "Avoid playful decoration, heavy animation, and visual patterns that compete with data or workflow state.",
+      ],
+    },
     previewImage: new URL("./assets/presets/saas-style-01.png", import.meta.url).href,
     tokenPatch: {
       seed: {
@@ -176,6 +219,18 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
     tagline: { en: "Friendly platform UI", zh: "友好平台型 UI" },
     bestFor: { en: "Settings, CRM, support, education, ops tools", zh: "设置中心、CRM、客服、教育、运营工具" },
     tone: { en: "Soft, rounded, familiar", zh: "柔和、圆润、易上手" },
+    aiStyleGuide: {
+      designPhilosophy: "A familiar B2B platform UI: approachable, predictable, and easy to learn, while staying efficient for repeated operational work.",
+      apply: [
+        "Use clear grouped settings, friendly but compact form layouts, readable help text, and familiar navigation patterns.",
+        "Let rounded shapes soften the experience, but keep spacing and information density suitable for daily tools.",
+        "Prefer explicit labels, calm empty states, and consistent feedback over decorative personality.",
+      ],
+      avoid: [
+        "Avoid cartoonish visuals, oversized pills, playful microcopy, and consumer-app whimsy.",
+        "Avoid making every surface soft and rounded when a simple table or list is clearer.",
+      ],
+    },
     previewImage: new URL("./assets/presets/google-style.png", import.meta.url).href,
     tokenPatch: {
       seed: {
@@ -223,6 +278,18 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
     tagline: { en: "Calm AI workspace", zh: "安静暗色 AI 工作台" },
     bestFor: { en: "AI products, focused workspaces, premium dev tools", zh: "AI 产品、专注工作台、高级开发者工具" },
     tone: { en: "Nocturnal, warm, focused", zh: "夜间感、温暖、专注" },
+    aiStyleGuide: {
+      designPhilosophy: "A focused dark B2B workspace: quiet concentration, low visual noise, and premium restraint for long sessions.",
+      apply: [
+        "Use layered dark surfaces, modest contrast, compact toolbars, and clear work areas for AI or developer workflows.",
+        "Use warmth in accents and status moments, not as ambient decoration across the whole screen.",
+        "Keep motion subtle and functional, especially around streaming, loading, and assistant state changes.",
+      ],
+      avoid: [
+        "Avoid cinematic dark-mode effects, glowing panels, sci-fi dashboards, and decorative background textures.",
+        "Avoid low-contrast text or hidden controls in the name of atmosphere.",
+      ],
+    },
     preferredTheme: "dark",
     previewImage: new URL("./assets/presets/minimal-dark.png", import.meta.url).href,
     tokenPatch: {
@@ -271,6 +338,18 @@ export const ONBOARDING_PRESETS: OnboardingPreset[] = [
     tagline: { en: "Command center", zh: "暗色指挥舱" },
     bestFor: { en: "Security, monitoring, trading, executive dashboards", zh: "安全、监控、交易、高管驾驶舱" },
     tone: { en: "High-signal, premium, controlled", zh: "高信号、高级、强控制感" },
+    aiStyleGuide: {
+      designPhilosophy: "A controlled B2B command center: high signal, disciplined hierarchy, and premium precision without theatrical dashboard decoration.",
+      apply: [
+        "Use dense status panels, clear alert hierarchy, compact chart areas, and precise dividers for monitoring-heavy screens.",
+        "Reserve strong contrast for live state, risk, selection, and decision-critical data.",
+        "Keep layouts stable and repeatable so operators can compare, scan, and respond quickly.",
+      ],
+      avoid: [
+        "Avoid sci-fi HUD ornament, glowing grids, fake radar visuals, and game-like cockpit styling.",
+        "Avoid turning every metric into a high-emphasis element; hierarchy matters more than drama.",
+      ],
+    },
     preferredTheme: "dark",
     previewImage: new URL("./assets/presets/hud-dark.png", import.meta.url).href,
     tokenPatch: {

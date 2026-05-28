@@ -11,6 +11,7 @@ import { fileURLToPath } from "node:url";
 import * as ts from "typescript";
 import { loadSpecs, getRepoRoot } from "./lib/load-specs.mjs";
 import { deriveSeedToMap } from "../src/design-tokens/seed-to-map.mjs";
+import { consumerRootFor, resolveTokenPaths } from "./lib/token-source.mjs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = getRepoRoot();
@@ -91,18 +92,16 @@ function normalizePrefix(prefix) {
   return String(prefix).replace(/^-/, "");
 }
 
-function nearestByPx(options, px) {
-  let best = null;
+function sameValueByPx(options, px) {
   for (const option of options) {
-    const delta = Math.abs(option.px - px);
-    if (!best || delta < best.delta) best = { ...option, delta };
+    if (Math.abs(option.px - px) < 0.001) return option;
   }
-  return best;
+  return null;
 }
 
 function loadFixContext() {
   if (fixContext) return fixContext;
-  const tokenPath = path.join(root, "src/design-tokens/tokens.json");
+  const tokenPath = resolveTokenPaths(root, { requireExisting: true }).tokensPath;
   let vars = {};
   if (fs.existsSync(tokenPath)) {
     const doc = JSON.parse(fs.readFileSync(tokenPath, "utf8"));
@@ -129,9 +128,14 @@ function loadFixContext() {
     ["sm", "border-radius-sm"],
     ["md", "border-radius"],
     ["lg", "border-radius-lg"],
+    ["outer", "border-radius-outer", "[var(--border-radius-outer)]"],
     ["xl", "border-radius-xl"],
   ]
-    .map(([label, key]) => ({ label, px: parsePx(vars[key]) }))
+    .map(([label, key, classFragment]) => ({
+      label,
+      classFragment: classFragment ?? label,
+      px: parsePx(vars[key]),
+    }))
     .filter((entry) => entry.px != null);
 
   const fontSize = [
@@ -155,21 +159,21 @@ function safeAutoFix(prefix, value) {
   const px = parsePx(value);
   const ctx = loadFixContext();
 
-  if (p === "ring" && px != null) return `${prefix}-[var(--ring-width)]`;
+  if (p === "ring" && px === 3) return `${prefix}-[var(--ring-width)]`;
   if (p === "border" && px != null) {
-    return px <= 1.25
-      ? `${prefix}-[var(--line-width)]`
-      : `${prefix}-[var(--line-width-bold)]`;
+    if (px === 1) return `${prefix}-[var(--line-width)]`;
+    if (px === 2) return `${prefix}-[var(--line-width-bold)]`;
+    return null;
   }
 
   if (p === "text" && px != null) {
-    const match = nearestByPx(ctx.fontSize, px);
+    const match = sameValueByPx(ctx.fontSize, px);
     return match ? `${prefix}-${match.label}` : null;
   }
 
   if (p === "rounded" || p.startsWith("rounded-")) {
-    const match = px != null ? nearestByPx(ctx.radius, px) : null;
-    return match ? `${prefix}-${match.label}` : null;
+    const match = px != null ? sameValueByPx(ctx.radius, px) : null;
+    return match ? `${prefix}-${match.classFragment}` : null;
   }
 
   if (
@@ -177,11 +181,26 @@ function safeAutoFix(prefix, value) {
     p === "m" || p === "mx" || p === "my" || p === "mt" || p === "mb" || p === "ml" || p === "mr" ||
     p === "gap" || p === "gap-x" || p === "gap-y" || p === "space-x" || p === "space-y"
   ) {
-    const match = px != null ? nearestByPx(ctx.spacing, Math.abs(px)) : null;
+    const match = px != null ? sameValueByPx(ctx.spacing, Math.abs(px)) : null;
     return match ? `${prefix}-${match.suffix}` : null;
   }
 
   return null;
+}
+
+function allowUnmappedNumericTokenValue(prefix, value) {
+  const p = normalizePrefix(prefix);
+  if (parsePx(value) == null) return false;
+  return (
+    p === "text" ||
+    p === "ring" ||
+    p === "border" ||
+    p === "rounded" ||
+    p.startsWith("rounded-") ||
+    p === "p" || p === "px" || p === "py" || p === "pt" || p === "pb" || p === "pl" || p === "pr" ||
+    p === "m" || p === "mx" || p === "my" || p === "mt" || p === "mb" || p === "ml" || p === "mr" ||
+    p === "gap" || p === "gap-x" || p === "gap-y" || p === "space-x" || p === "space-y"
+  );
 }
 
 function readAuditConfig() {
@@ -194,11 +213,25 @@ function readAuditConfig() {
 }
 
 function profileConfig(scope, baseCfg) {
-  if (scope === "app") return { name: "app", ...baseCfg };
+  const consumerRoot = consumerRootFor(root);
+  const inAnchorControlPlane = path.resolve(consumerRoot) !== path.resolve(root);
+  if (scope === "app") {
+    return {
+      name: "app",
+      ...baseCfg,
+      scanRoots: inAnchorControlPlane
+        ? ["../src", "../app", "../pages", "../packages", "../apps"]
+        : baseCfg.scanRoots,
+      excludePathSubstrings: [
+        ...(baseCfg.excludePathSubstrings ?? []),
+        "/src/components/anchor-ui/",
+      ],
+    };
+  }
   if (scope === "kit") {
     return {
       name: "kit",
-      scanRoots: ["src/components/base"],
+      scanRoots: inAnchorControlPlane ? ["../src/components/anchor-ui"] : ["src/components/base"],
       excludePathSubstrings: [
         "/node_modules/",
         "/__fixtures__/",
@@ -312,6 +345,7 @@ function auditFile(filePath, sourceText, forbiddenTags, flagArbitrary) {
           const [match, prefix, value] = m;
           if (!isTokenViolation(prefix, value)) continue;
           const fix = safeAutoFix(prefix, value);
+          if (!fix && allowUnmappedNumericTokenValue(prefix, value)) continue;
           if (fixMode && fix) {
             replacements.push({
               start: contentStart + m.index,
@@ -324,7 +358,7 @@ function auditFile(filePath, sourceText, forbiddenTags, flagArbitrary) {
           diags.push({
             file: filePath,
             line: posLine(pos),
-            message: `Arbitrary-value token class \`${match}\`: ${prefix}-* must use a design token (semantic name or var(--…)). Layout/positioning utilities (w-[…], top-[…], grid-cols-[…], aspect-[…], etc.) are allowed.${fix ? ` Safe autofix: \`${fix}\` (run with --fix).` : ""}`,
+            message: `Arbitrary-value token class \`${match}\`: ${prefix}-* must use a same-value design token when one exists. Layout/positioning utilities (w-[…], top-[…], grid-cols-[…], aspect-[…], etc.) are allowed.${fix ? ` Safe exact-value autofix: \`${fix}\` (run with --fix).` : ""}`,
           });
         }
       }

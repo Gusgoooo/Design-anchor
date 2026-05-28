@@ -10,7 +10,7 @@ export type Route =
   | { kind: "patterns" };
 
 /** Which top-nav tab is highlighted for a given route. */
-export type TopTab = "docs" | "designtoken" | "govern" | "components";
+export type TopTab = "docs" | "designtoken" | "govern" | "components" | "patterns";
 
 export function tabForRoute(r: Route): TopTab {
   switch (r.kind) {
@@ -23,8 +23,9 @@ export function tabForRoute(r: Route): TopTab {
       return "govern";
     case "components":
     case "story":
-    case "patterns":
       return "components";
+    case "patterns":
+      return "patterns";
   }
 }
 

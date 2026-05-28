@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execSync } from "node:child_process";
+import { consumerRootFor, projectTokenPaths } from "./scripts/lib/token-source.mjs";
 
 /** Write to disk synchronously with fsync, preventing unflushed buffers on process crash */
 function writeFileWithFsync(absPath, data) {
@@ -37,13 +38,181 @@ function execSyncCaptured(cmd, opts) {
  */
 const WRITE_WHITELIST_PREFIXES = [
   "src/anchor/schema/",
+  "src/anchor/component-demos/",
+  "src/anchor/rules/",
   "src/design-tokens/",
+  "src/styles/",
+  "src/components/anchor-ui/",
   "src/components/base/",
 ];
 
+const COMPONENTS_REL = "src/components/anchor-ui";
+const FALLBACK_COMPONENTS_REL = "src/components/base";
+const COMPONENT_IMPORT_BASE = "@/components/anchor-ui";
+const FALLBACK_COMPONENT_IMPORT_BASE = "@/components/base";
+const DEMO_COMPONENTS_REL = "src/anchor/component-demos/base";
+
 function isWriteAllowed(repoRoot, absPath) {
-  const rel = path.relative(repoRoot, absPath).split(path.sep).join("/");
-  return WRITE_WHITELIST_PREFIXES.some(prefix => rel.startsWith(prefix));
+  const roots = [...new Set([path.resolve(repoRoot), consumerRootFor(repoRoot)])];
+  return roots.some((root) => {
+    const rel = path.relative(root, absPath).split(path.sep).join("/");
+    if (rel.startsWith("..") || path.isAbsolute(rel)) return false;
+    return WRITE_WHITELIST_PREFIXES.some(prefix => rel.startsWith(prefix));
+  });
+}
+
+function componentSourceInfo(repoRoot) {
+  const consumerRoot = consumerRootFor(repoRoot);
+  const visibleDir = path.join(consumerRoot, COMPONENTS_REL);
+  if (fs.existsSync(visibleDir)) {
+    return {
+      root: consumerRoot,
+      dir: visibleDir,
+      rel: COMPONENTS_REL,
+      importBase: COMPONENT_IMPORT_BASE,
+      mode: "visible",
+    };
+  }
+  return {
+    root: repoRoot,
+    dir: path.join(repoRoot, FALLBACK_COMPONENTS_REL),
+    rel: FALLBACK_COMPONENTS_REL,
+    importBase: FALLBACK_COMPONENT_IMPORT_BASE,
+    mode: "fallback",
+  };
+}
+
+function demoSourceInfo(repoRoot) {
+  const demoDir = path.join(repoRoot, DEMO_COMPONENTS_REL);
+  if (fs.existsSync(demoDir)) {
+    return { dir: demoDir, rel: DEMO_COMPONENTS_REL };
+  }
+  return { dir: path.join(repoRoot, FALLBACK_COMPONENTS_REL), rel: FALLBACK_COMPONENTS_REL };
+}
+
+function rewriteImportedComponentSource(text) {
+  return String(text)
+    .replaceAll("@/components/base", COMPONENT_IMPORT_BASE)
+    .replaceAll("src/components/base", COMPONENTS_REL);
+}
+
+function demoComponentSpecifier(componentRel, sourceRel = "") {
+  const normalized = componentRel.split(path.sep).join("/").replace(/\.tsx$/, "");
+  return `${COMPONENT_IMPORT_BASE}/${normalized}`;
+}
+
+function demoRawSpecifier(componentRel) {
+  const normalized = componentRel.split(path.sep).join("/");
+  return `${COMPONENT_IMPORT_BASE}/${normalized}?raw`;
+}
+
+const ACTIVE_PRESET_STYLE_REL = "src/anchor/rules/ACTIVE_PRESET_STYLE.md";
+
+function cleanPromptText(value, maxLength = 480) {
+  return String(value ?? "")
+    .replace(/\r/g, "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, maxLength);
+}
+
+function cleanPromptList(value, maxItems = 5) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => cleanPromptText(item, 360))
+    .filter(Boolean)
+    .slice(0, maxItems);
+}
+
+function normalizeAiStyleGuide(value) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const designPhilosophy = cleanPromptText(value.designPhilosophy, 520);
+  const apply = cleanPromptList(value.apply, 6);
+  const avoid = cleanPromptList(value.avoid, 6);
+  if (!designPhilosophy && apply.length === 0 && avoid.length === 0) return null;
+  return { designPhilosophy, apply, avoid };
+}
+
+function renderActivePresetStyleBody({ preset, presetName, tone, preferredTheme, guide }) {
+  const name = cleanPromptText(presetName || preset || "Preset", 80);
+  const id = cleanPromptText(preset, 80);
+  const presetTone = cleanPromptText(tone, 160);
+  const theme = cleanPromptText(preferredTheme, 24);
+  const lines = [
+    `# Active preset style: ${name}`,
+    "",
+    "This is a lightweight B2B aesthetic layer for AI-written UI. It is secondary to Design-anchor component specs, semantic tokens, and audit rules.",
+    "",
+    "## Priority",
+    "",
+    "- First obey component specs, imports, semantic props, and token-only styling.",
+    "- Use this preset only for page rhythm, hierarchy, density, surface treatment, motion restraint, and decorative restraint.",
+    "- Do not copy colors, hex values, pixel values, or custom component implementations from this text.",
+    "",
+    "## Preset context",
+    "",
+    `- Preset: ${name}${id && id !== name ? ` (${id})` : ""}`,
+  ];
+  if (presetTone) lines.push(`- Tone: ${presetTone}`);
+  if (theme) lines.push(`- Preferred theme: ${theme}`);
+  lines.push("");
+  if (guide.designPhilosophy) {
+    lines.push("## Design philosophy", "", guide.designPhilosophy, "");
+  }
+  if (guide.apply.length > 0) {
+    lines.push("## Apply lightly", "");
+    guide.apply.forEach((item) => lines.push(`- ${item}`));
+    lines.push("");
+  }
+  if (guide.avoid.length > 0) {
+    lines.push("## Avoid", "");
+    guide.avoid.forEach((item) => lines.push(`- ${item}`));
+    lines.push("");
+  }
+  lines.push("## B2B restraint rule", "");
+  lines.push("- Prefer clarity, scanability, and predictable workflows over expressive visual moments.");
+  lines.push("- If a style choice would make a dashboard, form, table, or settings screen harder to read, choose the quieter option.");
+  return `${lines.join("\n").trim()}\n`;
+}
+
+function renderCursorPresetStyleRule(styleBody) {
+  return `---
+description: Active Design-anchor preset style, restrained B2B layer for AI-written UI
+alwaysApply: true
+---
+
+${styleBody}`;
+}
+
+function writePresetStyleArtifacts(repoRoot, payload) {
+  const guide = normalizeAiStyleGuide(payload.aiStyleGuide);
+  if (!guide) return { styleWritten: false };
+
+  const styleBody = renderActivePresetStyleBody({
+    preset: payload.preset,
+    presetName: payload.presetName,
+    tone: payload.tone,
+    preferredTheme: payload.preferredTheme,
+    guide,
+  });
+
+  const activeStylePath = path.join(repoRoot, ACTIVE_PRESET_STYLE_REL);
+  if (!isWriteAllowed(repoRoot, activeStylePath)) {
+    throw new Error("active preset style path not in whitelist");
+  }
+  fs.mkdirSync(path.dirname(activeStylePath), { recursive: true });
+  writeFileWithFsync(activeStylePath, styleBody);
+
+  const consumerRoot = consumerRootFor(repoRoot);
+  const cursorStylePath = path.join(consumerRoot, ".cursor/rules/anchor-style.mdc");
+  fs.mkdirSync(path.dirname(cursorStylePath), { recursive: true });
+  writeFileWithFsync(cursorStylePath, renderCursorPresetStyleRule(styleBody));
+
+  return {
+    styleWritten: true,
+    activeStylePath: path.relative(repoRoot, activeStylePath).split(path.sep).join("/"),
+    cursorStylePath: path.relative(consumerRoot, cursorStylePath).split(path.sep).join("/"),
+  };
 }
 
 // Curated allow-list of imports we know are safe to keep when copying
@@ -70,6 +239,7 @@ const SAFE_COMPONENT_IMPORT_PREFIXES = [
 function classifyComponentImport(importPath) {
   if (SAFE_COMPONENT_IMPORTS.has(importPath)) return "safe";
   if (SAFE_COMPONENT_IMPORT_PREFIXES.some((pre) => importPath.startsWith(pre))) return "safe";
+  if (importPath.startsWith("@/components/anchor-ui/")) return "safe";
   if (importPath.startsWith("@/components/base/")) return "safe";
   if (importPath.startsWith("@/")) return "warn";
   if (importPath.startsWith("./") || importPath.startsWith("../")) return "warn";
@@ -195,7 +365,8 @@ function toKebabName(name) {
 
 function collectComponentCatalog(repoRoot) {
   const components = new Map();
-  const baseDir = path.join(repoRoot, "src/components/base");
+  const source = componentSourceInfo(repoRoot);
+  const baseDir = source.dir;
   const specDir = path.join(repoRoot, "src/anchor/schema/components");
 
   if (fs.existsSync(baseDir)) {
@@ -214,7 +385,7 @@ function collectComponentCatalog(repoRoot) {
         components.set(id, {
           id,
           name: toPascalName(leaf),
-          file: `src/components/base/${rel}`,
+          file: `${source.rel}/${rel}`,
           files: new Set(),
           origin: "kit",
         });
@@ -229,8 +400,10 @@ function collectComponentCatalog(repoRoot) {
       try {
         const spec = JSON.parse(fs.readFileSync(path.join(specDir, file), "utf8"));
         const modulePath = String(spec.wraps?.module ?? "");
-        const id = modulePath.startsWith("@/components/base/")
-          ? modulePath.slice("@/components/base/".length)
+        const id = modulePath.startsWith(`${COMPONENT_IMPORT_BASE}/`)
+          ? modulePath.slice(`${COMPONENT_IMPORT_BASE}/`.length)
+          : modulePath.startsWith(`${FALLBACK_COMPONENT_IMPORT_BASE}/`)
+            ? modulePath.slice(`${FALLBACK_COMPONENT_IMPORT_BASE}/`.length)
           : file.replace(/\.spec\.json$/, "");
         const entry = components.get(id) ?? {
           id,
@@ -307,7 +480,7 @@ function collectUsageScanFiles(projectRoot, anchorRoot) {
  */
 export function schemaApiPlugin(repoRoot) {
   const specDir = path.join(repoRoot, "src/anchor/schema/components");
-  const tokensPath = path.join(repoRoot, "src/design-tokens/tokens.json");
+  const getTokenPaths = () => projectTokenPaths(repoRoot);
 
   return {
     name: "anchor-schema-api",
@@ -435,10 +608,10 @@ export function schemaApiPlugin(repoRoot) {
         }
 
         if (req.method === "POST" && url === "/api/clear-components") {
-          // Wipes src/components/base/ for the "empty library" onboarding mode.
+          // Wipes the visible component source for the "empty library" onboarding mode.
           // Tokens / specs / generated files stay so the user can grow from zero.
           try {
-            const baseDir = path.join(repoRoot, "src/components/base");
+            const baseDir = componentSourceInfo(repoRoot).dir;
             if (fs.existsSync(baseDir)) {
               for (const f of fs.readdirSync(baseDir)) {
                 fs.rmSync(path.join(baseDir, f), { recursive: true, force: true });
@@ -519,7 +692,7 @@ export function schemaApiPlugin(repoRoot) {
               const relFile = path.relative(projectRoot, file).split(path.sep).join("/");
 
               if (/from\s+["']@design/.test(text)) importKinds.designAlias += 1;
-              if (/components\/base\//.test(text) || /\.anchor\/src\/components\/base\//.test(text)) importKinds.baseDeep += 1;
+              if (/components\/(?:anchor-ui|base)\//.test(text) || /\.anchor\/src\/components\/base\//.test(text)) importKinds.baseDeep += 1;
               if (/<[A-Z][A-Za-z0-9]*\b/.test(text)) importKinds.jsxDetected += 1;
 
               const importRe = /import\s+([\s\S]*?)\s+from\s+["']([^"']+)["']/g;
@@ -528,7 +701,11 @@ export function schemaApiPlugin(repoRoot) {
                 const clause = m[1];
                 const source = m[2];
 
-                if (source === "@design" || source.endsWith("/.anchor/src/components/base")) {
+                if (
+                  source === "@design" ||
+                  source.endsWith("/src/components/anchor-ui") ||
+                  source.endsWith("/.anchor/src/components/base")
+                ) {
                   const named = /\{([^}]+)\}/.exec(clause);
                   if (!named) continue;
                   for (const raw of named[1].split(",")) {
@@ -540,7 +717,7 @@ export function schemaApiPlugin(repoRoot) {
                 }
 
                 const baseMatch =
-                  /(?:^@\/components\/base\/|^@design\/|\/\.anchor\/src\/components\/base\/)(.+)$/.exec(source);
+                  /(?:^@\/components\/anchor-ui\/|^@\/components\/base\/|^@design\/|\/src\/components\/anchor-ui\/|\/\.anchor\/src\/components\/base\/)(.+)$/.exec(source);
                 if (baseMatch) {
                   const id = baseMatch[1].replace(/\/index$/, "");
                   const entry = byKebab.get(id) ?? byKebab.get(toKebabName(path.basename(id)));
@@ -548,8 +725,11 @@ export function schemaApiPlugin(repoRoot) {
                   continue;
                 }
 
-                if (source.includes("components/base/")) {
-                  const id = source.split("components/base/").pop().replace(/\/index$/, "");
+                if (source.includes("components/anchor-ui/") || source.includes("components/base/")) {
+                  const id = source
+                    .split(/components\/(?:anchor-ui|base)\//)
+                    .pop()
+                    .replace(/\/index$/, "");
                   const entry = byKebab.get(id) ?? byKebab.get(toKebabName(path.basename(id)));
                   if (entry) entry.files.add(relFile);
                 }
@@ -599,12 +779,11 @@ export function schemaApiPlugin(repoRoot) {
 
         if (req.method === "GET" && url === "/api/token-summary") {
           try {
+            const { tokensPath, cssPath, spacingPath } = getTokenPaths();
             const tokenDoc = fs.existsSync(tokensPath)
               ? JSON.parse(fs.readFileSync(tokensPath, "utf8"))
               : {};
-            const cssPath = path.join(repoRoot, "src/styles/design-tokens.generated.css");
             const cssText = fs.existsSync(cssPath) ? fs.readFileSync(cssPath, "utf8") : "";
-            const spacingPath = path.join(repoRoot, "src/design-tokens/spacing-scale.generated.json");
             const spacing = fs.existsSync(spacingPath)
               ? JSON.parse(fs.readFileSync(spacingPath, "utf8"))
               : null;
@@ -675,7 +854,7 @@ export function schemaApiPlugin(repoRoot) {
               { id: "cursor-mcp",        label: ".cursor/mcp.json",                path: ".cursor/mcp.json" },
             ];
 
-            const tokensPath = path.join(repoRoot, "src/design-tokens/tokens.json");
+            const { tokensPath } = getTokenPaths();
             const tokensMtime = fs.existsSync(tokensPath) ? fs.statSync(tokensPath).mtimeMs : 0;
 
             const status = items.map((item) => {
@@ -748,6 +927,7 @@ export function schemaApiPlugin(repoRoot) {
 
         if (req.method === "GET" && url === "/api/design-tokens") {
           try {
+            const { tokensPath } = getTokenPaths();
             const body = fs.readFileSync(tokensPath, "utf8");
             res.setHeader("Content-Type", "application/json; charset=utf-8");
             res.end(body);
@@ -765,6 +945,7 @@ export function schemaApiPlugin(repoRoot) {
           });
           req.on("end", () => {
             try {
+              const { tokensPath } = getTokenPaths();
               if (!isWriteAllowed(repoRoot, tokensPath)) {
                 res.statusCode = 403;
                 res.setHeader("Content-Type", "application/json");
@@ -799,8 +980,12 @@ export function schemaApiPlugin(repoRoot) {
                 }
               }
 
+              const style = writePresetStyleArtifacts(repoRoot, payload);
               writeFileWithFsync(tokensPath, JSON.stringify(doc, null, 2) + "\n");
-              const sync = execSyncCaptured("npm run sync:anchor", { cwd: repoRoot });
+              const sync = execSyncCaptured("npm run sync:anchor", {
+                cwd: repoRoot,
+                env: { ...process.env, ANCHOR_TOKEN_ROOT: consumerRootFor(repoRoot) },
+              });
               res.setHeader("Content-Type", "application/json");
               res.end(
                 JSON.stringify({
@@ -808,6 +993,7 @@ export function schemaApiPlugin(repoRoot) {
                   preset,
                   mergedFields,
                   fileWritten: true,
+                  ...style,
                   syncOk: sync.ok,
                   syncError: sync.ok ? null : sync.stderr || sync.stdout,
                 }),
@@ -828,6 +1014,7 @@ export function schemaApiPlugin(repoRoot) {
           });
           req.on("end", () => {
             try {
+              const { tokensPath } = getTokenPaths();
               if (!isWriteAllowed(repoRoot, tokensPath)) {
                 res.statusCode = 403;
                 res.setHeader("Content-Type", "application/json");
@@ -839,7 +1026,10 @@ export function schemaApiPlugin(repoRoot) {
               JSON.parse(jsonText);
               const pretty = `${JSON.stringify(JSON.parse(jsonText), null, 2)}\n`;
               writeFileWithFsync(tokensPath, pretty);
-              const sync = execSyncCaptured("npm run sync:tokens", { cwd: repoRoot });
+              const sync = execSyncCaptured("npm run sync:tokens", {
+                cwd: repoRoot,
+                env: { ...process.env, ANCHOR_TOKEN_ROOT: consumerRootFor(repoRoot) },
+              });
               res.setHeader("Content-Type", "application/json");
               res.end(
                 JSON.stringify({
@@ -1081,9 +1271,23 @@ export function schemaApiPlugin(repoRoot) {
               let componentFile = null;
               if (fs.existsSync(absStory)) {
                 const storyText = fs.readFileSync(absStory, "utf8");
-                // Match: import { X } from "./component-name";
+                const source = componentSourceInfo(repoRoot);
+                const designImport = storyText.match(/from\s+["']@design\/([^"']+)["']/)
+                  || storyText.match(/from\s+["']@\/components\/anchor-ui\/([^"']+)["']/)
+                  || storyText.match(/from\s+["']@\/components\/base\/([^"']+)["']/);
+                if (designImport) {
+                  const compRel = designImport[1].replace(/\.tsx(?:\?raw)?$/, "").replace(/\?raw$/, "");
+                  for (const ext of [".tsx", ".ts"]) {
+                    const candidate = path.join(source.dir, compRel + ext);
+                    if (fs.existsSync(candidate)) {
+                      componentFile = candidate;
+                      break;
+                    }
+                  }
+                }
+                // Match legacy demos: import { X } from "./component-name";
                 const importMatch = storyText.match(/from\s+["']\.\/([\w-]+)["']/);
-                if (importMatch) {
+                if (!componentFile && importMatch) {
                   const compBase = importMatch[1];
                   const dir = path.dirname(absStory);
                   // Try .tsx then .ts
@@ -1100,13 +1304,20 @@ export function schemaApiPlugin(repoRoot) {
               // Delete story file
               if (fs.existsSync(absStory)) {
                 fs.unlinkSync(absStory);
-                deleted.push(path.relative(repoRoot, absStory));
+                deleted.push(path.relative(repoRoot, absStory).split(path.sep).join("/"));
               }
 
               // Delete component file
               if (componentFile && fs.existsSync(componentFile)) {
+                if (!isWriteAllowed(repoRoot, componentFile)) {
+                  res.statusCode = 403;
+                  res.setHeader("Content-Type", "application/json; charset=utf-8");
+                  res.end(JSON.stringify({ ok: false, error: "component path forbidden" }));
+                  return;
+                }
                 fs.unlinkSync(componentFile);
-                deleted.push(path.relative(repoRoot, componentFile));
+                const source = componentSourceInfo(repoRoot);
+                deleted.push(path.relative(source.root, componentFile).split(path.sep).join("/"));
               }
 
               // Delete spec.json if exists
@@ -1162,7 +1373,8 @@ export function schemaApiPlugin(repoRoot) {
               }
 
               const compName = filename.replace(/\.tsx$/, "");
-              const baseDir = path.join(repoRoot, "src/components/base");
+              const source = componentSourceInfo(repoRoot);
+              const baseDir = source.dir;
               if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
 
               const compPath = path.join(baseDir, filename);
@@ -1173,17 +1385,18 @@ export function schemaApiPlugin(repoRoot) {
                 return;
               }
 
-              writeFileWithFsync(compPath, Buffer.from(content, "binary"));
+              writeFileWithFsync(compPath, rewriteImportedComponentSource(Buffer.from(content, "binary").toString("utf8")));
 
               const pascal = compName.replace(/(^|-)(\w)/g, (_, _2, c) => c.toUpperCase());
-              const demoPath = path.join(baseDir, pascal + ".demo.tsx");
+              const demo = demoSourceInfo(repoRoot);
+              const demoPath = path.join(demo.dir, pascal + ".demo.tsx");
               if (!fs.existsSync(demoPath)) {
                 const demo = [
                   `import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";`,
                   `import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";`,
                   `import { autoClassControls } from "@/design-tokens/tw-class-audit";`,
-                  `import componentSrc from "./${compName}.tsx?raw";`,
-                  `import { ${pascal} } from "./${compName}";`,
+                  `import componentSrc from "${demoRawSpecifier(filename)}";`,
+                  `import { ${pascal} } from "${demoComponentSpecifier(filename)}";`,
                   ``,
                   `const audit = autoClassControls(componentSrc);`,
                   ``,
@@ -1213,8 +1426,8 @@ export function schemaApiPlugin(repoRoot) {
               res.setHeader("Content-Type", "application/json; charset=utf-8");
               res.end(JSON.stringify({
                 ok: true,
-                component: compPath.replace(repoRoot + "/", ""),
-                demo: demoPath.replace(repoRoot + "/", ""),
+                component: path.relative(source.root, compPath).split(path.sep).join("/"),
+                demo: path.relative(repoRoot, demoPath).split(path.sep).join("/"),
               }));
             } catch (e) {
               res.statusCode = 500;
@@ -1228,7 +1441,7 @@ export function schemaApiPlugin(repoRoot) {
         // POST /api/import-component-path  — accepts { path } where path is
         // an absolute (or ~-prefixed) file or folder on the dev machine.
         // For a React + Tailwind .tsx file: copies it into
-        // src/components/base/ and auto-generates a *.demo.tsx if missing.
+        // src/components/anchor-ui/ and auto-generates a Portal *.demo.tsx if missing.
         // For a folder: imports compatible scanned .tsx files (skipping
         // *.demo.tsx and *.stories.tsx).
         if (req.method === "POST" && url === "/api/import-component-path") {
@@ -1361,7 +1574,8 @@ export function schemaApiPlugin(repoRoot) {
                 return;
               }
 
-              const baseDir = path.join(repoRoot, "src/components/base");
+              const source = componentSourceInfo(repoRoot);
+              const baseDir = source.dir;
               if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
 
               const imported = [];
@@ -1378,19 +1592,20 @@ export function schemaApiPlugin(repoRoot) {
                     errors.push({ file: filename, error: "forbidden destination" });
                     continue;
                   }
-                  const content = fs.readFileSync(src);
+                  const content = rewriteImportedComponentSource(fs.readFileSync(src, "utf8"));
                   fs.mkdirSync(path.dirname(dest), { recursive: true });
                   writeFileWithFsync(dest, content);
 
                   const pascal = compName.replace(/(^|-)(\w)/g, (_, _2, c) => c.toUpperCase());
-                  const demoPath = path.join(path.dirname(dest), pascal + ".demo.tsx");
+                  const demoRoot = demoSourceInfo(repoRoot);
+                  const demoPath = path.join(demoRoot.dir, path.dirname(sourceRel), pascal + ".demo.tsx");
                   if (!fs.existsSync(demoPath)) {
                     const demo = [
                       `import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";`,
                       `import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";`,
                       `import { autoClassControls } from "@/design-tokens/tw-class-audit";`,
-                      `import componentSrc from "./${compName}.tsx?raw";`,
-                      `import { ${pascal} } from "./${compName}";`,
+                      `import componentSrc from "${demoRawSpecifier(sourceRel)}";`,
+                      `import { ${pascal} } from "${demoComponentSpecifier(sourceRel)}";`,
                       ``,
                       `const audit = autoClassControls(componentSrc);`,
                       ``,
@@ -1416,7 +1631,7 @@ export function schemaApiPlugin(repoRoot) {
                     ].join("\n");
                     writeFileWithFsync(demoPath, demo);
                   }
-                  imported.push(dest.replace(repoRoot + "/", ""));
+                  imported.push(path.relative(source.root, dest).split(path.sep).join("/"));
                 } catch (e) {
                   errors.push({ file: path.basename(src), error: String(e) });
                 }

@@ -11,6 +11,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
+      "@design": ["src/components/base/index.ts"],
+      "@design/*": ["src/components/base/*"],
       "vite-plugin-schema-api": ["./vite-plugin-schema-api.mjs"]
     }
   },

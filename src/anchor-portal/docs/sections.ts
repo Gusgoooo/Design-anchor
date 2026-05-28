@@ -123,8 +123,8 @@ npx design-anchor start
 
 This is the all-in-one. It will:
 
-1. **\`init\`** — install the \`.anchor/\` subtree (the recommended default component library and governance workspace)
-2. **\`install\`** — \`npm install\` inside \`.anchor/\` so the portal can run
+1. **\`init\`** — install the \`.anchor/\` control plane and visible \`src/components/anchor-ui/\` component source
+2. **\`install\`** — \`npm install\` at the project root for component runtime dependencies, then inside \`.anchor/\` for the Portal toolchain
 3. **\`dev\`** — start the Portal at <http://localhost:6006>
 
 Open the printed URL in your browser.
@@ -134,10 +134,13 @@ Open the printed URL in your browser.
 \`\`\`
 your-project/
 ├── .anchor/                    ← Design-anchor subtree (gitignored or vendored)
-│   ├── src/components/base/   recommended default components; imported components can join here
 │   ├── src/anchor/schema/     per-component spec.json contracts
-│   ├── src/design-tokens/     tokens.json + seed-to-map algorithm
-│   └── package.json           own deps (Vite + React + Radix + …)
+│   ├── src/anchor/component-demos/ Portal-only component previews
+│   ├── src/design-tokens/     seed-to-map algorithm and Portal token UI
+│   └── package.json           Portal toolchain only (Vite + TypeScript + Tailwind plugin)
+├── src/components/anchor-ui/    visible component source used by your app
+├── src/design-tokens/           runtime token source
+├── src/styles/                  generated token CSS
 ├── .cursorrules                AI-readable design contract (auto-regenerated)
 ├── .cursor/rules/anchor.mdc    Cursor-specific rule file
 ├── CLAUDE.md                   Claude Code project instructions
@@ -156,14 +159,15 @@ In the Portal (top nav):
 
 ## Importing components into your app
 
-Add a TypeScript path alias \`@design\` → \`.anchor/src\` so imports stay short:
+Add a TypeScript path alias \`@design\` → \`src/components/anchor-ui\` so imports stay short:
 
 \`\`\`ts
 // tsconfig.json
 {
   "compilerOptions": {
     "paths": {
-      "@design": [".anchor/src/components/base"]
+      "@design": ["src/components/anchor-ui"],
+      "@design/*": ["src/components/anchor-ui/*"]
     }
   }
 }
@@ -190,8 +194,8 @@ npx design-anchor start
 
 这是 all-in-one 命令，会自动：
 
-1. **\`init\`** —— 在项目里铺一个 \`.anchor/\` 子目录（推荐默认组件库 + 治理工作台）
-2. **\`install\`** —— 在 \`.anchor/\` 里跑 \`npm install\`，让 Portal 跑得起来
+1. **\`init\`** —— 在项目里铺一个 \`.anchor/\` 控制面，并把组件源码放进 \`src/components/anchor-ui/\`
+2. **\`install\`** —— 先在项目根跑 \`npm install\` 安装组件运行时依赖，再在 \`.anchor/\` 里安装 Portal 工具链
 3. **\`dev\`** —— 在 <http://localhost:6006> 启动 Portal
 
 打开命令行里打印的 URL 就行。
@@ -201,10 +205,13 @@ npx design-anchor start
 \`\`\`
 your-project/
 ├── .anchor/                    ← Design-anchor 子目录（可 gitignore 也可 vendor）
-│   ├── src/components/base/   推荐默认组件；导入组件也会进入这里
 │   ├── src/anchor/schema/     每个组件的 spec.json 契约
-│   ├── src/design-tokens/     tokens.json + seed-to-map 算法
-│   └── package.json           独立 deps（Vite + React + Radix 等）
+│   ├── src/anchor/component-demos/ Portal 专用组件预览
+│   ├── src/design-tokens/     seed-to-map 算法和 Portal token UI
+│   └── package.json           仅 Portal 工具链（Vite + TypeScript + Tailwind plugin）
+├── src/components/anchor-ui/    业务应用直接使用的组件源码
+├── src/design-tokens/           运行时 token 真源
+├── src/styles/                  生成的 token CSS
 ├── .cursorrules                给 AI 读的设计契约（自动重新生成）
 ├── .cursor/rules/anchor.mdc    Cursor 专属 rule 文件
 ├── CLAUDE.md                   Claude Code 项目指令
@@ -223,14 +230,15 @@ your-project/
 
 ## 在你自己的应用里用组件
 
-加一个 TypeScript path alias \`@design\` → \`.anchor/src\`，import 路径短一些：
+加一个 TypeScript path alias \`@design\` → \`src/components/anchor-ui\`，import 路径短一些：
 
 \`\`\`ts
 // tsconfig.json
 {
   "compilerOptions": {
     "paths": {
-      "@design": [".anchor/src/components/base"]
+      "@design": ["src/components/anchor-ui"],
+      "@design/*": ["src/components/anchor-ui/*"]
     }
   }
 }
@@ -261,7 +269,7 @@ export function CTA() {
       en: `
 ## The four layers
 
-1. **Seeds** (\`.anchor/src/design-tokens/tokens.json\`) — ~14 user-editable knobs
+1. **Seeds** (\`src/design-tokens/tokens.json\`) — ~14 user-editable knobs in the business project
 2. **Derived map** — 200+ CSS variables computed by \`seed-to-map.mjs\` (Antd algorithm + custom mappings)
 3. **\`@theme inline\`** block — wires the derived vars into Tailwind v4 utilities (\`bg-primary\` → \`var(--primary)\`)
 4. **Component className** — uses the Tailwind utilities
@@ -299,7 +307,7 @@ The "Save & Sync" button in the customizer:
       zh: `
 ## 四层结构
 
-1. **Seeds**（\`.anchor/src/design-tokens/tokens.json\`）—— ~14 个用户可调旋钮
+1. **Seeds**（\`src/design-tokens/tokens.json\`）—— 业务项目里的 ~14 个用户可调旋钮
 2. **派生 map** —— \`seed-to-map.mjs\` 算出来的 200+ 个 CSS 变量（Antd 算法 + 自定义映射）
 3. **\`@theme inline\`** 块 —— 把派生 var 接到 Tailwind v4 utilities 上（\`bg-primary\` → \`var(--primary)\`）
 4. **组件 className** —— 用 Tailwind utilities
@@ -355,21 +363,21 @@ npx design-anchor <command> [args]
 
 | Command | Behaviour |
 |---|---|
-| \`start [dir]\` | One-click. Init + npm install + open Portal. The most common entry. |
+| \`start [dir]\` | One-click. Init + project npm install + Portal toolchain install + open Portal. The most common entry. |
 | \`init [dir]\` | Scaffold \`.anchor/\` only (no install, no dev). Use when integrating into CI. |
 | \`dev [dir]\` | Start the Portal against an existing \`.anchor/\`. |
 | \`sync [dir]\` | Re-run schema + tokens sync. Regenerates \`.cursorrules\` / Tailwind / rules. Useful after manually editing \`tokens.json\` or a \`spec.json\`. |
 | \`audit [dir]\` | AST-scan business code for forbidden tags + arbitrary-value Tailwind on token-sensitive prefixes. |
 | \`upgrade [dir]\` | Pull the latest \`.anchor/\` template (preserves your tokens / custom components). |
 | \`mcp [dir]\` | Start the MCP server on stdio. See [MCP Server](#mcp-server). |
-| \`add <Component>\` | Import a new component into \`.anchor/src/components/base/\` and scaffold its spec + demo. |
+| \`add <Component>\` | Import a new component into \`src/components/anchor-ui/\` and scaffold its spec + Portal demo. |
 
 ## Common flows
 
 ### Customize tokens via terminal
 
 \`\`\`bash
-$EDITOR .anchor/src/design-tokens/tokens.json
+$EDITOR src/design-tokens/tokens.json
 npx design-anchor sync
 \`\`\`
 
@@ -406,21 +414,21 @@ npx design-anchor <command> [args]
 
 | 命令 | 行为 |
 |---|---|
-| \`start [dir]\` | 一键。init + npm install + 启动 Portal。最常用的入口。 |
+| \`start [dir]\` | 一键。init + 项目根 npm install + Portal 工具链安装 + 启动 Portal。最常用的入口。 |
 | \`init [dir]\` | 仅 scaffold \`.anchor/\`（不 install 也不 dev）。CI 集成场景用。 |
 | \`dev [dir]\` | 在已有 \`.anchor/\` 上启动 Portal。 |
 | \`sync [dir]\` | 重跑 schema + tokens 同步。重新生成 \`.cursorrules\` / Tailwind / rules。手动改过 \`tokens.json\` 或 \`spec.json\` 后用。 |
 | \`audit [dir]\` | AST 层扫业务代码，检查 forbidden tags + 在 token 敏感前缀上的 arbitrary-value Tailwind。 |
 | \`upgrade [dir]\` | 拉最新的 \`.anchor/\` 模板（保留你的 tokens 和自定义组件）。 |
 | \`mcp [dir]\` | 在 stdio 上启动 MCP server。详见 [MCP Server](#mcp-server)。 |
-| \`add <Component>\` | 把新组件导入 \`.anchor/src/components/base/\`，附带 scaffold spec 和 demo。 |
+| \`add <Component>\` | 把新组件导入 \`src/components/anchor-ui/\`，附带 scaffold spec 和 Portal demo。 |
 
 ## 常用流程
 
 ### 终端改 token
 
 \`\`\`bash
-$EDITOR .anchor/src/design-tokens/tokens.json
+$EDITOR src/design-tokens/tokens.json
 npx design-anchor sync
 \`\`\`
 
@@ -669,7 +677,7 @@ Edit \`src/anchor/linter/audit-config.json\`:
   "scanRoots": ["src"],
   "excludePathSubstrings": [
     "/node_modules/",
-    "/components/base/",
+    "/components/anchor-ui/",
     "/__fixtures__/"
   ],
   "reportForbiddenHtmlFromSpecs": true,
@@ -738,7 +746,7 @@ Audit 把前缀分两类：
   "scanRoots": ["src"],
   "excludePathSubstrings": [
     "/node_modules/",
-    "/components/base/",
+    "/components/anchor-ui/",
     "/__fixtures__/"
   ],
   "reportForbiddenHtmlFromSpecs": true,
@@ -935,7 +943,7 @@ Every component has a sibling \`*.spec.json\` in \`.anchor/src/anchor/schema/com
   "version": "1.0.0",
   "intent": "Unified clickable action entry. Raw <button> with manual styling is forbidden.",
   "wraps": {
-    "module": "@/components/base/button",
+    "module": "@/components/anchor-ui/button",
     "primitives": ["Button"]
   },
   "requiredProps": [...],
@@ -999,7 +1007,7 @@ After editing, run \`npx design-anchor sync\` to regenerate \`.cursorrules\` (or
   "version": "1.0.0",
   "intent": "Unified clickable action entry. Raw <button> with manual styling is forbidden.",
   "wraps": {
-    "module": "@/components/base/button",
+    "module": "@/components/anchor-ui/button",
     "primitives": ["Button"]
   },
   "requiredProps": [...],
@@ -1060,7 +1068,7 @@ Library tab → 选任意组件 → 下方面板切到 **Spec.json** → 改 →
 Two cases:
 
 1. **In the Portal preview**: edits go to a draft; click **Save & Sync** to commit. The preview already reflects the draft live, but disk + downstream tools need the explicit save.
-2. **In your business app**: after Save & Sync, the Tailwind generated CSS (\`.anchor/src/styles/design-tokens.generated.css\`) gets rewritten. Your app's Vite HMR / Webpack should pick it up. If not, restart the dev server.
+2. **In your business app**: after Save & Sync, the Tailwind generated CSS (\`src/styles/design-tokens.generated.css\`) gets rewritten. Your app's Vite HMR / Webpack should pick it up. If not, restart the dev server.
 
 ## Why does the Controls panel show controls that don't do anything?
 
@@ -1070,7 +1078,7 @@ The auto-controls scan the component source for Tailwind classes and offer overr
 
 Yes. Two ways:
 
-1. **Portal UI**: Library tab → "Add Component" → paste local path. The component is copied into \`.anchor/src/components/base/\` and a starter demo is scaffolded.
+1. **Portal UI**: Library tab → "Add Component" → paste local path. The component is copied into \`src/components/anchor-ui/\` and a starter Portal demo is scaffolded.
 2. **CLI**: \`npx design-anchor add MyComponent\`
 
 Then write a \`spec.json\` in \`.anchor/src/anchor/schema/components/\` to declare its contract.
@@ -1085,7 +1093,7 @@ In the customizer, open **Surfaces > Derived > Semantic** subgroup and click any
 
 ## Where does my data live?
 
-Everything is local. Tokens are in \`.anchor/src/design-tokens/tokens.json\`. Components are in \`.anchor/src/components/base/\`. Specs are in \`.anchor/src/anchor/schema/components/\`. Generated artifacts (\`.cursorrules\` etc.) are at the project root. Nothing leaves your machine.
+Everything is local. Tokens and generated token CSS live in your business project at \`src/design-tokens/tokens.json\` and \`src/styles/design-tokens.generated.css\`. Components are in \`src/components/anchor-ui/\`. Specs and Portal demos are in \`.anchor/src/anchor/\`. Generated artifacts (\`.cursorrules\` etc.) are at the project root. Nothing leaves your machine.
 
 ## How do I update Design-anchor?
 
@@ -1101,7 +1109,7 @@ Updates the \`.anchor/\` template files in place. Your seeds, custom components,
 两种情况：
 
 1. **在 Portal 预览里**：改的是 draft，点 **Save & Sync** 才真正落盘。预览本身是实时刷新 draft 的，但落盘 + 下游工具要显式保存。
-2. **在你的业务应用里**：Save & Sync 之后，Tailwind 生成的 CSS（\`.anchor/src/styles/design-tokens.generated.css\`）会重写。你应用的 Vite HMR / Webpack 应该捕到。没捕到就重启 dev server。
+2. **在你的业务应用里**：Save & Sync 之后，Tailwind 生成的 CSS（\`src/styles/design-tokens.generated.css\`）会重写。你应用的 Vite HMR / Webpack 应该捕到。没捕到就重启 dev server。
 
 ## Controls 面板里有些控件改了没反应？
 
@@ -1111,7 +1119,7 @@ auto-controls 扫组件源码里的 Tailwind class 生成 override 入口。但�
 
 可以，两种方式：
 
-1. **Portal UI**：Library tab → "Add Component" → 贴本地路径。组件复制到 \`.anchor/src/components/base/\`，自动 scaffold 一个 starter demo。
+1. **Portal UI**：Library tab → "Add Component" → 贴本地路径。组件复制到 \`src/components/anchor-ui/\`，自动 scaffold 一个 Portal demo。
 2. **CLI**：\`npx design-anchor add MyComponent\`
 
 然后在 \`.anchor/src/anchor/schema/components/\` 写一份 \`spec.json\` 声明它的契约。
@@ -1126,7 +1134,7 @@ Customizer 里打开 **Surfaces > Derived > Semantic** 子组，点任一行（�
 
 ## 数据存哪？
 
-全本地。Tokens 在 \`.anchor/src/design-tokens/tokens.json\`，组件在 \`.anchor/src/components/base/\`，specs 在 \`.anchor/src/anchor/schema/components/\`，生成的产物（\`.cursorrules\` 等）在项目根。什么都不会出你的机器。
+全本地。Tokens 和生成 CSS 在业务项目的 \`src/design-tokens/tokens.json\` 与 \`src/styles/design-tokens.generated.css\`，组件在 \`src/components/anchor-ui/\`，specs 和 Portal demos 在 \`.anchor/src/anchor/\`，生成的产物（\`.cursorrules\` 等）在项目根。什么都不会出你的机器。
 
 ## 怎么升级 Design-anchor？
 

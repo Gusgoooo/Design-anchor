@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Activity, Camera, Check, MoreHorizontal, RotateCcw, Save, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/base/button";
+import { Button } from "@design/button";
 import { useLocale } from "../i18n/LocaleProvider";
 import { navigateTo } from "../router";
 import { SEED_GROUPS, SEED_GROUP_TITLE_ZH } from "@/design-tokens/seed-card-config";
@@ -18,13 +18,13 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/base/alert-dialog";
+} from "@design/alert-dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/base/dropdown-menu";
+} from "@design/dropdown-menu";
 
 export function Customizer({ draft }: { draft: TokenDraft }) {
   const { t, locale } = useLocale();

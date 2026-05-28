@@ -5,7 +5,6 @@ import { useLocale } from "../i18n/LocaleProvider";
 import { useRoute } from "../router";
 import { useStorySession, mergeParameters } from "../usePreviewState";
 import { PreviewFrame } from "./PreviewFrame";
-import { PatternsRoute } from "../docs/PatternsRoute";
 
 export function Canvas() {
   const { t } = useLocale();
@@ -13,7 +12,6 @@ export function Canvas() {
   const { session, loading, error, registry } = useStorySession();
 
   if (route.kind === "components") return <WelcomeScreen registryCount={registry?.length ?? 0} />;
-  if (route.kind === "patterns") return <PatternsRoute />;
 
   if (loading) return <CenterMessage icon={<Loader2 size={16} className="animate-spin" />} text={t({ en: "Loading story…", zh: "Story 加载中…" })} />;
   if (error) return <CenterMessage icon={null} text={error} variant="error" />;

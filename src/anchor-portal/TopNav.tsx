@@ -11,6 +11,7 @@ const TABS: { id: TopTab; label: Bilingual; onClick: () => void }[] = [
   { id: "docs", label: { en: "Docs", zh: "文档" }, onClick: () => navigateTo({ kind: "docs" }) },
   { id: "govern", label: { en: "Project Health", zh: "项目健康" }, onClick: () => navigateTo({ kind: "govern" }) },
   { id: "components", label: { en: "Library", zh: "组件库" }, onClick: () => navigateTo({ kind: "components" }) },
+  { id: "patterns", label: { en: "Patterns", zh: "组合" }, onClick: () => navigateTo({ kind: "patterns" }) },
   { id: "designtoken", label: { en: "Theme", zh: "主题" }, onClick: () => navigateTo({ kind: "designtoken" }) },
 ];
 

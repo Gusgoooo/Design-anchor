@@ -903,7 +903,7 @@ function CreateSchemaPrompt({
       componentName: leafTitle,
       version: "1.0.0",
       intent: "",
-      wraps: { module: `@/components/base/${kebab}`, primitives: [leafTitle] },
+      wraps: { module: `@/components/anchor-ui/${kebab}`, primitives: [leafTitle] },
       requiredProps: [],
       optionalProps: [],
       styleLock: { baselineTokens: [], blacklist: [] },

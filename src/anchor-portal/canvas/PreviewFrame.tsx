@@ -6,7 +6,9 @@ import {
   mergeParameters,
   type StorySession,
 } from "../usePreviewState";
-import type { LayoutMode, StoryContext } from "../argTypes-types";
+import type { Decorator, LayoutMode, StoryContext } from "../argTypes-types";
+
+type StoryArgs = Record<string, unknown>;
 
 class StoryErrorBoundary extends React.Component<
   { sessionId: string; children: React.ReactNode },
@@ -36,9 +38,19 @@ class StoryErrorBoundary extends React.Component<
   }
 }
 
-function renderStoryElement(session: StorySession): React.ReactNode {
-  const { meta, storyObj, args } = session;
-  const ctx = buildStoryContext(session);
+function buildStoryContextWithArgs(session: StorySession, args: StoryArgs): StoryContext {
+  return { ...buildStoryContext(session), args };
+}
+
+function StoryRenderHost({
+  session,
+  args = session.args,
+}: {
+  session: StorySession;
+  args?: StoryArgs;
+}) {
+  const { meta, storyObj } = session;
+  const ctx = buildStoryContextWithArgs(session, args);
   const renderFn = storyObj.render ?? meta.render;
   if (renderFn) return renderFn(args, ctx);
   if (meta.component) {
@@ -52,22 +64,6 @@ function renderStoryElement(session: StorySession): React.ReactNode {
       <code className="font-mono">component</code> set on this story.
     </div>
   );
-}
-
-/** Wrap result through decorators. Meta decorators are outermost, then story decorators. */
-function applyDecorators(session: StorySession, base: () => React.ReactNode): React.ReactElement {
-  const ctx = buildStoryContext(session);
-  const decorators = [
-    ...(session.meta.decorators ?? []),
-    ...(session.storyObj.decorators ?? []),
-  ];
-  let wrapped: () => React.ReactNode = base;
-  for (let i = decorators.length - 1; i >= 0; i--) {
-    const dec = decorators[i];
-    const prev = wrapped;
-    wrapped = () => dec((_args?: Partial<Record<string, unknown>>) => prev() as React.ReactElement, ctx);
-  }
-  return <>{wrapped()}</>;
 }
 
 function LayoutWrapper({
@@ -91,20 +87,57 @@ function LayoutWrapper({
   );
 }
 
+function StoryContent({ session }: { session: StorySession }) {
+  const decorators = React.useMemo<ReadonlyArray<Decorator>>(
+    () => [
+      ...(session.meta.decorators ?? []),
+      ...(session.storyObj.decorators ?? []),
+    ],
+    [session.meta.decorators, session.storyObj.decorators],
+  );
+
+  return <StoryDecoratorLayer args={session.args} decorators={decorators} index={0} session={session} />;
+}
+
+function StoryDecoratorLayer({
+  args,
+  decorators,
+  index,
+  session,
+}: {
+  args: StoryArgs;
+  decorators: ReadonlyArray<Decorator>;
+  index: number;
+  session: StorySession;
+}) {
+  const decorator = decorators[index];
+  const ctx = buildStoryContextWithArgs(session, args);
+
+  const Story = React.useCallback(
+    (nextArgs?: Partial<StoryArgs>) => (
+      <StoryDecoratorLayer
+        args={nextArgs ? { ...args, ...nextArgs } : args}
+        decorators={decorators}
+        index={index + 1}
+        session={session}
+      />
+    ),
+    [args, decorators, index, session],
+  );
+
+  if (!decorator) return <StoryRenderHost args={args} session={session} />;
+  return <>{decorator(Story, ctx)}</>;
+}
+
 export function PreviewFrame({ session }: { session: StorySession }) {
   const params = mergeParameters(session);
   const layout: LayoutMode = (params.layout as LayoutMode) ?? "centered";
 
-  // Re-mount the story tree when the story changes so decorators that hold
-  // local state don't bleed across navigations.
-  const subtree = React.useMemo(() => {
-    return applyDecorators(session, () => renderStoryElement(session));
-    // session is recreated each time args or story changes — useMemo with full session keeps it stable
-  }, [session]);
-
   return (
     <StoryErrorBoundary sessionId={session.story.id}>
-      <LayoutWrapper layout={layout}>{subtree}</LayoutWrapper>
+      <LayoutWrapper layout={layout}>
+        <StoryContent key={session.story.id} session={session} />
+      </LayoutWrapper>
     </StoryErrorBoundary>
   );
 }

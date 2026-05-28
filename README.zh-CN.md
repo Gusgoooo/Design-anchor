@@ -43,7 +43,7 @@ Design-anchor 把软文档换成三层硬约束，让漂移在机制上不可能
 | 层 | 做什么 | 什么时候生效 |
 |---|---|---|
 | **Rules** | 从 `spec.json` 生成 AI 可读契约（`.cursorrules` / `CLAUDE.md` / `copilot-instructions.md`）。AI 在写错之前就被告知「有 `<Button>` 别用 `<button>`」 | 生码之前 |
-| **Hooks** | `anchor audit` AST 扫描，保存/pre-commit/CI 三处触发。`bg-[#0204a3]`、`<button>`、`p-[13px]` 全部拒 | 生码之后 |
+| **Hooks** | `anchor audit` AST 扫描，保存/pre-commit/CI 三处触发。`bg-[#0204a3]`、`<button>` 会被拦截；明确 px 值会先尝试映射到等值 token，再决定是否保留手写值。 | 生码之后 |
 | **MCP** | 13 个工具让 agent 读 schema、改 token、跑 audit、同步规则——零拷贝 | 按需调度 |
 
 <a id="快速开始"></a>
@@ -56,7 +56,7 @@ npx design-anchor start
 
 这条命令做三件事：
 
-1. **Scaffold** `.anchor/` — 60+ 受治理的 React + Tailwind 组件、token 引擎、spec 契约
+1. **Scaffold** `.anchor/` + `src/components/anchor-ui/` — Anchor 控制面，以及放在业务源码里的 60+ 受治理 React + Tailwind 组件
 2. **Patch 项目** — 注入组件依赖、往 `globals.css` 添加 token 导入（保留你现有的样式）、生成 Cursor / Claude / Copilot 的 AI 规则文件
 3. **打开 Portal** — 选择品牌预设或从 Tailwind Default 开始
 
@@ -66,7 +66,7 @@ npx design-anchor start
 
 ```ts
 // tsconfig.json
-{ "compilerOptions": { "paths": { "@design": [".anchor/src/components/base"] } } }
+{ "compilerOptions": { "paths": { "@design": ["src/components/anchor-ui"], "@design/*": ["src/components/anchor-ui/*"] } } }
 ```
 
 ```tsx
@@ -119,7 +119,7 @@ your-project/
 AST 扫描，执行两类规则：
 
 - **Forbidden 原生标签** — 有 `<Button>` 还写 `<button>` 则拒
-- **Token 敏感前缀上的 arbitrary value** — `bg-[#hex]`、`p-[13px]`、`rounded-[10px]` 拒；`w-[280px]`、`max-w-[480px]` 过（layout 一次性像素允许）
+- **Token 敏感前缀上的 arbitrary value** — `bg-[#hex]` 这类硬编码颜色拒；`p-[24px]`、`rounded-[16px]`、`text-[14px]` 这类明确数值会先映射到等值 token（如 `p-6`、`rounded-lg`、`text-sm`），没有等值 token 时才保留手写值；`w-[280px]`、`max-w-[480px]` 过（layout 一次性像素允许）
 
 ### MCP server
 
@@ -144,6 +144,7 @@ anchor start [dir]        Init + install + 打开 Portal
 anchor init  [dir]        仅 scaffold .anchor/
 anchor govern             仅注入 AI 规则（不拷贝组件）
 anchor dev   [dir]        在已有 .anchor/ 上启动 Portal
+anchor portal [tab] [dir] 打开指定 Portal tab：tokens/components/specs/govern/docs/patterns
 anchor sync  [dir]        重新生成规则 + token
 anchor audit [dir]        AST 扫描违规
 anchor upgrade [dir]      更新模板（保留你的修改）
@@ -152,15 +153,22 @@ anchor screenshot [图片]  截图驱动 token 提取
 anchor theme <prompt.md>  从设计 prompt 提取 token
 ```
 
+React 是 peer dependency（`>=18 <20`）。业务项目通过 `@design` 引用可见的 `src/components/anchor-ui` 源码时，`react` 和 `react-dom` 必须 dedupe 到宿主项目这一份。
+
 ## 项目结构
 
 ```
 your-project/
-├── .anchor/                            组件库 + token 引擎
-│   ├── src/components/base/            60+ React + Tailwind 组件
+├── src/design-tokens/                  项目 token 唯一真源
+│   └── tokens.json
+├── src/styles/
+│   └── design-tokens.generated.css     业务应用导入的运行时 CSS
+├── src/components/anchor-ui/           60+ React + Tailwind 组件
+├── .anchor/                            Anchor Portal + schema + sync 控制面
 │   ├── src/anchor/schema/              每个组件的 spec.json 契约
-│   ├── src/design-tokens/              tokens.json + 派生算法
-│   └── package.json                    peerDependencies（从项目根 resolve）
+│   ├── src/anchor/component-demos/     Portal 专用组件 demo
+│   ├── src/design-tokens/              派生算法 + 默认模板
+│   └── package.json                    仅 Portal 工具链；运行时依赖从项目根 resolve
 ├── CLAUDE.md                           AI 规则（Claude）
 ├── .cursor/rules/anchor.mdc            AI 规则（Cursor）
 ├── .github/copilot-instructions.md     AI 规则（Copilot）

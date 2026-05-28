@@ -2,8 +2,13 @@
 import fs from "node:fs";
 import path from "node:path";
 import ts from "typescript";
+import { consumerRootFor } from "./lib/token-source.mjs";
 
 const repoRoot = process.cwd();
+const consumerRoot = consumerRootFor(repoRoot);
+const componentRoot = fs.existsSync(path.join(consumerRoot, "src/components/anchor-ui"))
+  ? path.join(consumerRoot, "src/components/anchor-ui")
+  : path.join(repoRoot, "src/components/base");
 const errors = [];
 
 function fileExists(p) {
@@ -76,6 +81,12 @@ function collectExports(absFile, seen = new Set()) {
 }
 
 function resolveAnchorModule(modulePath) {
+  if (modulePath.startsWith("@/components/anchor-ui/")) {
+    return resolveSourceModule(path.join(consumerRoot, "src/components/anchor-ui", modulePath.slice("@/components/anchor-ui/".length)));
+  }
+  if (modulePath.startsWith("@/components/base/")) {
+    return resolveSourceModule(path.join(componentRoot, modulePath.slice("@/components/base/".length)));
+  }
   if (modulePath.startsWith("@/")) {
     return resolveSourceModule(path.join(repoRoot, "src", modulePath.slice(2)));
   }
@@ -87,7 +98,7 @@ function resolveAnchorModule(modulePath) {
 
 function checkSpecExports() {
   const specDir = path.join(repoRoot, "src/anchor/schema/components");
-  const baseIndex = path.join(repoRoot, "src/components/base/index.ts");
+  const baseIndex = path.join(componentRoot, "index.ts");
   const baseExports = collectExports(baseIndex);
   const files = fs.existsSync(specDir)
     ? fs.readdirSync(specDir).filter((file) => file.endsWith(".spec.json")).sort()
@@ -111,7 +122,7 @@ function checkSpecExports() {
       errors.push(`${file}: ${modulePath} does not export ${name}`);
     }
     if (!baseExports.has(name)) {
-      errors.push(`${file}: src/components/base/index.ts does not export ${name}`);
+      errors.push(`${file}: component index does not export ${name}`);
     }
   }
   return checked;

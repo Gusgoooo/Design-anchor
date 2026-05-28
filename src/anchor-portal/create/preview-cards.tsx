@@ -3,7 +3,7 @@
  *   apps/v4/registry/bases/base/blocks/preview/cards/*
  *
  * Adaptations:
- * - imports rewired @/registry/bases/base/ui/* → @/components/base/*
+ * - imports rewired @/registry/bases/base/ui/* to @design/*
  * - shadcn's Base UI `render={<Button/>}` slot pattern rewritten as
  *   Radix `asChild` (our base components use Radix primitives)
  * - shadcn's <IconPlaceholder> (multi-library icon) replaced with
@@ -62,11 +62,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/base/alert-dialog";
-import { Badge } from "@/components/base/badge";
-import { Button } from "@/components/base/button";
-import { ButtonGroup } from "@/components/base/button-group";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/base/card";
+} from "@design/alert-dialog";
+import { Badge } from "@design/badge";
+import { Button } from "@design/button";
+import { ButtonGroup } from "@design/button-group";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@design/card";
 import {
   ChartContainer,
   ChartLegend,
@@ -74,8 +74,8 @@ import {
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@/components/base/chart";
-import { Checkbox } from "@/components/base/checkbox";
+} from "@design/chart";
+import { Checkbox } from "@design/checkbox";
 import {
   Dialog,
   DialogClose,
@@ -85,7 +85,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/base/dialog";
+} from "@design/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -94,7 +94,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/base/dropdown-menu";
+} from "@design/dropdown-menu";
 import {
   Empty,
   EmptyContent,
@@ -102,16 +102,16 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from "@/components/base/empty";
-import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/base/field";
-import { Input } from "@/components/base/input";
+} from "@design/empty";
+import { Field, FieldDescription, FieldGroup, FieldLabel } from "@design/field";
+import { Input } from "@design/input";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupButton,
   InputGroupInput,
   InputGroupText,
-} from "@/components/base/input-group";
+} from "@design/input-group";
 import {
   Item,
   ItemActions,
@@ -121,9 +121,9 @@ import {
   ItemHeader,
   ItemSeparator,
   ItemTitle,
-} from "@/components/base/item";
-import { Kbd } from "@/components/base/kbd";
-import { RadioGroup, RadioGroupItem } from "@/components/base/radio-group";
+} from "@design/item";
+import { Kbd } from "@design/kbd";
+import { RadioGroup, RadioGroupItem } from "@design/radio-group";
 import {
   Select,
   SelectContent,
@@ -131,19 +131,19 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/base/select";
-import { Separator } from "@/components/base/separator";
-import { Slider } from "@/components/base/slider";
-import { Spinner } from "@/components/base/spinner";
-import { Switch } from "@/components/base/switch";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/base/tabs";
-import { Textarea } from "@/components/base/textarea";
+} from "@design/select";
+import { Separator } from "@design/separator";
+import { Slider } from "@design/slider";
+import { Spinner } from "@design/spinner";
+import { Switch } from "@design/switch";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@design/tabs";
+import { Textarea } from "@design/textarea";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/base/tooltip";
+} from "@design/tooltip";
 
 /* ─── 1. Style Overview ─────────────────────────────────────────────────── */
 

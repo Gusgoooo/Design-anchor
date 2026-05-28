@@ -16,6 +16,7 @@ if (Object.keys(anchorTailwindExtend.borderRadius).length) {
 export default {
   content: [
     "./src/**/*.{ts,tsx}",
+    "../src/components/anchor-ui/**/*.{ts,tsx}",
     "./src/anchor/schema/**/*.json",
   ],
   safelist: anchorSafelist,

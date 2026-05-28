@@ -7,7 +7,7 @@ code.
 ## Path A — Extract tokens, override the library
 
 Analyse the reference image and propose a diff against
-`.anchor/src/design-tokens/tokens.json` covering at minimum:
+`src/design-tokens/tokens.json` covering at minimum:
 
 - `colorPrimary` (and Success / Warning / Error / Info / Link if visible)
 - `colorBgBase` / `colorTextBase`

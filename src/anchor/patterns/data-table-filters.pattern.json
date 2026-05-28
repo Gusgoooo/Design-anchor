@@ -1,0 +1,28 @@
+{
+  "id": "data-table-filters",
+  "name": "Data Table + Filters",
+  "category": "Data Management",
+  "intent": "A B2B data-list composition for searchable, filterable records with one primary creation action.",
+  "bestFor": ["CRM lists", "admin users", "orders", "billing records", "ops queues"],
+  "components": ["Card", "Input", "Select", "Button", "Badge", "DataTable"],
+  "structure": [
+    "Header: title, short context, one primary action",
+    "Filter row: search input first, select filters next, secondary actions last",
+    "Table: compact density, status badges, owner or timestamp columns",
+    "Footer: result count and pagination or next-step action when needed"
+  ],
+  "states": ["loading", "empty", "filtered-empty", "row-selected", "bulk-action"],
+  "apply": [
+    "Keep the toolbar directly above the table so the control relationship is obvious.",
+    "Use Button variants for action hierarchy: default for the main action, outline or secondary for supporting actions.",
+    "Use Badge only for true row state, priority, or category markers.",
+    "Keep layout density compact enough for repeated B2B workflows."
+  ],
+  "avoid": [
+    "Do not hand-build a raw table when DataTable fits the record-list use case.",
+    "Do not turn the list into a marketing card grid.",
+    "Do not introduce custom filter controls before checking the component library.",
+    "Do not hardcode colors, spacing, radius, or status palettes."
+  ],
+  "aiPrompt": "Build a Data Table + Filters pattern using only Design-anchor components. Compose Card, Input, Select, Button, Badge, and DataTable. Keep the screen B2B-focused: searchable toolbar above the table, one primary action, compact density, semantic tokens only, and no raw table/input/button controls."
+}

@@ -42,7 +42,7 @@ type DataTableStoryArgs = {
 };
 
 const meta = {
-  title: "Base/Table",
+  title: "Base/DataTable",
   component: DataTable,
   parameters: {
     anchorTokenCompliance: storyAnchorCompliance({

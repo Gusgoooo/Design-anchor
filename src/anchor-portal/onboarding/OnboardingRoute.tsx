@@ -15,18 +15,18 @@ import {
   Anchor,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/base/button";
+import { Button } from "@design/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/base/card";
-import { Input } from "@/components/base/input";
-import { Badge } from "@/components/base/badge";
-import { Alert, AlertDescription, AlertTitle } from "@/components/base/alert";
-import { Separator } from "@/components/base/separator";
+} from "@design/card";
+import { Input } from "@design/input";
+import { Badge } from "@design/badge";
+import { Alert, AlertDescription, AlertTitle } from "@design/alert";
+import { Separator } from "@design/separator";
 import { useLocale } from "../i18n/LocaleProvider";
 import { navigateTo } from "../router";
 import { useTheme } from "../theme/DarkModeProvider";
@@ -110,7 +110,14 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
     const res = await fetch("/api/apply-token-preset", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ preset: preset.id, tokenPatch: preset.tokenPatch }),
+      body: JSON.stringify({
+        preset: preset.id,
+        presetName: preset.name,
+        tone: preset.tone.en,
+        preferredTheme: preset.preferredTheme ?? "light",
+        tokenPatch: preset.tokenPatch,
+        aiStyleGuide: preset.aiStyleGuide,
+      }),
     });
     const body = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
     if (!res.ok || !body.ok) throw new Error(body.error ?? `HTTP ${res.status}`);

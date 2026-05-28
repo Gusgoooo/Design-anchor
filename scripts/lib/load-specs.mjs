@@ -34,3 +34,11 @@ export function loadDecorativeLibs(rootOverride) {
   if (!fs.existsSync(file)) return null;
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
+
+export function loadActivePresetStyle(rootOverride) {
+  const root = getRepoRoot(rootOverride);
+  const file = path.join(root, "src/anchor/rules/ACTIVE_PRESET_STYLE.md");
+  if (!fs.existsSync(file)) return null;
+  const text = fs.readFileSync(file, "utf8").trim();
+  return text ? text : null;
+}

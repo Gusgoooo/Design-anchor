@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Design-anchor MCP Server — Exposes component library operations to Cursor Agent via stdio JSON-RPC
+ * Design-anchor MCP Server — Exposes Design-anchor operations to AI agents via stdio JSON-RPC
  *
  * Tools:
  *   list_components    List all components
@@ -8,18 +8,25 @@
  *   create_component   Create a new component (generates tsx + demo)
  *   list_tokens        List all design tokens
  *   update_token       Modify a token value
- *   read_file          Read any file in the component library
- *   write_file         Write any file in the component library
+ *   read_file          Read a file in the Anchor control plane or visible component source
+ *   write_file         Write a file in the Anchor control plane or visible component source
  */
 import { readFileSync, writeFileSync, existsSync, readdirSync, mkdirSync, statSync } from "node:fs";
-import { join, resolve, relative, dirname } from "node:path";
+import { basename, join, resolve, relative, dirname } from "node:path";
 import { execSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { projectTokenPaths } from "../scripts/lib/token-source.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const PKG_ROOT = resolve(__dirname, "..");
 
 const LIB_ROOT = resolve(process.argv[2] || ".anchor");
+const PROJECT_ROOT = basename(LIB_ROOT) === ".anchor" ? resolve(LIB_ROOT, "..") : LIB_ROOT;
+const TOKEN_PATHS = projectTokenPaths(LIB_ROOT);
+const COMPONENTS_REL = "src/components/anchor-ui";
+const FALLBACK_COMPONENTS_REL = "src/components/base";
+const DEMOS_REL = "src/anchor/component-demos/base";
+const COMPONENT_IMPORT_BASE = "@design";
 
 if (!existsSync(LIB_ROOT)) {
   process.stderr.write(`Error: directory ${LIB_ROOT} does not exist\n`);
@@ -29,7 +36,7 @@ if (!existsSync(LIB_ROOT)) {
 const TOOLS = [
   {
     name: "list_components",
-    description: "List all component names and file paths in the library",
+    description: "List all component names and file paths in the visible component source",
     inputSchema: { type: "object", properties: {}, required: [] },
   },
   {
@@ -79,20 +86,20 @@ const TOOLS = [
   },
   {
     name: "read_file",
-    description: "Read any file in the component library",
+    description: "Read a file in the Anchor control plane or visible component source",
     inputSchema: {
       type: "object",
-      properties: { path: { type: "string", description: "File path relative to the component library root" } },
+      properties: { path: { type: "string", description: "File path relative to .anchor or the project root" } },
       required: ["path"],
     },
   },
   {
     name: "write_file",
-    description: "Write a file in the component library (directories are created automatically)",
+    description: "Write a file in the Anchor control plane or visible component source (directories are created automatically)",
     inputSchema: {
       type: "object",
       properties: {
-        path: { type: "string", description: "File path relative to the component library root" },
+        path: { type: "string", description: "File path relative to .anchor or the project root" },
         content: { type: "string", description: "File content" },
       },
       required: ["path", "content"],
@@ -143,15 +150,84 @@ const TOOLS = [
 
 /* ─── Tool handlers ─── */
 
+function componentDir() {
+  const visible = join(PROJECT_ROOT, COMPONENTS_REL);
+  if (existsSync(visible)) return { dir: visible, root: PROJECT_ROOT, rel: COMPONENTS_REL };
+  return { dir: join(LIB_ROOT, FALLBACK_COMPONENTS_REL), root: LIB_ROOT, rel: FALLBACK_COMPONENTS_REL };
+}
+
+function demoDir() {
+  const preferred = join(LIB_ROOT, DEMOS_REL);
+  if (existsSync(preferred) || basename(LIB_ROOT) === ".anchor") {
+    return { dir: preferred, rel: DEMOS_REL };
+  }
+  return { dir: join(LIB_ROOT, FALLBACK_COMPONENTS_REL), rel: FALLBACK_COMPONENTS_REL };
+}
+
+function toKebabName(name) {
+  return String(name)
+    .replace(/\.[tj]sx?$/, "")
+    .replace(/([a-z0-9])([A-Z])/g, "$1-$2")
+    .replace(/[_\s]+/g, "-")
+    .toLowerCase();
+}
+
+function toPascalName(name) {
+  return String(name)
+    .replace(/\.[tj]sx?$/, "")
+    .replace(/(^|[-_\s])(\w)/g, (_m, _sep, c) => c.toUpperCase());
+}
+
+function rewriteComponentImports(source) {
+  return String(source)
+    .replaceAll("@/components/base", "@/components/anchor-ui")
+    .replaceAll("src/components/base", COMPONENTS_REL);
+}
+
+function defaultDemoSource(name, fileName) {
+  const pascal = toPascalName(name);
+  const kebab = fileName.replace(/\.tsx$/, "");
+  return [
+    `import type { Meta, StoryObj } from "@/anchor-portal/argTypes-types";`,
+    `import { storyAnchorCompliance } from "@/design-tokens/story-preview-shell";`,
+    `import { autoClassControls } from "@/design-tokens/tw-class-audit";`,
+    `import componentSrc from "${COMPONENT_IMPORT_BASE}/${kebab}.tsx?raw";`,
+    `import { ${pascal} } from "${COMPONENT_IMPORT_BASE}/${kebab}";`,
+    ``,
+    `const audit = autoClassControls(componentSrc);`,
+    ``,
+    `const meta = {`,
+    `  title: "${pascal}",`,
+    `  component: ${pascal},`,
+    `  parameters: { anchorTokenCompliance: storyAnchorCompliance({ ignoreArgNames: ["children"] }) },`,
+    `  args: { ...audit.args },`,
+    `  argTypes: { ...audit.argTypes },`,
+    `} satisfies Meta<typeof ${pascal}>;`,
+    ``,
+    `export default meta;`,
+    `type Story = StoryObj<typeof meta>;`,
+    ``,
+    `export const Default: Story = {`,
+    `  render: (args) => (`,
+    `    <${pascal} className={audit.buildClassName(args as unknown as Record<string, string>)}>`,
+    `      Sample content`,
+    `    </${pascal}>`,
+    `  ),`,
+    `};`,
+    ``,
+  ].join("\n");
+}
+
 function listComponents() {
   const result = [];
-  const dir = join(LIB_ROOT, "src/components/base");
+  const source = componentDir();
+  const dir = source.dir;
   if (!existsSync(dir)) return result;
   walkFiles(dir, (file) => {
     const rel = relative(dir, file).split(/[\\/]/).join("/");
     if (!rel.endsWith(".tsx")) return;
     if (rel.includes(".demo.") || rel.includes(".stories.")) return;
-    result.push({ name: rel.replace(/\.tsx$/, ""), path: `src/components/base/${rel}` });
+    result.push({ name: rel.replace(/\.tsx$/, ""), path: `${source.rel}/${rel}` });
   });
   return result.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -166,7 +242,7 @@ function walkFiles(dir, cb) {
 }
 
 function readComponent(name) {
-  const baseDir = join(LIB_ROOT, "src/components/base");
+  const baseDir = componentDir().dir;
   const file = resolve(baseDir, name.endsWith(".tsx") ? name : `${name}.tsx`);
   assertInside(baseDir, file);
   if (existsSync(file)) return readFileSync(file, "utf8");
@@ -174,18 +250,29 @@ function readComponent(name) {
 }
 
 function createComponent(name, code, demo) {
-  const dir = join(LIB_ROOT, "src/components/base");
+  const source = componentDir();
+  const dir = source.dir;
   mkdirSync(dir, { recursive: true });
-  const lower = name.charAt(0).toLowerCase() + name.slice(1);
-  writeFileSync(join(dir, `${lower}.tsx`), code);
-  if (demo) {
-    writeFileSync(join(dir, `${name}.demo.tsx`), demo);
-  }
-  return { created: [`src/components/base/${lower}.tsx`, demo ? `src/components/base/${name}.demo.tsx` : null].filter(Boolean) };
+  const fileBase = toKebabName(name);
+  const pascal = toPascalName(name);
+  const componentPath = join(dir, `${fileBase}.tsx`);
+  writeFileSync(componentPath, rewriteComponentImports(code));
+
+  const demos = demoDir();
+  mkdirSync(demos.dir, { recursive: true });
+  const demoPath = join(demos.dir, `${pascal}.demo.tsx`);
+  writeFileSync(demoPath, demo ? rewriteComponentImports(demo) : defaultDemoSource(name, `${fileBase}.tsx`));
+
+  return {
+    created: [
+      relative(source.root, componentPath).split(/[\\/]/).join("/"),
+      relative(LIB_ROOT, demoPath).split(/[\\/]/).join("/"),
+    ],
+  };
 }
 
 function listTokens() {
-  const tokensPath = join(LIB_ROOT, "src/design-tokens/tokens.json");
+  const tokensPath = TOKEN_PATHS.tokensPath;
   const doc = JSON.parse(readFileSync(tokensPath, "utf8"));
   if (doc.seed && typeof doc.seed === "object") {
     const ids = new Set([
@@ -218,7 +305,7 @@ function listTokens() {
 }
 
 function updateToken(id, field, value) {
-  const tokensPath = join(LIB_ROOT, "src/design-tokens/tokens.json");
+  const tokensPath = TOKEN_PATHS.tokensPath;
   const doc = JSON.parse(readFileSync(tokensPath, "utf8"));
   if (doc.seed && typeof doc.seed === "object") {
     const section = normalizeTokenField(field);
@@ -249,22 +336,41 @@ function normalizeTokenField(field) {
 
 function runTokenSync() {
   try {
-    const output = execSync("npm run sync:tokens", { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+    const output = execSync("npm run sync:tokens", {
+      cwd: LIB_ROOT,
+      encoding: "utf8",
+      timeout: 30000,
+      env: { ...process.env, ANCHOR_TOKEN_ROOT: TOKEN_PATHS.root },
+    });
     return output.trim();
   } catch (e) {
     return `sync:tokens failed: ${e.stdout || e.stderr || e.message}`;
   }
 }
 
+function resolveManagedPath(relPath) {
+  const requested = String(relPath || "");
+  const rel = requested.replace(/\\/g, "/").replace(/^\.\//, "");
+  const candidates = [];
+  if (rel.startsWith(`${COMPONENTS_REL}/`) || rel === COMPONENTS_REL) {
+    candidates.push({ root: PROJECT_ROOT, abs: resolve(PROJECT_ROOT, rel) });
+  }
+  if (rel.startsWith("src/design-tokens/") || rel.startsWith("src/styles/")) {
+    candidates.push({ root: PROJECT_ROOT, abs: resolve(PROJECT_ROOT, rel) });
+  }
+  candidates.push({ root: LIB_ROOT, abs: resolve(LIB_ROOT, requested) });
+  const picked = candidates[0];
+  assertInside(picked.root, picked.abs);
+  return picked;
+}
+
 function readFile(relPath) {
-  const abs = resolve(LIB_ROOT, relPath);
-  assertInside(LIB_ROOT, abs);
+  const { abs } = resolveManagedPath(relPath);
   return readFileSync(abs, "utf8");
 }
 
 function writeFile(relPath, content) {
-  const abs = resolve(LIB_ROOT, relPath);
-  assertInside(LIB_ROOT, abs);
+  const { abs } = resolveManagedPath(relPath);
   mkdirSync(join(abs, ".."), { recursive: true });
   writeFileSync(abs, content);
   return { path: relPath, ok: true };
@@ -326,14 +432,24 @@ function runAudit() {
     const localAudit = join(LIB_ROOT, "scripts/anchor-audit.mjs");
     if (!existsSync(localAudit)) throw new Error("anchor-audit.mjs does not exist");
     try {
-      const output = execSync(`node "${localAudit}"`, { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+      const output = execSync(`node "${localAudit}"`, {
+        cwd: LIB_ROOT,
+        encoding: "utf8",
+        timeout: 30000,
+        env: { ...process.env, ANCHOR_TOKEN_ROOT: TOKEN_PATHS.root },
+      });
       return { passed: true, output };
     } catch (e) {
       return { passed: false, output: e.stdout || e.stderr || e.message };
     }
   }
   try {
-    const output = execSync(`node "${auditScript}"`, { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+    const output = execSync(`node "${auditScript}"`, {
+      cwd: LIB_ROOT,
+      encoding: "utf8",
+      timeout: 30000,
+      env: { ...process.env, ANCHOR_TOKEN_ROOT: TOKEN_PATHS.root },
+    });
     return { passed: true, output };
   } catch (e) {
     return { passed: false, output: e.stdout || e.stderr || e.message };
@@ -342,13 +458,23 @@ function runAudit() {
 
 function runSyncRules() {
   try {
-    const output = execSync("npm run sync:anchor", { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+    const output = execSync("npm run sync:anchor", {
+      cwd: LIB_ROOT,
+      encoding: "utf8",
+      timeout: 30000,
+      env: { ...process.env, ANCHOR_TOKEN_ROOT: TOKEN_PATHS.root },
+    });
     return output.trim();
   } catch (e) {
     const syncScript = join(PKG_ROOT, "scripts/sync-from-schema.mjs");
     if (!existsSync(syncScript)) return `sync failed: ${e.stdout || e.stderr || e.message}`;
     try {
-      const output = execSync(`node "${syncScript}"`, { cwd: LIB_ROOT, encoding: "utf8", timeout: 30000 });
+      const output = execSync(`node "${syncScript}"`, {
+        cwd: LIB_ROOT,
+        encoding: "utf8",
+        timeout: 30000,
+        env: { ...process.env, ANCHOR_TOKEN_ROOT: TOKEN_PATHS.root },
+      });
       return output.trim();
     } catch (fallbackError) {
       return `sync failed: ${fallbackError.stdout || fallbackError.stderr || fallbackError.message}`;

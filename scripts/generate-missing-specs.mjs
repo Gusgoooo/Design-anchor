@@ -202,7 +202,7 @@ function generateSpec(componentId, source) {
     version: "1.0.0",
     intent,
     wraps: {
-      module: `@/components/base/${componentId}`,
+      module: `@/components/anchor-ui/${componentId}`,
       primitives: primitives.length > 0 ? primitives : [componentName],
     },
     requiredProps: [
@@ -218,7 +218,7 @@ function generateSpec(componentId, source) {
       baselineTokens,
       blacklist,
     },
-    aiPrompt: `Import ${componentName} from @/components/base/${componentId}; ${intent ? intent.split(".")[0] + "." : ""}`,
+    aiPrompt: `Import ${componentName} from @design/${componentId}; ${intent ? intent.split(".")[0] + "." : ""}`,
     meta: {
       tags: [componentId, category],
       category,

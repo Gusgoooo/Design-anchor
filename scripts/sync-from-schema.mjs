@@ -5,7 +5,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { loadSpecs, loadDecorativeLibs, getRepoRoot } from "./lib/load-specs.mjs";
+import { loadSpecs, loadDecorativeLibs, loadActivePresetStyle, getRepoRoot } from "./lib/load-specs.mjs";
 import { renderCursorrules, renderAnchorMarkdown } from "./lib/render-anchor-rules.mjs";
 
 const root = getRepoRoot();
@@ -75,11 +75,12 @@ export const anchorSafelist: string[] = ${JSON.stringify(safelist, null, 2)};
 }
 
 const decorativeLibs = loadDecorativeLibs();
+const activePresetStyle = loadActivePresetStyle();
 
 function writeAnchorRulesMirror(specs) {
   const dir = path.join(root, "src/anchor/rules");
   fs.mkdirSync(dir, { recursive: true });
-  const md = renderAnchorMarkdown(specs, decorativeLibs);
+  const md = renderAnchorMarkdown(specs, decorativeLibs, activePresetStyle);
   const mdPath = path.join(dir, "ANCHOR_RULES.md");
   fs.writeFileSync(mdPath, md, "utf8");
   console.log(`Wrote ${path.relative(root, mdPath)}`);
@@ -87,7 +88,7 @@ function writeAnchorRulesMirror(specs) {
 
 function writeCursorrules(specs) {
   const outFile = path.join(root, ".cursorrules");
-  fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs), "utf8");
+  fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs, activePresetStyle), "utf8");
   console.log(`Wrote ${path.relative(root, outFile)}`);
 }
 
@@ -98,9 +99,10 @@ function writeAgentsMd() {
 
 ## Directory Conventions
 
-1. **UI / components / token source of truth** → \`src/components/\` and \`src/design-tokens/\`
-2. **Portal / sync / kit integration** → root-level CLI, scripts, src/anchor-portal
-3. **Upstream npm package** → \`node_modules/design-anchor/\` **read-only**, synced via \`anchor upgrade\`
+1. **UI / component implementation source of truth** → \`src/components/\`
+2. **Project token source of truth** → the business project \`src/design-tokens/tokens.json\`; generated CSS lives in \`src/styles/design-tokens.generated.css\`
+3. **Portal / sync / kit integration** → root-level CLI, scripts, src/anchor-portal
+4. **Upstream npm package** → \`node_modules/design-anchor/\` **read-only**, synced via \`anchor upgrade\`
 
 ## AI Coding Contracts
 
@@ -109,6 +111,16 @@ function writeAgentsMd() {
 - **Spacing**: no arbitrary-value Tailwind (\`m-[13px]\`); use schema semantic props.
 - **Component specs**: \`src/anchor/schema/components/*.spec.json\` is the single source of truth.
 - **After changes**: run \`npm run sync:anchor\` to sync .cursorrules.
+
+## Portal Auto-Open Intent
+
+When the user asks to inspect or change tokens, theme, components, component specs, component styling, governance health, presets, or docs, open Portal first with \`npx design-anchor portal <tab>\`.
+- \`tokens\`: change token, show tokens, brand color, radius, spacing, dark mode, theme, design tokens.
+- \`components\`: component list, available components, component library, preview components.
+- \`specs\`: component spec, schema, props contract, variant mapping.
+- \`govern\`: governance, health, component usage, audit, drift check.
+- \`docs\`: docs, setup, CLI commands.
+- \`presets\`: preset, style preset, onboarding, brand style.
 `;
   fs.writeFileSync(agentsPath, content, "utf8");
   console.log(`Wrote AGENTS.md`);

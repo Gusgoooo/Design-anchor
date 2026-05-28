@@ -18,7 +18,7 @@ type ImportResult = {
 
 /**
  * Imports a React + Tailwind .tsx file or folder into
- * src/components/base/ by reading from a local path on the dev machine.
+ * src/components/anchor-ui/ by reading from a local path on the dev machine.
  * The dev-only Vite middleware (/api/import-component-path) does the
  * filesystem work; this dialog is just the input.
  */
@@ -132,8 +132,8 @@ export function AddComponentDialog({ open, onClose }: Props) {
             />
             <span className="text-sm leading-snug text-muted-foreground">
               {t({
-                en: "Only React + Tailwind components are supported. Absolute path. ~ expands to $HOME. A folder imports .tsx files (skipping *.demo.tsx). Files copy to src/components/base/; a matching *.demo.tsx is auto-generated if missing.",
-                zh: "仅支持 React + Tailwind 组件。绝对路径，~ 会扩展为 $HOME。指向文件夹时会导入 .tsx（跳过 *.demo.tsx）。文件会复制到 src/components/base/；如果没有同名 *.demo.tsx 会自动生成一个。",
+                en: "Only React + Tailwind components are supported. Absolute path. ~ expands to $HOME. A folder imports .tsx files (skipping *.demo.tsx). Files copy to src/components/anchor-ui/; a matching Portal demo is auto-generated if missing.",
+                zh: "仅支持 React + Tailwind 组件。绝对路径，~ 会扩展为 $HOME。指向文件夹时会导入 .tsx（跳过 *.demo.tsx）。文件会复制到 src/components/anchor-ui/；如果没有预览 demo 会自动生成一个。",
               })}
             </span>
           </label>

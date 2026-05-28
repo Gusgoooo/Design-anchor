@@ -1,6 +1,6 @@
 {
   "name": "design-anchor",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "AI coding governance pipeline — define design protocols, generate components + rules + audits automatically",
   "private": false,
   "publishConfig": {

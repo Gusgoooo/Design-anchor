@@ -73,7 +73,7 @@ export function ComponentContextMenu() {
       const r = await fetch("/api/delete-component", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ importPath: state.importPath }),
+        body: JSON.stringify({ importPath: state.importPath, confirm: true }),
       });
       const body = (await r.json().catch(() => ({}))) as { ok?: boolean; error?: string };
       if (!r.ok || !body.ok) throw new Error(body.error ?? r.statusText);

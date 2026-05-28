@@ -47,6 +47,8 @@ Design-anchor replaces soft documentation with three hard layers that make drift
 | **Hooks** | `anchor audit` AST scan runs on save, pre-commit, and CI. Rejects `bg-[#0204a3]` and raw `<button>`; exact-value px overrides are mapped back to tokens before staying arbitrary. | After generation |
 | **MCP** | 13-tool server lets agents read schemas, update tokens, run audit, sync rules — no copy-paste loop. | On demand |
 
+During AI coding, Design-anchor should be visible in the same conversation: the agent starts UI work with a `Design Anchor 预检`, calls out `Design Anchor 自动治理` when it fixes unsafe code, asks for confirmation only when product judgment is needed, and ends with a short self-check such as `Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`.
+
 <a id="quick-start"></a>
 ## Quick start
 
@@ -146,7 +148,7 @@ anchor start [dir]        Init + install + open Portal
 anchor init  [dir]        Scaffold .anchor/ only
 anchor govern             Inject AI rules without scaffolding
 anchor dev   [dir]        Start Portal on existing .anchor/
-anchor portal [tab] [dir] Open Portal tab: tokens/components/specs/govern/docs/patterns
+anchor portal [tab] [dir] Open Portal tab: tokens/theme/theme-editor/components/specs/docs
 anchor sync  [dir]        Regenerate rules + tokens
 anchor audit [dir]        AST scan for violations
 anchor upgrade [dir]      Pull latest template (preserves edits)

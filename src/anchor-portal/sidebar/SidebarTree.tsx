@@ -129,7 +129,7 @@ function TreeRow({
   if (isRoot && node.kind === "group") {
     return (
       <div className={cn(!isFirstRoot && "mt-2")}>
-        <div className="flex items-center gap-1.5 px-3 pt-2 pb-1 text-sm font-semibold uppercase tracking-wider text-muted-foreground/80 select-none">
+        <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80 select-none">
           {rootKind === "ai" ? <Brain size={13} /> : <LayoutGrid size={13} />}
           <span>{node.name}</span>
         </div>
@@ -300,7 +300,7 @@ function RowButton({
       onContextMenu={onContextMenu}
       style={{ paddingLeft: 8 + depth * 14 }}
       className={cn(
-        "group mx-1.5 flex w-[calc(100%-12px)] items-center gap-1.5 rounded-md py-1 pr-2 text-left text-base transition-colors",
+        "group mx-1.5 flex w-[calc(100%-12px)] items-center gap-1.5 rounded-md py-1.5 pr-2 text-left text-sm transition-colors",
         compact ? "font-normal" : "font-medium",
         isSelected
           ? "bg-muted text-foreground"

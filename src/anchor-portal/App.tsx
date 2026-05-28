@@ -6,10 +6,8 @@ import { TopNav } from "./TopNav";
 
 const DocsRoute = React.lazy(() => import("./docs/DocsRoute").then((m) => ({ default: m.DocsRoute })));
 const DesignTokenRoute = React.lazy(() => import("./docs/DesignTokenRoute").then((m) => ({ default: m.DesignTokenRoute })));
-const GovernRoute = React.lazy(() => import("./govern/GovernRoute").then((m) => ({ default: m.GovernRoute })));
 const OnboardingRoute = React.lazy(() => import("./onboarding/OnboardingRoute").then((m) => ({ default: m.OnboardingRoute })));
 const ComponentsRoute = React.lazy(() => import("./workbench/ComponentsRoute").then((m) => ({ default: m.ComponentsRoute })));
-const PatternsRoute = React.lazy(() => import("./docs/PatternsRoute").then((m) => ({ default: m.PatternsRoute })));
 
 export default function App() {
   return (
@@ -69,10 +67,6 @@ function AppShell() {
             <DocsRoute />
           ) : route.kind === "designtoken" ? (
             <DesignTokenRoute />
-          ) : route.kind === "govern" ? (
-            <GovernRoute />
-          ) : route.kind === "patterns" ? (
-            <PatternsRoute />
           ) : (
             <ComponentsRoute currentStoryId={currentStoryId} hasStoryRoute={route.kind === "story"} />
           )}

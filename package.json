@@ -23,6 +23,7 @@
     "bin/",
     "scripts/",
     "src/",
+    "!src/anchor-portal/dist/",
     "docs/",
     "vendor/",
     "AGENTS.md",
@@ -49,6 +50,8 @@
     "anchor:audit:fix": "node scripts/anchor-audit.mjs --scope all --fix",
     "check:tokens": "node scripts/check-token-contract.mjs",
     "check:anchor": "node scripts/check-anchor-consistency.mjs && npm run check:tokens",
+    "verify": "npm run typecheck && npm run build && npm run check:anchor && npm run anchor:audit:all && npm pack --dry-run",
+    "prepack": "npm run build",
     "dev": "vite --config src/anchor-portal/vite.config.ts",
     "build": "vite build --config src/anchor-portal/vite.config.ts",
     "typecheck": "tsc --noEmit"

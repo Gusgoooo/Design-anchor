@@ -28,6 +28,7 @@ type HealthSummary = {
   usage: ComponentUsage | null;
   governance: GovernanceStatus | null;
   loading: boolean;
+  hasFetched: boolean;
   lastFetched: Date | null;
   refresh: () => Promise<void>;
 };
@@ -39,6 +40,7 @@ function useHealthSummary(): HealthSummary {
   const [usage, setUsage] = React.useState<ComponentUsage | null>(null);
   const [governance, setGovernance] = React.useState<GovernanceStatus | null>(null);
   const [loading, setLoading] = React.useState(false);
+  const [hasFetched, setHasFetched] = React.useState(false);
   const [lastFetched, setLastFetched] = React.useState<Date | null>(null);
 
   const refresh = React.useCallback(async () => {
@@ -52,15 +54,14 @@ function useHealthSummary(): HealthSummary {
       setAudit(a);
       setUsage(u);
       setGovernance(g);
+      setHasFetched(true);
       setLastFetched(new Date());
     } finally {
       setLoading(false);
     }
   }, []);
 
-  React.useEffect(() => { void refresh(); }, [refresh]);
-
-  return { audit, usage, governance, loading, lastFetched, refresh };
+  return { audit, usage, governance, loading, hasFetched, lastFetched, refresh };
 }
 
 function relativeTime(date: Date | null, locale: "en" | "zh"): string {
@@ -90,7 +91,7 @@ export function HealthWidget() {
   const [copied, setCopied] = React.useState(false);
   const buttonRef = React.useRef<HTMLButtonElement | null>(null);
   const panelRef = React.useRef<HTMLDivElement | null>(null);
-  const { audit, usage, governance, loading, lastFetched, refresh } = useHealthSummary();
+  const { audit, usage, governance, loading, hasFetched, lastFetched, refresh } = useHealthSummary();
 
   React.useEffect(() => {
     if (!open) return;
@@ -103,7 +104,11 @@ export function HealthWidget() {
     return () => window.removeEventListener("pointerdown", handlePointerDown);
   }, [open]);
 
-  const synced = constraintsSynced(governance);
+  React.useEffect(() => {
+    if (open && !hasFetched && !loading) void refresh();
+  }, [hasFetched, loading, open, refresh]);
+
+  const synced = governance ? constraintsSynced(governance) : null;
   const hasReminder = audit?.ok === true && audit.passed === false;
   const issueCount = audit?.ok ? audit.issueCount ?? 0 : 0;
 
@@ -161,16 +166,20 @@ export function HealthWidget() {
           <div className="space-y-2">
             <WidgetMetric
               label={t({ en: "AI design constraints", zh: "AI 设计约束" })}
-              value={synced ? t({ en: "Active", zh: "已生效" }) : t({ en: "Sync needed", zh: "待同步" })}
+              value={
+                synced == null
+                  ? loading ? t({ en: "Checking", zh: "检查中" }) : "—"
+                  : synced ? t({ en: "Active", zh: "已生效" }) : t({ en: "Sync needed", zh: "待同步" })
+              }
               description={t({
                 en: "AI combines user instructions with design specs when generating.",
                 zh: "AI 会结合用户指令与设计规范生成。",
               })}
-              tone={synced ? "good" : "soft"}
+              tone={synced == null ? "neutral" : synced ? "good" : "soft"}
             />
             <WidgetMetric
               label={t({ en: "Component specs", zh: "组件规范覆盖" })}
-              value={usage?.ok ? `${usage.total ?? 0}` : "—"}
+              value={usage?.ok ? `${usage.total ?? 0}` : loading ? "…" : "—"}
               description={t({ en: "AI knows the intended imports, variants, and usage constraints.", zh: "AI 知道组件的导入、变体和使用约束。" })}
               tone="neutral"
             />
@@ -179,14 +188,14 @@ export function HealthWidget() {
               value={
                 audit?.ok
                   ? `${hasReminder ? t({ en: "Reminder", zh: "有提醒" }) : t({ en: "Passed", zh: "通过" })} · ${relativeTime(lastFetched, locale)}`
-                  : t({ en: "Unavailable", zh: "不可用" })
+                  : loading ? t({ en: "Checking", zh: "检查中" }) : t({ en: "Not run", zh: "未运行" })
               }
               description={audit?.ok ? t({ en: "Reported in the AI coding flow.", zh: "在 AI 生码链路中反馈。" }) : audit?.error ?? ""}
-              tone={hasReminder ? "soft" : "good"}
+              tone={audit?.ok ? hasReminder ? "soft" : "good" : "neutral"}
             />
             <WidgetMetric
               label={t({ en: "Auto governance", zh: "自动治理" })}
-              value={t({ en: `This run intercepted ${issueCount}`, zh: `本次拦截 ${issueCount} 次` })}
+              value={audit?.ok ? t({ en: `This run intercepted ${issueCount}`, zh: `本次拦截 ${issueCount} 次` }) : loading ? t({ en: "Checking", zh: "检查中" }) : "—"}
               description={t({ en: "Safe fixes happen in the AI task summary.", zh: "安全修复在 AI 任务总结中体现。" })}
               tone={issueCount > 0 ? "soft" : "neutral"}
             />

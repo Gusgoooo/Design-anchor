@@ -185,7 +185,7 @@ export function OnboardingRoute({ onComplete }: { onComplete: () => void }) {
       const res = await fetch("/api/import-component-path", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: scan.root, files, safeOnly: filterRisky, recursive: true }),
+        body: JSON.stringify({ path: scan.root, files, safeOnly: filterRisky, recursive: true, confirm: true }),
       });
       const body = (await res.json()) as ImportResult;
       if (!res.ok || !body.ok) throw new Error(body.error ?? `HTTP ${res.status}`);

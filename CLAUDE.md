@@ -38,7 +38,7 @@ Editing seeds is fine. After editing tokens.json, run `npm run sync:tokens`. Aft
 - **Adding a new component**: create `src/components/base/<Name>.tsx`, scaffold `src/anchor/schema/components/<name>.spec.json`, run `npm run sync:anchor`.
 - **Changing component variants**: update both the component AND its spec (forbidden / baseline / examples).
 - **Changing tokens**: edit `src/design-tokens/tokens.json`, run `npm run sync:tokens`. CSS variables regenerate.
-- **Before finishing**: run `npm run anchor:audit` and `npx tsc --noEmit`.
+- **Before finishing**: run `npm run anchor:audit` and `npx tsc --noEmit`; include a visible `Design Anchor 自检` line in the task summary when the change affects UI generation rules, components, or tokens. If the work changes UI behavior, also call out any `Design Anchor 自动治理` fix you made.
 
 ## Image-reference workflow
 

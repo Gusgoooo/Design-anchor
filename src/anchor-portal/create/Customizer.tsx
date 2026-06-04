@@ -1,9 +1,7 @@
 import * as React from "react";
-import { Activity, Camera, Check, MoreHorizontal, RotateCcw, Save, Undo2 } from "lucide-react";
+import { Camera, Check, CheckCircle2, MoreHorizontal, RotateCcw, Save, Undo2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "@design/button";
 import { useLocale } from "../i18n/LocaleProvider";
-import { navigateTo } from "../router";
 import { SEED_GROUPS, SEED_GROUP_TITLE_ZH } from "@/design-tokens/seed-card-config";
 import { readSeedValue, type TokenDraft } from "./useTokenDraft";
 import { SeedRow } from "./SeedCard";
@@ -151,26 +149,18 @@ export function Customizer({ draft }: { draft: TokenDraft }) {
         {showHealthPrompt && !isDirty ? (
           <div className="mt-3 rounded-lg border border-border bg-background px-3 py-3 text-sm">
             <div className="flex items-start gap-2">
-              <Activity size={14} className="mt-0.5 shrink-0 text-primary" />
+              <CheckCircle2 size={14} className="mt-0.5 shrink-0 text-primary" />
               <div className="min-w-0 flex-1">
                 <p className="font-medium text-foreground">
                   {t({ en: "Theme baseline saved", zh: "主题基线已保存" })}
                 </p>
                 <p className="mt-0.5 text-muted-foreground">
                   {t({
-                    en: "Next, check Project Health to see component adoption, token status, and AI contract freshness.",
-                    zh: "下一步查看项目健康，确认组件采用、Token 状态和 AI 契约新鲜度。",
+                    en: "AI constraints are synced. The dashboard icon in the top-right stays quiet unless there is something to review.",
+                    zh: "AI 约束已同步。右上角仪表盘会保持安静，只有需要关注时才提示。",
                   })}
                 </p>
               </div>
-              <Button
-                type="button"
-                onClick={() => navigateTo({ kind: "govern" })}
-                size="sm"
-                className="shrink-0"
-              >
-                {t({ en: "View Health", zh: "查看健康度" })}
-              </Button>
             </div>
           </div>
         ) : null}

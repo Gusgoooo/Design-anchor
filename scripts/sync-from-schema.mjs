@@ -5,7 +5,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { loadSpecs, loadDecorativeLibs, loadActivePresetStyle, getRepoRoot } from "./lib/load-specs.mjs";
+import { loadSpecs, loadDecorativeLibs, loadActivePromptStyle, getRepoRoot } from "./lib/load-specs.mjs";
 import { renderCursorrules, renderAnchorMarkdown } from "./lib/render-anchor-rules.mjs";
 
 const root = getRepoRoot();
@@ -75,12 +75,12 @@ export const anchorSafelist: string[] = ${JSON.stringify(safelist, null, 2)};
 }
 
 const decorativeLibs = loadDecorativeLibs();
-const activePresetStyle = loadActivePresetStyle();
+const activePromptStyle = loadActivePromptStyle();
 
 function writeAnchorRulesMirror(specs) {
   const dir = path.join(root, "src/anchor/rules");
   fs.mkdirSync(dir, { recursive: true });
-  const md = renderAnchorMarkdown(specs, decorativeLibs, activePresetStyle);
+  const md = renderAnchorMarkdown(specs, decorativeLibs, activePromptStyle);
   const mdPath = path.join(dir, "ANCHOR_RULES.md");
   fs.writeFileSync(mdPath, md, "utf8");
   console.log(`Wrote ${path.relative(root, mdPath)}`);
@@ -88,7 +88,7 @@ function writeAnchorRulesMirror(specs) {
 
 function writeCursorrules(specs) {
   const outFile = path.join(root, ".cursorrules");
-  fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs, activePresetStyle), "utf8");
+  fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs, activePromptStyle), "utf8");
   console.log(`Wrote ${path.relative(root, outFile)}`);
 }
 
@@ -112,15 +112,27 @@ function writeAgentsMd() {
 - **Component specs**: \`src/anchor/schema/components/*.spec.json\` is the single source of truth.
 - **After changes**: run \`npm run sync:anchor\` to sync .cursorrules.
 
+## Design Anchor in the AI Coding Loop
+
+- **Preflight exposure**: when a task touches UI, theme, components, tokens, or page layout, start with a visible line: \`Design Anchor 预检：我会先查组件规范与 token，优先复用 @design。\`
+- **Before UI edits**: inspect \`@design\` / \`src/components/anchor-ui\` and component specs; reuse existing components and token classes first.
+- **During UI edits**: auto-correct raw HTML substitutes, hard-coded colors, arbitrary token-sensitive values, and bypassed Design-anchor components inside the current coding task. Say \`Design Anchor 自动治理\` when you make such a correction.
+- **After UI edits**: include a short \`Design Anchor 自检\` summary in the AI task result instead of pushing the user into a Portal backlog.
+- **Final answer requirement**: whenever UI code changed, include one \`Design Anchor 自检\` line with component reuse, token compliance, auto-fixes, unresolved confirmations, and sync/audit status.
+- **Passed summary**: \`Design Anchor 自检：复用了 N 个 @design 组件，未发现硬编码颜色，规则已同步。\`
+- **Auto-fixed summary**: \`Design Anchor 自检：检测到 N 处绕过 @design / token 的实现，已改为使用 Button / DataTable。\`
+- **Needs-confirmation summary**: \`Design Anchor 自检：有 N 处需要确认：这个原生 table 是否应该替换为 DataTable？\`
+- **Never hide Design Anchor behind generic wording** such as “lint passed” or “checks passed”; name it explicitly in the AI response.
+
 ## Portal Auto-Open Intent
 
-When the user asks to inspect or change tokens, theme, components, component specs, component styling, governance health, presets, or docs, open Portal first with \`npx design-anchor portal <tab>\`.
-- \`tokens\`: change token, show tokens, brand color, radius, spacing, dark mode, theme, design tokens.
+When the user asks to inspect or change tokens, theme, components, component specs, component styling, dashboard health, or docs, open Portal first with \`npx design-anchor portal <tab>\`.
+When the user provides a style/design prompt and asks for a theme, extract tokens with \`npx design-anchor theme <prompt.md>\` and keep aesthetic guidance subordinate to component specs and semantic tokens.
+- \`tokens\`: change token, show tokens, edit theme, adjust theme, open theme editor, theme editor, brand color, radius, spacing, dark mode, theme, design tokens.
 - \`components\`: component list, available components, component library, preview components.
 - \`specs\`: component spec, schema, props contract, variant mapping.
-- \`govern\`: governance, health, component usage, audit, drift check.
+- \`dashboard\`: top-right dashboard, health, AI constraints, audit, self-check.
 - \`docs\`: docs, setup, CLI commands.
-- \`presets\`: preset, style preset, onboarding, brand style.
 `;
   fs.writeFileSync(agentsPath, content, "utf8");
   console.log(`Wrote AGENTS.md`);

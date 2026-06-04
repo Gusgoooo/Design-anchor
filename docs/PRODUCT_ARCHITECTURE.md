@@ -74,9 +74,9 @@ In the product repo itself, the same source lives under `src/` and is packaged i
 
 | Module | Path | Responsibility |
 |---|---|---|
-| CLI | `bin/anchor.mjs` | `start`, `init`, `dev`, `sync`, `audit`, `upgrade`, `mcp`, onboarding orchestration |
+| CLI | `bin/anchor.mjs` | `start`, `init`, `dev`, `sync`, `audit`, `upgrade`, `mcp`, style-prompt token extraction |
 | MCP server | `bin/anchor-mcp.mjs` | Exposes schema, tokens, files, audit, and sync over stdio JSON-RPC |
-| Portal shell | `src/anchor-portal/` | Vite React app for Docs, Design Token, Components, Onboarding, Govern |
+| Portal shell | `src/anchor-portal/` | Vite React app for Docs, Design Token, Components, and Govern views |
 | Component source | Consumer projects: `src/components/anchor-ui/`; product template source: `src/components/base/` | Governed React + Tailwind components exported through `@design` |
 | Component specs | Consumer projects: `.anchor/src/anchor/schema/components/*.spec.json`; product template source: `src/anchor/schema/components/*.spec.json` | Machine-readable contracts for usage, forbidden tags, primitives, and AI hints |
 | Token source | Consumer projects: `src/design-tokens/tokens.json`; product template source: `src/design-tokens/tokens.json` | Seed, dark overrides, custom seeds, and derived-token overrides |
@@ -147,8 +147,8 @@ The Portal is a Vite React application, not a Storybook runtime. It is optimized
 - **Docs**: bilingual usage and integration docs.
 - **Design Token**: visual token editor with live preview and Save & Sync.
 - **Components**: reads real components from `src/components/anchor-ui`, then uses `.anchor/src/anchor/component-demos` for previews, controls, and spec editing.
-- **Onboarding**: default kit, import existing components into `src/components/anchor-ui`, or start empty.
 - **Govern**: audit status, scope tags, issue list, and rule health.
+- **Style prompt flow**: `anchor theme <prompt.md>` extracts tokens and writes restrained AI style guidance without forcing a first-run Portal flow.
 
 Routes are lazy-loaded so heavier workbench screens do not inflate the initial bundle.
 

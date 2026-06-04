@@ -35,10 +35,15 @@ export function loadDecorativeLibs(rootOverride) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
-export function loadActivePresetStyle(rootOverride) {
+export function loadActivePromptStyle(rootOverride) {
   const root = getRepoRoot(rootOverride);
-  const file = path.join(root, "src/anchor/rules/ACTIVE_PRESET_STYLE.md");
-  if (!fs.existsSync(file)) return null;
-  const text = fs.readFileSync(file, "utf8").trim();
+  const file = path.join(root, "src/anchor/rules/ACTIVE_PROMPT_STYLE.md");
+  const legacyFile = path.join(root, "src/anchor/rules/ACTIVE_PRESET_STYLE.md");
+  const source = fs.existsSync(file) ? file : legacyFile;
+  if (!fs.existsSync(source)) return null;
+  const text = fs.readFileSync(source, "utf8").trim();
   return text ? text : null;
 }
+
+/** @deprecated use loadActivePromptStyle */
+export const loadActivePresetStyle = loadActivePromptStyle;

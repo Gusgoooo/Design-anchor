@@ -58,7 +58,7 @@ export function AddComponentDialog({ open, onClose }: Props) {
       const res = await fetch("/api/import-component-path", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ path: path.trim() }),
+        body: JSON.stringify({ path: path.trim(), confirm: true }),
       });
       const body = (await res.json().catch(() => ({}))) as ImportResult;
       if (!res.ok || !body.ok) throw new Error(body.error ?? res.statusText);

@@ -149,13 +149,12 @@ your-project/
 
 ## First interactions
 
-In the Portal (top nav):
+In the Portal:
 
-- **Onboarding** — quick start from Tailwind Default / a preset, or migrate an existing React + Tailwind \`.tsx\` component library.
-- **Docs** — you're reading them.
-- **Project Health** — migration backlog first, then long-term component/token/AI-contract observability.
-- **Library** — browse and govern the default component library. Pick one to see its preview + controls.
-- **Theme** — the visual customizer. Edit a seed on the left, watch the right preview update live. Hit **Save & Sync** to write to disk and regenerate \`.cursorrules\`.
+- **Theme** — the default home. Edit a seed on the left, watch real components update live, then hit **Save & Sync**.
+- **Library** — browse the component assets AI can reuse. Pick one to see its preview + controls.
+- **Dashboard icon** — a quiet signal for AI-ready components, synced rules, and real risks.
+- **Help icon** — use the right-side help icon when you need docs.
 
 ## Importing components into your app
 
@@ -220,13 +219,12 @@ your-project/
 
 ## 进 Portal 之后干啥
 
-顶部导航三块：
+Portal 主要围绕设计系统维护：
 
-- **Onboarding** —— 从 Tailwind Default / preset 快速开始，或迁移已有 React + Tailwind \`.tsx\` 组件库
-- **Docs** —— 就是你正在读的这个
-- **Project Health** —— 先看存量治理 backlog，之后长期观察组件、Token 和 AI 契约状态
-- **Library** —— 浏览并治理默认组件库，点任一个进去看 preview 和 controls
-- **Theme** —— 可视化 customizer。左侧改 seed，右侧实时预览。**Save & Sync** 一下，落盘 + 重新生成 \`.cursorrules\`
+- **Theme / 主题** —— 默认首页。左侧改 seed，右侧看真实组件实时变化，然后 **Save & Sync**
+- **Library / 组件库** —— 浏览 AI 可复用的组件资产，点任一个进去看 preview 和 controls
+- **Dashboard / 仪表盘 icon** —— 轻量确认组件规范覆盖、规则同步和真实风险
+- **Help / 帮助 icon** —— 需要文档时点右上角帮助入口
 
 ## 在你自己的应用里用组件
 

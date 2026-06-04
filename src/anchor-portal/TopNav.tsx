@@ -1,18 +1,16 @@
 import * as React from "react";
-import { Check, Copy, Globe, Moon, Sun, Terminal } from "lucide-react";
+import { Check, Copy, Globe, HelpCircle, Moon, Sun, Terminal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useTheme } from "./theme/DarkModeProvider";
 import { useLocale, type Bilingual } from "./i18n/LocaleProvider";
 import { navigateTo, tabForRoute, useRoute, type TopTab } from "./router";
+import { HealthWidget } from "./HealthWidget";
 
 const BASH_COMMAND = "npx design-anchor start";
 
 const TABS: { id: TopTab; label: Bilingual; onClick: () => void }[] = [
-  { id: "docs", label: { en: "Docs", zh: "文档" }, onClick: () => navigateTo({ kind: "docs" }) },
-  { id: "govern", label: { en: "Project Health", zh: "项目健康" }, onClick: () => navigateTo({ kind: "govern" }) },
-  { id: "components", label: { en: "Library", zh: "组件库" }, onClick: () => navigateTo({ kind: "components" }) },
-  { id: "patterns", label: { en: "Patterns", zh: "组合" }, onClick: () => navigateTo({ kind: "patterns" }) },
   { id: "designtoken", label: { en: "Theme", zh: "主题" }, onClick: () => navigateTo({ kind: "designtoken" }) },
+  { id: "components", label: { en: "Library", zh: "组件库" }, onClick: () => navigateTo({ kind: "components" }) },
 ];
 
 export function TopNav() {
@@ -24,7 +22,7 @@ export function TopNav() {
   return (
     <header className="flex shrink-0 items-center gap-6 border-b border-border bg-background px-5 py-2.5">
       <a
-        href="#/docs"
+        href="#/theme"
         className="text-base font-bold tracking-tight text-foreground no-underline hover:opacity-80"
       >
         DesignAnchor
@@ -37,7 +35,7 @@ export function TopNav() {
             type="button"
             onClick={tab.onClick}
             className={cn(
-              "rounded-md px-3 py-1.5 text-base font-medium transition-colors",
+              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
               active === tab.id
                 ? "bg-muted text-foreground"
                 : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",
@@ -49,6 +47,19 @@ export function TopNav() {
       </nav>
 
       <div className="ml-auto flex items-center gap-2">
+        <HealthWidget />
+        <button
+          type="button"
+          onClick={() => navigateTo({ kind: "docs" })}
+          title={t({ en: "Help and docs", zh: "帮助和文档" })}
+          className={cn(
+            "inline-flex h-8 items-center justify-center gap-1.5 rounded-md px-2.5 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground",
+            route.kind === "docs" ? "bg-muted text-foreground" : "",
+          )}
+        >
+          <HelpCircle size={14} />
+          <span>{t({ en: "Docs", zh: "文档" })}</span>
+        </button>
         <BashHint command={BASH_COMMAND} hintLabel={t({ en: "Launch this product locally", zh: "本地启动该产品" })} />
         <button
           type="button"

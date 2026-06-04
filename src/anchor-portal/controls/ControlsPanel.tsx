@@ -101,7 +101,7 @@ export function ControlsPanel() {
           hint={t({ en: "This story doesn't expose any controls.", zh: "该 story 没有暴露任何参数。" })}
         />
       ) : (
-        <div className={cn("flex-1 overflow-y-auto px-3 pb-3", isDirty && "pb-16")}>
+        <div className={cn("flex-1 overflow-y-auto px-3 pt-1 pb-3", isDirty && "pb-16")}>
           <div className="space-y-3">
             {groups.map((g) => (
               <section key={g.category ?? "_default"}>

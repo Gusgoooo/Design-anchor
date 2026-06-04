@@ -1,65 +1,19 @@
 import fs from "node:fs";
 import path from "node:path";
-import { execSync } from "node:child_process";
 import { consumerRootFor, projectTokenPaths } from "./scripts/lib/token-source.mjs";
-
-/** Write to disk synchronously with fsync, preventing unflushed buffers on process crash */
-function writeFileWithFsync(absPath, data) {
-  fs.writeFileSync(absPath, data, "utf8");
-  let fd;
-  try {
-    fd = fs.openSync(absPath, "r+");
-    fs.fsyncSync(fd);
-  } finally {
-    if (fd !== undefined) fs.closeSync(fd);
-  }
-}
-
-function execSyncCaptured(cmd, opts) {
-  try {
-    const out = execSync(cmd, {
-      cwd: opts.cwd,
-      stdio: ["ignore", "pipe", "pipe"],
-      encoding: "utf8",
-      maxBuffer: 10 * 1024 * 1024,
-      ...opts,
-    });
-    return { ok: true, stdout: out ?? "", stderr: "" };
-  } catch (e) {
-    const stderr = e.stderr != null ? String(e.stderr) : "";
-    const stdout = e.stdout != null ? String(e.stdout) : "";
-    return { ok: false, stdout, stderr: stderr || stdout || e.message || String(e) };
-  }
-}
-
-/**
- * Portal API write whitelist -- only files under these directories are allowed to be written by the API.
- * Prevents Portal or malicious requests from writing to arbitrary repo locations.
- */
-const WRITE_WHITELIST_PREFIXES = [
-  "src/anchor/schema/",
-  "src/anchor/component-demos/",
-  "src/anchor/rules/",
-  "src/design-tokens/",
-  "src/styles/",
-  "src/components/anchor-ui/",
-  "src/components/base/",
-];
+import {
+  execSyncCaptured,
+  isInsidePath,
+  isWriteAllowed,
+  writeFileWithFsync,
+} from "./src/anchor-server/fs-safety.mjs";
+import { requireMutationConfirm, sendJson } from "./src/anchor-server/http-utils.mjs";
 
 const COMPONENTS_REL = "src/components/anchor-ui";
 const FALLBACK_COMPONENTS_REL = "src/components/base";
 const COMPONENT_IMPORT_BASE = "@/components/anchor-ui";
 const FALLBACK_COMPONENT_IMPORT_BASE = "@/components/base";
 const DEMO_COMPONENTS_REL = "src/anchor/component-demos/base";
-
-function isWriteAllowed(repoRoot, absPath) {
-  const roots = [...new Set([path.resolve(repoRoot), consumerRootFor(repoRoot)])];
-  return roots.some((root) => {
-    const rel = path.relative(root, absPath).split(path.sep).join("/");
-    if (rel.startsWith("..") || path.isAbsolute(rel)) return false;
-    return WRITE_WHITELIST_PREFIXES.some(prefix => rel.startsWith(prefix));
-  });
-}
 
 function componentSourceInfo(repoRoot) {
   const consumerRoot = consumerRootFor(repoRoot);
@@ -106,7 +60,7 @@ function demoRawSpecifier(componentRel) {
   return `${COMPONENT_IMPORT_BASE}/${normalized}?raw`;
 }
 
-const ACTIVE_PRESET_STYLE_REL = "src/anchor/rules/ACTIVE_PRESET_STYLE.md";
+const ACTIVE_PROMPT_STYLE_REL = "src/anchor/rules/ACTIVE_PROMPT_STYLE.md";
 
 function cleanPromptText(value, maxLength = 480) {
   return String(value ?? "")
@@ -133,25 +87,25 @@ function normalizeAiStyleGuide(value) {
   return { designPhilosophy, apply, avoid };
 }
 
-function renderActivePresetStyleBody({ preset, presetName, tone, preferredTheme, guide }) {
-  const name = cleanPromptText(presetName || preset || "Preset", 80);
+function renderActivePromptStyleBody({ preset, presetName, tone, preferredTheme, guide }) {
+  const name = cleanPromptText(presetName || preset || "Design prompt", 80);
   const id = cleanPromptText(preset, 80);
   const presetTone = cleanPromptText(tone, 160);
   const theme = cleanPromptText(preferredTheme, 24);
   const lines = [
-    `# Active preset style: ${name}`,
+    `# Active design prompt style: ${name}`,
     "",
     "This is a lightweight B2B aesthetic layer for AI-written UI. It is secondary to Design-anchor component specs, semantic tokens, and audit rules.",
     "",
     "## Priority",
     "",
     "- First obey component specs, imports, semantic props, and token-only styling.",
-    "- Use this preset only for page rhythm, hierarchy, density, surface treatment, motion restraint, and decorative restraint.",
+    "- Use this style guidance only for page rhythm, hierarchy, density, surface treatment, motion restraint, and decorative restraint.",
     "- Do not copy colors, hex values, pixel values, or custom component implementations from this text.",
     "",
-    "## Preset context",
+    "## Style context",
     "",
-    `- Preset: ${name}${id && id !== name ? ` (${id})` : ""}`,
+    `- Source: ${name}${id && id !== name ? ` (${id})` : ""}`,
   ];
   if (presetTone) lines.push(`- Tone: ${presetTone}`);
   if (theme) lines.push(`- Preferred theme: ${theme}`);
@@ -175,20 +129,20 @@ function renderActivePresetStyleBody({ preset, presetName, tone, preferredTheme,
   return `${lines.join("\n").trim()}\n`;
 }
 
-function renderCursorPresetStyleRule(styleBody) {
+function renderCursorPromptStyleRule(styleBody) {
   return `---
-description: Active Design-anchor preset style, restrained B2B layer for AI-written UI
+description: Active Design-anchor design prompt style, restrained B2B layer for AI-written UI
 alwaysApply: true
 ---
 
 ${styleBody}`;
 }
 
-function writePresetStyleArtifacts(repoRoot, payload) {
+function writePromptStyleArtifacts(repoRoot, payload) {
   const guide = normalizeAiStyleGuide(payload.aiStyleGuide);
   if (!guide) return { styleWritten: false };
 
-  const styleBody = renderActivePresetStyleBody({
+  const styleBody = renderActivePromptStyleBody({
     preset: payload.preset,
     presetName: payload.presetName,
     tone: payload.tone,
@@ -196,9 +150,9 @@ function writePresetStyleArtifacts(repoRoot, payload) {
     guide,
   });
 
-  const activeStylePath = path.join(repoRoot, ACTIVE_PRESET_STYLE_REL);
+  const activeStylePath = path.join(repoRoot, ACTIVE_PROMPT_STYLE_REL);
   if (!isWriteAllowed(repoRoot, activeStylePath)) {
-    throw new Error("active preset style path not in whitelist");
+    throw new Error("active prompt style path not in whitelist");
   }
   fs.mkdirSync(path.dirname(activeStylePath), { recursive: true });
   writeFileWithFsync(activeStylePath, styleBody);
@@ -206,7 +160,7 @@ function writePresetStyleArtifacts(repoRoot, payload) {
   const consumerRoot = consumerRootFor(repoRoot);
   const cursorStylePath = path.join(consumerRoot, ".cursor/rules/anchor-style.mdc");
   fs.mkdirSync(path.dirname(cursorStylePath), { recursive: true });
-  writeFileWithFsync(cursorStylePath, renderCursorPresetStyleRule(styleBody));
+  writeFileWithFsync(cursorStylePath, renderCursorPromptStyleRule(styleBody));
 
   return {
     styleWritten: true,
@@ -259,11 +213,6 @@ function inspectComponentImports(absPath) {
       ? "warn"
       : "safe";
   return { imports: classified, level: worstLevel };
-}
-
-function isInsidePath(parent, child) {
-  const rel = path.relative(parent, child);
-  return rel === "" || (!rel.startsWith("..") && !path.isAbsolute(rel));
 }
 
 function isImportableComponentFile(filePath) {
@@ -492,28 +441,28 @@ export function schemaApiPlugin(repoRoot) {
         const url = parsedUrl.pathname;
 
         if (req.method === "GET" && url === "/api/setup-status") {
-          // Reports whether the user has completed first-run onboarding.
-          // Stored in .anchor-portal/setup.json (gitignored via .anchor-portal/).
+          // Legacy compatibility endpoint. Onboarding has been removed, so
+          // Portal should always open directly into the working shell.
           const p = path.join(repoRoot, ".anchor-portal/setup.json");
           if (!fs.existsSync(p)) {
             res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ configured: false }));
+            res.end(JSON.stringify({ configured: true, onboarding: false }));
             return;
           }
           try {
             const body = JSON.parse(fs.readFileSync(p, "utf8"));
             res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ configured: true, ...body }));
+            res.end(JSON.stringify({ ...body, configured: true, onboarding: false }));
           } catch {
             res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ configured: false }));
+            res.end(JSON.stringify({ configured: true, onboarding: false }));
           }
           return;
         }
 
         if (req.method === "POST" && url === "/api/setup-status") {
-          // Records the user's onboarding choice. Subsequent visits skip
-          // the wizard. Sending { configured: false } resets it (debug aid).
+          // Legacy compatibility endpoint. Keep accepting old clients, but
+          // never let this re-enable a first-run onboarding gate.
           let raw = "";
           req.on("data", (c) => { raw += String(c); });
           req.on("end", () => {
@@ -527,6 +476,8 @@ export function schemaApiPlugin(repoRoot) {
                 mode: payload.mode ?? "default",
                 imported: Array.isArray(payload.imported) ? payload.imported : [],
                 ...payload,
+                configured: true,
+                onboarding: false,
               };
               writeFileWithFsync(p, JSON.stringify(body, null, 2) + "\n");
               res.setHeader("Content-Type", "application/json");
@@ -608,22 +559,30 @@ export function schemaApiPlugin(repoRoot) {
         }
 
         if (req.method === "POST" && url === "/api/clear-components") {
-          // Wipes the visible component source for the "empty library" onboarding mode.
+          // Wipes the visible component source for an explicitly requested empty library mode.
           // Tokens / specs / generated files stay so the user can grow from zero.
-          try {
-            const baseDir = componentSourceInfo(repoRoot).dir;
-            if (fs.existsSync(baseDir)) {
-              for (const f of fs.readdirSync(baseDir)) {
-                fs.rmSync(path.join(baseDir, f), { recursive: true, force: true });
+          let raw = "";
+          req.on("data", (c) => { raw += String(c); });
+          req.on("end", () => {
+            try {
+              const payload = raw ? JSON.parse(raw) : {};
+              const mutation = requireMutationConfirm(res, payload, "clear components");
+              if (!mutation) return;
+
+              const baseDir = componentSourceInfo(repoRoot).dir;
+              const removed = [];
+              if (fs.existsSync(baseDir)) {
+                for (const f of fs.readdirSync(baseDir)) {
+                  const target = path.join(baseDir, f);
+                  removed.push(path.relative(repoRoot, target).split(path.sep).join("/"));
+                  if (!mutation.dryRun) fs.rmSync(target, { recursive: true, force: true });
+                }
               }
+              sendJson(res, { ok: true, dryRun: mutation.dryRun, removed });
+            } catch (e) {
+              sendJson(res, { ok: false, error: String(e) }, 500);
             }
-            res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ ok: true }));
-          } catch (e) {
-            res.statusCode = 500;
-            res.setHeader("Content-Type", "application/json");
-            res.end(JSON.stringify({ ok: false, error: String(e) }));
-          }
+          });
           return;
         }
 
@@ -939,6 +898,8 @@ export function schemaApiPlugin(repoRoot) {
         }
 
         if (req.method === "POST" && url === "/api/apply-token-preset") {
+          // Legacy compatibility endpoint for old Portal builds. New product
+          // flow uses `anchor theme <prompt.md>` and prompt-derived tokens.
           let raw = "";
           req.on("data", (c) => {
             raw += String(c);
@@ -980,7 +941,7 @@ export function schemaApiPlugin(repoRoot) {
                 }
               }
 
-              const style = writePresetStyleArtifacts(repoRoot, payload);
+              const style = writePromptStyleArtifacts(repoRoot, payload);
               writeFileWithFsync(tokensPath, JSON.stringify(doc, null, 2) + "\n");
               const sync = execSyncCaptured("npm run sync:anchor", {
                 cwd: repoRoot,
@@ -1021,7 +982,7 @@ export function schemaApiPlugin(repoRoot) {
                 res.end(JSON.stringify({ ok: false, error: "write path not in whitelist" }));
                 return;
               }
-              const payload = JSON.parse(raw);
+              const payload = raw ? JSON.parse(raw) : {};
               const jsonText = payload.jsonText ?? "";
               JSON.parse(jsonText);
               const pretty = `${JSON.stringify(JSON.parse(jsonText), null, 2)}\n`;
@@ -1253,6 +1214,8 @@ export function schemaApiPlugin(repoRoot) {
                 res.end(JSON.stringify({ ok: false, error: "missing importPath" }));
                 return;
               }
+              const mutation = requireMutationConfirm(res, payload, "delete component");
+              if (!mutation) return;
 
               const absStory = path.isAbsolute(importPathRaw)
                 ? path.normalize(importPathRaw)
@@ -1303,7 +1266,13 @@ export function schemaApiPlugin(repoRoot) {
 
               // Delete story file
               if (fs.existsSync(absStory)) {
-                fs.unlinkSync(absStory);
+                if (!isWriteAllowed(repoRoot, absStory)) {
+                  res.statusCode = 403;
+                  res.setHeader("Content-Type", "application/json; charset=utf-8");
+                  res.end(JSON.stringify({ ok: false, error: "story path forbidden" }));
+                  return;
+                }
+                if (!mutation.dryRun) fs.unlinkSync(absStory);
                 deleted.push(path.relative(repoRoot, absStory).split(path.sep).join("/"));
               }
 
@@ -1315,7 +1284,7 @@ export function schemaApiPlugin(repoRoot) {
                   res.end(JSON.stringify({ ok: false, error: "component path forbidden" }));
                   return;
                 }
-                fs.unlinkSync(componentFile);
+                if (!mutation.dryRun) fs.unlinkSync(componentFile);
                 const source = componentSourceInfo(repoRoot);
                 deleted.push(path.relative(source.root, componentFile).split(path.sep).join("/"));
               }
@@ -1325,13 +1294,19 @@ export function schemaApiPlugin(repoRoot) {
                 const compId = path.basename(componentFile, path.extname(componentFile)).toLowerCase();
                 const specPath = path.join(specDir, `${compId}.spec.json`);
                 if (fs.existsSync(specPath)) {
-                  fs.unlinkSync(specPath);
+                  if (!isWriteAllowed(repoRoot, specPath)) {
+                    res.statusCode = 403;
+                    res.setHeader("Content-Type", "application/json; charset=utf-8");
+                    res.end(JSON.stringify({ ok: false, error: "spec path forbidden" }));
+                    return;
+                  }
+                  if (!mutation.dryRun) fs.unlinkSync(specPath);
                   deleted.push(path.relative(repoRoot, specPath));
                 }
               }
 
               res.setHeader("Content-Type", "application/json; charset=utf-8");
-              res.end(JSON.stringify({ ok: true, deleted }));
+              res.end(JSON.stringify({ ok: true, dryRun: mutation.dryRun, deleted }));
             } catch (e) {
               res.statusCode = 500;
               res.setHeader("Content-Type", "application/json; charset=utf-8");
@@ -1347,6 +1322,12 @@ export function schemaApiPlugin(repoRoot) {
           req.on("end", () => {
             try {
               const body = Buffer.concat(chunks);
+              const mutation = requireMutationConfirm(res, {
+                confirm: parsedUrl.searchParams.get("confirm") === "true" || req.headers["x-anchor-confirm"] === "true",
+                dryRun: parsedUrl.searchParams.get("dryRun") === "true",
+              }, "upload component");
+              if (!mutation) return;
+
               const boundary = (req.headers["content-type"] || "").split("boundary=")[1];
               if (!boundary) { res.statusCode = 400; res.end("no boundary"); return; }
 
@@ -1375,7 +1356,7 @@ export function schemaApiPlugin(repoRoot) {
               const compName = filename.replace(/\.tsx$/, "");
               const source = componentSourceInfo(repoRoot);
               const baseDir = source.dir;
-              if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+              if (!mutation.dryRun && !fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
 
               const compPath = path.join(baseDir, filename);
               if (!isWriteAllowed(repoRoot, compPath)) {
@@ -1385,7 +1366,9 @@ export function schemaApiPlugin(repoRoot) {
                 return;
               }
 
-              writeFileWithFsync(compPath, rewriteImportedComponentSource(Buffer.from(content, "binary").toString("utf8")));
+              if (!mutation.dryRun) {
+                writeFileWithFsync(compPath, rewriteImportedComponentSource(Buffer.from(content, "binary").toString("utf8")));
+              }
 
               const pascal = compName.replace(/(^|-)(\w)/g, (_, _2, c) => c.toUpperCase());
               const demo = demoSourceInfo(repoRoot);
@@ -1420,12 +1403,16 @@ export function schemaApiPlugin(repoRoot) {
                   `};`,
                   ``,
                 ].join("\n");
-                writeFileWithFsync(demoPath, demo);
+                if (!mutation.dryRun) {
+                  fs.mkdirSync(path.dirname(demoPath), { recursive: true });
+                  writeFileWithFsync(demoPath, demo);
+                }
               }
 
               res.setHeader("Content-Type", "application/json; charset=utf-8");
               res.end(JSON.stringify({
                 ok: true,
+                dryRun: mutation.dryRun,
                 component: path.relative(source.root, compPath).split(path.sep).join("/"),
                 demo: path.relative(repoRoot, demoPath).split(path.sep).join("/"),
               }));
@@ -1451,6 +1438,8 @@ export function schemaApiPlugin(repoRoot) {
             try {
               const raw = Buffer.concat(chunks).toString("utf8");
               const body = raw ? JSON.parse(raw) : {};
+              const mutation = requireMutationConfirm(res, body, "import component path");
+              if (!mutation) return;
               let sourcePath = String(body?.path ?? "").trim();
               if (!sourcePath) {
                 res.statusCode = 400;
@@ -1576,7 +1565,7 @@ export function schemaApiPlugin(repoRoot) {
 
               const source = componentSourceInfo(repoRoot);
               const baseDir = source.dir;
-              if (!fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
+              if (!mutation.dryRun && !fs.existsSync(baseDir)) fs.mkdirSync(baseDir, { recursive: true });
 
               const imported = [];
               const errors = [...skipped];
@@ -1593,8 +1582,10 @@ export function schemaApiPlugin(repoRoot) {
                     continue;
                   }
                   const content = rewriteImportedComponentSource(fs.readFileSync(src, "utf8"));
-                  fs.mkdirSync(path.dirname(dest), { recursive: true });
-                  writeFileWithFsync(dest, content);
+                  if (!mutation.dryRun) {
+                    fs.mkdirSync(path.dirname(dest), { recursive: true });
+                    writeFileWithFsync(dest, content);
+                  }
 
                   const pascal = compName.replace(/(^|-)(\w)/g, (_, _2, c) => c.toUpperCase());
                   const demoRoot = demoSourceInfo(repoRoot);
@@ -1629,7 +1620,10 @@ export function schemaApiPlugin(repoRoot) {
                       `};`,
                       ``,
                     ].join("\n");
-                    writeFileWithFsync(demoPath, demo);
+                    if (!mutation.dryRun) {
+                      fs.mkdirSync(path.dirname(demoPath), { recursive: true });
+                      writeFileWithFsync(demoPath, demo);
+                    }
                   }
                   imported.push(path.relative(source.root, dest).split(path.sep).join("/"));
                 } catch (e) {
@@ -1640,6 +1634,7 @@ export function schemaApiPlugin(repoRoot) {
               res.setHeader("Content-Type", "application/json; charset=utf-8");
               res.end(JSON.stringify({
                 ok: imported.length > 0,
+                dryRun: mutation.dryRun,
                 imported,
                 errors,
                 kind: stat.isDirectory() ? "folder" : "file",

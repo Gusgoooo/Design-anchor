@@ -6,55 +6,102 @@
 
 <h1 align="center">Design-anchor</h1>
 
-<p align="center"><strong>给 AI 生成产品 UI 用的后台设计系统护栏。</strong></p>
+<p align="center"><strong>给 AI 生成产品 UI 用的本地设计系统治理工具。</strong></p>
 
 <p align="center">
-  Prompt &rarr; tokens。Specs &rarr; components。Rules &rarr; 稳定的 AI coding。
+  风格 prompt 生成 token。Token 驱动组件。规则约束 AI coding。
 </p>
 
 <p align="center">
   <a href="./README.md">English</a> &middot;
-  <a href="#快速开始">简体中文</a>
+  <a href="#快速开始">快速开始</a> &middot;
+  <a href="#核心能力">核心能力</a> &middot;
+  <a href="#工作原理">工作原理</a>
 </p>
 
 ---
 
-## 问题
+## Design-anchor 是什么？
 
-每个 AI 编码工具都能吐出“能跑的”UI。真正难的是第 20 个 prompt、第 50 次编辑、第三个 agent 接手后，UI 仍然像同一个产品。
+Design-anchor 是一套面向 AI coding 的本地设计系统控制面。它给 agent 一份明确的产品 UI 契约：应该使用哪些组件、应该引用哪些 token、应该如何同步规则，以及每次修改后如何审计。
+
+它尤其适合 B 端和企业产品：dashboard、表单、设置页、表格和运营工作流需要长期保持清晰、克制、稳定，而不是每个 prompt 都生成一套新的视觉语言。
+
+Design-anchor 把业务 UI 和产品控制面分开：
+
+| 区域 | 位置 | 作用 |
+|---|---|---|
+| **组件** | `src/components/anchor-ui/` | 应用真实使用的 React + Tailwind 组件源码。 |
+| **Design Token** | `src/design-tokens/tokens.json` | 项目颜色、圆角、字号、间距、图表色的唯一真源。 |
+| **Anchor 控制面** | `.anchor/` | Portal、schema、rules、scripts、MCP、sync 和 audit。 |
+
+业务代码从 `@design` 或 `@/components/anchor-ui` 引用组件。隐藏的 `.anchor/` 负责治理和同步，但不是运行时组件源码。
+
+<a id="核心能力"></a>
+## 核心能力
+
+### 1. 组件优先的 AI 生码
+
+Design-anchor 会把受治理的 UI 组件放进用户源码目录。AI agent 在写页面时会先复用这些组件，而不是手写原生标签替代品。
 
 ```tsx
-// 周一 —— agent A
-<button className="bg-blue-500 px-4 py-2 rounded-lg">保存</button>
+import { Button } from "@design";
 
-// 周五 —— 同一个 agent
-<button className="bg-[#3b82f6] px-[15px] py-2.5 rounded-[10px]">保存</button>
-
-// 下个 sprint —— agent B
-<button className="bg-indigo-500 px-3.5 py-1.5 rounded-md">保存</button>
+export function SaveAction() {
+  return <Button>保存修改</Button>;
+}
 ```
 
-同一个意图，三套实现，三种蓝，三种圆角。乘以每个页面的每个 UI 原语，B 端产品很快就会像多个团队各做各的。Figma 和 `design.md` 能帮助人，但 AI agent 更需要能读取、能执行、能审计的本地契约。
+生成的 AI 规则会要求 agent 在已有项目组件时使用 `Button`、`Input`、`DataTable` 等组件，而不是原生 `<button>`、`<input>`、`<table>`。
 
-## 解法
+### 2. 从风格 prompt 提取 design token
 
-Design-anchor 作为项目依赖安装，然后退到后台。它把组件、token、规则和审计变成本地真源，让 AI 工具按你的产品系统写 UI，而不是先强迫用户进入一个设计系统产品流程。
+把产品风格 prompt 交给 Design-anchor：
 
-| 产品面 | 真源 | AI 应该怎么做 |
-|---|---|---|
-| **组件** | `src/components/anchor-ui/` | 从 `@design` 或 `@/components/anchor-ui` 引用，不从 `.anchor/` 内部深路径引用。 |
-| **Token** | `src/design-tokens/tokens.json` | 使用 `bg-primary` 这类语义 token class，然后同步生成 CSS。 |
-| **控制面** | `.anchor/` | 只放 Portal、schema、rules、scripts、audit，不作为业务 UI 实现目录。 |
+```bash
+npx design-anchor theme design-prompt.md
+```
 
-底层用三层硬约束防止漂移：
+它会把可提取的设计值写入 `src/design-tokens/tokens.json`，重新生成 token CSS，保存原始 prompt，并生成一份克制的 AI 风格指导。prompt 可以影响节奏、层级、密度和氛围；组件规范和语义 token 始终是更强的约束。
 
-| 层 | 做什么 | 什么时候生效 |
-|---|---|---|
-| **Rules** | 从 `spec.json` 生成 AI 可读契约（`.cursorrules` / `CLAUDE.md` / `copilot-instructions.md`）。AI 在写错之前就被告知「有 `<Button>` 别用 `<button>`」 | 生码之前 |
-| **Hooks** | `anchor audit` AST 扫描，保存/pre-commit/CI 三处触发。`bg-[#0204a3]`、`<button>` 会被拦截；明确 px 值会先尝试映射到等值 token，再决定是否保留手写值。 | 生码之后 |
-| **MCP** | 13 个工具让 agent 读 schema、改 token、跑 audit、同步规则——零拷贝 | 按需调度 |
+### 3. Token 驱动的主题系统
 
-AI 生码时，Design-anchor 的反馈应该直接出现在同一段对话里：开始 UI 任务时先出现 `Design Anchor 预检`，自动修复时明确说 `Design Anchor 自动治理`，任务结束时追加轻量自检，例如 `Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`。
+Token 会编译成 CSS 变量和 Tailwind theme 值：
+
+```
+tokens.json -> seed-to-map.mjs -> CSS variables -> Tailwind semantic classes
+```
+
+业务代码使用 `bg-primary`、`text-muted-foreground`、`border-border`、`rounded-md` 这类语义 class。避免硬编码 hex、任意值颜色和 token-sensitive 的随意间距。
+
+### 4. 面向 AI 工具的规则文件
+
+Design-anchor 会为常见 AI coding 环境生成规则：
+
+```
+CLAUDE.md
+.cursor/rules/anchor.mdc
+.cursor/rules/anchor-selfcheck.mdc
+.github/copilot-instructions.md
+AGENTS.md
+.mcp.json
+.cursor/mcp.json
+```
+
+规则会让 AI 工作流显式化：
+
+- UI 任务开始时输出 `Design Anchor 预检`。
+- 优先使用 `@design` 组件和语义 token。
+- 自动修复原生标签替代、硬编码颜色和不安全任意值。
+- UI 任务结束时输出 `Design Anchor 自检`。
+
+### 5. Audit、sync 与 MCP
+
+`anchor audit` 会扫描常见设计系统违规。MCP 工具让 agent 可以读取组件、查看 token、更新 schema、运行 audit、同步规则，而不需要把文件内容来回复制。
+
+当前 MCP 工具：
+
+`list_components` · `read_component` · `create_component` · `list_tokens` · `update_token` · `list_schemas` · `read_schema` · `update_schema` · `run_audit` · `run_sync_rules` · `get_cursorrules` · `read_file` · `write_file`
 
 <a id="快速开始"></a>
 ## 快速开始
@@ -64,163 +111,153 @@ npm install -D design-anchor
 npx design-anchor start
 ```
 
-这条命令会建立一套可运行契约：
+这会完成以下设置：
 
-1. **把可见组件源码放进 `src/components/anchor-ui/`**，即使将来移除 Design-anchor，业务代码仍可继续运行。
-2. **创建 `.anchor/` 控制面**，承载 Portal、schema、sync scripts、MCP、rules 和 audits。
-3. **Patch 项目接入**：组件依赖、token CSS import、`@design` 引用约定、Cursor / Claude / Copilot 规则。
-4. **直接打开 Theme / tokens**，没有强制 onboarding，也没有必选 preset。
+1. 在 `src/components/anchor-ui/` 放入可见组件源码。
+2. 建立 `src/design-tokens/tokens.json` 作为项目 token 真源。
+3. 创建 `.anchor/` 本地控制面。
+4. 为 Cursor、Claude、Copilot 和通用 agent 生成规则。
+5. 配置 MCP，方便 agent 访问本地真源。
+6. 打开 Portal，用于查看 token、组件、文档和治理状态。
 
-现在没有强制首访向导。需要查看时可以打开 Portal 看 token 或组件，也可以直接关闭 Portal 开始 Coding——护栏已经在后台生效。
+已有项目如果只想先接治理：
 
-如果用户提供风格 prompt，可以直接抽取 token：
+```bash
+npx design-anchor govern
+```
+
+之后可以逐步接入组件、token 和 audit。
+
+## 典型工作流
+
+### 用 AI 生成一个新页面
+
+1. 让 AI coding 工具实现页面。
+2. 规则会要求它先检查 `@design`、组件 spec 和 token。
+3. AI 使用受治理组件和语义 token class。
+4. 运行 `npx design-anchor audit`，或让配置好的 hooks 自动运行。
+5. 任务结束时输出 `Design Anchor 自检`。
+
+### 从产品风格 prompt 生成主题
 
 ```bash
 npx design-anchor theme design-prompt.md
+npx design-anchor sync
 ```
 
-这会把 token 写入 `src/design-tokens/tokens.json`，保存原始 prompt，并生成克制的 AI 风格指导。prompt 只轻量影响节奏、层级、密度和氛围；组件规范与语义 token 仍然优先。
+prompt 会转成 token 值和轻量风格指导。最终 UI 仍然使用受治理组件和语义 token class。
 
-## 使用组件
+### 查看或调整设计系统状态
 
-使用 Design-anchor 拷贝到业务项目里的可见源码：
-
-```ts
-// tsconfig.json
-{ "compilerOptions": { "paths": { "@design": ["src/components/anchor-ui"], "@design/*": ["src/components/anchor-ui/*"] } } }
+```bash
+npx design-anchor portal theme
+npx design-anchor portal components
+npx design-anchor portal docs
 ```
 
-```tsx
-import { Button } from "@design";
+Portal 用于查看和治理。业务运行时代码继续使用 `src/components/anchor-ui/` 中的可见组件源码。
 
-export function CTA() {
-  return <Button>保存修改</Button>;
-}
-```
-
-这点有意接近 shadcn：组件在用户源码目录里，Design-anchor 只提供后台治理、同步和审计能力。
-
+<a id="工作原理"></a>
 ## 工作原理
 
 ### Token 流水线
 
 ```
-14 个 seed（tokens.json） → seed-to-map.mjs → 200+ CSS 变量 → @theme → className
+14 个 seed (tokens.json) -> seed-to-map.mjs -> 200+ CSS variables -> Tailwind classes
 ```
-
-把 `colorPrimary` 从 `#000` 改成 `#635BFF`：所有 `bg-primary` 立刻变。把 `borderRadius` 从 `8` 改成 `12`：所有 `rounded-md` 跟着走。跑 `anchor sync`，不需要全局替换。
 
 | 类别 | Seeds | 驱动 |
 |---|---|---|
-| 品牌 | colorPrimary / Success / Warning / Error / Info | 所有语义色 |
-| 表面 | colorBgBase / colorTextBase | 30+ 派生中性色、填充、边框 |
-| 字号 | fontSize | `text-xs` 到 `text-3xl` |
-| 圆角 | borderRadius | `rounded-sm/md/lg/xl` 梯度 |
-| 间距 | sizeUnit | 完整 Tailwind `p-N` / `gap-N` 尺度 |
-| 图表 | chart1 – chart5 | 图表配色（已接 Recharts） |
+| 品牌 | `colorPrimary`、`colorSuccess`、`colorWarning`、`colorError`、`colorInfo` | 语义色槽 |
+| 表面 | `colorBgBase`、`colorTextBase` | 中性色、填充、边框 |
+| 字号 | `fontSize` | 字号尺度 |
+| 圆角 | `borderRadius` | 圆角梯度 |
+| 间距 | `sizeUnit` | Tailwind 间距尺度 |
+| 图表 | `chart1` 到 `chart5` | 图表色板 |
 
-组件遵循比例圆角规则：内部圆角 = 外部圆角 - padding，通过 `calc(var(--radius-md) - var(--spacing-1))` 实现，最小 2px。下拉选项、Toggle 高亮、Tab 指示器在任意圆角设置下都保持视觉比例。
+修改 `colorPrimary` 会影响所有 `bg-primary`。修改 `borderRadius` 会影响整套圆角尺度。组件使用比例圆角规则，让嵌套表面在不同圆角设置下仍然平衡。
 
-### AI 规则文件
+### 组件契约
 
-从 `spec.json` 生成——单一来源，多个输出：
+组件 spec 描述：
 
-```
-your-project/
-├── CLAUDE.md                           Claude Code / Claude Desktop
-├── .cursor/rules/anchor.mdc            Cursor（alwaysApply）
-├── .cursor/rules/anchor-selfcheck.mdc  编辑后 checklist
-├── .github/copilot-instructions.md     Copilot Chat
-├── AGENTS.md                           通用 AI 契约
-├── .mcp.json                           Claude Code / Cline / Zed MCP
-├── .cursor/mcp.json                    Cursor MCP
-└── .cursor/hooks.json                  保存后跑 audit
-```
+- import 路径
+- props 和 variants
+- 禁用的原生替代标签
+- token 与样式约束
+- AI 可以模仿的 examples
 
-### `anchor audit`
+这些 spec 会生成 AI 规则和 audit 期望，所以生码前后的约束来自同一份契约。
 
-AST 扫描，执行两类规则：
+### Audit 行为
 
-- **Forbidden 原生标签** — 有 `<Button>` 还写 `<button>` 则拒
-- **Token 敏感前缀上的 arbitrary value** — `bg-[#hex]` 这类硬编码颜色拒；`p-[24px]`、`rounded-[16px]`、`text-[14px]` 这类明确数值会先映射到等值 token（如 `p-6`、`rounded-lg`、`text-sm`），没有等值 token 时才保留手写值；`w-[280px]`、`max-w-[480px]` 过（layout 一次性像素允许）
+`anchor audit` 会检查：
 
-### MCP server
+- 已有受治理组件时仍使用原生标签
+- 硬编码颜色
+- token-sensitive 的任意值 Tailwind
+- 绕过可见组件源码的 import
 
-```jsonc
-// init 时自动配置
-{
-  "mcpServers": {
-    "design-anchor": {
-      "command": "npx",
-      "args": ["design-anchor", "mcp", "."]
-    }
-  }
-}
-```
-
-13 个工具：`list_components` · `read_component` · `create_component` · `list_tokens` · `update_token` · `list_schemas` · `read_schema` · `update_schema` · `run_audit` · `run_sync_rules` · `get_cursorrules` · `read_file` · `write_file`
-
-这是推荐给 AI agent 的路径：Design-anchor 可以被 skill、MCP 或 CLI 调用，但不占据用户的第一个产品屏幕。
+明确数值会尽量映射回等值 token。固定宽度这类 layout-only 的一次性值可以保留。
 
 ## CLI
 
 ```
-anchor start [dir]        Init + install + 打开 Portal
+anchor start [dir]        初始化、安装并打开 Portal
 anchor init  [dir]        仅 scaffold .anchor/
-anchor govern             仅注入 AI 规则（不拷贝组件）
-anchor dev   [dir]        在已有 .anchor/ 上启动 Portal
-anchor portal [tab] [dir] 打开指定 Portal tab：tokens/theme/theme-editor/components/specs/docs
-anchor sync  [dir]        重新生成规则 + token
-anchor audit [dir]        AST 扫描违规
-anchor upgrade [dir]      更新模板（保留你的修改）
-anchor mcp [dir]          启动 MCP server
-anchor screenshot [图片]  截图驱动 token 提取
-anchor theme <prompt.md>  从设计 prompt 提取 token
+anchor govern             仅注入 AI 规则，不拷贝组件
+anchor theme  <file>      从 design prompt 提取 token
+anchor screenshot [img]   打印截图转 token 的工作流指导
+anchor upgrade [dir]      更新模板，同时保留本地修改
+anchor dev   [dir]        启动 Anchor Portal
+anchor portal [tab] [dir] 打开 Portal tab：tokens/theme/components/specs/docs
+anchor sync  [dir]        重新生成 rules 和 tokens
+anchor audit [dir]        扫描设计系统违规
+anchor mcp   [dir]        以 stdio 启动 MCP server
 ```
 
-React 是 peer dependency（`>=18 <20`）。业务项目通过 `@design` 引用可见的 `src/components/anchor-ui` 源码时，`react` 和 `react-dom` 必须 dedupe 到宿主项目这一份。
-
-已有项目如果只想先接治理，可以从 `anchor govern` 开始，再逐步接组件和 token。
-
-## 项目结构
+## 会写入项目哪些内容
 
 ```
 your-project/
-├── src/design-tokens/                  项目 token 唯一真源
-│   └── tokens.json
+├── src/design-tokens/
+│   └── tokens.json                    项目 token 真源
 ├── src/styles/
-│   └── design-tokens.generated.css     业务应用导入的运行时 CSS
-├── src/components/anchor-ui/           60+ React + Tailwind 组件
-├── .anchor/                            Anchor Portal + schema + sync 控制面
-│   ├── src/anchor/schema/              每个组件的 spec.json 契约
-│   ├── src/anchor/component-demos/     Portal 专用组件 demo
-│   ├── src/design-tokens/              派生算法 + 默认模板
-│   └── package.json                    仅 Portal 工具链；运行时依赖从项目根 resolve
-├── CLAUDE.md                           AI 规则（Claude）
-├── .cursor/rules/anchor.mdc            AI 规则（Cursor）
-├── .github/copilot-instructions.md     AI 规则（Copilot）
-├── AGENTS.md                           AI 契约（通用）
-├── .mcp.json + .cursor/mcp.json        MCP 配置
-└── .cursor/hooks.json                  保存后审计
+│   └── design-tokens.generated.css    生成的运行时 CSS
+├── src/components/anchor-ui/          用户拥有的组件源码
+├── .anchor/                           Portal、schema、sync、audit、MCP
+│   ├── src/anchor/schema/
+│   ├── src/anchor/component-demos/
+│   ├── src/design-tokens/
+│   └── package.json
+├── CLAUDE.md
+├── .cursor/rules/anchor.mdc
+├── .github/copilot-instructions.md
+├── AGENTS.md
+├── .mcp.json
+├── .cursor/mcp.json
+└── .cursor/hooks.json
 ```
 
-所有组件运行时依赖（React、Radix 等）安装在项目根 node_modules——不会出现 React 双实例和 Context 冲突。
+运行时依赖从项目根解析，避免 React 双实例和 context mismatch。
 
 ## 适合谁
 
-| 团队类型 | 为什么 |
+| 团队 | 价值 |
 |---|---|
-| **B 端 SaaS** | Dashboard、表单、表格到处重复，用户每天在 UI 里工作，小的不一致会长期放大 |
-| **企业平台** | 多个贡献者跨年维护，所有人和 AI 遵守同一套契约 |
-| **AI 辅助团队** | 让 AI 放手写前端，同时不允许它把按钮发明五种写法 |
-| **老项目** | 先接治理，再逐步迁移页面，不需要一次性重构 |
+| **B 端 SaaS 团队** | 让 dashboard、表单、表格、设置页在多轮 AI 修改后仍然一致。 |
+| **企业平台** | 给多个贡献者和多个 agent 一份本地 UI 契约。 |
+| **AI 辅助产品团队** | 让 AI 快速写 UI，同时不发明新的组件和 token。 |
+| **已有产品** | 先接治理，再逐步迁移页面和 token。 |
 
 ## 技术栈
 
-- **React 19** + **Tailwind v4** + **Radix UI** + **shadcn/ui** 模式
-- **Antd 5** 色彩算法做 token 派生
-- **Vite 6**（Portal）
-- **MCP** stdio JSON-RPC 对接 AI
+- React 19
+- Tailwind CSS v4
+- Radix UI 与 shadcn/ui 模式
+- Ant Design 色彩算法做 token 派生
+- Vite Portal
+- MCP stdio JSON-RPC
 
 ## License
 

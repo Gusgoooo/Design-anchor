@@ -5,7 +5,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { loadSpecs, loadDecorativeLibs, loadActivePresetStyle, getRepoRoot } from "./lib/load-specs.mjs";
+import { loadSpecs, loadDecorativeLibs, loadActivePromptStyle, getRepoRoot } from "./lib/load-specs.mjs";
 import { renderCursorrules, renderAnchorMarkdown } from "./lib/render-anchor-rules.mjs";
 
 const root = getRepoRoot();
@@ -75,12 +75,12 @@ export const anchorSafelist: string[] = ${JSON.stringify(safelist, null, 2)};
 }
 
 const decorativeLibs = loadDecorativeLibs();
-const activePresetStyle = loadActivePresetStyle();
+const activePromptStyle = loadActivePromptStyle();
 
 function writeAnchorRulesMirror(specs) {
   const dir = path.join(root, "src/anchor/rules");
   fs.mkdirSync(dir, { recursive: true });
-  const md = renderAnchorMarkdown(specs, decorativeLibs, activePresetStyle);
+  const md = renderAnchorMarkdown(specs, decorativeLibs, activePromptStyle);
   const mdPath = path.join(dir, "ANCHOR_RULES.md");
   fs.writeFileSync(mdPath, md, "utf8");
   console.log(`Wrote ${path.relative(root, mdPath)}`);
@@ -88,7 +88,7 @@ function writeAnchorRulesMirror(specs) {
 
 function writeCursorrules(specs) {
   const outFile = path.join(root, ".cursorrules");
-  fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs, activePresetStyle), "utf8");
+  fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs, activePromptStyle), "utf8");
   console.log(`Wrote ${path.relative(root, outFile)}`);
 }
 
@@ -126,13 +126,13 @@ function writeAgentsMd() {
 
 ## Portal Auto-Open Intent
 
-When the user asks to inspect or change tokens, theme, components, component specs, component styling, dashboard health, presets, or docs, open Portal first with \`npx design-anchor portal <tab>\`.
+When the user asks to inspect or change tokens, theme, components, component specs, component styling, dashboard health, or docs, open Portal first with \`npx design-anchor portal <tab>\`.
+When the user provides a style/design prompt and asks for a theme, extract tokens with \`npx design-anchor theme <prompt.md>\` and keep aesthetic guidance subordinate to component specs and semantic tokens.
 - \`tokens\`: change token, show tokens, edit theme, adjust theme, open theme editor, theme editor, brand color, radius, spacing, dark mode, theme, design tokens.
 - \`components\`: component list, available components, component library, preview components.
 - \`specs\`: component spec, schema, props contract, variant mapping.
 - \`dashboard\`: top-right dashboard, health, AI constraints, audit, self-check.
 - \`docs\`: docs, setup, CLI commands.
-- \`presets\`: preset, style preset, onboarding, brand style.
 `;
   fs.writeFileSync(agentsPath, content, "utf8");
   console.log(`Wrote AGENTS.md`);

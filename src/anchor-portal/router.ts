@@ -2,7 +2,6 @@ import * as React from "react";
 
 export type Route =
   | { kind: "docs" }
-  | { kind: "onboarding" }
   | { kind: "designtoken" }
   | { kind: "components" }
   | { kind: "story"; storyId: string };
@@ -13,7 +12,6 @@ export type TopTab = "designtoken" | "components";
 export function tabForRoute(r: Route): TopTab | null {
   switch (r.kind) {
     case "docs":
-    case "onboarding":
       return null;
     case "designtoken":
       return "designtoken";
@@ -25,10 +23,19 @@ export function tabForRoute(r: Route): TopTab | null {
 
 const STORY_PREFIX = "/story/";
 
-export function parseHash(hash: string = window.location.hash): Route {
+function pathFromHash(hash: string) {
   const trimmed = hash.replace(/^#/, "");
-  const path = trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  if (path === "/onboarding" || path === "/setup") return { kind: "onboarding" };
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function legacyHashReplacement(hash: string = window.location.hash): string | null {
+  const path = pathFromHash(hash);
+  return path === "/onboarding" || path === "/setup" ? "#/theme" : null;
+}
+
+export function parseHash(hash: string = window.location.hash): Route {
+  const path = pathFromHash(hash);
+  if (path === "/onboarding" || path === "/setup") return { kind: "designtoken" };
   if (path === "/" || path === "") return { kind: "designtoken" };
   if (path === "/docs") return { kind: "docs" };
   if (path === "/_designtoken" || path === "/designtoken" || path === "/theme") return { kind: "designtoken" };
@@ -45,8 +52,6 @@ export function serializeRoute(r: Route): string {
   switch (r.kind) {
     case "docs":
       return "#/docs";
-    case "onboarding":
-      return "#/onboarding";
     case "designtoken":
       return "#/theme";
     case "components":
@@ -64,12 +69,18 @@ export function navigateTo(r: Route) {
 }
 
 export function useRoute(): Route {
-  const get = React.useCallback(() => parseHash(), []);
+  const get = React.useCallback(() => {
+    const replacement = legacyHashReplacement();
+    if (replacement && window.location.hash !== replacement) {
+      window.history.replaceState(null, "", replacement);
+    }
+    return parseHash();
+  }, []);
   const [route, setRoute] = React.useState<Route>(get);
   React.useEffect(() => {
-    const handler = () => setRoute(parseHash());
+    const handler = () => setRoute(get());
     window.addEventListener("hashchange", handler);
     return () => window.removeEventListener("hashchange", handler);
-  }, []);
+  }, [get]);
   return route;
 }

@@ -5,7 +5,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { loadSpecs, loadDecorativeLibs, loadActivePresetStyle, getRepoRoot } from "./lib/load-specs.mjs";
+import { loadSpecs, loadDecorativeLibs, loadActivePromptStyle, getRepoRoot } from "./lib/load-specs.mjs";
 import { renderCursorrules } from "./lib/render-anchor-rules.mjs";
 
 const root = getRepoRoot();
@@ -13,6 +13,6 @@ const outFile = path.join(root, ".cursorrules");
 
 const specs = loadSpecs();
 const decorativeLibs = loadDecorativeLibs();
-const activePresetStyle = loadActivePresetStyle();
-fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs, activePresetStyle), "utf8");
+const activePromptStyle = loadActivePromptStyle();
+fs.writeFileSync(outFile, renderCursorrules(specs, decorativeLibs, activePromptStyle), "utf8");
 console.log(`Wrote ${path.relative(root, outFile)} (${specs.length} specs)`);

@@ -6,10 +6,10 @@
 
 <h1 align="center">Design-anchor</h1>
 
-<p align="center"><strong>The design-system guardrail for AI Coding.</strong></p>
+<p align="center"><strong>A background design-system guardrail for AI-generated product UI.</strong></p>
 
 <p align="center">
-  Rules constrain generation &rarr; Hooks auto-audit &rarr; MCP orchestrates the rest.
+  Prompt &rarr; tokens. Specs &rarr; components. Rules &rarr; consistent AI coding.
 </p>
 
 <p align="center">
@@ -22,7 +22,7 @@
 
 ## The problem
 
-Every AI coding tool ships UI that *runs*. But across sessions, the output drifts:
+Every AI coding tool can ship UI that *runs*. The harder problem is keeping that UI consistent after the 20th prompt, the 50th edit, and the third agent in the same repo.
 
 ```tsx
 // Monday — agent A
@@ -35,19 +35,27 @@ Every AI coding tool ships UI that *runs*. But across sessions, the output drift
 <button className="bg-indigo-500 px-3.5 py-1.5 rounded-md">Save</button>
 ```
 
-Same intent, three implementations, three blues, three radii. Multiply across every page — your product looks like ten teams shipped it. Figma libraries and `design.md` docs don't fix this; soft constraints get forgotten by edit #50.
+Same intent, three implementations, three blues, three radii. Multiply across every page and a B2B product starts to feel like several teams shipped separate surfaces. Figma libraries and `design.md` docs help humans, but AI agents need executable contracts they can read, apply, and audit.
 
 ## The fix
 
-Design-anchor replaces soft documentation with three hard layers that make drift mechanically impossible:
+Design-anchor is installed as a project dependency and then fades into the background. It gives your AI tools local truth about components, tokens, rules, and audits, without forcing users through a design-system product flow first.
+
+| Product surface | Source of truth | What AI should do |
+|---|---|---|
+| **Components** | `src/components/anchor-ui/` | Import from `@design` or `@/components/anchor-ui`, never from `.anchor/` internals. |
+| **Tokens** | `src/design-tokens/tokens.json` | Use semantic token classes like `bg-primary`, then sync generated CSS. |
+| **Control plane** | `.anchor/` | Keep Portal, schema, rules, scripts, and audits separate from application UI. |
+
+Under the hood, three layers keep output from drifting:
 
 | Layer | What it does | When it acts |
 |---|---|---|
-| **Rules** | AI-readable contracts (`.cursorrules` / `CLAUDE.md` / `copilot-instructions.md`) generated from per-component `spec.json`. AI sees "use `<Button>`, not `<button>`" *before* writing the wrong thing. | Before generation |
+| **Rules** | AI-readable contracts (`.cursorrules` / `CLAUDE.md` / `copilot-instructions.md`) generated from per-component `spec.json`. AI sees "use `<Button>`, not `<button>`" before writing the wrong thing. | Before generation |
 | **Hooks** | `anchor audit` AST scan runs on save, pre-commit, and CI. Rejects `bg-[#0204a3]` and raw `<button>`; exact-value px overrides are mapped back to tokens before staying arbitrary. | After generation |
 | **MCP** | 13-tool server lets agents read schemas, update tokens, run audit, sync rules — no copy-paste loop. | On demand |
 
-During AI coding, Design-anchor should be visible in the same conversation: the agent starts UI work with a `Design Anchor 预检`, calls out `Design Anchor 自动治理` when it fixes unsafe code, asks for confirmation only when product judgment is needed, and ends with a short self-check such as `Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`.
+During AI coding, Design-anchor should be visible in the same conversation: the agent starts UI work with `Design Anchor 预检`, calls out `Design Anchor 自动治理` when it fixes unsafe code, and ends with a self-check such as `Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`.
 
 <a id="quick-start"></a>
 ## Quick start
@@ -57,15 +65,26 @@ npm install -D design-anchor
 npx design-anchor start
 ```
 
-This does three things:
+This installs the working contract:
 
-1. **Scaffolds** `.anchor/` + `src/components/anchor-ui/` — Anchor control plane plus 60+ governed React + Tailwind components in your source tree
-2. **Patches** your project — injects component dependencies, adds token import to `globals.css` (preserves your existing styles), generates AI rule files for Cursor / Claude / Copilot
-3. **Opens** the Portal — pick a brand preset or start from Tailwind Default
+1. **Adds visible component source** in `src/components/anchor-ui/`, so generated code can keep working even if Design-anchor is later removed.
+2. **Creates the `.anchor/` control plane** for Portal, schema, sync scripts, MCP, rules, and audits.
+3. **Patches project wiring**: dependencies, token CSS import, `@design` alias guidance, Cursor / Claude / Copilot rules.
+4. **Opens Portal directly to Theme / tokens**. There is no required onboarding or preset selection.
 
-After the preset selection, Design-anchor shows a brief injection summary confirming your project is configured. Browse the component library, or close the Portal and start coding — the guardrails are already active.
+Browse tokens or components when you need to inspect them, or close the Portal and start coding. The guardrails are already active in the background.
+
+To turn a user's style prompt into tokens:
+
+```bash
+npx design-anchor theme design-prompt.md
+```
+
+This writes token values into `src/design-tokens/tokens.json`, saves the original prompt, and generates restrained AI style guidance. The prompt can influence rhythm, hierarchy, density, and atmosphere; component specs and semantic tokens still win.
 
 ## Use components
+
+Use the visible source that Design-anchor copied into your project:
 
 ```ts
 // tsconfig.json
@@ -80,6 +99,8 @@ export function CTA() {
 }
 ```
 
+This is intentionally similar to shadcn: components live in the user's source tree, while Design-anchor supplies the background governance, sync, and audit layer.
+
 <a id="how-it-works"></a>
 ## How it works
 
@@ -89,7 +110,7 @@ export function CTA() {
 14 seeds (tokens.json) → seed-to-map.mjs → 200+ CSS variables → @theme → className
 ```
 
-Change `colorPrimary` from `#000` to `#635BFF` — every `bg-primary` across every component flips. Change `borderRadius` from `8` to `12` — every `rounded-md` updates. Run `anchor sync`. No find-and-replace.
+Change `colorPrimary` from `#000` to `#635BFF`: every `bg-primary` across every component flips. Change `borderRadius` from `8` to `12`: every `rounded-md` updates. Run `anchor sync`. No find-and-replace.
 
 | Category | Seeds | Drives |
 |---|---|---|
@@ -141,6 +162,8 @@ AST scan that enforces two classes of rules:
 
 13 tools: `list_components` · `read_component` · `create_component` · `list_tokens` · `update_token` · `list_schemas` · `read_schema` · `update_schema` · `run_audit` · `run_sync_rules` · `get_cursorrules` · `read_file` · `write_file`
 
+This is the preferred path for AI agents: Design-anchor can be called by skills, MCP, or CLI while staying out of the user's first screen.
+
 ## CLI
 
 ```
@@ -158,6 +181,8 @@ anchor theme <prompt.md>  Extract tokens from design prompt
 ```
 
 React is a peer dependency (`>=18 <20`). Keep `react` and `react-dom` deduped to the host project when importing the visible `src/components/anchor-ui` source through `@design`.
+
+For existing projects that only want governance first, start with `anchor govern`, then add components or tokens incrementally.
 
 ## What lands in your project
 

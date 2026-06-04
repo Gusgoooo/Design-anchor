@@ -58,7 +58,7 @@ const TEMPLATE_COMPONENTS_REL = "src/components/base";
 const DEMO_COMPONENTS_REL = "src/anchor/component-demos/base";
 const COMPONENT_IMPORT_BASE = "@/components/anchor-ui";
 
-const PORTAL_PATH = "/#/_designtoken";
+const PORTAL_PATH = "/#/theme";
 const DEFAULT_PORT = 6006;
 const PORTAL_ROUTE_MAP = {
   token: "/#/theme",
@@ -83,9 +83,15 @@ const PORTAL_ROUTE_MAP = {
   docs: "/#/docs",
   document: "/#/docs",
   documents: "/#/docs",
-  preset: "/#/onboarding",
-  presets: "/#/onboarding",
-  onboarding: "/#/onboarding",
+  style: "/#/theme",
+  prompt: "/#/theme",
+  designPrompt: "/#/theme",
+  designprompt: "/#/theme",
+  "design-prompt": "/#/theme",
+  preset: "/#/theme",
+  presets: "/#/theme",
+  onboarding: "/#/theme",
+  setup: "/#/theme",
 };
 
 const MANIFEST_FILE = ".design-kit-manifest.json";
@@ -1074,9 +1080,9 @@ This project uses Design-anchor. The visible component source is \`${relComponen
 | Component style tuning | 改组件样式、调整组件、按钮样式、表格样式、组件风格 | change component style, tune component, button style, table style | \`npx design-anchor portal components\` |
 | Dashboard / health | 右上角仪表盘、健康度、AI 约束状态、审计、自检 | dashboard, health, AI constraints, audit, self-check | \`npx design-anchor portal theme\` then use the top-right dashboard icon |
 | Docs / help | 文档、使用说明、怎么接入、CLI 命令 | docs, documentation, how to use, setup, CLI commands | \`npx design-anchor portal docs\` |
-| Preset / onboarding | 选择 preset、品牌风格、重新 onboarding、从预设开始 | preset, style preset, onboarding, brand style | \`npx design-anchor portal presets\` |
+| Style prompt / tokens | 风格 prompt、品牌风格、从 prompt 提取 token、根据描述生成主题 | style prompt, design prompt, brand style, extract tokens, theme from prompt | \`npx design-anchor portal tokens\` or \`npx design-anchor theme <prompt.md>\` |
 
-规则：如果用户说“打开/看看/调整/修改/配置/查看/show/change/edit/configure/check/list”并且对象是 token、主题、主题编辑器、组件、规范、仪表盘、健康、preset、文档，先打开 Portal；只有用户明确要求“不要打开 Portal / 直接改文件 / code only”时，才跳过 Portal。
+规则：如果用户说“打开/看看/调整/修改/配置/查看/show/change/edit/configure/check/list”并且对象是 token、主题、主题编辑器、组件、规范、仪表盘、健康、文档，先打开 Portal；如果用户提供风格 / design prompt 并要求生成主题，先用 \`npx design-anchor theme <prompt.md>\` 抽取 token，审美指导必须服从组件规范与语义 token；只有用户明确要求“不要打开 Portal / 直接改文件 / code only”时，才跳过 Portal。
 
 ${sceneRouting}
 
@@ -1217,13 +1223,13 @@ function generateAgentsMd(projectRoot, libTarget) {
 
 ## Portal 自动唤起
 
-用户要求查看或修改 token、主题、组件库、组件规范、组件样式、治理健康度、preset 或文档时，优先运行 \`npx design-anchor portal <tab>\` 打开 Portal。中英文都要识别：
+用户要求查看或修改 token、主题、组件库、组件规范、组件样式、治理健康度或文档时，优先运行 \`npx design-anchor portal <tab>\` 打开 Portal。中英文都要识别：
+用户提供风格 / design prompt 并要求生成主题时，使用 \`npx design-anchor theme <prompt.md>\` 抽取 token；审美指导只能轻量影响节奏、层级、密度与氛围，必须服从组件规范与语义 token。
 - \`tokens\`：改 token、看看 token、修改主题、调整主题、打开主题编辑器、主题编辑器、改品牌色、改圆角、theme、theme editor、design tokens。
 - \`components\`：有哪些组件、组件列表、组件预览、component library。
 - \`specs\`：组件规范、组件 schema、props contract、variant mapping。
 - \`dashboard\`：右上角仪表盘、健康度、AI 约束状态、audit、self-check。
 - \`docs\`：文档、怎么接入、CLI commands。
-- \`presets\`：选择 preset、品牌风格、onboarding。
 `;
   writeFileSync(join(projectRoot, "AGENTS.md"), content);
   console.log("  ✅ AGENTS.md（项目根）");
@@ -1755,7 +1761,10 @@ function extractTokensFromPrompt(text) {
 
   // ── Phase 6: Border radius ──
   // Standard: border-radius: 8px
-  const radiusMatch = text.match(/(?:border[- ]?radius|corner[- ]?radius)[:\s]*(\d{1,2})(?:\s*[-–]\s*\d{1,2})?\s*px/i);
+  const radiusMatch = text.match(/(?:border[- ]?radius|corner[- ]?radius)[:\s]*(\d{1,2})(?:\s*[-–]\s*\d{1,2})?\s*px/i)
+    || text.match(/\bradius[:\s]+(\d{1,2})\s*px/i)
+    || text.match(/\b(\d{1,2})\s*px\s+(?:border[- ]?radius|corner[- ]?radius|rounded\s+corners?|radius)\b/i)
+    || text.match(/(?:border[- ]?radius|corner[- ]?radius|rounded\s+corners?)\b[^.\n#]{0,40}?(\d{1,2})\s*px/i);
   if (radiusMatch) {
     seed.borderRadius = parseInt(radiusMatch[1], 10);
     sources.push({ field: "seed.borderRadius", value: `${seed.borderRadius}px`, from: radiusMatch[0].substring(0, 60) });
@@ -1798,6 +1807,77 @@ function extractTokensFromPrompt(text) {
   }
 
   return { seed, seedDark, fixedAliases, customSeeds, sources };
+}
+
+function compactPromptExcerpt(text, maxLength = 2600) {
+  const normalized = String(text ?? "")
+    .replace(/\r\n/g, "\n")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  if (normalized.length <= maxLength) return normalized;
+  return `${normalized.slice(0, maxLength).trim()}\n\n[Prompt excerpt truncated; full source remains saved in the project.]`;
+}
+
+function renderActivePromptStyleBody({ promptRel, promptText, sources }) {
+  const tokenSignals = sources.length
+    ? sources.map((s) => `- \`${s.field}\` = \`${s.value}\``).join("\n")
+    : "- No explicit token values were extracted.";
+  return `# Active design prompt style
+
+This is a lightweight B2B aesthetic layer for AI-written UI. It is secondary to Design-anchor component specs, semantic tokens, and audit rules.
+
+## Priority
+
+- First obey component specs, imports, semantic props, and token-only styling.
+- Use the prompt only for page rhythm, hierarchy, density, surface treatment, motion restraint, and decorative restraint.
+- Do not copy colors, hex values, pixel values, or custom component implementations from the prompt into code.
+- Prefer clarity, scanability, and predictable workflows over expressive visual moments.
+
+## Source
+
+- Prompt file: \`${promptRel}\`
+
+## Extracted token signals
+
+${tokenSignals}
+
+## Apply lightly
+
+- Let the prompt influence empty states, section hierarchy, information density, and the quietness of surfaces.
+- Keep dashboards, forms, tables, settings, and operational flows utilitarian and easy to scan.
+- If a style choice would make a 2B workflow harder to read or maintain, choose the quieter option.
+
+## Prompt excerpt
+
+${compactPromptExcerpt(promptText)}
+`;
+}
+
+function renderCursorPromptStyleRule(styleBody) {
+  return `---
+description: Active Design-anchor design prompt style, restrained B2B layer for AI-written UI
+alwaysApply: true
+---
+
+${styleBody}`;
+}
+
+function writePromptStyleArtifacts(projectRoot, anchorDir, promptText, promptRel, sources) {
+  const styleBody = renderActivePromptStyleBody({ promptRel, promptText, sources });
+  const activeStylePath = join(anchorDir, "src/anchor/rules/ACTIVE_PROMPT_STYLE.md");
+  mkdirSync(dirname(activeStylePath), { recursive: true });
+  writeFileSync(activeStylePath, styleBody);
+
+  const cursorRulesDir = join(projectRoot, ".cursor/rules");
+  mkdirSync(cursorRulesDir, { recursive: true });
+  const cursorStylePath = join(cursorRulesDir, "anchor-style.mdc");
+  writeFileSync(cursorStylePath, renderCursorPromptStyleRule(styleBody));
+
+  return {
+    activeStylePath: relative(projectRoot, activeStylePath).split(sep).join("/"),
+    cursorStylePath: relative(projectRoot, cursorStylePath).split(sep).join("/"),
+  };
 }
 
 function doTheme(promptFile) {
@@ -1869,6 +1949,11 @@ function doTheme(promptFile) {
   // 4. 生成风格分工规则
   const rulesDir = join(projectRoot, ".cursor/rules");
   mkdirSync(rulesDir, { recursive: true });
+  const promptDst = existsSync(anchorDir)
+    ? join(anchorDir, "design-prompt.md")
+    : join(projectRoot, "design-prompt.md");
+  const promptRel = relative(projectRoot, promptDst).split(sep).join("/");
+  const styleArtifacts = writePromptStyleArtifacts(projectRoot, anchorDir, promptText, promptRel, extracted.sources);
 
   const themeRule = `---
 description: Design Prompt 风格分工 — AI 必须遵守的风格与组件边界
@@ -1879,12 +1964,14 @@ alwaysApply: true
 
 ## 风格来源（Design Prompt）
 
-本项目的视觉风格基于用户提供的 Design Prompt（见 design-prompt.md）。
-AI 在实现页面时应参考该文件的：
+本项目的视觉风格基于用户提供的 Design Prompt（见 ${promptRel}）。
+AI 在实现页面时可以轻量参考该文件的：
 - 视觉氛围与品牌调性描述
-- 特定的阴影、渐变、动画细节
-- 布局原则与响应式断点
+- 布局节奏、信息层级、密度与响应式原则
+- 表面处理、阴影、动效等需要克制使用的细节
 - Do's and Don'ts 中的视觉规则
+
+这些内容只影响页面节奏、层级、密度、表面处理和装饰克制，不能覆盖组件规范、语义 token 或 audit 规则。
 
 ## Component Source (Design-anchor)
 
@@ -1902,6 +1989,7 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 - ❌ 从 Design Prompt 中手抄 px 间距到代码（必须用 spacing scale）
 - ❌ Ignoring Design-anchor components而按 prompt 描述从零构建组件
 - ❌ 在代码中写 \`style={{ color: '#ff385c' }}\` 等内联样式
+- ❌ 为了追求氛围而牺牲 2B 工作流的可读性、扫描性和可维护性
 
 ## 正确做法
 
@@ -1909,17 +1997,29 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 - ✅ 用 \`text-foreground\` 代替 \`text-[#222222]\`
 - ✅ 用 \`rounded-md\` 代替 \`rounded-[14px]\`
 - ✅ Using Design-anchor Button 组件代替按 prompt 手写按钮
+- ✅ 让 prompt 轻量影响版式节奏、空状态、层级与表面处理
 `;
 
   writeFileSync(join(rulesDir, "anchor-theme.mdc"), themeRule);
   console.log("  ✅ .cursor/rules/anchor-theme.mdc 已生成");
+  console.log(`  ✅ ${styleArtifacts.activeStylePath} 已生成`);
+  console.log(`  ✅ ${styleArtifacts.cursorStylePath} 已生成`);
 
   // 5. 保存原始 prompt
-  const promptDst = existsSync(anchorDir)
-    ? join(anchorDir, "design-prompt.md")
-    : join(projectRoot, "design-prompt.md");
   writeFileSync(promptDst, promptText);
   console.log(`  ✅ ${relative(projectRoot, promptDst)} 已保存`);
+
+  try {
+    execSync("npm run sync:anchor", {
+      cwd: anchorDir,
+      stdio: "pipe",
+      env: { ...process.env, ANCHOR_TOKEN_ROOT: projectRoot },
+    });
+    console.log("  ✅ Design Anchor 规则已同步（含 design prompt style guidance）");
+  } catch (e) {
+    const msg = e.stderr?.toString() || e.stdout?.toString() || e.message;
+    console.log(`  ⚠️  规则同步失败（可手动运行 npm run sync:anchor）${msg ? ": " + msg.split("\n")[0] : ""}`);
+  }
 
   console.log(`
 ✅ 主题提取完成！
@@ -1927,7 +2027,7 @@ ${extracted.sources.map(s => `- \`${s.field}\` = \`${s.value}\``).join("\n")}
 下一步：
   • npx design-anchor dev    — 在 Anchor Portal 中预览新主题
   • 打开 Cursor，AI 将使用提取后的 token + Design-anchor components
-  • 视觉氛围细节参考 design-prompt.md
+  • 视觉氛围细节参考 ${promptRel}，但保持 B2B 克制
 `);
 }
 

@@ -74,9 +74,9 @@ your-project/
 
 | 模块 | 路径 | 职责 |
 |---|---|---|
-| CLI | `bin/anchor.mjs` | `start`、`init`、`dev`、`sync`、`audit`、`upgrade`、`mcp`、onboarding 编排 |
+| CLI | `bin/anchor.mjs` | `start`、`init`、`dev`、`sync`、`audit`、`upgrade`、`mcp`、style prompt token 提取 |
 | MCP server | `bin/anchor-mcp.mjs` | 通过 stdio JSON-RPC 暴露 schema、tokens、files、audit、sync |
-| Portal shell | `src/anchor-portal/` | Vite React app，承载 Docs、Design Token、Components、Onboarding、Govern |
+| Portal shell | `src/anchor-portal/` | Vite React app，承载 Docs、Design Token、Components 与 Govern 视图 |
 | 组件源 | 消费项目 `src/components/anchor-ui/`；产品仓库模板源为 `src/components/base/` | 通过 `@design` 导出的 React + Tailwind 受管组件 |
 | 组件 specs | 消费项目 `.anchor/src/anchor/schema/components/*.spec.json`；产品仓库模板源为 `src/anchor/schema/components/*.spec.json` | 用法、forbidden tags、primitives、AI hints 的机器契约 |
 | Token 真源 | 消费项目 `src/design-tokens/tokens.json`；产品仓库模板源为 `src/design-tokens/tokens.json` | seed、暗色覆盖、自定义 seed、派生 token 覆盖 |
@@ -147,8 +147,8 @@ Portal 是一个 Vite React 应用，不再依赖 Storybook runtime。它围绕�
 - **Docs**：双语使用和接入文档。
 - **Design Token**：可视化 token editor，支持 live preview 和 Save & Sync。
 - **Components**：读取 `src/components/anchor-ui` 的真实组件，配合 `.anchor/src/anchor/component-demos` 做预览、controls、spec 编辑。
-- **Onboarding**：默认 kit、导入现有组件到 `src/components/anchor-ui`、空白起步。
 - **Govern**：audit 状态、scope 标签、issue 列表和规则健康度。
+- **Style prompt flow**：`anchor theme <prompt.md>` 提取 tokens 并写入克制的 AI 风格指导，不强制首访 Portal 流程。
 
 路由采用 lazy-loading，避免较重的工作台页面增加首屏负担。
 

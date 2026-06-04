@@ -6,10 +6,10 @@
 
 <h1 align="center">Design-anchor</h1>
 
-<p align="center"><strong>AI Coding 的设计系统护栏。</strong></p>
+<p align="center"><strong>给 AI 生成产品 UI 用的后台设计系统护栏。</strong></p>
 
 <p align="center">
-  Rules 约束生码 &rarr; Hooks 自动审计 &rarr; MCP 灵活调度。
+  Prompt &rarr; tokens。Specs &rarr; components。Rules &rarr; 稳定的 AI coding。
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@
 
 ## 问题
 
-每个 AI 编码工具都能吐出"能跑的"UI。但跨 session 一拉长，输出就开始漂移：
+每个 AI 编码工具都能吐出“能跑的”UI。真正难的是第 20 个 prompt、第 50 次编辑、第三个 agent 接手后，UI 仍然像同一个产品。
 
 ```tsx
 // 周一 —— agent A
@@ -34,11 +34,19 @@
 <button className="bg-indigo-500 px-3.5 py-1.5 rounded-md">保存</button>
 ```
 
-同一个意图，三套实现，三种蓝，三种圆角。乘以每个页面的每个 UI 原语——产品看起来像十个团队拼出来的。Figma 和 design.md 治不了这个，软约束到第 50 次编辑就被忘了。
+同一个意图，三套实现，三种蓝，三种圆角。乘以每个页面的每个 UI 原语，B 端产品很快就会像多个团队各做各的。Figma 和 `design.md` 能帮助人，但 AI agent 更需要能读取、能执行、能审计的本地契约。
 
 ## 解法
 
-Design-anchor 把软文档换成三层硬约束，让漂移在机制上不可能：
+Design-anchor 作为项目依赖安装，然后退到后台。它把组件、token、规则和审计变成本地真源，让 AI 工具按你的产品系统写 UI，而不是先强迫用户进入一个设计系统产品流程。
+
+| 产品面 | 真源 | AI 应该怎么做 |
+|---|---|---|
+| **组件** | `src/components/anchor-ui/` | 从 `@design` 或 `@/components/anchor-ui` 引用，不从 `.anchor/` 内部深路径引用。 |
+| **Token** | `src/design-tokens/tokens.json` | 使用 `bg-primary` 这类语义 token class，然后同步生成 CSS。 |
+| **控制面** | `.anchor/` | 只放 Portal、schema、rules、scripts、audit，不作为业务 UI 实现目录。 |
+
+底层用三层硬约束防止漂移：
 
 | 层 | 做什么 | 什么时候生效 |
 |---|---|---|
@@ -46,7 +54,7 @@ Design-anchor 把软文档换成三层硬约束，让漂移在机制上不可能
 | **Hooks** | `anchor audit` AST 扫描，保存/pre-commit/CI 三处触发。`bg-[#0204a3]`、`<button>` 会被拦截；明确 px 值会先尝试映射到等值 token，再决定是否保留手写值。 | 生码之后 |
 | **MCP** | 13 个工具让 agent 读 schema、改 token、跑 audit、同步规则——零拷贝 | 按需调度 |
 
-AI 生码时，Design-anchor 的反馈应该直接出现在同一段对话里：开始 UI 任务时先出现 `Design Anchor 预检`，自动修复时明确说 `Design Anchor 自动治理`，只有需要产品判断时才提确认问题，任务结束时追加轻量自检，例如 `Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`。
+AI 生码时，Design-anchor 的反馈应该直接出现在同一段对话里：开始 UI 任务时先出现 `Design Anchor 预检`，自动修复时明确说 `Design Anchor 自动治理`，任务结束时追加轻量自检，例如 `Design Anchor 自检：复用了 8 个 @design 组件，未发现硬编码颜色，规则已同步。`。
 
 <a id="快速开始"></a>
 ## 快速开始
@@ -56,15 +64,26 @@ npm install -D design-anchor
 npx design-anchor start
 ```
 
-这条命令做三件事：
+这条命令会建立一套可运行契约：
 
-1. **Scaffold** `.anchor/` + `src/components/anchor-ui/` — Anchor 控制面，以及放在业务源码里的 60+ 受治理 React + Tailwind 组件
-2. **Patch 项目** — 注入组件依赖、往 `globals.css` 添加 token 导入（保留你现有的样式）、生成 Cursor / Claude / Copilot 的 AI 规则文件
-3. **打开 Portal** — 选择品牌预设或从 Tailwind Default 开始
+1. **把可见组件源码放进 `src/components/anchor-ui/`**，即使将来移除 Design-anchor，业务代码仍可继续运行。
+2. **创建 `.anchor/` 控制面**，承载 Portal、schema、sync scripts、MCP、rules 和 audits。
+3. **Patch 项目接入**：组件依赖、token CSS import、`@design` 引用约定、Cursor / Claude / Copilot 规则。
+4. **直接打开 Theme / tokens**，没有强制 onboarding，也没有必选 preset。
 
-选完预设后，Design-anchor 展示注入确认页，确认项目已配置完毕。可以继续浏览组件库样式，或直接关闭 Portal 开始 Coding——护栏已经生效。
+现在没有强制首访向导。需要查看时可以打开 Portal 看 token 或组件，也可以直接关闭 Portal 开始 Coding——护栏已经在后台生效。
+
+如果用户提供风格 prompt，可以直接抽取 token：
+
+```bash
+npx design-anchor theme design-prompt.md
+```
+
+这会把 token 写入 `src/design-tokens/tokens.json`，保存原始 prompt，并生成克制的 AI 风格指导。prompt 只轻量影响节奏、层级、密度和氛围；组件规范与语义 token 仍然优先。
 
 ## 使用组件
+
+使用 Design-anchor 拷贝到业务项目里的可见源码：
 
 ```ts
 // tsconfig.json
@@ -79,6 +98,8 @@ export function CTA() {
 }
 ```
 
+这点有意接近 shadcn：组件在用户源码目录里，Design-anchor 只提供后台治理、同步和审计能力。
+
 ## 工作原理
 
 ### Token 流水线
@@ -87,7 +108,7 @@ export function CTA() {
 14 个 seed（tokens.json） → seed-to-map.mjs → 200+ CSS 变量 → @theme → className
 ```
 
-把 `colorPrimary` 从 `#000` 改成 `#635BFF`，所有 `bg-primary` 立刻变。把 `borderRadius` 从 `8` 改成 `12`，所有 `rounded-md` 跟着走。跑 `anchor sync`，不需要全局替换。
+把 `colorPrimary` 从 `#000` 改成 `#635BFF`：所有 `bg-primary` 立刻变。把 `borderRadius` 从 `8` 改成 `12`：所有 `rounded-md` 跟着走。跑 `anchor sync`，不需要全局替换。
 
 | 类别 | Seeds | 驱动 |
 |---|---|---|
@@ -139,6 +160,8 @@ AST 扫描，执行两类规则：
 
 13 个工具：`list_components` · `read_component` · `create_component` · `list_tokens` · `update_token` · `list_schemas` · `read_schema` · `update_schema` · `run_audit` · `run_sync_rules` · `get_cursorrules` · `read_file` · `write_file`
 
+这是推荐给 AI agent 的路径：Design-anchor 可以被 skill、MCP 或 CLI 调用，但不占据用户的第一个产品屏幕。
+
 ## CLI
 
 ```
@@ -156,6 +179,8 @@ anchor theme <prompt.md>  从设计 prompt 提取 token
 ```
 
 React 是 peer dependency（`>=18 <20`）。业务项目通过 `@design` 引用可见的 `src/components/anchor-ui` 源码时，`react` 和 `react-dom` 必须 dedupe 到宿主项目这一份。
+
+已有项目如果只想先接治理，可以从 `anchor govern` 开始，再逐步接组件和 token。
 
 ## 项目结构
 

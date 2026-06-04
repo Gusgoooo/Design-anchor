@@ -60,7 +60,7 @@ function demoRawSpecifier(componentRel) {
   return `${COMPONENT_IMPORT_BASE}/${normalized}?raw`;
 }
 
-const ACTIVE_PRESET_STYLE_REL = "src/anchor/rules/ACTIVE_PRESET_STYLE.md";
+const ACTIVE_PROMPT_STYLE_REL = "src/anchor/rules/ACTIVE_PROMPT_STYLE.md";
 
 function cleanPromptText(value, maxLength = 480) {
   return String(value ?? "")
@@ -87,25 +87,25 @@ function normalizeAiStyleGuide(value) {
   return { designPhilosophy, apply, avoid };
 }
 
-function renderActivePresetStyleBody({ preset, presetName, tone, preferredTheme, guide }) {
-  const name = cleanPromptText(presetName || preset || "Preset", 80);
+function renderActivePromptStyleBody({ preset, presetName, tone, preferredTheme, guide }) {
+  const name = cleanPromptText(presetName || preset || "Design prompt", 80);
   const id = cleanPromptText(preset, 80);
   const presetTone = cleanPromptText(tone, 160);
   const theme = cleanPromptText(preferredTheme, 24);
   const lines = [
-    `# Active preset style: ${name}`,
+    `# Active design prompt style: ${name}`,
     "",
     "This is a lightweight B2B aesthetic layer for AI-written UI. It is secondary to Design-anchor component specs, semantic tokens, and audit rules.",
     "",
     "## Priority",
     "",
     "- First obey component specs, imports, semantic props, and token-only styling.",
-    "- Use this preset only for page rhythm, hierarchy, density, surface treatment, motion restraint, and decorative restraint.",
+    "- Use this style guidance only for page rhythm, hierarchy, density, surface treatment, motion restraint, and decorative restraint.",
     "- Do not copy colors, hex values, pixel values, or custom component implementations from this text.",
     "",
-    "## Preset context",
+    "## Style context",
     "",
-    `- Preset: ${name}${id && id !== name ? ` (${id})` : ""}`,
+    `- Source: ${name}${id && id !== name ? ` (${id})` : ""}`,
   ];
   if (presetTone) lines.push(`- Tone: ${presetTone}`);
   if (theme) lines.push(`- Preferred theme: ${theme}`);
@@ -129,20 +129,20 @@ function renderActivePresetStyleBody({ preset, presetName, tone, preferredTheme,
   return `${lines.join("\n").trim()}\n`;
 }
 
-function renderCursorPresetStyleRule(styleBody) {
+function renderCursorPromptStyleRule(styleBody) {
   return `---
-description: Active Design-anchor preset style, restrained B2B layer for AI-written UI
+description: Active Design-anchor design prompt style, restrained B2B layer for AI-written UI
 alwaysApply: true
 ---
 
 ${styleBody}`;
 }
 
-function writePresetStyleArtifacts(repoRoot, payload) {
+function writePromptStyleArtifacts(repoRoot, payload) {
   const guide = normalizeAiStyleGuide(payload.aiStyleGuide);
   if (!guide) return { styleWritten: false };
 
-  const styleBody = renderActivePresetStyleBody({
+  const styleBody = renderActivePromptStyleBody({
     preset: payload.preset,
     presetName: payload.presetName,
     tone: payload.tone,
@@ -150,9 +150,9 @@ function writePresetStyleArtifacts(repoRoot, payload) {
     guide,
   });
 
-  const activeStylePath = path.join(repoRoot, ACTIVE_PRESET_STYLE_REL);
+  const activeStylePath = path.join(repoRoot, ACTIVE_PROMPT_STYLE_REL);
   if (!isWriteAllowed(repoRoot, activeStylePath)) {
-    throw new Error("active preset style path not in whitelist");
+    throw new Error("active prompt style path not in whitelist");
   }
   fs.mkdirSync(path.dirname(activeStylePath), { recursive: true });
   writeFileWithFsync(activeStylePath, styleBody);
@@ -160,7 +160,7 @@ function writePresetStyleArtifacts(repoRoot, payload) {
   const consumerRoot = consumerRootFor(repoRoot);
   const cursorStylePath = path.join(consumerRoot, ".cursor/rules/anchor-style.mdc");
   fs.mkdirSync(path.dirname(cursorStylePath), { recursive: true });
-  writeFileWithFsync(cursorStylePath, renderCursorPresetStyleRule(styleBody));
+  writeFileWithFsync(cursorStylePath, renderCursorPromptStyleRule(styleBody));
 
   return {
     styleWritten: true,
@@ -441,28 +441,28 @@ export function schemaApiPlugin(repoRoot) {
         const url = parsedUrl.pathname;
 
         if (req.method === "GET" && url === "/api/setup-status") {
-          // Reports whether the user has completed first-run onboarding.
-          // Stored in .anchor-portal/setup.json (gitignored via .anchor-portal/).
+          // Legacy compatibility endpoint. Onboarding has been removed, so
+          // Portal should always open directly into the working shell.
           const p = path.join(repoRoot, ".anchor-portal/setup.json");
           if (!fs.existsSync(p)) {
             res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ configured: false }));
+            res.end(JSON.stringify({ configured: true, onboarding: false }));
             return;
           }
           try {
             const body = JSON.parse(fs.readFileSync(p, "utf8"));
             res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ configured: true, ...body }));
+            res.end(JSON.stringify({ ...body, configured: true, onboarding: false }));
           } catch {
             res.setHeader("Content-Type", "application/json; charset=utf-8");
-            res.end(JSON.stringify({ configured: false }));
+            res.end(JSON.stringify({ configured: true, onboarding: false }));
           }
           return;
         }
 
         if (req.method === "POST" && url === "/api/setup-status") {
-          // Records the user's onboarding choice. Subsequent visits skip
-          // the wizard. Sending { configured: false } resets it (debug aid).
+          // Legacy compatibility endpoint. Keep accepting old clients, but
+          // never let this re-enable a first-run onboarding gate.
           let raw = "";
           req.on("data", (c) => { raw += String(c); });
           req.on("end", () => {
@@ -476,6 +476,8 @@ export function schemaApiPlugin(repoRoot) {
                 mode: payload.mode ?? "default",
                 imported: Array.isArray(payload.imported) ? payload.imported : [],
                 ...payload,
+                configured: true,
+                onboarding: false,
               };
               writeFileWithFsync(p, JSON.stringify(body, null, 2) + "\n");
               res.setHeader("Content-Type", "application/json");
@@ -557,7 +559,7 @@ export function schemaApiPlugin(repoRoot) {
         }
 
         if (req.method === "POST" && url === "/api/clear-components") {
-          // Wipes the visible component source for the "empty library" onboarding mode.
+          // Wipes the visible component source for an explicitly requested empty library mode.
           // Tokens / specs / generated files stay so the user can grow from zero.
           let raw = "";
           req.on("data", (c) => { raw += String(c); });
@@ -896,6 +898,8 @@ export function schemaApiPlugin(repoRoot) {
         }
 
         if (req.method === "POST" && url === "/api/apply-token-preset") {
+          // Legacy compatibility endpoint for old Portal builds. New product
+          // flow uses `anchor theme <prompt.md>` and prompt-derived tokens.
           let raw = "";
           req.on("data", (c) => {
             raw += String(c);
@@ -937,7 +941,7 @@ export function schemaApiPlugin(repoRoot) {
                 }
               }
 
-              const style = writePresetStyleArtifacts(repoRoot, payload);
+              const style = writePromptStyleArtifacts(repoRoot, payload);
               writeFileWithFsync(tokensPath, JSON.stringify(doc, null, 2) + "\n");
               const sync = execSyncCaptured("npm run sync:anchor", {
                 cwd: repoRoot,

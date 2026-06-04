@@ -42,11 +42,11 @@
 
 ## Portal 自动唤起
 
-用户要求查看或修改 token、主题、组件库、组件规范、组件样式、右上角仪表盘、preset 或文档时，优先运行 `npx design-anchor portal <tab>` 打开 Portal。中英文都要识别，例如：
+用户要求查看或修改 token、主题、组件库、组件规范、组件样式、右上角仪表盘或文档时，优先运行 `npx design-anchor portal <tab>` 打开 Portal。中英文都要识别，例如：
+用户提供风格 / design prompt 并要求生成主题时，使用 `npx design-anchor theme <prompt.md>` 抽取 token；审美指导只能轻量影响节奏、层级、密度与氛围，必须服从组件规范与语义 token。
 
 - `tokens`：改 token、看看 token、修改主题、调整主题、打开主题编辑器、主题编辑器、改品牌色、改圆角、theme、theme editor、design tokens。
 - `components`：有哪些组件、组件列表、组件预览、component library。
 - `specs`：组件规范、组件 schema、props contract、variant mapping。
 - `dashboard`：右上角仪表盘、健康度、AI 约束状态、audit、self-check。
 - `docs`：文档、怎么接入、CLI commands。
-- `presets`：选择 preset、品牌风格、onboarding。
